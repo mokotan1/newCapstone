@@ -760,6 +760,7 @@ GameObject:
   - component: {fileID: 265606118}
   - component: {fileID: 265606117}
   - component: {fileID: 265606119}
+  - component: {fileID: 265606120}
   m_Layer: 0
   m_Name: Flowchart_hall
   m_TagString: Untagged
@@ -800,6 +801,7 @@ MonoBehaviour:
   - {fileID: 265606056}
   - {fileID: 265606075}
   - {fileID: 265606092}
+  - {fileID: 265606120}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -4245,6 +4247,21 @@ MonoBehaviour:
     booleanRef: {fileID: 0}
     booleanVal: 0
   targetGameObjectOLD: {fileID: 0}
+--- !u!114 &265606120
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: pressTab
+  value: 0
 --- !u!1 &285306152
 GameObject:
   m_ObjectHideFlags: 0
@@ -5423,6 +5440,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8432011457589529400, guid: d165af602cb8f9d4799711789615e1eb, type: 3}
+      propertyPath: targetflowchart
+      value: 
+      objectReference: {fileID: 265605999}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
