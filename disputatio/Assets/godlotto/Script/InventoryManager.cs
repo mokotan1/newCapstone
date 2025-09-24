@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Fungus;
+using System;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -15,6 +17,12 @@ public class InventoryManager : MonoBehaviour
     public GameObject slotPrefab;
     public int maxSlots = 12;
 
+    public Flowchart targetflowchart;
+
+    public bool pressTab = false;
+
+
+
     private List<InventorySlot> slots = new List<InventorySlot>();
     private Animator animator;
     private bool isOpen = false;
@@ -29,6 +37,7 @@ public class InventoryManager : MonoBehaviour
     {
         animator = inventoryUI_Background.GetComponent<Animator>();
         inventoryUI_Background.SetActive(false);
+        pressTab = targetflowchart.GetBooleanVariable("pressTab");
         CreateSlots();
         UpdateUI();
     }
@@ -40,11 +49,13 @@ public class InventoryManager : MonoBehaviour
             isOpen = !isOpen;
             if (isOpen)
             {
+                targetflowchart.SetBooleanVariable("pressTab", true);
                 inventoryUI_Background.SetActive(true);
                 animator.SetTrigger("Open");
             }
             else
             {
+                targetflowchart.SetBooleanVariable("pressTab", false);
                 animator.SetTrigger("Close");
                 // 인벤토리를 닫을 때 현재 선택된 아이템이 있다면 해제합니다.
                 if (selectedItem != null)
