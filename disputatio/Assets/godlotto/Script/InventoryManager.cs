@@ -128,7 +128,6 @@ public class InventoryManager : MonoBehaviour
         selectedItem = null;
         Debug.Log("손에 든 아이템을 내려놓았다.");
     }
-<<<<<<< HEAD:disputatio/Assets/godlotto/InventoryManager.cs
 
 
     public void UseItemOn(GameObject targetObject)
@@ -158,7 +157,4 @@ public class InventoryManager : MonoBehaviour
         DeselectItem(); // 잘못된 사용이므로 아이템 선택만 해제
     }
 }
-=======
-    
->>>>>>> main:disputatio/Assets/godlotto/Script/InventoryManager.cs
 }
