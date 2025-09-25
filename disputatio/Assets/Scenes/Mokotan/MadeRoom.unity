@@ -728,7 +728,6 @@ GameObject:
   - component: {fileID: 285511151}
   - component: {fileID: 285511152}
   - component: {fileID: 285511150}
-  - component: {fileID: 285511153}
   - component: {fileID: 285511154}
   m_Layer: 0
   m_Name: Flowchart
@@ -750,11 +749,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -69.0816, y: -48.22667}
+  scrollPos: {x: 70.72628, y: 27.629417}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
-  zoom: 0.8125
+  zoom: 0.7
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -764,7 +763,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 285511151}
   selectedCommands:
-  - {fileID: 285511154}
+  - {fileID: 285511150}
   variables:
   - {fileID: 285511120}
   - {fileID: 285511133}
@@ -1655,7 +1654,6 @@ MonoBehaviour:
   eventHandler: {fileID: 285511152}
   commandList:
   - {fileID: 285511150}
-  - {fileID: 285511153}
   - {fileID: 285511154}
   suppressAllAutoSelections: 0
 --- !u!114 &285511152
@@ -1674,36 +1672,9 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 251765671}
   waitFrames: 1
---- !u!114 &285511153
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285511111}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 30
-  indentLevel: 0
-  description: 
-  targetObject: {fileID: 251765670}
-  targetComponentAssemblyName: 
-  targetComponentFullname: 
-  targetComponentText: 
-  targetMethod: 
-  targetMethodText: 
-  methodParameters: []
-  saveReturnValue: 0
-  returnValueVariableKey: 
-  returnValueType: 
-  showInherited: 0
-  callMode: 0
 --- !u!114 &285511154
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
