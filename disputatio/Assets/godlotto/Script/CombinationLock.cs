@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // TextMeshPro를 사용하기 위해 필요
 using UnityEngine.Events; // UnityEvent를 사용하기 위해 필요
+using Fungus;
 
 public class CombinationLock : MonoBehaviour
 {
@@ -15,12 +16,17 @@ public class CombinationLock : MonoBehaviour
     [Header("Events")]
     public UnityEvent onUnlockSuccess; // 정답일 때 실행될 이벤트
     public UnityEvent onUnlockFail;    // 오답일 때 실행될 이벤트
+    [SerializeField]
+    public Flowchart flowchart;
+    bool solved;
 
     private int[] currentDigits;
 
     void Start()
     {
         currentDigits = new int[numberOfDigits];
+        solved = flowchart.GetBooleanVariable("solved");
+        Debug.Log(solved);
         UpdateDisplay();
     }
 
@@ -61,6 +67,7 @@ public class CombinationLock : MonoBehaviour
             if (onUnlockSuccess != null)
             {
                 onUnlockSuccess.Invoke(); // 성공 이벤트 실행
+                flowchart.SetBooleanVariable("solved", true);
             }
             gameObject.SetActive(false); // 자물쇠 UI 끄기
         }
