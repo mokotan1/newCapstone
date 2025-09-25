@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Fungus;
+using System;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -15,6 +17,12 @@ public class InventoryManager : MonoBehaviour
     public GameObject slotPrefab;
     public int maxSlots = 12;
 
+    public Flowchart targetflowchart;
+
+    public bool pressTab = false;
+
+
+
     private List<InventorySlot> slots = new List<InventorySlot>();
     private Animator animator;
     private bool isOpen = false;
@@ -29,6 +37,7 @@ public class InventoryManager : MonoBehaviour
     {
         animator = inventoryUI_Background.GetComponent<Animator>();
         inventoryUI_Background.SetActive(false);
+        pressTab = targetflowchart.GetBooleanVariable("pressTab");
         CreateSlots();
         UpdateUI();
     }
@@ -40,11 +49,17 @@ public class InventoryManager : MonoBehaviour
             isOpen = !isOpen;
             if (isOpen)
             {
+                pressTab = true;
+                targetflowchart.SetBooleanVariable("pressTab", pressTab);
+                Debug.Log(pressTab);
                 inventoryUI_Background.SetActive(true);
                 animator.SetTrigger("Open");
             }
             else
             {
+                pressTab = false;
+                targetflowchart.SetBooleanVariable("pressTab", pressTab);
+                Debug.Log(pressTab);
                 animator.SetTrigger("Close");
                 // 인벤토리를 닫을 때 현재 선택된 아이템이 있다면 해제합니다.
                 if (selectedItem != null)
@@ -122,8 +137,11 @@ public class InventoryManager : MonoBehaviour
     // 아이템 사용 후 '손에 든' 상태를 해제하는 함수
     public void DeselectItem()
     {
+        Debug.Log("DeselectItem 함수가 호출되었습니다!", this.gameObject);
+
+
         selectedItem = null;
         Debug.Log("손에 든 아이템을 내려놓았다.");
     }
-    
+
 }
