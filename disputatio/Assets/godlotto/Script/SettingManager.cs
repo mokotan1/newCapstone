@@ -28,11 +28,16 @@ public class SettingSceneManager : MonoBehaviour
 
     void Start()
     {
+        // 기존 코드
         LoadSettings();
         AssignListeners();
         InitializeResolution();
 
-        // ✨ 씬 시작 시 첫 번째 UI 요소에 포커스
+        // 커서 상태 강제 초기화
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // 첫 번째 UI 요소 선택
         SelectUIElement(0);
     }
 
