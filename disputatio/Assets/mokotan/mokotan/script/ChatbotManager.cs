@@ -66,6 +66,8 @@ public class ChatbotManager : MonoBehaviour
     private const string API_KEY = "AIzaSyCtDnwmH_m99jmzUE8QB3xShfi8XtkNJSQ"; // 실제 API 키로 교체해야 합니다.
     private const string API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
 
+    [SerializeField]
+    public Flowchart globalFlowchart;
     // Gemini API 호출을 위한 메시지 리스트
     private List<GeminiMessage> chatHistory = new List<GeminiMessage>();
 
@@ -90,27 +92,28 @@ public class ChatbotManager : MonoBehaviour
     }
 
     // 게임 시작 시 초기 대화를 설정하는 함수
-    private void InitializeChatHistory()
+   private void InitializeChatHistory()
     {
         chatHistory.Clear();
+        // 리소스에서 기본 프롬프트 텍스트를 불러옵니다.
         TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt");
-        string introPrompt = "";
+        string basePrompt = "";
         
         if (introTextAsset != null)
         {
-            introPrompt = introTextAsset.text;
+            basePrompt = introTextAsset.text;
         }
         else
         {
             Debug.LogError("introPrompt.txt 파일을 찾을 수 없습니다. Resources 폴더에 파일을 추가해주세요.");
-            introPrompt = "초기 프롬프트 파일을 찾을 수 없습니다.";
+            basePrompt = "초기 프롬프트 파일을 찾을 수 없습니다.";
         }
-        
-        // 프롬프트를 대화 기록에 추가
-        chatHistory.Add(new GeminiMessage { role = "user", parts = new List<GeminiContent> { new GeminiContent { text = introPrompt } } });
 
-        // 바로 사용자 입력창을 활성화
-        SetInputActive(true);
+        // [삭제] GetBottle 변수를 확인하고 프롬프트를 수정하는 로직은
+        // 이제 GetGeminiResponse 함수가 담당하므로 여기서는 필요 없습니다.
+
+        // 챗봇의 기본 역할(페르소나)만 대화 기록에 추가합니다.
+        chatHistory.Add(new GeminiMessage { role = "model", parts = new List<GeminiContent> { new GeminiContent { text = basePrompt } } });
     }
 
     // 유저가 메시지를 전송할 때 호출되는 함수
@@ -148,12 +151,49 @@ public class ChatbotManager : MonoBehaviour
         // 챗봇 응답을 로딩 중임을 표시
         Say("...", null);
 
-        // 대화 기록을 기반으로 페이로드 생성
+         // 1. 기본 프롬프트를 불러옵니다.
+        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt");
+        string finalPrompt = introTextAsset != null ? introTextAsset.text : "You are a helpful assistant.";
+
+        // 2. 가장 최근의 사용자 메시지를 가져옵니다.
+        string lastUserMessage = "";
+        if (chatHistory.Count > 0 && chatHistory[chatHistory.Count - 1].role == "user")
+        {
+            lastUserMessage = chatHistory[chatHistory.Count - 1].parts[0].text;
+        }
+
+        // 3. Fungus 변수와 사용자 메시지 키워드를 확인하여 프롬프트를 조립합니다.
+        if (globalFlowchart != null)
+        {
+            bool hasBottleFlag = globalFlowchart.GetBooleanVariable("GetBottle"); // 예시 변수 이름
+
+            // 물병 플래그가 True이고, 사용자가 "물병"에 대해 물어봤을 경우
+            if (hasBottleFlag && lastUserMessage.Contains("물병") || lastUserMessage.Contains("병"))
+            {
+                // 프롬프트에 수수께끼를 내라는 특별 지시를 추가합니다.
+                finalPrompt += "\n\n[중요 지시] 플레이어는 '물병'에 대한 단서를 가지고 있으며, '물병'에 대해 질문했습니다. 부력에 대한 힌트로 수수께끼로 힌트를 주세요.";
+            }
+            // 여기에 다른 아이템에 대한 Else If 조건을 계속 추가할 수 있습니다.
+            // else if (hasKeyFlag && lastUserMessage.Contains("문")) { ... }
+        }
+        else
+        {
+            Debug.LogError("Global Flowchart가 ChatbotManager에 연결되지 않았습니다!");
+        }
+
+        // --- 프롬프트 생성 로직 끝 ---
+
+        // 최종 조립된 프롬프트를 포함하여 페이로드 생성
         GeminiPayload payload = new GeminiPayload
         {
             contents = chatHistory
         };
+        // 참고: Gemini API는 systemInstruction을 지원하지만,
+        // 여기서는 대화 흐름에 직접 지시를 추가하는 방식으로 구현합니다.
+        // 만약 systemInstruction을 사용하려면 payload 생성 로직을 수정해야 합니다.
+
         string payloadJson = JsonConvert.SerializeObject(payload);
+
 
         int retryCount = 0;
         float delay = 1.0f;
