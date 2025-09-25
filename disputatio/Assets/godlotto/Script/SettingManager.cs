@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using UnityEngine.EventSystems; // EventSystem 사용을 위해 추가
 
 public class SettingSceneManager : MonoBehaviour
 {
@@ -12,7 +13,12 @@ public class SettingSceneManager : MonoBehaviour
     public Slider bgmSlider;
     public Slider sfxSlider;
     public TextMeshProUGUI resolutionText;
+    public Button resolutionButton; // 키보드 조작을 위해 참조 추가
     public Toggle fullscreenToggle;
+
+    [Header("Keyboard Navigation")] // ✨ 키보드 조작을 위한 변수들 추가
+    public Selectable[] navigableElements;
+    private int currentIndex = 0;
 
     [Header("Scene Navigation")]
     public string mainMenuSceneName = "MainMenuScene";
@@ -22,12 +28,18 @@ public class SettingSceneManager : MonoBehaviour
 
     void Start()
     {
-        // UI 요소들에 저장된 PlayerPrefs 값을 불러와 적용
         LoadSettings();
-        // 리스너(버튼 클릭, 슬라이더 조작 등의 이벤트) 연결
         AssignListeners();
-        // 해상도 관련 UI 초기화
         InitializeResolution();
+
+        // ✨ 씬 시작 시 첫 번째 UI 요소에 포커스
+        SelectUIElement(0);
+    }
+
+    // ✨ Update 함수 및 키보드 입력 처리 로직 추가
+    void Update()
+    {
+        HandleKeyboardInput();
     }
 
     private void LoadSettings()
@@ -47,7 +59,6 @@ public class SettingSceneManager : MonoBehaviour
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
     }
 
-    // --- 설정값 적용 함수 ---
     public void SetBgmVolume(float volume)
     {
         audioMixer.SetFloat("BGMVolume", volume == 0 ? -80 : Mathf.Log10(volume) * 20);
@@ -66,7 +77,6 @@ public class SettingSceneManager : MonoBehaviour
         PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
     }
 
-    // --- 해상도 관련 함수 ---
     private void InitializeResolution()
     {
         resolutions = new List<Resolution>(Screen.resolutions);
@@ -82,15 +92,8 @@ public class SettingSceneManager : MonoBehaviour
         SetResolution(currentResolutionIndex);
     }
 
-    public void CycleResolutionForward()
-    {
-        CycleResolution(1);
-    }
-
-    public void CycleResolutionBackward()
-    {
-        CycleResolution(-1);
-    }
+    public void CycleResolutionForward() => CycleResolution(1);
+    public void CycleResolutionBackward() => CycleResolution(-1);
 
     private void CycleResolution(int direction)
     {
@@ -115,9 +118,95 @@ public class SettingSceneManager : MonoBehaviour
             resolutionText.text = resolutions[currentResolutionIndex].width + " x " + resolutions[currentResolutionIndex].height;
     }
 
-    // --- 씬 이동 ---
     public void BackToMainMenu()
     {
         SceneManager.LoadScene(mainMenuSceneName);
+    }
+    
+    // ✨ --- 이하 키보드 조작을 위한 함수들 --- ✨
+
+    private void HandleKeyboardInput()
+    {
+        bool isKeyboardInput = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
+                                 Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow) ||
+                                 Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space);
+
+        if (isKeyboardInput && EventSystem.current.currentSelectedGameObject == null)
+        {
+            SelectUIElement(currentIndex);
+        }
+
+        if (EventSystem.current.currentSelectedGameObject == null) return;
+        
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            HandleNavigation();
+        }
+        else
+        {
+            HandleSelectionKeyboardInput();
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
+            {
+                HandleEnterPress();
+            }
+        }
+    }
+    
+    private void HandleNavigation()
+    {
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            currentIndex++;
+            if (currentIndex >= navigableElements.Length) currentIndex = 0;
+        }
+        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            currentIndex--;
+            if (currentIndex < 0) currentIndex = navigableElements.Length - 1;
+        }
+        SelectUIElement(currentIndex);
+    }
+
+    private void HandleSelectionKeyboardInput()
+    {
+        GameObject selectedObj = EventSystem.current.currentSelectedGameObject;
+        if (selectedObj == null) return;
+
+        if (selectedObj == bgmSlider.gameObject)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow)) bgmSlider.value += 0.1f;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) bgmSlider.value -= 0.1f;
+        }
+        else if (selectedObj == sfxSlider.gameObject)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow)) sfxSlider.value += 0.1f;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) sfxSlider.value -= 0.1f;
+        }
+        else if (selectedObj == resolutionButton.gameObject)
+        {
+            if (Input.GetKeyDown(KeyCode.RightArrow)) CycleResolution(1);
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) CycleResolution(-1);
+        }
+    }
+
+    private void HandleEnterPress()
+    {
+        GameObject selectedObj = EventSystem.current.currentSelectedGameObject;
+        if (selectedObj == null) return;
+        
+        Button button = selectedObj.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.Invoke();
+        }
+    }
+
+    private void SelectUIElement(int index)
+    {
+        if (navigableElements.Length > 0 && index >= 0 && index < navigableElements.Length)
+        {
+            EventSystem.current.SetSelectedGameObject(navigableElements[index].gameObject);
+            currentIndex = index;
+        }
     }
 }
