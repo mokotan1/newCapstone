@@ -49,13 +49,17 @@ public class InventoryManager : MonoBehaviour
             isOpen = !isOpen;
             if (isOpen)
             {
-                targetflowchart.SetBooleanVariable("pressTab", true);
+                pressTab = true;
+                targetflowchart.SetBooleanVariable("pressTab", pressTab);
+                Debug.Log(pressTab);
                 inventoryUI_Background.SetActive(true);
                 animator.SetTrigger("Open");
             }
             else
             {
-                targetflowchart.SetBooleanVariable("pressTab", false);
+                pressTab = false;
+                targetflowchart.SetBooleanVariable("pressTab", pressTab);
+                Debug.Log(pressTab);
                 animator.SetTrigger("Close");
                 // 인벤토리를 닫을 때 현재 선택된 아이템이 있다면 해제합니다.
                 if (selectedItem != null)
