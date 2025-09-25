@@ -3,72 +3,135 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
+using UnityEngine.EventSystems; // EventSystem 사용을 위해 추가
 
-public class SettingManager : MonoBehaviour
+public class SettingSceneManager : MonoBehaviour
 {
-    [Header("Audio Settings")]
+    [Header("UI Components")]
     public AudioMixer audioMixer;
     public Slider bgmSlider;
     public Slider sfxSlider;
-
-    [Header("Graphics Settings")]
     public TextMeshProUGUI resolutionText;
-    public Button resolutionButton;
+    public Button resolutionButton; // 키보드 조작을 위해 참조 추가
     public Toggle fullscreenToggle;
-    private List<Resolution> resolutions;
-    private int currentResolutionIndex = 0;
 
-    [Header("Navigation")]
-    public string mainMenuSceneName = "MainMenuScene";
+    [Header("Keyboard Navigation")] // ✨ 키보드 조작을 위한 변수들 추가
     public Selectable[] navigableElements;
     private int currentIndex = 0;
 
-    [Header("In-Game Panel Specific")]
-    public GameObject settingPanel;
+    [Header("Scene Navigation")]
+    public string mainMenuSceneName = "MainMenuScene";
+
+    private List<Resolution> resolutions;
+    private int currentResolutionIndex = 0;
 
     void Start()
     {
-        // 씬/패널 시작 시 커서 상태를 항상 '보이고 자유로운' 상태로 초기화
+        // 기존 코드
+        LoadSettings();
+        AssignListeners();
+        InitializeResolution();
+
+        // 커서 상태 강제 초기화
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        InitializeAudioSliders();
-        InitializeResolution();
-        
-        if (fullscreenToggle != null)
-        {
-            // 저장된 전체화면 설정을 불러와 토글에 반영
-            fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-        }
+        // 첫 번째 UI 요소 선택
+        SelectUIElement(0);
     }
 
-    // 오브젝트가 활성화될 때마다 (패널이 켜질 때마다) 호출됩니다.
-    void OnEnable()
-    {
-        // Time.timeScale에 영향을 받지 않는 안정적인 UI 선택 코루틴 실행
-        StartCoroutine(SelectFirstElementAfterRealtime());
-    }
-
-    // 현실 시간 기준으로 기다려서 첫 UI 요소를 선택하는 코루틴
-    IEnumerator SelectFirstElementAfterRealtime()
-    {
-        // 게임 시간이 멈춰도 현실 시간으로 아주 잠시 기다립니다.
-        yield return new WaitForSecondsRealtime(0.02f); 
-        
-        EventSystem.current.SetSelectedGameObject(null);
-        if (navigableElements.Length > 0)
-        {
-            EventSystem.current.SetSelectedGameObject(navigableElements[0].gameObject);
-            currentIndex = 0;
-        }
-    }
-
+    // ✨ Update 함수 및 키보드 입력 처리 로직 추가
     void Update()
     {
-        // 키보드 입력을 감지하여 마우스 사용 후 포커스를 다시 가져오는 로직
+        HandleKeyboardInput();
+    }
+
+    private void LoadSettings()
+    {
+        bgmSlider.value = PlayerPrefs.GetFloat("BGMVolume", 0.75f);
+        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.75f);
+        fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
+
+        SetBgmVolume(bgmSlider.value);
+        SetSfxVolume(sfxSlider.value);
+    }
+
+    private void AssignListeners()
+    {
+        bgmSlider.onValueChanged.AddListener(SetBgmVolume);
+        sfxSlider.onValueChanged.AddListener(SetSfxVolume);
+        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+    }
+
+    public void SetBgmVolume(float volume)
+    {
+        audioMixer.SetFloat("BGMVolume", volume == 0 ? -80 : Mathf.Log10(volume) * 20);
+        PlayerPrefs.SetFloat("BGMVolume", volume);
+    }
+
+    public void SetSfxVolume(float volume)
+    {
+        audioMixer.SetFloat("SFXVolume", volume == 0 ? -80 : Mathf.Log10(volume) * 20);
+        PlayerPrefs.SetFloat("SFXVolume", volume);
+    }
+
+    public void SetFullscreen(bool isFullscreen)
+    {
+        Screen.fullScreen = isFullscreen;
+        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
+    }
+
+    private void InitializeResolution()
+    {
+        resolutions = new List<Resolution>(Screen.resolutions);
+        resolutions.RemoveAll(res => res.refreshRateRatio.value < 60);
+        resolutions.Sort((a, b) => (a.width.CompareTo(b.width) * 1000) + a.height.CompareTo(b.height));
+
+        currentResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", resolutions.Count - 1);
+        if (currentResolutionIndex >= resolutions.Count)
+        {
+            currentResolutionIndex = resolutions.Count - 1;
+        }
+        
+        SetResolution(currentResolutionIndex);
+    }
+
+    public void CycleResolutionForward() => CycleResolution(1);
+    public void CycleResolutionBackward() => CycleResolution(-1);
+
+    private void CycleResolution(int direction)
+    {
+        currentResolutionIndex += direction;
+        if (currentResolutionIndex >= resolutions.Count) currentResolutionIndex = 0;
+        if (currentResolutionIndex < 0) currentResolutionIndex = resolutions.Count - 1;
+        SetResolution(currentResolutionIndex);
+    }
+
+    private void SetResolution(int index)
+    {
+        currentResolutionIndex = index;
+        Resolution resolution = resolutions[index];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
+        PlayerPrefs.SetInt("ResolutionIndex", currentResolutionIndex);
+        UpdateResolutionText();
+    }
+
+    private void UpdateResolutionText()
+    {
+        if (resolutionText != null)
+            resolutionText.text = resolutions[currentResolutionIndex].width + " x " + resolutions[currentResolutionIndex].height;
+    }
+
+    public void BackToMainMenu()
+    {
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
+    
+    // ✨ --- 이하 키보드 조작을 위한 함수들 --- ✨
+
+    private void HandleKeyboardInput()
+    {
         bool isKeyboardInput = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
                                  Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow) ||
                                  Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space);
@@ -77,30 +140,20 @@ public class SettingManager : MonoBehaviour
         {
             SelectUIElement(currentIndex);
         }
-        
+
         if (EventSystem.current.currentSelectedGameObject == null) return;
         
-        // 상하 방향키로 UI 요소 간 이동
         if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
         {
             HandleNavigation();
         }
-        // 그 외, 좌우 방향키로 값 조절
         else
         {
             HandleSelectionKeyboardInput();
-        }
-
-        // 엔터/스페이스 키로 버튼 클릭
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
-        {
-            HandleEnterPress();
-        }
-
-        // Backspace 키로 메인 메뉴로 돌아가기 (SettingScene에서 유용)
-        if (Input.GetKeyDown(KeyCode.Backspace))
-        {
-            BackToMainMenu();
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
+            {
+                HandleEnterPress();
+            }
         }
     }
     
@@ -119,24 +172,6 @@ public class SettingManager : MonoBehaviour
         SelectUIElement(currentIndex);
     }
 
-    private void HandleEnterPress()
-    {
-        Button selectedButton = navigableElements[currentIndex].GetComponent<Button>();
-        if (selectedButton != null)
-        {
-            selectedButton.onClick.Invoke();
-        }
-    }
-
-    private void SelectUIElement(int index)
-    {
-        if (navigableElements.Length > 0 && index < navigableElements.Length)
-        {
-            EventSystem.current.SetSelectedGameObject(navigableElements[index].gameObject);
-            currentIndex = index;
-        }
-    }
-
     private void HandleSelectionKeyboardInput()
     {
         GameObject selectedObj = EventSystem.current.currentSelectedGameObject;
@@ -144,134 +179,39 @@ public class SettingManager : MonoBehaviour
 
         if (selectedObj == bgmSlider.gameObject)
         {
-            if (Input.GetKeyDown(KeyCode.RightArrow)) bgmSlider.value = Mathf.Clamp01(bgmSlider.value + 0.1f);
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) bgmSlider.value = Mathf.Clamp01(bgmSlider.value - 0.1f);
+            if (Input.GetKeyDown(KeyCode.RightArrow)) bgmSlider.value += 0.1f;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) bgmSlider.value -= 0.1f;
         }
         else if (selectedObj == sfxSlider.gameObject)
         {
-            if (Input.GetKeyDown(KeyCode.RightArrow)) sfxSlider.value = Mathf.Clamp01(sfxSlider.value + 0.1f);
-            if (Input.GetKeyDown(KeyCode.LeftArrow)) sfxSlider.value = Mathf.Clamp01(sfxSlider.value - 0.1f);
+            if (Input.GetKeyDown(KeyCode.RightArrow)) sfxSlider.value += 0.1f;
+            if (Input.GetKeyDown(KeyCode.LeftArrow)) sfxSlider.value -= 0.1f;
         }
-        else if (selectedObj.GetComponentInParent<Button>() == resolutionButton)
+        else if (selectedObj == resolutionButton.gameObject)
         {
             if (Input.GetKeyDown(KeyCode.RightArrow)) CycleResolution(1);
             if (Input.GetKeyDown(KeyCode.LeftArrow)) CycleResolution(-1);
         }
     }
-    
-    private void InitializeAudioSliders()
-    {
-        bgmSlider.value = PlayerPrefs.GetFloat("BGMVolume", 0.75f);
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.75f);
-        bgmSlider.onValueChanged.AddListener(SetBgmVolume);
-        sfxSlider.onValueChanged.AddListener(SetSfxVolume);
-        SetBgmVolume(bgmSlider.value);
-        SetSfxVolume(sfxSlider.value);
-    }
 
-    private void InitializeResolution()
+    private void HandleEnterPress()
     {
-        resolutions = new List<Resolution>(Screen.resolutions);
-        resolutions.Sort((a, b) => {
-            if (a.width != b.width) return a.width.CompareTo(b.width);
-            else return a.height.CompareTo(b.height);
-        });
+        GameObject selectedObj = EventSystem.current.currentSelectedGameObject;
+        if (selectedObj == null) return;
         
-        int savedIndex = PlayerPrefs.GetInt("ResolutionIndex", -1);
-        if (savedIndex != -1 && savedIndex < resolutions.Count)
+        Button button = selectedObj.GetComponent<Button>();
+        if (button != null)
         {
-            currentResolutionIndex = savedIndex;
-        }
-        else
-        {
-            bool foundCurrent = false;
-            for (int i = 0; i < resolutions.Count; i++)
-            {
-                if (resolutions[i].width == Screen.width && resolutions[i].height == Screen.height)
-                {
-                    currentResolutionIndex = i;
-                    foundCurrent = true;
-                    break;
-                }
-            }
-            if (!foundCurrent) currentResolutionIndex = resolutions.Count - 1;
-        }
-
-        UpdateResolutionText();
-        SetResolution(currentResolutionIndex);
-    }
-    
-    public void SetBgmVolume(float volume)
-    {
-        audioMixer.SetFloat("BGMVolume", volume == 0 ? -80 : Mathf.Log10(volume) * 20);
-        PlayerPrefs.SetFloat("BGMVolume", volume);
-    }
-
-    public void SetSfxVolume(float volume)
-    {
-        audioMixer.SetFloat("SFXVolume", volume == 0 ? -80 : Mathf.Log10(volume) * 20);
-        PlayerPrefs.SetFloat("SFXVolume", volume);
-    }
-
-    public void SetFullscreen(bool isFullscreen)
-    {
-        Screen.fullScreen = isFullscreen;
-        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
-    }
-    
-    public void BackToMainMenu()
-    {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
-    }
-
-    public void ReturnToGame()
-    {
-        // '게임으로 돌아가기' 버튼의 OnClick() 이벤트를 Inspector에서 GameManager의 ResumeGame() 함수에 직접 연결하는 것을 권장합니다.
-        if (FindFirstObjectByType<GameManager>() != null)
-        {
-            FindFirstObjectByType<GameManager>().ResumeGame();
-        }
-    }
-    
-    public void CycleResolution(int direction)
-    {
-        currentResolutionIndex += direction;
-        if (currentResolutionIndex >= resolutions.Count) currentResolutionIndex = 0;
-        if (currentResolutionIndex < 0) currentResolutionIndex = resolutions.Count - 1;
-
-        SetResolution(currentResolutionIndex);
-    }
-
-    public void SetResolution(int resolutionIndex)
-    {
-        currentResolutionIndex = resolutionIndex;
-        UpdateResolutionText();
-        
-        Resolution resolution = resolutions[currentResolutionIndex];
-        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
-        
-        PlayerPrefs.SetInt("ResolutionIndex", currentResolutionIndex);
-        
-        if (resolutionButton != null)
-        {
-            resolutionButton.Select();
+            button.onClick.Invoke();
         }
     }
 
-    public void CycleResolutionForward()
+    private void SelectUIElement(int index)
     {
-        CycleResolution(1);
-    }
-
-    public void CycleResolutionBackward()
-    {
-        CycleResolution(-1);
-    }
-
-    private void UpdateResolutionText()
-    {
-        if(resolutionText != null)
-            resolutionText.text = resolutions[currentResolutionIndex].width + " x " + resolutions[currentResolutionIndex].height;
+        if (navigableElements.Length > 0 && index >= 0 && index < navigableElements.Length)
+        {
+            EventSystem.current.SetSelectedGameObject(navigableElements[index].gameObject);
+            currentIndex = index;
+        }
     }
 }
