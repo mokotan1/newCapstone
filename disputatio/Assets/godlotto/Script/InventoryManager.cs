@@ -16,7 +16,7 @@ public class InventoryManager : MonoBehaviour
     public Transform slotsHolder;
     public GameObject slotPrefab;
     public int maxSlots = 12;
-
+    [SerializeField]
     public Flowchart targetflowchart;
 
     public bool pressTab = false;
