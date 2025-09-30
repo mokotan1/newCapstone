@@ -149,11 +149,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chatSayDialog: {fileID: 1313100015}
-  userInputField: {fileID: 2128609818}
-  sendButton: {fileID: 1146448741}
-  inputPanel: {fileID: 935192767}
-  dialogueChunkSize: 150
   globalFlowchart: {fileID: 1859562080}
+  userInputField: {fileID: 2128609818}
+  API_KEY: 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
+  modelName: gpt-4o
 --- !u!4 &70135318
 Transform:
   m_ObjectHideFlags: 0
@@ -786,7 +785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 100.78387, y: 81.42913}
+  scrollPos: {x: -21.569086, y: 92.01736}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -798,9 +797,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 265606023}
+  - {fileID: 265606003}
   selectedCommands:
-  - {fileID: 265606134}
+  - {fileID: 265606099}
   variables:
   - {fileID: 265606005}
   - {fileID: 265606045}
@@ -832,8 +831,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 67.334145
-    y: 70.23077
+    x: 69.68708
+    y: 66.701355
     width: 125.13
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -2340,7 +2339,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 420.5595
     y: 547.9731
-    width: 104.3
+    width: 104.39
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -5754,7 +5753,7 @@ MonoBehaviour:
     vector3Val: {x: 0, y: 0, z: 0}
 --- !u!114 &265606134
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -5906,7 +5905,7 @@ MonoBehaviour:
     vector3Val: {x: 0, y: 0, z: 0}
 --- !u!114 &265606135
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -7477,7 +7476,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1146448742}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 70135317}
+        m_TargetAssemblyTypeName: GlobalChatbot, Assembly-CSharp
+        m_MethodName: OnSendButtonClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1146448742
 MonoBehaviour:
   m_ObjectHideFlags: 0
