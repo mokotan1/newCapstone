@@ -33,10 +33,6 @@ public class GameManager : MonoBehaviour
         isPaused = false; 
         Time.timeScale = 1f;
         
-        // 씬 시작 시 커서는 숨기고 잠금 (게임 플레이를 위해)
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        
         // settingPanel은 초기에는 비활성화 상태
         if (settingPanel != null)
         {
