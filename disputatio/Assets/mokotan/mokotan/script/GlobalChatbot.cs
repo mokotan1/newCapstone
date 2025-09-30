@@ -56,7 +56,7 @@ public class GlobalChatbot : MonoBehaviour
     private void InitializeChatHistory()
     {
         chatHistory.Clear();
-        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt_global");
+        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt");
         string basePrompt = introTextAsset != null ? introTextAsset.text : "You are a helpful assistant.";
         chatHistory.Add(new OpenAIMessage { role = "system", content = basePrompt });
     }

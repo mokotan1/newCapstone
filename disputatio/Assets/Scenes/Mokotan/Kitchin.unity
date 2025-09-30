@@ -1323,6 +1323,13 @@ GameObject:
   - component: {fileID: 290854094}
   - component: {fileID: 290854093}
   - component: {fileID: 290854096}
+  - component: {fileID: 290854097}
+  - component: {fileID: 290854098}
+  - component: {fileID: 290854101}
+  - component: {fileID: 290854100}
+  - component: {fileID: 290854099}
+  - component: {fileID: 290854102}
+  - component: {fileID: 290854103}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1343,11 +1350,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -751.3029, y: 164.59541}
+  scrollPos: {x: -1781.8545, y: 389.1513}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 232
-  zoom: 0.7375
+  zoom: 0.8875
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1355,9 +1362,8 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 290854091}
-  selectedCommands:
-  - {fileID: 290854096}
+  - {fileID: 290854030}
+  selectedCommands: []
   variables:
   - {fileID: 290853934}
   - {fileID: 290853961}
@@ -1765,7 +1771,7 @@ MonoBehaviour:
   nodeRect:
     serializedVersion: 2
     x: 669.7482
-    y: 445.5216
+    y: 438.76102
     width: 150.11
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -1775,9 +1781,11 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 0}
   commandList:
+  - {fileID: 290854097}
   - {fileID: 290853923}
   - {fileID: 290853901}
   - {fileID: 290854006}
+  - {fileID: 290854098}
   - {fileID: 290854079}
   suppressAllAutoSelections: 0
 --- !u!114 &290853903
@@ -5595,8 +5603,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 1511.0752
-    y: 156.58376
+    x: 1513.3286
+    y: 150.94995
     width: 113.69
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -6372,8 +6380,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 1856.2498
-    y: 33.59549
+    x: 1858.5033
+    y: 31.341969
     width: 176.65
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -6796,8 +6804,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 2289.5803
-    y: -69.15005
+    x: 2295.214
+    y: -73.65709
     width: 87.369995
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -6814,6 +6822,7 @@ MonoBehaviour:
   - {fileID: 290854046}
   - {fileID: 290854015}
   - {fileID: 290854036}
+  - {fileID: 290854101}
   - {fileID: 290854014}
   - {fileID: 290854013}
   suppressAllAutoSelections: 0
@@ -6887,6 +6896,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 290854022}
   - {fileID: 290854023}
+  - {fileID: 290854100}
   suppressAllAutoSelections: 0
 --- !u!114 &290854021
 MonoBehaviour:
@@ -7190,8 +7200,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 2458.746
-    y: 46.652782
+    x: 2459.8728
+    y: 44.399258
     width: 78.47
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -7204,9 +7214,11 @@ MonoBehaviour:
   - {fileID: 290854074}
   - {fileID: 290854077}
   - {fileID: 290854025}
+  - {fileID: 290854103}
   - {fileID: 290854076}
   - {fileID: 290854073}
   - {fileID: 290854072}
+  - {fileID: 290854102}
   suppressAllAutoSelections: 0
 --- !u!114 &290854028
 MonoBehaviour:
@@ -7250,7 +7262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 2333.573
+    x: 2334.6997
     y: 33.297375
     width: 82.75
     height: 40
@@ -7386,6 +7398,7 @@ MonoBehaviour:
   indentLevel: 0
   targetObjects:
   - {fileID: 243801839}
+  - {fileID: 535236202}
   interactableState:
     booleanRef: {fileID: 0}
     booleanVal: 1
@@ -7733,6 +7746,7 @@ MonoBehaviour:
   indentLevel: 0
   targetObjects:
   - {fileID: 243801839}
+  - {fileID: 535236202}
   interactableState:
     booleanRef: {fileID: 0}
     booleanVal: 1
@@ -7845,6 +7859,7 @@ MonoBehaviour:
   eventHandler: {fileID: 0}
   commandList:
   - {fileID: 290854051}
+  - {fileID: 290854099}
   suppressAllAutoSelections: 0
 --- !u!114 &290854054
 MonoBehaviour:
@@ -8798,6 +8813,7 @@ MonoBehaviour:
   indentLevel: 2
   targetObjects:
   - {fileID: 586477519}
+  - {fileID: 535236202}
   interactableState:
     booleanRef: {fileID: 0}
     booleanVal: 0
@@ -11425,6 +11441,140 @@ MonoBehaviour:
   targetObject: {fileID: 1675062676}
   methodName: TriggerAIResponseByFlag
   delay: 0.5
+--- !u!114 &290854097
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 207
+  indentLevel: 0
+  _targetGameObject:
+    gameObjectRef: {fileID: 0}
+    gameObjectVal: {fileID: 1254764023}
+  activeState:
+    booleanRef: {fileID: 0}
+    booleanVal: 0
+  targetGameObjectOLD: {fileID: 0}
+--- !u!114 &290854098
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a598660d01b2343bb92adebcbb629ec5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 208
+  indentLevel: 0
+  targetClickable2D: {fileID: 480640596}
+  activeState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+--- !u!114 &290854099
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 211
+  indentLevel: 0
+  targetObjects:
+  - {fileID: 535236202}
+  interactableState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+--- !u!114 &290854100
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 210
+  indentLevel: 0
+  targetObjects:
+  - {fileID: 535236202}
+  interactableState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+--- !u!114 &290854101
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 209
+  indentLevel: 1
+  targetObjects:
+  - {fileID: 535236202}
+  interactableState:
+    booleanRef: {fileID: 0}
+    booleanVal: 0
+--- !u!114 &290854102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 212
+  indentLevel: 1
+  targetObjects:
+  - {fileID: 535236202}
+  interactableState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+--- !u!114 &290854103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 213
+  indentLevel: 1
+  targetObjects:
+  - {fileID: 535236202}
+  interactableState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
 --- !u!1 &300483508
 GameObject:
   m_ObjectHideFlags: 0
@@ -13895,7 +14045,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 290853876}
         m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
         m_MethodName: ExecuteBlock
         m_Mode: 5
