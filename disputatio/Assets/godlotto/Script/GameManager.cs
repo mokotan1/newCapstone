@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager Awake: 초기화 완료.");
         // 초기에는 게임이 일시 정지 상태가 아님
         isPaused = false; 
-        Time.timeScale = 1f;
         
         // settingPanel은 초기에는 비활성화 상태
         if (settingPanel != null)
@@ -90,9 +89,6 @@ public class GameManager : MonoBehaviour
         {
             settingPanel.SetActive(true);
         }
-        Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void ResumeGame()
@@ -102,9 +98,6 @@ public class GameManager : MonoBehaviour
         {
             settingPanel.SetActive(false);
         }
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
         
         // 게임을 재개할 때, '입력 무시' 깃발을 세운다
         blockNextInput = true;
