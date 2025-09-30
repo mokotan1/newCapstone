@@ -137,6 +137,11 @@ public class KitchenChatbot : MonoBehaviour
         bool isComplete = false;
         Say(message, () => isComplete = true);
         yield return new WaitUntil(() => isComplete);
+
+          if (chatSayDialog != null)
+    {
+        chatSayDialog.gameObject.SetActive(false);
+    }
     }
     
     private void Say(string message, System.Action onComplete = null)
