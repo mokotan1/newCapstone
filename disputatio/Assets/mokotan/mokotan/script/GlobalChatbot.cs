@@ -7,18 +7,19 @@ using Fungus;
 using System;
 using Newtonsoft.Json;
 using TMPro;
-// OpenAI API 데이터 구조 (이 부분은 다른 스크립트와 중복되지 않게 한 곳에만 두는 것이 좋습니다)
-// [System.Serializable] public class OpenAIMessage ... (위와 동일)
+
+
+// OpenAI API 데이터 구조 클래스들은 별도 파일에 있어야 합니다.
 
 public class GlobalChatbot : MonoBehaviour
 {
     // --- Unity & Fungus 연결 변수 ---
     [SerializeField] private SayDialog chatSayDialog;
-    [SerializeField] public Flowchart globalFlowchart; // 글로벌 flowchart만 참조
+    [SerializeField] public Flowchart globalFlowchart;
     [SerializeField] private TMP_InputField userInputField;
 
     // --- OpenAI API 설정 ---
-    [SerializeField] private string API_KEY = "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"; // OpenAI 키를 입력하세요
+    private string API_KEY; // ◀ 값을 직접 할당하지 않고, 파일에서 읽어올 변수
     [SerializeField] private string modelName = "gpt-4o";
     private const string API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -26,21 +27,41 @@ public class GlobalChatbot : MonoBehaviour
     private List<OpenAIMessage> chatHistory = new List<OpenAIMessage>();
     private bool isRequestInProgress = false;
 
+    // ▼▼▼ API 키를 로드하기 위한 Awake() 함수 추가 ▼▼▼
+    private void Awake()
+    {
+        LoadAPIKey();
+    }
+
     private void Start()
     {
         InitializeChatHistory();
+    }
+    
+    // ▼▼▼ API 키를 파일에서 읽어오는 함수 추가 ▼▼▼
+    private void LoadAPIKey()
+    {
+        TextAsset keyFile = Resources.Load<TextAsset>("APIKey"); // Resources 폴더의 APIKey.txt 로드
+        if (keyFile != null)
+        {
+            API_KEY = keyFile.text.Trim(); // Trim()으로 공백 제거
+            Debug.Log("OpenAI API Key loaded successfully.");
+        }
+        else
+        {
+            Debug.LogError("API 키 파일을 찾을 수 없습니다! Assets/Resources/APIKey.txt 경로를 확인해주세요.");
+        }
     }
 
     private void InitializeChatHistory()
     {
         chatHistory.Clear();
-        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt_global"); // 글로벌용 프롬프트
+        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt_global");
         string basePrompt = introTextAsset != null ? introTextAsset.text : "You are a helpful assistant.";
         chatHistory.Add(new OpenAIMessage { role = "system", content = basePrompt });
     }
 
-    // 이 스크립트는 플레이어의 직접 입력으로만 작동한다고 가정
-    public void SendMessageToChatbot(string userMessage) // Fungus 입력이나 UI 입력에서 호출
+    public void SendMessageToChatbot(string userMessage)
     {
         if (isRequestInProgress) return;
         if (string.IsNullOrEmpty(userMessage)) return;
@@ -51,28 +72,23 @@ public class GlobalChatbot : MonoBehaviour
 
     public void OnSendButtonClick()
     {
-        // InputField의 텍스트를 가져옵니다.
         string message = userInputField.text;
-        
-        // 비어있지 않다면 메시지 전송 함수를 호출합니다.
         if (!string.IsNullOrEmpty(message))
         {
             SendMessageToChatbot(message);
-            
-            // 입력 필드를 다시 비워줍니다.
             userInputField.text = "";
-            userInputField.ActivateInputField(); // 다시 입력하기 편하도록 포커스 설정
+            userInputField.ActivateInputField();
         }
     }
 
     private IEnumerator GetGPTResponse()
     {
+        // (이하 GetGPTResponse 함수 및 다른 함수들은 기존과 동일합니다)
         isRequestInProgress = true;
         Say("...", null);
 
         string finalSystemPrompt = chatHistory[0].content;
 
-        // --- 글로벌 관련 로직만 남김 ---
         if (globalFlowchart != null)
         {
             bool hasBottleFlag = globalFlowchart.GetBooleanVariable("GetBottle");
@@ -92,7 +108,6 @@ public class GlobalChatbot : MonoBehaviour
 
         using (UnityWebRequest request = new UnityWebRequest(API_URL, "POST"))
         {
-            // ... (API 요청 부분은 KitchenChatbot과 동일)
             byte[] bodyRaw = Encoding.UTF8.GetBytes(payloadJson);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -117,7 +132,8 @@ public class GlobalChatbot : MonoBehaviour
             yield return StartCoroutine(DisplayMessageChunks(chatbotResponse));
         }
     }
-     private string ParseGPTResponse(string json)
+
+    private string ParseGPTResponse(string json)
     {
         try
         {

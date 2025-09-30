@@ -1343,11 +1343,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -1088.7109, y: 5.3413353}
+  scrollPos: {x: -751.3029, y: 164.59541}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 232
-  zoom: 1
+  zoom: 0.7375
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1634,7 +1634,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 862.21857
     y: 386.5
-    width: 104.3
+    width: 104.39
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -1764,7 +1764,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 667.0363
+    x: 669.7482
     y: 445.5216
     width: 150.11
     height: 40
@@ -10922,7 +10922,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 1655.7109
+    x: 1657.0669
     y: 367.65866
     width: 73.6
     height: 40
@@ -11917,7 +11917,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 480640595}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 1690, y: 251, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 1}
   m_ConstrainProportionsScale: 0
@@ -14018,7 +14018,6 @@ RectTransform:
   - {fileID: 1654095606}
   - {fileID: 1461258862}
   - {fileID: 1014563352}
-  - {fileID: 1675062677}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -15733,7 +15732,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1675062677
 Transform:
   m_ObjectHideFlags: 0
@@ -15743,11 +15742,11 @@ Transform:
   m_GameObject: {fileID: 1675062676}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -319.37238, y: -311.83496, z: -1.432226}
+  m_LocalPosition: {x: 640.6276, y: 228.16504, z: -1.432226}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1021282610}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1675062678
 MonoBehaviour:
@@ -15758,16 +15757,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1675062676}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 909188ddab9be584699994f0c1097ec4, type: 3}
+  m_Script: {fileID: 11500000, guid: 00647ada9aa5d9f469a07fbc68bb5425, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   chatSayDialog: {fileID: 1958785641}
-  userInputField: {fileID: 1654095603}
-  sendButton: {fileID: 1461258859}
-  inputPanel: {fileID: 1021282607}
-  dialogueChunkSize: 150
-  globalFlowchart: {fileID: 0}
   kitchenFlowchart: {fileID: 290853876}
+  modelName: gpt-4o
 --- !u!1 &1702324455
 GameObject:
   m_ObjectHideFlags: 0
@@ -16551,7 +16546,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!82 &1958785637
 AudioSource:
   m_ObjectHideFlags: 0
@@ -17051,8 +17046,9 @@ SceneRoots:
   - {fileID: 15879522}
   - {fileID: 1747689398}
   - {fileID: 559136594}
-  - {fileID: 480640599}
   - {fileID: 290853880}
   - {fileID: 192235982}
   - {fileID: 1992724854}
   - {fileID: 1958785646}
+  - {fileID: 480640599}
+  - {fileID: 1675062677}

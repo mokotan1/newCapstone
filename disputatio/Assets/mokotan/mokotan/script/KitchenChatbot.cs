@@ -8,25 +8,15 @@ using System;
 using Newtonsoft.Json;
 using TMPro;
 
-// OpenAI API 데이터 구조 (이 부분은 다른 스크립트와 중복되지 않게 한 곳에만 두는 것이 좋습니다)
-[System.Serializable]
-public class OpenAIMessage { public string role; public string content; }
-[System.Serializable]
-public class OpenAIPayload { public string model; public List<OpenAIMessage> messages; }
-[System.Serializable]
-public class OpenAIChoice { public OpenAIMessage message; }
-[System.Serializable]
-public class OpenAIResponse { public List<OpenAIChoice> choices; }
+// OpenAI API 데이터 구조 클래스들은 별도 파일에 있어야 합니다.
 
 public class KitchenChatbot : MonoBehaviour
 {
     // --- Unity & Fungus 연결 변수 ---
     [SerializeField] private SayDialog chatSayDialog;
-    [SerializeField] public Flowchart kitchenFlowchart; // 주방 flowchart만 참조
-    [SerializeField] private TMP_InputField userInputField;
-
+    [SerializeField] public Flowchart kitchenFlowchart;
     // --- OpenAI API 설정 ---
-    [SerializeField] private string API_KEY = "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"; // OpenAI 키를 입력하세요
+    private string API_KEY; // ◀ 값을 직접 할당하지 않고, 파일에서 읽어올 변수
     [SerializeField] private string modelName = "gpt-4o";
     private const string API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -34,15 +24,36 @@ public class KitchenChatbot : MonoBehaviour
     private List<OpenAIMessage> chatHistory = new List<OpenAIMessage>();
     private bool isRequestInProgress = false;
 
+    // ▼▼▼ API 키를 로드하기 위한 Awake() 함수 추가 ▼▼▼
+    private void Awake()
+    {
+        LoadAPIKey();
+    }
+
     private void Start()
     {
         InitializeChatHistory();
     }
 
+    // ▼▼▼ API 키를 파일에서 읽어오는 함수 추가 ▼▼▼
+    private void LoadAPIKey()
+    {
+        TextAsset keyFile = Resources.Load<TextAsset>("APIKey"); // Resources 폴더의 APIKey.txt 로드
+        if (keyFile != null)
+        {
+            API_KEY = keyFile.text.Trim(); // Trim()으로 공백 제거
+            Debug.Log("OpenAI API Key loaded successfully for KitchenChatbot.");
+        }
+        else
+        {
+            Debug.LogError("API 키 파일을 찾을 수 없습니다! Assets/Resources/APIKey.txt 경로를 확인해주세요.");
+        }
+    }
+
     private void InitializeChatHistory()
     {
         chatHistory.Clear();
-        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt_kitchen"); // 주방용 프롬프트
+        TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt");
         string basePrompt = introTextAsset != null ? introTextAsset.text : "You are a helpful kitchen assistant.";
         chatHistory.Add(new OpenAIMessage { role = "system", content = basePrompt });
     }
@@ -53,16 +64,18 @@ public class KitchenChatbot : MonoBehaviour
         string actionText = "(플레이어가 나에게 음식을 주었다.)";
         chatHistory.Add(new OpenAIMessage { role = "user", content = actionText });
         StartCoroutine(GetGPTResponse());
+        Debug.Log("call");
     }
-
+    
+   
     private IEnumerator GetGPTResponse()
     {
+        // (이하 GetGPTResponse 함수 및 다른 함수들은 기존과 동일합니다)
         isRequestInProgress = true;
         Say("...", null);
 
         string finalSystemPrompt = chatHistory[0].content;
-        
-        // --- 주방 관련 로직만 남김 ---
+
         if (kitchenFlowchart != null)
         {
             bool giveFood = kitchenFlowchart.GetBooleanVariable("giveFood");
@@ -118,11 +131,9 @@ public class KitchenChatbot : MonoBehaviour
             return "답변 파싱 실패";
         }
     }
-    
 
     private IEnumerator DisplayMessageChunks(string message)
     {
-        // ... (대사 나누기 로직은 기존과 동일)
         bool isComplete = false;
         Say(message, () => isComplete = true);
         yield return new WaitUntil(() => isComplete);
