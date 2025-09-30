@@ -40,6 +40,7 @@ public class InGameSettingsPanel : MonoBehaviour
 
     void Start()
     {
+        OnSettingPanel();
         LoadSettings();
         AssignListeners();
         InitializeResolution();
@@ -47,19 +48,24 @@ public class InGameSettingsPanel : MonoBehaviour
 
     void Update()
     {
+
+    }
+
+    // (이 아래 코드는 이전 답변의 최종 완성 코드와 거의 동일합니다.
+    // 클래스 이름만 InGameSettingsPanel로 바뀌었습니다.)
+
+    public void OnSettingPanel()
+    {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             ToggleSettingPanel();
         }
 
         if (!isPanelOpen) return;
-        
+
         HandleKeyboardInput();
     }
-    
-    // (이 아래 코드는 이전 답변의 최종 완성 코드와 거의 동일합니다.
-    // 클래스 이름만 InGameSettingsPanel로 바뀌었습니다.)
-    
+            
     private void LoadSettings()
     {
         bgmSlider.value = PlayerPrefs.GetFloat("BGMVolume", 0.75f);
@@ -80,23 +86,6 @@ public class InGameSettingsPanel : MonoBehaviour
     {
         isPanelOpen = !isPanelOpen;
         settingPanel.SetActive(isPanelOpen);
-
-        if (isPanelOpen)
-        {
-            Time.timeScale = 0f;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            StartCoroutine(SelectFirstElementAfterRealtime());
-        }
-        else
-        {
-            Time.timeScale = 1f;
-            if (SceneManager.GetActiveScene().name != mainMenuSceneName)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-        }
     }
 
     public void OpenSettingPanel()
