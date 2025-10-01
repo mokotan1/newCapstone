@@ -1,17 +1,15 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-// Button 타입을 직접 사용하지 않으므로 UnityEngine.UI는 없어도 됩니다.
 
 public class DropZone : MonoBehaviour, IDropHandler
 {
-    [Header("회전 버튼들")]
-    // Button 타입 대신 GameObject 타입으로 변경하여 활성화/비활성화를 직접 제어합니다.
+    [Header("회전 버튼 오브젝트")]
     public GameObject rotateRightButtonObject;
     public GameObject rotateLeftButtonObject;
 
     void Start()
     {
-        // 게임이 시작될 때 회전 버튼들을 화면에서 완전히 숨깁니다.
+        // 시작 시 버튼들을 화면에서 숨깁니다.
         if (rotateRightButtonObject != null)
         {
             rotateRightButtonObject.SetActive(false);
@@ -27,10 +25,11 @@ public class DropZone : MonoBehaviour, IDropHandler
         Draggable draggable = eventData.pointerDrag.GetComponent<Draggable>();
         if (draggable != null)
         {
+            // 위치 및 크기 조절
             draggable.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
             draggable.transform.localScale = Vector3.one;
 
-            // 드롭이 성공하면 버튼들을 화면에 다시 표시합니다.
+            // 1. 버튼들을 화면에 다시 표시합니다 (SetActive 사용).
             if (rotateRightButtonObject != null)
             {
                 rotateRightButtonObject.SetActive(true);
@@ -38,6 +37,13 @@ public class DropZone : MonoBehaviour, IDropHandler
             if (rotateLeftButtonObject != null)
             {
                 rotateLeftButtonObject.SetActive(true);
+            }
+
+            // 2. 각도 텍스트를 화면에 표시하도록 요청합니다.
+            FilterCardRotator rotator = draggable.GetComponent<FilterCardRotator>();
+            if (rotator != null)
+            {
+                rotator.ShowAngleText();
             }
         }
     }
