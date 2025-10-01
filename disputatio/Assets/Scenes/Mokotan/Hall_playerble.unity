@@ -9642,6 +9642,7 @@ GameObject:
   - component: {fileID: 1859562082}
   - component: {fileID: 1859562083}
   - component: {fileID: 1859562084}
+  - component: {fileID: 1859562085}
   m_Layer: 0
   m_Name: Variablemanager
   m_TagString: Untagged
@@ -9734,6 +9735,7 @@ MonoBehaviour:
   - {fileID: 1859562082}
   - {fileID: 1859562083}
   - {fileID: 1859562084}
+  - {fileID: 1859562085}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -9803,6 +9805,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 0
   key: isCalled
+  value: 0
+--- !u!114 &1859562085
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859562076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: hasUsedStudyKey
   value: 0
 --- !u!1 &1863794206
 GameObject:
