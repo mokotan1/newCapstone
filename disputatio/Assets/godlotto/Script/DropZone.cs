@@ -29,7 +29,6 @@ public class DropZone : MonoBehaviour, IDropHandler
             draggable.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
             draggable.transform.localScale = Vector3.one;
 
-            // 1. 버튼들을 화면에 다시 표시합니다 (SetActive 사용).
             if (rotateRightButtonObject != null)
             {
                 rotateRightButtonObject.SetActive(true);
@@ -37,13 +36,6 @@ public class DropZone : MonoBehaviour, IDropHandler
             if (rotateLeftButtonObject != null)
             {
                 rotateLeftButtonObject.SetActive(true);
-            }
-
-            // 2. 각도 텍스트를 화면에 표시하도록 요청합니다.
-            FilterCardRotator rotator = draggable.GetComponent<FilterCardRotator>();
-            if (rotator != null)
-            {
-                rotator.ShowAngleText();
             }
         }
     }
