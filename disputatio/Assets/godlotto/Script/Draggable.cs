@@ -23,9 +23,6 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         originalPosition = rectTransform.anchoredPosition;
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false; // 드롭 존을 감지하기 위해 잠시 자신의 레이캐스트를 끕니다.
-
-        // 만약 각도 텍스트가 보이고 있었다면 숨깁니다.
-        GetComponent<FilterCardRotator>()?.HideAngleText();
     }
 
     public void OnDrag(PointerEventData eventData)

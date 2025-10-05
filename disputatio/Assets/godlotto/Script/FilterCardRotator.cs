@@ -1,78 +1,47 @@
 using UnityEngine;
-using TMPro;
 
 public class FilterCardRotator : MonoBehaviour
 {
-    [Header("UI Components")]
-    public TextMeshProUGUI angleText;
-
-    private float currentZRotation = 0f;
-
-    void Start()
-    {
-        // 시작 시 각도 텍스트를 숨깁니다.
-        if (angleText != null)
-        {
-            angleText.gameObject.SetActive(false);
-        }
-    }
+    // 플레이어가 인지하는 각도를 저장할 변수 (0, 90, 180, 270)
+    private float currentAngle = 0f;
 
     // 오른쪽으로 90도 회전시키는 함수
     public void RotateRight()
     {
-        // 시계 방향으로 90도를 더합니다.
-        currentZRotation += 90f;
+        // 사용자가 인지하는 각도는 90도씩 더해줍니다.
+        currentAngle += 90f;
 
-        // 만약 각도가 360도 이상이 되면 0으로 되돌립니다.
-        if (currentZRotation >= 360f)
+        // 360도가 되면 0으로 되돌립니다.
+        if (currentAngle >= 360f)
         {
-            currentZRotation = 0f;
+            currentAngle = 0f;
         }
 
-        transform.localRotation = Quaternion.Euler(0, 0, currentZRotation);
-        UpdateAngleText(); // 회전 후 텍스트 업데이트
+        // 실제 회전을 적용합니다. 시계 방향으로 돌리기 위해 음수(-) 값을 사용합니다.
+        ApplyRotation();
     }
 
     // 왼쪽으로 90도 회전시키는 함수
     public void RotateLeft()
     {
-        // 반시계 방향으로 90도를 뺍니다.
-        currentZRotation -= 90f;
+        // 사용자가 인지하는 각도는 90도씩 빼줍니다.
+        currentAngle -= 90f;
 
-        // 만약 각도가 0도보다 작아지면 270도로 순환시킵니다.
-        if (currentZRotation < 0f)
+        // 0도보다 작아지면 270도로 순환시킵니다.
+        if (currentAngle < 0f)
         {
-            currentZRotation = 270f;
+            currentAngle = 270f;
         }
 
-        transform.localRotation = Quaternion.Euler(0, 0, currentZRotation);
-        UpdateAngleText(); // 회전 후 텍스트 업데이트
+        // 실제 회전을 적용합니다.
+        ApplyRotation();
     }
 
-    // (이 아래는 기존 코드와 동일합니다)
-
-    private void UpdateAngleText()
+    // 실제 회전값을 적용하는 함수
+    private void ApplyRotation()
     {
-        if (angleText != null && angleText.gameObject.activeSelf)
-        {
-            angleText.text = currentZRotation + "°";
-        }
-    }
-
-    public void ShowAngleText()
-    {
-        if (angleText != null)
-        {
-            angleText.gameObject.SetActive(true);
-            UpdateAngleText();
-        }
-    }
-
-    public void HideAngleText()
-    {
-        if (angleText != null)
-        {
-            angleText.gameObject.SetActive(false);
-        }
+        // 유니티의 Z축 회전은 반시계가 양수(+)이므로,
+        // 우리가 원하는 시계 방향 회전을 위해서는 currentAngle에 음수(-)를 붙여줍니다.
+        transform.localRotation = Quaternion.Euler(0, 0, -currentAngle);
     }
 }
