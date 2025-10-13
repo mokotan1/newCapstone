@@ -271,10 +271,8 @@ GameObject:
   - component: {fileID: 687597764}
   - component: {fileID: 687597765}
   - component: {fileID: 687597767}
-  - component: {fileID: 687597766}
   - component: {fileID: 687597768}
   - component: {fileID: 687597770}
-  - component: {fileID: 687597769}
   - component: {fileID: 687597772}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
@@ -283,10 +281,12 @@ GameObject:
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
   - component: {fileID: 687597782}
-  - component: {fileID: 687597783}
   - component: {fileID: 687597784}
+  - component: {fileID: 687597788}
   - component: {fileID: 687597785}
+  - component: {fileID: 687597787}
   - component: {fileID: 687597786}
+  - component: {fileID: 687597789}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -307,7 +307,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -1, y: -2}
+  scrollPos: {x: 163.5069, y: -51.408894}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -321,7 +321,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 687597762}
   selectedCommands:
-  - {fileID: 687597786}
+  - {fileID: 687597789}
   variables:
   - {fileID: 687597774}
   description: 
@@ -364,7 +364,7 @@ MonoBehaviour:
   nodeRect:
     serializedVersion: 2
     x: 66
-    y: 70
+    y: 68
     width: 78.03
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -374,7 +374,7 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 687597761}
   commandList:
-  - {fileID: 687597786}
+  - {fileID: 687597789}
   - {fileID: 687597764}
   suppressAllAutoSelections: 0
 --- !u!4 &687597763
@@ -426,7 +426,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 560
+    x: 555
     y: 243
     width: 159.98001
     height: 40
@@ -440,37 +440,9 @@ MonoBehaviour:
   - {fileID: 687597780}
   - {fileID: 687597773}
   - {fileID: 687597772}
+  - {fileID: 687597788}
   - {fileID: 687597770}
-  - {fileID: 687597769}
   - {fileID: 687597782}
-  suppressAllAutoSelections: 0
---- !u!114 &687597766
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d3d73aef2cfc4f51abf34ac00241f60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nodeRect:
-    serializedVersion: 2
-    x: 859
-    y: 265
-    width: 129.01999
-    height: 40
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  useCustomTint: 0
-  itemId: 4
-  blockName: Right_Hallway
-  description: 
-  eventHandler: {fileID: 0}
-  commandList:
-  - {fileID: 687597783}
-  - {fileID: 687597785}
   suppressAllAutoSelections: 0
 --- !u!114 &687597767
 MonoBehaviour:
@@ -486,14 +458,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 856
+    x: 857
     y: 200
-    width: 115.48
+    width: 112.509995
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 3
-  blockName: StudyRoom
+  blockName: 2floorRight
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -516,31 +488,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 1658578552}
   waitFrames: 1
---- !u!114 &687597769
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 1
-  text: "\uBCF5\uB3C4\uB85C \uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597766}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597770
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -555,9 +502,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 6
   indentLevel: 1
-  text: "\uC911\uC559\uC73C\uB85C \uB3CC\uC544\uAC04\uB2E4."
+  text: "1\uCE35\uC73C\uB85C \uB3CC\uC544\uAC04\uB2E4."
   description: 
-  targetBlock: {fileID: 687597767}
+  targetBlock: {fileID: 687597785}
   hideIfVisited: 0
   interactable:
     booleanRef: {fileID: 0}
@@ -796,7 +743,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: StudyRoom
+    stringVal: 2floorRight
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &687597780
@@ -1056,8 +1003,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 850
-    y: 334
+    x: 858
+    y: 316
     width: 107.16
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -1094,26 +1041,6 @@ MonoBehaviour:
   hideThisOption:
     booleanRef: {fileID: 0}
     booleanVal: 0
---- !u!114 &687597783
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 207aecf668a0345388087ccf522f9957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 19
-  indentLevel: 0
-  duration: 1
-  targetAlpha: 1
-  waitUntilFinished: 1
-  fadeColor: {r: 0, g: 0, b: 0, a: 1}
-  fadeTexture: {fileID: 0}
-  fadeTweenType: 4
 --- !u!114 &687597784
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1275,17 +1202,90 @@ MonoBehaviour:
   m_GameObject: {fileID: 687597759}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3d73aef2cfc4f51abf34ac00241f60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nodeRect:
+    serializedVersion: 2
+    x: 843
+    y: 254
+    width: 129.6
+    height: 40
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  useCustomTint: 0
+  itemId: 25
+  blockName: Hall_playerble
+  description: 
+  eventHandler: {fileID: 0}
+  commandList:
+  - {fileID: 687597787}
+  - {fileID: 687597786}
+  suppressAllAutoSelections: 0
+--- !u!114 &687597786
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemId: 21
+  itemId: 24
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: Right_Hallway
+    stringVal: Hall_playerble
   loadingImage: {fileID: 0}
   sceneNameOLD: 
---- !u!114 &687597786
+--- !u!114 &687597787
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207aecf668a0345388087ccf522f9957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 23
+  indentLevel: 0
+  duration: 1
+  targetAlpha: 1
+  waitUntilFinished: 1
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  fadeTexture: {fileID: 0}
+  fadeTweenType: 4
+--- !u!114 &687597788
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 21
+  indentLevel: 1
+  text: "\uC67C\uCABD \uBCF5\uB3C4\uB85C \uB3CC\uC544\uAC04\uB2E4."
+  description: 
+  targetBlock: {fileID: 687597767}
+  hideIfVisited: 0
+  interactable:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+  setMenuDialog: {fileID: 0}
+  hideThisOption:
+    booleanRef: {fileID: 0}
+    booleanVal: 0
+--- !u!114 &687597789
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1297,7 +1297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb77d0ce495044f6e9feb91b31798e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemId: 22
+  itemId: 26
   indentLevel: 0
   anyVar:
     variable: {fileID: 687597774}
