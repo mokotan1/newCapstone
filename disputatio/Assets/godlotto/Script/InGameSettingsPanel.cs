@@ -12,6 +12,11 @@ public class InGameSettingsPanel : MonoBehaviour
 {
     public static InGameSettingsPanel instance;
 
+    [Header("Fungus 연동")] // 이 부분을 추가하세요
+    public Flowchart targetFlowchart;
+    public Fungus.DialogInput dialogInput;
+
+
     [Header("UI Components")]
     public GameObject settingPanel; // 설정 UI의 부모 패널 GameObject
     public GameObject targetObject;
@@ -96,6 +101,13 @@ public class InGameSettingsPanel : MonoBehaviour
     {
         isPanelOpen = !isPanelOpen;
         settingPanel.SetActive(isPanelOpen);
+
+        if (dialogInput != null)
+        {
+            // isPanelOpen이 true면(패널이 열리면) dialogInput.enabled는 false가 됩니다.
+            // isPanelOpen이 false면(패널이 닫히면) dialogInput.enabled는 true가 됩니다.
+            dialogInput.enabled = !isPanelOpen;
+        }
     }
 
     public void OpenSettingPanel()

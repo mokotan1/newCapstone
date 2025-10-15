@@ -61,6 +61,15 @@ namespace Fungus
         {
             if (!useEventSystem)
             {
+                // ★★★ 여기가 수정된 부분입니다! ★★★
+                // 만약 마우스 포인터가 UI 요소 위에 있다면,
+                // 아무것도 하지 말고 즉시 이 함수를 종료합니다.
+                if (EventSystem.current.IsPointerOverGameObject())
+                {
+                    return;
+                }
+                // ★★★ 여기까지 ★★★
+
                 DoPointerClick();
             }
         }
