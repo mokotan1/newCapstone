@@ -266,7 +266,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1087019192695242789, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_text
-      value: "\uC815\uBA74 \uCC45\uC7A5"
+      value: "\uC11C\uC7AC \uC911\uC559"
       objectReference: {fileID: 0}
     - target: {fileID: 2493690748687693286, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_Pivot.x
@@ -377,10 +377,8 @@ GameObject:
   - component: {fileID: 687597764}
   - component: {fileID: 687597765}
   - component: {fileID: 687597767}
-  - component: {fileID: 687597766}
   - component: {fileID: 687597768}
   - component: {fileID: 687597770}
-  - component: {fileID: 687597769}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
   - component: {fileID: 687597776}
@@ -388,9 +386,7 @@ GameObject:
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
   - component: {fileID: 687597782}
-  - component: {fileID: 687597783}
   - component: {fileID: 687597784}
-  - component: {fileID: 687597785}
   - component: {fileID: 687597786}
   m_Layer: 0
   m_Name: Flowchart
@@ -424,9 +420,8 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 687597765}
-  selectedCommands:
-  - {fileID: 687597770}
+  - {fileID: 687597762}
+  selectedCommands: []
   variables:
   - {fileID: 687597774}
   description: 
@@ -545,36 +540,7 @@ MonoBehaviour:
   - {fileID: 687597780}
   - {fileID: 687597773}
   - {fileID: 687597770}
-  - {fileID: 687597769}
   - {fileID: 687597782}
-  suppressAllAutoSelections: 0
---- !u!114 &687597766
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d3d73aef2cfc4f51abf34ac00241f60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nodeRect:
-    serializedVersion: 2
-    x: 859
-    y: 265
-    width: 129.01999
-    height: 40
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  useCustomTint: 0
-  itemId: 4
-  blockName: Right_Hallway
-  description: 
-  eventHandler: {fileID: 0}
-  commandList:
-  - {fileID: 687597783}
-  - {fileID: 687597785}
   suppressAllAutoSelections: 0
 --- !u!114 &687597767
 MonoBehaviour:
@@ -590,14 +556,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 856
+    x: 855
     y: 200
-    width: 115.48
+    width: 132.23999
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 3
-  blockName: StudyRoom
+  blockName: POStudyRoom
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -620,31 +586,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 1658578552}
   waitFrames: 1
---- !u!114 &687597769
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 1
-  text: "\uBCF5\uB3C4\uB85C \uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597766}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597770
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -873,7 +814,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: StudyRoom
+    stringVal: POStudyRoom
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &687597780
@@ -1171,26 +1112,6 @@ MonoBehaviour:
   hideThisOption:
     booleanRef: {fileID: 0}
     booleanVal: 0
---- !u!114 &687597783
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 207aecf668a0345388087ccf522f9957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 19
-  indentLevel: 0
-  duration: 1
-  targetAlpha: 1
-  waitUntilFinished: 1
-  fadeColor: {r: 0, g: 0, b: 0, a: 1}
-  fadeTexture: {fileID: 0}
-  fadeTweenType: 4
 --- !u!114 &687597784
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1343,25 +1264,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597785
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 21
-  indentLevel: 0
-  _sceneName:
-    stringRef: {fileID: 0}
-    stringVal: Right_Hallway
-  loadingImage: {fileID: 0}
-  sceneNameOLD: 
 --- !u!114 &687597786
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1951,7 +1853,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1852665873602642195, guid: 27d70079a1723a141b809fa497d6d409, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1959,7 +1861,7 @@ SpriteRenderer:
   m_Size: {x: 19.2, y: 10.8}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &2070744233
