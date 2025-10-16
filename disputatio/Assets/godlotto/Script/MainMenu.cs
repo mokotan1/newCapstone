@@ -5,35 +5,29 @@ using UnityEngine.EventSystems;
 
 public class MainMenu : MonoBehaviour
 {
-    // 인스펙터에서 연결할 UI 요소들
-    public Button[] menuButtons; // 메뉴 버튼 배열 (Start, Load, Setting, Exit 순서)
-    public string gameSceneName = "GameScene"; // 'Start' 클릭 시 이동할 게임 씬 이름
-    public string settingSceneName = "SettingScene"; // 'Setting' 클릭 시 이동할 설정 씬 이름
+    public Button[] menuButtons; // Start, Load, Setting, Exit
+    public string gameSceneName = "GameScene";
+    public string settingSceneName = "SettingScene";
 
-    private int currentButtonIndex = 0; // 현재 선택된 버튼의 인덱스
-    private Vector3 lastMousePosition; // 마우스 움직임 감지를 위한 마지막 위치
+    private int currentButtonIndex = 0;
+    private Vector3 lastMousePosition;
 
     void Start()
     {
-        // 키보드 우선 모드로 시작 (커서 숨김)
         SetKeyboardMode();
         lastMousePosition = Input.mousePosition;
-        
-        // 첫 번째 버튼을 기본으로 선택
         SelectButton(currentButtonIndex);
     }
 
     void Update()
     {
-        // 마우스가 움직였는지 확인
         if (Input.mousePosition != lastMousePosition)
         {
             SetMouseMode();
         }
         lastMousePosition = Input.mousePosition;
 
-        // 키보드 입력이 감지되면 키보드 모드로 전환
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || 
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.LeftArrow) ||
             Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
         {
             SetKeyboardMode();
@@ -45,8 +39,7 @@ public class MainMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            currentButtonIndex++;
-            if (currentButtonIndex >= menuButtons.Length) currentButtonIndex = 0;
+            currentButtonIndex = (currentButtonIndex + 1) % menuButtons.Length;
             SelectButton(currentButtonIndex);
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
@@ -62,18 +55,18 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    // --- 모드 설정 함수 ---
+    // --- 모드 설정 ---
     private void SetKeyboardMode()
     {
+        // 커서는 숨기되, 잠그지 않습니다 (잠금은 다음 씬으로 carry-over 되므로 금지)
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.None;  // ★ 변경: Locked → None
     }
 
     private void SetMouseMode()
     {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        // 마우스 모드에서는 키보드 하이라이트를 제거하여 마우스 오버와 겹치지 않게 함
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -82,9 +75,17 @@ public class MainMenu : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(menuButtons[index].gameObject);
     }
 
-    // --- 버튼 클릭 시 호출될 함수들 ---
+    // --- 공통: 씬 전환 전 커서 해제 ---
+    private void UnlockCursorForSceneChange()
+    {
+        Cursor.visible = true;                     // 다음 씬이 원하면 알아서 숨기게
+        Cursor.lockState = CursorLockMode.None;    // 잠금 carry-over 방지
+    }
+
+    // --- 버튼 핸들러 ---
     public void OnStartButton()
     {
+        UnlockCursorForSceneChange();              // ★ 추가
         SceneManager.LoadScene(gameSceneName);
     }
 
@@ -95,6 +96,7 @@ public class MainMenu : MonoBehaviour
 
     public void OnSettingButton()
     {
+        UnlockCursorForSceneChange();              // 선택: 설정 씬에서도 마우스 사용 시
         SceneManager.LoadScene(settingSceneName);
     }
 

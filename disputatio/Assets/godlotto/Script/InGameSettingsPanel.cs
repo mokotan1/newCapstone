@@ -260,7 +260,6 @@ public class InGameSettingsPanel : MonoBehaviour
     Debug.Log("모든 DontDestroyOnLoad 오브젝트 삭제 완료");
 
     yield return null;
-    yield return null;
 
     Debug.Log($"씬 로드 시도: {mainMenuSceneName}");
     SceneManager.LoadScene(mainMenuSceneName);
