@@ -1158,9 +1158,9 @@ GameObject:
   - component: {fileID: 545852011}
   - component: {fileID: 545852026}
   - component: {fileID: 545852028}
-  - component: {fileID: 545852029}
-  - component: {fileID: 545852030}
   - component: {fileID: 545852031}
+  - component: {fileID: 545852033}
+  - component: {fileID: 545852036}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1181,11 +1181,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 386.00824, y: 395.26663}
+  scrollPos: {x: 490.09235, y: 425.47324}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 585
-  zoom: 1
+  zoom: 0.9100001
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1194,7 +1194,8 @@ MonoBehaviour:
     height: 859
   selectedBlocks:
   - {fileID: 545852010}
-  selectedCommands: []
+  selectedCommands:
+  - {fileID: 545852036}
   variables:
   - {fileID: 545852031}
   description: 
@@ -1317,7 +1318,7 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 545852009}
   commandList:
-  - {fileID: 545852030}
+  - {fileID: 545852033}
   - {fileID: 545852008}
   - {fileID: 545852007}
   - {fileID: 545852025}
@@ -1336,7 +1337,7 @@ MonoBehaviour:
   - {fileID: 545852014}
   - {fileID: 545852013}
   - {fileID: 545852028}
-  - {fileID: 545852029}
+  - {fileID: 545852036}
   - {fileID: 545852026}
   suppressAllAutoSelections: 0
 --- !u!114 &545852011
@@ -1802,41 +1803,6 @@ MonoBehaviour:
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeTexture: {fileID: 0}
   fadeTweenType: 4
---- !u!114 &545852029
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545851995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 21
-  indentLevel: 0
-  _duration:
-    floatRef: {fileID: 0}
-    floatVal: 1
-  durationOLD: 0
---- !u!114 &545852030
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545851995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 22
-  indentLevel: 0
-  targetObject: {fileID: 1846772584}
-  methodName: PlayMusic
-  delay: 0
 --- !u!114 &545852031
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1852,6 +1818,41 @@ MonoBehaviour:
   scope: 2
   key: isCalled
   value: 0
+--- !u!114 &545852033
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545851995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 23
+  indentLevel: 0
+  targetObject: {fileID: 1846772584}
+  methodName: PlayMusic
+  delay: 0
+--- !u!114 &545852036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545851995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 27
+  indentLevel: 0
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 1
+  durationOLD: 0
 --- !u!1 &589797156
 GameObject:
   m_ObjectHideFlags: 0
@@ -2249,6 +2250,7 @@ GameObject:
   - component: {fileID: 764985580}
   - component: {fileID: 764985579}
   - component: {fileID: 764985578}
+  - component: {fileID: 764985587}
   m_Layer: 0
   m_Name: Variablemanager
   m_TagString: Untagged
@@ -2402,6 +2404,7 @@ MonoBehaviour:
   - {fileID: 764985580}
   - {fileID: 764985579}
   - {fileID: 764985578}
+  - {fileID: 764985587}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -2427,6 +2430,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &764985587
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764985577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: Animation
+  value: 0
 --- !u!1 &806860219
 GameObject:
   m_ObjectHideFlags: 0
@@ -5235,6 +5253,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicToPlay: {fileID: 8300000, guid: f3c866bbc4639e7409c30c71736d84a6, type: 3}
+  footstepSound: {fileID: 0}
+  delayBetweenSteps: 0.3
 --- !u!1 &1890993416
 GameObject:
   m_ObjectHideFlags: 0
