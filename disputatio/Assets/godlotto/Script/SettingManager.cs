@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
-using UnityEngine.EventSystems; // EventSystem 사용을 위해 추가
+using UnityEngine.EventSystems;
 
 public class SettingSceneManager : MonoBehaviour
 {
@@ -13,10 +13,10 @@ public class SettingSceneManager : MonoBehaviour
     public Slider bgmSlider;
     public Slider sfxSlider;
     public TextMeshProUGUI resolutionText;
-    public Button resolutionButton; // 키보드 조작을 위해 참조 추가
+    public Button resolutionButton;
     public Toggle fullscreenToggle;
 
-    [Header("Keyboard Navigation")] // ✨ 키보드 조작을 위한 변수들 추가
+    [Header("Keyboard Navigation")]
     public Selectable[] navigableElements;
     private int currentIndex = 0;
 
@@ -28,7 +28,6 @@ public class SettingSceneManager : MonoBehaviour
 
     void Start()
     {
-        // 기존 코드
         LoadSettings();
         AssignListeners();
         InitializeResolution();
@@ -41,9 +40,15 @@ public class SettingSceneManager : MonoBehaviour
         SelectUIElement(0);
     }
 
-    // ✨ Update 함수 및 키보드 입력 처리 로직 추가
     void Update()
     {
+        // 🔹 ESC로 메인메뉴로 복귀
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            BackToMainMenuViaEsc();
+            return; // 같은 프레임에 아래 입력 처리 안 하도록 종료
+        }
+
         HandleKeyboardInput();
     }
 
@@ -93,7 +98,7 @@ public class SettingSceneManager : MonoBehaviour
         {
             currentResolutionIndex = resolutions.Count - 1;
         }
-        
+
         SetResolution(currentResolutionIndex);
     }
 
@@ -120,21 +125,32 @@ public class SettingSceneManager : MonoBehaviour
     private void UpdateResolutionText()
     {
         if (resolutionText != null)
-            resolutionText.text = resolutions[currentResolutionIndex].width + " x " + resolutions[currentResolutionIndex].height;
+            resolutionText.text = $"{resolutions[currentResolutionIndex].width} x {resolutions[currentResolutionIndex].height}";
     }
 
+    // 버튼으로 돌아갈 때도 사용하는 기본 메서드
     public void BackToMainMenu()
     {
+        // 씬 전환 전 커서/시간 상태를 안전하게 원복
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        Time.timeScale = 1f;
+
         SceneManager.LoadScene(mainMenuSceneName);
     }
-    
-    // ✨ --- 이하 키보드 조작을 위한 함수들 --- ✨
 
+    // 🔹 ESC 전용 래퍼 (원하면 공통 메서드만 호출해도 됩니다)
+    private void BackToMainMenuViaEsc()
+    {
+        BackToMainMenu();
+    }
+
+    // --- 이하 키보드 조작 처리 ---
     private void HandleKeyboardInput()
     {
         bool isKeyboardInput = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
-                                 Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow) ||
-                                 Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space);
+                               Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow) ||
+                               Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space);
 
         if (isKeyboardInput && EventSystem.current.currentSelectedGameObject == null)
         {
@@ -142,7 +158,7 @@ public class SettingSceneManager : MonoBehaviour
         }
 
         if (EventSystem.current.currentSelectedGameObject == null) return;
-        
+
         if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
         {
             HandleNavigation();
@@ -156,7 +172,7 @@ public class SettingSceneManager : MonoBehaviour
             }
         }
     }
-    
+
     private void HandleNavigation()
     {
         if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -198,7 +214,7 @@ public class SettingSceneManager : MonoBehaviour
     {
         GameObject selectedObj = EventSystem.current.currentSelectedGameObject;
         if (selectedObj == null) return;
-        
+
         Button button = selectedObj.GetComponent<Button>();
         if (button != null)
         {
