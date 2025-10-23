@@ -962,6 +962,7 @@ GameObject:
   - component: {fileID: 1916320970}
   - component: {fileID: 1916320969}
   - component: {fileID: 1916320968}
+  - component: {fileID: 1916320975}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1146,6 +1147,7 @@ MonoBehaviour:
   selectedCommands: []
   variables:
   - {fileID: 1916320966}
+  - {fileID: 1916320975}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -1737,6 +1739,21 @@ MonoBehaviour:
   - {fileID: 1916320970}
   - {fileID: 1916320969}
   suppressAllAutoSelections: 0
+--- !u!114 &1916320975
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916320954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: ElectricOn
+  value: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

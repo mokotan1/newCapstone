@@ -1204,7 +1204,6 @@ GameObject:
   - component: {fileID: 1167277878}
   - component: {fileID: 1167277877}
   - component: {fileID: 1167277875}
-  - component: {fileID: 1167277880}
   - component: {fileID: 1167277884}
   - component: {fileID: 1167277885}
   - component: {fileID: 1167277883}
@@ -1307,10 +1306,9 @@ MonoBehaviour:
   - {fileID: 1167277876}
   selectedCommands: []
   variables:
-  - {fileID: 1167277880}
+  - {fileID: 1167277951}
   - {fileID: 1167277887}
   - {fileID: 1167277940}
-  - {fileID: 1167277951}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -1421,21 +1419,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1167277880
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167277873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4580f28dd8581476b810b38eea2f1316, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scope: 2
-  key: PreviousSceneName
-  value: 
 --- !u!114 &1167277883
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1513,7 +1496,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: ElectricOn
-  value: 1
+  value: 0
 --- !u!114 &1167277888
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3314,8 +3297,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scope: 0
-  key: isCall
+  scope: 2
+  key: isCalled
   value: 0
 --- !u!114 &1167277952
 MonoBehaviour:
