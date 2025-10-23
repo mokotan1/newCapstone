@@ -1275,7 +1275,6 @@ GameObject:
   - component: {fileID: 2129203492}
   - component: {fileID: 2129203491}
   - component: {fileID: 2129203490}
-  - component: {fileID: 2129203495}
   - component: {fileID: 2129203498}
   - component: {fileID: 2129203500}
   - component: {fileID: 2129203501}
@@ -1362,12 +1361,11 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 2129203530}
+  - {fileID: 2129203491}
   selectedCommands:
-  - {fileID: 2129203531}
+  - {fileID: 2129203504}
   variables:
   - {fileID: 2129203512}
-  - {fileID: 2129203495}
   - {fileID: 2129203501}
   - {fileID: 2129203585}
   description: 
@@ -1423,8 +1421,8 @@ MonoBehaviour:
   commandList:
   - {fileID: 2129203517}
   - {fileID: 2129203516}
-  - {fileID: 2129203504}
   - {fileID: 2129203500}
+  - {fileID: 2129203504}
   - {fileID: 2129203503}
   - {fileID: 2129203515}
   - {fileID: 2129203537}
@@ -1490,21 +1488,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2129203495
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scope: 2
-  key: UsedStudyKey
-  value: 0
 --- !u!114 &2129203498
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1849,7 +1832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: 12
-  indentLevel: 1
+  indentLevel: 2
   storyText: "\uC7A0\uACA8\uC788\uB2E4"
   description: 
   character: {fileID: 0}
