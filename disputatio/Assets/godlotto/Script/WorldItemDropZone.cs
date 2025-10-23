@@ -10,7 +10,7 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
 
     [Header("Fungus 연동")]
     public Flowchart targetFlowchart; // 이벤트를 보낼 Flowchart
-    public string fungusBooleanVariableName = "hasUsedKey"; // True로 바꿀 변수 이름
+    public string fungusBooleanVariableName = "UsedKey"; // True로 바꿀 변수 이름
 
     [Header("잠금 해제 이벤트 (선택사항)")]
     public UnityEvent onUnlock; // 문 열림 애니메이션 등 추가 효과를 위해 사용

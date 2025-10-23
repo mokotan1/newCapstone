@@ -3374,6 +3374,8 @@ GameObject:
   - component: {fileID: 1931558281}
   - component: {fileID: 1931558283}
   - component: {fileID: 1931558284}
+  - component: {fileID: 1931558286}
+  - component: {fileID: 1931558285}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -3437,11 +3439,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 157.30185, y: 78.382545}
+  scrollPos: {x: 90.108574, y: 47.80107}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
-  zoom: 0.7872501
+  zoom: 0.84725004
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -3449,12 +3451,12 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1931558219}
+  - {fileID: 1931558245}
   selectedCommands: []
   variables:
   - {fileID: 1931558226}
-  - {fileID: 1931558236}
   - {fileID: 1931558264}
+  - {fileID: 1931558236}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -4228,8 +4230,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 508.4735
-    y: 262.59586
+    x: 553.3248
+    y: 268.49728
     width: 133.73001
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -4240,6 +4242,8 @@ MonoBehaviour:
   eventHandler: {fileID: 0}
   commandList:
   - {fileID: 1931558246}
+  - {fileID: 1931558286}
+  - {fileID: 1931558285}
   - {fileID: 1931558244}
   suppressAllAutoSelections: 0
 --- !u!114 &1931558246
@@ -4534,8 +4538,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 542.9252
-    y: 396.9724
+    x: 541.7449
+    y: 398.1527
     width: 151.25
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -4545,9 +4549,9 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 0}
   commandList:
-  - {fileID: 1931558267}
   - {fileID: 1931558265}
   - {fileID: 1931558266}
+  - {fileID: 1931558267}
   suppressAllAutoSelections: 0
 --- !u!114 &1931558260
 MonoBehaviour:
@@ -4647,7 +4651,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: ElectricOn
-  value: 1
+  value: 0
 --- !u!114 &1931558265
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4877,8 +4881,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 539.7606
-    y: 491.92133
+    x: 570.4483
+    y: 464.77463
     width: 104.75
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -4888,9 +4892,9 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 0}
   commandList:
-  - {fileID: 1931558271}
   - {fileID: 1931558270}
   - {fileID: 1931558268}
+  - {fileID: 1931558271}
   suppressAllAutoSelections: 0
 --- !u!114 &1931558270
 MonoBehaviour:
@@ -6780,6 +6784,41 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &1931558285
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931558217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 138
+  indentLevel: 0
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 2
+  durationOLD: 0
+--- !u!114 &1931558286
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931558217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 137
+  indentLevel: 0
+  targetObject: {fileID: 1265914554}
+  methodName: PlayFootstep
+  delay: 0
 --- !u!1 &1937859553
 GameObject:
   m_ObjectHideFlags: 0
