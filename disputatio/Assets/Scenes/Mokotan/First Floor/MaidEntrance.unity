@@ -648,7 +648,7 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 2129203483}
         m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
         m_MethodName: ExecuteBlock
         m_Mode: 5
@@ -657,7 +657,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: GoMaidRoom
+          m_StringArgument: EnterMaidRoom
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1256718513
@@ -1329,6 +1329,7 @@ GameObject:
   - component: {fileID: 2129203605}
   - component: {fileID: 2129203604}
   - component: {fileID: 2129203603}
+  - component: {fileID: 2129203608}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1366,6 +1367,7 @@ MonoBehaviour:
   variables:
   - {fileID: 2129203512}
   - {fileID: 2129203495}
+  - {fileID: 2129203608}
   - {fileID: 2129203587}
   description: 
   stepPause: 0
@@ -5181,6 +5183,21 @@ MonoBehaviour:
   - {fileID: 2129203604}
   - {fileID: 2129203603}
   suppressAllAutoSelections: 0
+--- !u!114 &2129203608
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: HaveMaidKey
+  value: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
