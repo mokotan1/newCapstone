@@ -33,7 +33,7 @@ public class PostExposureController : MonoBehaviour
         {
             Debug.Log("Color Adjustments 효과를 찾았습니다.");
             colorAdjustments.postExposure.value = 0f;
-            colorAdjustments.contrast.value = 0f;
+            colorAdjustments.contrast.value = 50f;
         }
         else
         {
@@ -43,6 +43,7 @@ public class PostExposureController : MonoBehaviour
         // Vignette 효과 가져오기 (초기화 로직은 제거, 필요시 직접 설정)
         if (postProcessVolume.profile.TryGet(out vignette))
         {
+            vignette.intensity.value = 0.7f;
             Debug.Log("Vignette 효과를 찾았습니다.");
             // vignette.intensity.value = 0f; // 시작 시 초기화 제거 (원래 Profile 값 유지)
         }
@@ -87,11 +88,11 @@ public class PostExposureController : MonoBehaviour
     /// <summary>
     /// Vignette 강도를 즉시 0으로 설정합니다. (사용자 요구사항 반영)
     /// </summary>
-    public void SetVignetteToZero() // 원래 함수 이름 유지
+    public void SetVignetteToZero(float value) // 원래 함수 이름 유지
     {
         if (vignette != null)
         {
-            vignette.intensity.value = 0f;
+            vignette.intensity.value = value;
             Debug.Log("Vignette Intensity set to 0 (instant)."); // 디버그 메시지 수정
         }
         else
