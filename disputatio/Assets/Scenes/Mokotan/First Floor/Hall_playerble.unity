@@ -7500,6 +7500,12 @@ GameObject:
   - component: {fileID: 388188819}
   - component: {fileID: 388188818}
   - component: {fileID: 388188817}
+  - component: {fileID: 388188838}
+  - component: {fileID: 388188837}
+  - component: {fileID: 388188836}
+  - component: {fileID: 388188835}
+  - component: {fileID: 388188840}
+  - component: {fileID: 388188839}
   m_Layer: 0
   m_Name: Variablemanager
   m_TagString: Untagged
@@ -7536,7 +7542,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: HaveBasementKey
-  value: 0
+  value: 1
 --- !u!114 &388188819
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7551,7 +7557,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: HaveTutorKey
-  value: 0
+  value: 1
 --- !u!114 &388188820
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7566,7 +7572,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: HaveStudyKey
-  value: 0
+  value: 1
 --- !u!114 &388188821
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7581,7 +7587,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: HaveMaidKey
-  value: 0
+  value: 1
 --- !u!114 &388188822
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7611,7 +7617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: UsedTutorKey
-  value: 0
+  value: 1
 --- !u!114 &388188824
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7626,7 +7632,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: UsedBasementKey
-  value: 0
+  value: 1
 --- !u!114 &388188825
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7772,10 +7778,16 @@ MonoBehaviour:
   - {fileID: 388188826}
   - {fileID: 388188825}
   - {fileID: 388188823}
+  - {fileID: 388188839}
+  - {fileID: 388188838}
+  - {fileID: 388188836}
   - {fileID: 388188824}
   - {fileID: 388188821}
   - {fileID: 388188820}
   - {fileID: 388188819}
+  - {fileID: 388188840}
+  - {fileID: 388188837}
+  - {fileID: 388188835}
   - {fileID: 388188818}
   - {fileID: 388188817}
   description: 
@@ -7803,6 +7815,96 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &388188835
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: HaveBedKey
+  value: 1
+--- !u!114 &388188836
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: UsedBedKey
+  value: 1
+--- !u!114 &388188837
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: HaveChildKey
+  value: 1
+--- !u!114 &388188838
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: UsedChildKey
+  value: 1
+--- !u!114 &388188839
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: UsedWifeKey
+  value: 1
+--- !u!114 &388188840
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388188816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: HaveWifeKey
+  value: 1
 --- !u!1 &495798705
 GameObject:
   m_ObjectHideFlags: 0
