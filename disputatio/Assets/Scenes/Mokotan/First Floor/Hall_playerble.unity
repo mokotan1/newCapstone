@@ -361,7 +361,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.52, y: 1.58}
+    oldSize: {x: 0.97999996, y: 2.36}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -413,7 +413,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3512498951170658160, guid: 057f544b296faaa4d966f18a8bfa6680, type: 3}
+  m_Sprite: {fileID: 4901893949300395101, guid: fa9c8e9d54ec3b141aff1e4d5b6e7a58, type: 3}
   m_Color: {r: 0.8313726, g: 0.83921576, b: 0.97647065, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -804,11 +804,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -17.792664, y: 13.506836}
+  scrollPos: {x: 93.291794, y: 124.39479}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
-  zoom: 1
+  zoom: 0.85024995
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -816,7 +816,7 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 265606003}
+  - {fileID: 265606037}
   selectedCommands: []
   variables:
   - {fileID: 265606045}
@@ -1145,7 +1145,7 @@ MonoBehaviour:
   nodeRect:
     serializedVersion: 2
     x: 531.31915
-    y: 412.57104
+    y: 409.04266
     width: 126.04
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -1266,7 +1266,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 387.77972
+    x: 384.25134
     y: 411.35287
     width: 119.19
     height: 40
@@ -2348,7 +2348,7 @@ MonoBehaviour:
   nodeRect:
     serializedVersion: 2
     x: 772.5712
-    y: 166.31966
+    y: 168.6719
     width: 121.48
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -7916,6 +7916,7 @@ GameObject:
   - component: {fileID: 495798706}
   - component: {fileID: 495798708}
   - component: {fileID: 495798707}
+  - component: {fileID: 495798709}
   m_Layer: 5
   m_Name: parret
   m_TagString: Untagged
@@ -7939,8 +7940,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 457, y: 40}
-  m_SizeDelta: {x: 1000, y: 1000}
+  m_AnchoredPosition: {x: 11.5056, y: -0.0024872}
+  m_SizeDelta: {x: 652.8337, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &495798707
 MonoBehaviour:
@@ -7962,7 +7963,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 4901893949300395101, guid: c3e305021f2b2b94e99ff9653d2eae7d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7980,6 +7981,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 495798705}
   m_CullTransparentMesh: 1
+--- !u!95 &495798709
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495798705}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1e8118ec8655d7143855cb64d70ab8fb, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &513782335
 GameObject:
   m_ObjectHideFlags: 0
@@ -9195,7 +9218,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -311, y: 357}
+  m_AnchoredPosition: {x: 370.24, y: -84}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1146448741
@@ -11292,8 +11315,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -486, y: 83}
-  m_SizeDelta: {x: 500, y: 500}
+  m_AnchoredPosition: {x: 0, y: -245}
+  m_SizeDelta: {x: 900.48, y: 209.223}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2128609818
 MonoBehaviour:
