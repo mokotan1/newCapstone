@@ -1114,7 +1114,8 @@ MonoBehaviour:
     height: 859
   selectedBlocks:
   - {fileID: 545852010}
-  selectedCommands: []
+  selectedCommands:
+  - {fileID: 545852033}
   variables: []
   description: 
   stepPause: 0
@@ -4590,7 +4591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61dddfdc5e0e44ca298d8f46f7f5a915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedFlowchart: {fileID: 0}
+  selectedFlowchart: {fileID: 545852005}
 --- !u!4 &1815301921
 Transform:
   m_ObjectHideFlags: 1
@@ -4631,7 +4632,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1834711768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5418,7 +5419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82af994fdc3ac8a4fbcf01295529c318, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetFlowchart: {fileID: 0}
+  targetFlowchart: {fileID: 545852005}
   fungusVariableName: isCalled
   dialogInput: {fileID: 1834711770}
   settingPanel: {fileID: 2123509417}
@@ -5750,7 +5751,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 50
   m_TargetDisplay: 0
 --- !u!114 &2123509421
 MonoBehaviour:
@@ -5822,6 +5823,8 @@ GameObject:
   - component: {fileID: 2144482581}
   - component: {fileID: 2144482580}
   - component: {fileID: 2144482579}
+  - component: {fileID: 2144482603}
+  - component: {fileID: 2144482604}
   m_Layer: 0
   m_Name: Variablemanager
   m_TagString: Untagged
@@ -6008,7 +6011,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: ElectricOn
-  value: 0
+  value: 1
 --- !u!114 &2144482591
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -6196,6 +6199,7 @@ MonoBehaviour:
   - {fileID: 2144482581}
   - {fileID: 2144482586}
   - {fileID: 2144482585}
+  - {fileID: 2144482603}
   description: 
   stepPause: 0
   colorCommands: 1
@@ -6221,6 +6225,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2144482603
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144482578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4580f28dd8581476b810b38eea2f1316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: PrevScene
+  value: 
+--- !u!114 &2144482604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144482578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b0b68baaa508d142a646df7dcda4f8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  globalFlowchartName: Variablemanager
+  prevVarKey: PrevScene
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
