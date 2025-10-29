@@ -624,7 +624,7 @@ GameObject:
   - component: {fileID: 1256718513}
   - component: {fileID: 1256718512}
   m_Layer: 0
-  m_Name: TutorRoom_Door
+  m_Name: Wife_Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -642,9 +642,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f12114e92cf93ff4e869374048581b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  requiredItem: {fileID: 11400000, guid: dbee556a35542fc43b09fdafae7e9a1a, type: 2}
-  targetFlowchart: {fileID: 0}
-  fungusBooleanVariableName: HaveTutorKey
+  requiredItem: {fileID: 11400000, guid: 0ffb8cbc2dbad084bbe9e8c9350c6157, type: 2}
+  targetFlowchart: {fileID: 2129203483}
+  fungusBooleanVariableName: HaveWifeKey
   onUnlock:
     m_PersistentCalls:
       m_Calls:
@@ -657,7 +657,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: EnterTutorRoom
+          m_StringArgument: EnterWifeRoom
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1256718513
@@ -954,7 +954,7 @@ GameObject:
   - component: {fileID: 1334343513}
   - component: {fileID: 1334343512}
   m_Layer: 0
-  m_Name: Go_Left
+  m_Name: Go_Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1065,7 +1065,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 9159483732125017881, guid: 371489499411cf748a70df0fd527d0e3, type: 3}
+  m_Sprite: {fileID: -8104813422637996630, guid: 421ad492e18c9ea4497c127e59f9c3aa, type: 3}
   m_Color: {r: 0, g: 0.46333387, b: 0.9716981, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1085,7 +1085,7 @@ Transform:
   m_GameObject: {fileID: 1334343511}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 100, y: 500, z: 0}
+  m_LocalPosition: {x: 1820, y: 500, z: 0}
   m_LocalScale: {x: 75, y: 75, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1362,7 +1362,7 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 2129203561}
+  - {fileID: 2129203602}
   selectedCommands: []
   variables:
   - {fileID: 2129203512}
@@ -1395,12 +1395,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 606.97375
     y: 34.11679
-    width: 158.82
+    width: 154.39
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 4
-  blockName: TutorRoom_Clicked
+  blockName: WifeRoom_Clicked
   description: 
   eventHandler: {fileID: 2129203487}
   commandList:
@@ -1502,7 +1502,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scope: 2
-  key: UsedTutorKey
+  key: UsedWifeKey
   value: 0
 --- !u!114 &2129203496
 MonoBehaviour:
@@ -2557,7 +2557,7 @@ MonoBehaviour:
   indentLevel: 1
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: ChildEntrance
+    stringVal: BedEntrance
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &2129203532
@@ -3049,12 +3049,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 611.99274
     y: 151.99316
-    width: 141.34
+    width: 137.59
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 165
-  blockName: EnterTutorRoom
+  blockName: EnterWifeRoom
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -3735,7 +3735,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: TutorRoom
+    stringVal: WifeRoom
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &2129203570
@@ -4594,7 +4594,7 @@ MonoBehaviour:
   indentLevel: 1
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: 2floorHallway_Left
+    stringVal: 2floorHallway_Right
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &2129203597
@@ -5068,7 +5068,7 @@ MonoBehaviour:
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 199
-  blockName: Left_Clicked
+  blockName: Right_Clicked
   description: 
   eventHandler: {fileID: 2129203595}
   commandList:
@@ -5095,7 +5095,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: TutorRoom
+    stringVal: WifeRoom
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &2129203604
@@ -5196,7 +5196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scope: 2
-  key: HaveTutorKey
+  key: HaveWifeKey
   value: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
