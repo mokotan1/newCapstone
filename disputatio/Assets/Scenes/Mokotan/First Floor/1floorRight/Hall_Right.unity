@@ -1596,7 +1596,6 @@ GameObject:
   - component: {fileID: 1420002205}
   - component: {fileID: 1420002203}
   - component: {fileID: 1420002204}
-  - component: {fileID: 1420002202}
   - component: {fileID: 1420002207}
   - component: {fileID: 1420002209}
   - component: {fileID: 1420002206}
@@ -1621,6 +1620,7 @@ GameObject:
   - component: {fileID: 1420002228}
   - component: {fileID: 1420002230}
   - component: {fileID: 1420002231}
+  - component: {fileID: 1420002232}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1641,7 +1641,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 206.39876, y: 39.664932}
+  scrollPos: {x: 205.29985, y: 39.664932}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -1653,8 +1653,11 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1420002196}
-  selectedCommands: []
+  - {fileID: 1420002203}
+  selectedCommands:
+  - {fileID: 1420002217}
+  - {fileID: 1420002218}
+  - {fileID: 1420002232}
   variables:
   - {fileID: 1420002219}
   - {fileID: 1420002220}
@@ -1765,7 +1768,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 3
   indentLevel: 1
-  storyText: "\uD640\uB85C \uB3CC\uC544\uAC08\uAE4C?"
+  storyText: "\uC774\uC804 \uC704\uCE58\uB85C \uB3CC\uC544\uAC08\uAE4C?"
   description: 
   character: {fileID: 1216492973}
   portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
@@ -1825,25 +1828,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 945401657}
   waitFrames: 1
---- !u!114 &1420002202
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1420002193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 0
-  _sceneName:
-    stringRef: {fileID: 0}
-    stringVal: Hall_playerble
-  loadingImage: {fileID: 0}
-  sceneNameOLD: 
 --- !u!114 &1420002203
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1872,7 +1856,7 @@ MonoBehaviour:
   - {fileID: 1420002204}
   - {fileID: 1420002217}
   - {fileID: 1420002218}
-  - {fileID: 1420002202}
+  - {fileID: 1420002232}
   suppressAllAutoSelections: 0
 --- !u!114 &1420002204
 MonoBehaviour:
@@ -1908,7 +1892,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 4
   indentLevel: 1
-  text: "\uC608"
+  text: "\uB3CC\uC544\uAC04\uB2E4."
   description: 
   targetBlock: {fileID: 1420002203}
   hideIfVisited: 0
@@ -1933,7 +1917,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 12
   indentLevel: 1
-  text: "\uC544\uB2C8\uC694\n"
+  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
   description: 
   targetBlock: {fileID: 1420002207}
   hideIfVisited: 0
@@ -3658,6 +3642,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 134
   indentLevel: 0
+--- !u!114 &1420002232
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420002193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 135
+  indentLevel: 0
+  targetObject: {fileID: 1866063745}
+  methodName: GoBack
+  delay: 0
 --- !u!1 &1451903443
 GameObject:
   m_ObjectHideFlags: 0
@@ -4930,6 +4931,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1834284106}
   m_CullTransparentMesh: 1
+--- !u!1001 &1866063744
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8044174010786703611, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_Name
+      value: BackNavigator
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 887.9752
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 233.05571
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -15.374082
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+--- !u!1 &1866063745 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8044174010786703611, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+  m_PrefabInstance: {fileID: 1866063744}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2037312718
 GameObject:
   m_ObjectHideFlags: 0
@@ -5088,3 +5151,4 @@ SceneRoots:
   - {fileID: 597164042}
   - {fileID: 1796360984}
   - {fileID: 1688631704}
+  - {fileID: 1866063744}
