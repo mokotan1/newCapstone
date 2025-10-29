@@ -285,6 +285,68 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1001 &192121337
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8044174010786703611, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_Name
+      value: BackNavigator
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 887.9752
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 233.05571
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -15.374082
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8730424148186787109, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+--- !u!1 &192121338 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8044174010786703611, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+  m_PrefabInstance: {fileID: 192121337}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &205392090
 GameObject:
   m_ObjectHideFlags: 0
@@ -1098,7 +1160,6 @@ GameObject:
   - component: {fileID: 641932997}
   - component: {fileID: 641933002}
   - component: {fileID: 641933003}
-  - component: {fileID: 641933001}
   - component: {fileID: 641933007}
   - component: {fileID: 641933010}
   - component: {fileID: 641933009}
@@ -1140,6 +1201,7 @@ GameObject:
   - component: {fileID: 641933060}
   - component: {fileID: 641933061}
   - component: {fileID: 641933059}
+  - component: {fileID: 641933062}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1172,9 +1234,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 641932989}
+  - {fileID: 641933002}
   selectedCommands:
-  - {fileID: 641933061}
+  - {fileID: 641933062}
   variables:
   - {fileID: 641933033}
   - {fileID: 641933029}
@@ -1371,7 +1433,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 8
   indentLevel: 1
-  storyText: "\uD640\uB85C \uB3CC\uC544\uAC08\uAE4C?"
+  storyText: "\uC774\uC804 \uC704\uCE58\uB85C \uB3CC\uC544\uAC08\uAE4C?"
   description: 
   character: {fileID: 205392091}
   portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
@@ -1431,25 +1493,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 1529174751}
   waitFrames: 1
---- !u!114 &641933001
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641932986}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 12
-  indentLevel: 0
-  _sceneName:
-    stringRef: {fileID: 0}
-    stringVal: Hall_playerble
-  loadingImage: {fileID: 0}
-  sceneNameOLD: 
 --- !u!114 &641933002
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1478,7 +1521,7 @@ MonoBehaviour:
   - {fileID: 641933003}
   - {fileID: 641933054}
   - {fileID: 641933055}
-  - {fileID: 641933001}
+  - {fileID: 641933062}
   suppressAllAutoSelections: 0
 --- !u!114 &641933003
 MonoBehaviour:
@@ -1541,7 +1584,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 17
   indentLevel: 1
-  text: "\uC544\uB2C8\uC694"
+  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
   description: 
   targetBlock: {fileID: 641933007}
   hideIfVisited: 0
@@ -1566,7 +1609,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 16
   indentLevel: 1
-  text: "\uC608"
+  text: "\uB3CC\uC544\uAC04\uB2E4."
   description: 
   targetBlock: {fileID: 641933002}
   hideIfVisited: 0
@@ -4835,6 +4878,23 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &641933062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641932986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 131
+  indentLevel: 0
+  targetObject: {fileID: 192121338}
+  methodName: GoBack
+  delay: 0
 --- !u!1 &695578179
 GameObject:
   m_ObjectHideFlags: 0
@@ -7083,12 +7143,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 9076749090867148855, guid: 9f62f883994b5e3478976ebd844a5d19, type: 3}
+  m_Sprite: {fileID: -1297138581638178188, guid: a5c83e91716156446bb78af45d32353f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 19.2, y: 10.8}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -7810,3 +7870,4 @@ SceneRoots:
   - {fileID: 696397220}
   - {fileID: 793945838}
   - {fileID: 1431018782}
+  - {fileID: 192121337}
