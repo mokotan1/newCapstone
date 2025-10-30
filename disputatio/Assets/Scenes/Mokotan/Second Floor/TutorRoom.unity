@@ -1803,6 +1803,9 @@ GameObject:
   - component: {fileID: 687597868}
   - component: {fileID: 687597869}
   - component: {fileID: 687597870}
+  - component: {fileID: 687597872}
+  - component: {fileID: 687597873}
+  - component: {fileID: 687597871}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1835,9 +1838,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 687597865}
+  - {fileID: 687597872}
   selectedCommands:
-  - {fileID: 687597867}
+  - {fileID: 687597871}
   variables:
   - {fileID: 687597774}
   - {fileID: 687597806}
@@ -6928,9 +6931,26 @@ MonoBehaviour:
     PublicKeyToken=null
   targetComponentFullname: 'UnityEngine.Component[]'
   targetComponentText: TutorChatbot
-  targetMethod: TriggerAIResponseByFlag
-  targetMethodText: 'TriggerAIResponseByFlag (): Void'
-  methodParameters: []
+  targetMethod: AddPlayerMessageAndGetResponse
+  targetMethodText: 'AddPlayerMessageAndGetResponse (String): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      typeFullname: System.String
+      intValue: 0
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
   saveReturnValue: 0
   returnValueVariableKey: 
   returnValueType: System.Void
@@ -6950,7 +6970,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 0
   key: CorrectAnswerCount
-  value: 0
+  value: 5
 --- !u!114 &687597859
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7362,7 +7382,7 @@ MonoBehaviour:
   FireOn: 1
 --- !u!114 &687597870
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -7381,6 +7401,94 @@ MonoBehaviour:
     booleanRef: {fileID: 0}
     booleanVal: 0
   targetGameObjectOLD: {fileID: 0}
+--- !u!114 &687597871
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 228
+  indentLevel: 0
+  description: 
+  targetObject: {fileID: 703796149}
+  targetComponentAssemblyName: ItemPickup, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: ItemPickup
+  targetMethod: OnPointerClick
+  targetMethodText: 'OnPointerClick (PointerEventData): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: UnityEngine.EventSystems.PointerEventData, UnityEngine.UI,
+        Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+      typeFullname: UnityEngine.EventSystems.PointerEventData
+      intValue: 0
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
+--- !u!114 &687597872
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3d73aef2cfc4f51abf34ac00241f60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nodeRect:
+    serializedVersion: 2
+    x: 614.2787
+    y: 363.39014
+    width: 94.979996
+    height: 40
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  useCustomTint: 0
+  itemId: 227
+  blockName: add key
+  description: 
+  eventHandler: {fileID: 687597873}
+  commandList:
+  - {fileID: 687597871}
+  suppressAllAutoSelections: 0
+--- !u!114 &687597873
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentBlock: {fileID: 687597872}
+  suppressBlockAutoSelect: 0
+  clickableObject: {fileID: 703796153}
+  waitFrames: 1
 --- !u!1 &701409201
 GameObject:
   m_ObjectHideFlags: 0
@@ -8717,6 +8825,12 @@ MonoBehaviour:
   chatSayDialog: {fileID: 1045858719}
   flowchart: {fileID: 687597760}
   modelName: gpt-4o
+  OnAIReponseComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  OnQuizCompletedEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1085980052
 Transform:
   m_ObjectHideFlags: 0
