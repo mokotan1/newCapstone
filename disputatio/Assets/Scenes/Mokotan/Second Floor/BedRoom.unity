@@ -429,6 +429,7 @@ GameObject:
   - component: {fileID: 687597789}
   - component: {fileID: 687597791}
   - component: {fileID: 687597790}
+  - component: {fileID: 687597792}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -460,10 +461,8 @@ MonoBehaviour:
     y: -340
     width: 1114
     height: 859
-  selectedBlocks:
-  - {fileID: 687597765}
-  selectedCommands:
-  - {fileID: 687597788}
+  selectedBlocks: []
+  selectedCommands: []
   variables:
   - {fileID: 687597774}
   description: 
@@ -581,6 +580,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 687597780}
   - {fileID: 687597773}
+  - {fileID: 687597792}
   - {fileID: 687597788}
   - {fileID: 687597782}
   suppressAllAutoSelections: 0
@@ -600,12 +600,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 856
     y: 201
-    width: 125.79
+    width: 111.29
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 3
-  blockName: WifeEntrance
+  blockName: Select_Yes
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -833,7 +833,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: WifeEntrance
+    stringVal: 2floorRightCross
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &687597780
@@ -1297,7 +1297,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 21
   indentLevel: 1
-  text: "\uBCF5\uB3C4\uB85C \uB3CC\uC544\uAC04\uB2E4."
+  text: "\uB3CC\uC544\uAC04\uB2E4."
   description: 
   targetBlock: {fileID: 687597767}
   hideIfVisited: 0
@@ -1495,6 +1495,33 @@ MonoBehaviour:
   targetObject: {fileID: 139121775}
   methodName: PlayFootstep
   delay: 0
+--- !u!114 &687597792
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec422cd568a9c4a31ad7c36d0572b9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 159
+  indentLevel: 1
+  storyText: "\uAC08\uB9BC\uAE38\uB85C \uB3CC\uC544\uAC08\uAE4C?"
+  description: 
+  character: {fileID: 0}
+  portrait: {fileID: 0}
+  voiceOverClip: {fileID: 0}
+  showAlways: 1
+  showCount: 1
+  extendPrevious: 0
+  fadeWhenDone: 1
+  waitForClick: 1
+  stopVoiceover: 1
+  waitForVO: 0
+  setSayDialog: {fileID: 0}
 --- !u!1 &1227302856
 GameObject:
   m_ObjectHideFlags: 1

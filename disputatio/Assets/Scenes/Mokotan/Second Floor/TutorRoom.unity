@@ -347,7 +347,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Backspace
+          m_StringArgument: Panel_Backspace
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &150134193
@@ -1381,7 +1381,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Backspace
+          m_StringArgument: Panel_Backspace
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &442236768
@@ -1513,7 +1513,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Backspace
+          m_StringArgument: Panel_Backspace
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &556763120
@@ -1702,6 +1702,9 @@ GameObject:
   - component: {fileID: 687597846}
   - component: {fileID: 687597845}
   - component: {fileID: 687597844}
+  - component: {fileID: 687597853}
+  - component: {fileID: 687597854}
+  - component: {fileID: 687597855}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1722,7 +1725,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -73.4931, y: 60.591106}
+  scrollPos: {x: -33.493103, y: 75.59111}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -1734,7 +1737,7 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 687597767}
+  - {fileID: 687597765}
   selectedCommands: []
   variables:
   - {fileID: 687597774}
@@ -1857,6 +1860,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 687597780}
   - {fileID: 687597773}
+  - {fileID: 687597853}
   - {fileID: 687597788}
   - {fileID: 687597782}
   suppressAllAutoSelections: 0
@@ -1876,12 +1880,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 847
     y: 201
-    width: 129.47
+    width: 111.29
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 3
-  blockName: ChildEntrance
+  blockName: Select_Yes
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -2109,7 +2113,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: ChildEntrance
+    stringVal: 2floorLeftCross
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &687597780
@@ -2573,7 +2577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 21
   indentLevel: 1
-  text: "\uBCF5\uB3C4\uB85C \uB3CC\uC544\uAC04\uB2E4."
+  text: "\uB3CC\uC544\uAC04\uB2E4."
   description: 
   targetBlock: {fileID: 687597767}
   hideIfVisited: 0
@@ -3241,12 +3245,12 @@ MonoBehaviour:
     serializedVersion: 2
     x: 796.4931
     y: 68.40889
-    width: 111.84
+    width: 148.92
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
   itemId: 163
-  blockName: Backspace
+  blockName: Panel_Backspace
   description: 
   eventHandler: {fileID: 0}
   commandList:
@@ -4144,6 +4148,8 @@ MonoBehaviour:
   - {fileID: 687597813}
   - {fileID: 687597812}
   - {fileID: 687597827}
+  - {fileID: 687597854}
+  - {fileID: 687597855}
   - {fileID: 687597824}
   - {fileID: 687597826}
   - {fileID: 687597833}
@@ -6746,6 +6752,79 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &687597853
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec422cd568a9c4a31ad7c36d0572b9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 215
+  indentLevel: 1
+  storyText: "\uAC08\uB9BC\uAE38\uB85C \uB3CC\uC544\uAC08\uAE4C?"
+  description: 
+  character: {fileID: 0}
+  portrait: {fileID: 0}
+  voiceOverClip: {fileID: 0}
+  showAlways: 1
+  showCount: 1
+  extendPrevious: 0
+  fadeWhenDone: 1
+  waitForClick: 1
+  stopVoiceover: 1
+  waitForVO: 0
+  setSayDialog: {fileID: 0}
+--- !u!114 &687597854
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec422cd568a9c4a31ad7c36d0572b9da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 216
+  indentLevel: 2
+  storyText: "\uC131\uACBD\uACFC \uC138\uACC4\uC0AC\uC5D0 \uB300\uD55C \uCC45\uC774
+    \uC62C\uB824\uC838 \uC788\uB2E4."
+  description: 
+  character: {fileID: 0}
+  portrait: {fileID: 0}
+  voiceOverClip: {fileID: 0}
+  showAlways: 1
+  showCount: 1
+  extendPrevious: 0
+  fadeWhenDone: 1
+  waitForClick: 1
+  stopVoiceover: 1
+  waitForVO: 0
+  setSayDialog: {fileID: 0}
+--- !u!114 &687597855
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 217
+  indentLevel: 2
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 0.1
+  durationOLD: 0
 --- !u!1 &701409201
 GameObject:
   m_ObjectHideFlags: 0

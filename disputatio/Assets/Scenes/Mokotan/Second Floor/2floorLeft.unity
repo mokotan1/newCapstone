@@ -654,7 +654,6 @@ GameObject:
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
   - component: {fileID: 687597776}
-  - component: {fileID: 687597777}
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
   - component: {fileID: 687597782}
@@ -678,6 +677,7 @@ GameObject:
   - component: {fileID: 687597807}
   - component: {fileID: 687597806}
   - component: {fileID: 687597805}
+  - component: {fileID: 687597811}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -710,7 +710,7 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 687597767}
+  - {fileID: 687597797}
   selectedCommands: []
   variables:
   - {fileID: 687597774}
@@ -847,7 +847,7 @@ MonoBehaviour:
   - {fileID: 687597776}
   - {fileID: 687597800}
   - {fileID: 687597801}
-  - {fileID: 687597777}
+  - {fileID: 687597811}
   suppressAllAutoSelections: 0
 --- !u!114 &687597768
 MonoBehaviour:
@@ -1077,25 +1077,6 @@ MonoBehaviour:
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeTexture: {fileID: 0}
   fadeTweenType: 4
---- !u!114 &687597777
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 12
-  indentLevel: 0
-  _sceneName:
-    stringRef: {fileID: 0}
-    stringVal: 2floorMainHall
-  loadingImage: {fileID: 0}
-  sceneNameOLD: 
 --- !u!114 &687597780
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2693,6 +2674,23 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &687597811
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 136
+  indentLevel: 0
+  targetObject: {fileID: 1868750677}
+  methodName: GoBack
+  delay: 0
 --- !u!1 &1219328353
 GameObject:
   m_ObjectHideFlags: 0
@@ -3090,6 +3088,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+--- !u!1 &1868750677 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8044174010786703611, guid: be126c90af608324a9be09e2672b3dc5, type: 3}
+  m_PrefabInstance: {fileID: 1868750676}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2044518455
 PrefabInstance:
   m_ObjectHideFlags: 0
