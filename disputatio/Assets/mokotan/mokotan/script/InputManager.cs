@@ -5,8 +5,6 @@ public class InputManager : MonoBehaviour
 {
     [SerializeField]
     DialogInput dialogInput;
-    [SerializeField]
-    public static MenuDialog ActiveMenuDialog { get; set; }
 
     public void TurnOffEnable()
     {
