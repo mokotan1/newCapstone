@@ -818,6 +818,21 @@ MonoBehaviour:
   forwardButton: {fileID: 0}
   restartButton: {fileID: 0}
   debugView: {fileID: 0}
+--- !u!114 &422026347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 422026342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11fb28e22cc29b54689e9c6578d6c5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 819135176}
+  slot: {fileID: 0}
+  sprite: []
 --- !u!1 &424082500
 GameObject:
   m_ObjectHideFlags: 0
@@ -8691,7 +8706,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7047298147727563761, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: selectedCommands.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7047298147727563761, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: 'selectedBlocks.Array.data[0]'
@@ -8700,7 +8715,7 @@ PrefabInstance:
     - target: {fileID: 7047298147727563761, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: 'selectedCommands.Array.data[0]'
       value: 
-      objectReference: {fileID: 819135210}
+      objectReference: {fileID: 3306826727992127547}
     - target: {fileID: 7233399605713362636, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: targetObject
       value: 
@@ -8715,18 +8730,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: commandList.Array.size
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+      propertyPath: 'commandList.Array.data[3]'
+      value: 
+      objectReference: {fileID: 3306826727992127550}
+    - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+      propertyPath: 'commandList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 3306826727992127548}
     - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: 'commandList.Array.data[5]'
       value: 
-      objectReference: {fileID: 819135209}
+      objectReference: {fileID: 3306826727992127549}
     - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: 'commandList.Array.data[6]'
       value: 
-      objectReference: {fileID: 819135210}
+      objectReference: {fileID: 819135209}
     - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       propertyPath: 'commandList.Array.data[7]'
+      value: 
+      objectReference: {fileID: 819135210}
+    - target: {fileID: 7278185958202418142, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+      propertyPath: 'commandList.Array.data[8]'
       value: 
       objectReference: {fileID: 819135208}
     - target: {fileID: 7354888876891260401, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
@@ -8774,13 +8801,80 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8591378618790306744, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 819135210}
+    - targetCorrespondingSourceObject: {fileID: 8591378618790306744, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3306826727992127550}
     - targetCorrespondingSourceObject: {fileID: 5249734319841240811, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 422026345}
     - targetCorrespondingSourceObject: {fileID: 5249734319841240811, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 422026346}
+    - targetCorrespondingSourceObject: {fileID: 5249734319841240811, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 422026347}
   m_SourcePrefab: {fileID: 100100000, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+--- !u!114 &3306826727992127547 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8147188720298717688, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+  m_PrefabInstance: {fileID: 3306826727992127546}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819135126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3306826727992127548 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6427213351948114808, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+  m_PrefabInstance: {fileID: 3306826727992127546}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819135126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb77d0ce495044f6e9feb91b31798e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3306826727992127549 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6191839103434172428, guid: 33c19f8ce2890114a8cdc7ca0d23393c, type: 3}
+  m_PrefabInstance: {fileID: 3306826727992127546}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819135126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c5e8d46183346b59f64b820e71f97f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3306826727992127550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819135126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 70
+  indentLevel: 1
+  description: 
+  targetObject: {fileID: 1437890603}
+  targetComponentAssemblyName: ChangeSP, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: ChangeSP
+  targetMethod: OnChangeButtonImage
+  targetMethodText: 'OnChangeButtonImage (): Void'
+  methodParameters: []
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
