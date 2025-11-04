@@ -85,6 +85,10 @@ public class MainMenu : MonoBehaviour
     // --- 버튼 핸들러 ---
     public void OnStartButton()
     {
+        // ✅ 게임 데이터 초기화
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+
         UnlockCursorForSceneChange();              // ★ 추가
         SceneManager.LoadScene(gameSceneName);
     }
