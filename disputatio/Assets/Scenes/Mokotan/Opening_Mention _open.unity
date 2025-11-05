@@ -667,6 +667,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 99667454}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &674696810
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1010.4945
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 667.6893
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.1909747
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6708453564589683334, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_Name
+      value: SceneBoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 7225548294490707432, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: globalFlowchart
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
 --- !u!1 &698313273
 GameObject:
   m_ObjectHideFlags: 0
@@ -1861,6 +1922,7 @@ GameObject:
   - component: {fileID: 1313011554}
   - component: {fileID: 1313011555}
   - component: {fileID: 1313011556}
+  - component: {fileID: 1313011559}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1893,9 +1955,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1313011486}
+  - {fileID: 1313011474}
   selectedCommands:
-  - {fileID: 1313011550}
+  - {fileID: 1313011559}
   variables:
   - {fileID: 1313011520}
   - {fileID: 1313011529}
@@ -1964,6 +2026,7 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 1313011473}
   commandList:
+  - {fileID: 1313011559}
   - {fileID: 1313011547}
   - {fileID: 1313011511}
   - {fileID: 1313011476}
@@ -3554,6 +3617,28 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &1313011559
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313011441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b115619cb83b4d6ab8047d0e9407403, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 101
+  indentLevel: 0
+  isStartPoint: 1
+  keyMode: 1
+  customKey: Opening_Mention _open
+  keySeparator: _
+  descriptionMode: 0
+  customDescription: 
+  fireEvent: 1
+  resumeOnLoad: 1
 --- !u!1 &1411594160
 GameObject:
   m_ObjectHideFlags: 0
@@ -4769,3 +4854,4 @@ SceneRoots:
   - {fileID: 1203789675}
   - {fileID: 145574133}
   - {fileID: 99667454}
+  - {fileID: 674696810}

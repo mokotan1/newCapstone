@@ -40,32 +40,56 @@ public class ChangeSP : MonoBehaviour
         // 씬 이름에 따라 슬롯 이미지 변경
         switch (sceneName)
         {
-            case "Opening":
+            case "Opening_Office":
                 slot.image.sprite = sprite[0];
                 break;
 
-            case "Bedroom":
+            case "Opening_Mention":
                 slot.image.sprite = sprite[1];
                 break;
 
-            case "Basement":
+            case "Opening_Mention _open":
                 slot.image.sprite = sprite[2];
                 break;
 
-            case "Library":
+            case "Hall_playerble":
                 slot.image.sprite = sprite[3];
                 break;
 
-            case "Attic":
+            case "Hall_Left":
                 slot.image.sprite = sprite[4];
                 break;
 
-            case "SecretRoom":
+            case "Hall_Left2":
                 slot.image.sprite = sprite[5];
                 break;
 
-            case "Ending":
+            case "Kitchen":
                 slot.image.sprite = sprite[6];
+                break;
+
+            case "UtilityRoom":
+                slot.image.sprite = sprite[7];
+                break;
+            
+            case "Hallway_Left":
+                slot.image.sprite = sprite[8];
+                break;
+
+            case "Hallway_Left2":
+                slot.image.sprite = sprite[9];
+                break;
+
+            case "nding":
+                slot.image.sprite = sprite[10];
+                break;
+
+            case "Eng":
+                slot.image.sprite = sprite[11];
+                break;
+
+            case "Endin":
+                slot.image.sprite = sprite[12];
                 break;
 
             default:

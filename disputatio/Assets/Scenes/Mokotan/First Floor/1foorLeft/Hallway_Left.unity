@@ -366,7 +366,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 2230031050347783920, guid: 894a85b0b68a1a7479acfb87fe72a184, type: 3}
+  m_Sprite: {fileID: -7211685737802525888, guid: 1079778202c13164693cfd1d56c3ff4b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1483,6 +1483,7 @@ GameObject:
   - component: {fileID: 1167277972}
   - component: {fileID: 1167277973}
   - component: {fileID: 1167277974}
+  - component: {fileID: 1167277976}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1503,7 +1504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -127.13872, y: -3.7192848}
+  scrollPos: {x: -82.09847, y: -113.10265}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -1515,8 +1516,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1167277906}
-  selectedCommands: []
+  - {fileID: 1167277884}
+  selectedCommands:
+  - {fileID: 1167277976}
   variables:
   - {fileID: 1167277951}
   - {fileID: 1167277887}
@@ -1676,6 +1678,7 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 1167277885}
   commandList:
+  - {fileID: 1167277976}
   - {fileID: 1167277959}
   - {fileID: 1167277970}
   - {fileID: 1167277968}
@@ -6428,6 +6431,28 @@ MonoBehaviour:
   targetObject: {fileID: 1222528571}
   methodName: GoBack
   delay: 0
+--- !u!114 &1167277976
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167277873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b115619cb83b4d6ab8047d0e9407403, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 314
+  indentLevel: 0
+  isStartPoint: 1
+  keyMode: 1
+  customKey: Hallway_Left
+  keySeparator: _
+  descriptionMode: 0
+  customDescription: 
+  fireEvent: 1
+  resumeOnLoad: 1
 --- !u!1001 &1222528570
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6837,6 +6862,67 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: 22140fa725c2e4b40bb10fe1d73c4f43, type: 2}
   targetFlowchart: {fileID: 0}
   fungusVariableName: 
+--- !u!1001 &1759041289
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1010.4945
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 667.6893
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.1909747
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 380921795986588668, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6708453564589683334, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: m_Name
+      value: SceneBoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 7225548294490707432, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
+      propertyPath: globalFlowchart
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f87d8262679211144ab2ddc0e9f39267, type: 3}
 --- !u!1 &1917743636
 GameObject:
   m_ObjectHideFlags: 0
@@ -7124,3 +7210,4 @@ SceneRoots:
   - {fileID: 306512604}
   - {fileID: 984129334}
   - {fileID: 1222528570}
+  - {fileID: 1759041289}
