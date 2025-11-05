@@ -14,21 +14,26 @@ public class ClickEffectPlayer : MonoBehaviour
         FindMainCamera();
     }
 
-    // 씬이 이동되거나 리로드될 때마다 카메라를 찾을 수 있도록
-    // Start()에서 호출하거나 필요할 때 호출하는 전용 함수 생성
+    // "EffectCamera" 태그를 가진 카메라를 찾는 함수
     private void FindMainCamera()
     {
-        // mainCamera가 이미 할당되어 있다면 다시 찾지 않음
-        // 하지만 씬 이동으로 인해 카메라가 파괴되었다면 null이 됨
+        // mainCamera가 null일 때만 검색
         if (mainCamera == null)
         {
-            // "MainCamera" 태그가 붙은 카메라를 찾음
-            // 씬 이동 후 새로운 씬의 카메라를 자동으로 찾게 됩니다.
-            mainCamera = Camera.main;
+            // "EffectCamera" 태그가 붙은 GameObject를 찾습니다.
+            GameObject camObject = GameObject.FindWithTag("EffectCamera");
 
+            // GameObject를 찾았는지 확인
+            if (camObject != null)
+            {
+                // 찾은 GameObject에서 Camera 컴포넌트를 가져옵니다.
+                mainCamera = camObject.GetComponent<Camera>();
+            }
+
+            // 위 과정 후에도 mainCamera가 null이라면 (태그를 못 찾았거나, 찾았는데 Camera 컴포넌트가 없는 경우)
             if (mainCamera == null)
             {
-                Debug.LogWarning("경고: 씬에서 'MainCamera' 태그가 붙은 카메라를 찾을 수 없습니다.");
+                Debug.LogWarning("경고: 씬에서 'EffectCamera' 태그가 붙은 카메라를 찾을 수 없습니다.");
             }
         }
     }
@@ -36,8 +41,6 @@ public class ClickEffectPlayer : MonoBehaviour
     void Update()
     {
         // 씬 이동 등으로 카메라가 사라졌을 경우 다시 찾도록 시도
-        // (빈번한 씬 이동이 없다면 FindMainCamera()를 Update에서 자주 호출할 필요는 없습니다.
-        // Start()에서 찾는 것만으로 대부분 충분합니다.)
         if (mainCamera == null)
         {
             FindMainCamera();
@@ -49,15 +52,12 @@ public class ClickEffectPlayer : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             // 4. 마우스의 2D 화면 위치를 3D 월드 위치로 변환
-            // Z값은 카메라와의 거리이므로 적절히 조절해야 함
             Vector3 clickPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
 
             // 5. 2D 게임이나 UI처럼 보이게 하려면 Z축 위치를 고정
-            // 2D 게임의 경우 0으로 설정
-            clickPosition.z = 0;
+            clickPosition.z = 0; 
 
             // 6. 프리팹을 클릭 위치에 생성(Instantiate)
-            // Quaternion.identity는 '회전 없음'을 의미
             Instantiate(clickEffectPrefab, clickPosition, Quaternion.identity);
         }
     }
