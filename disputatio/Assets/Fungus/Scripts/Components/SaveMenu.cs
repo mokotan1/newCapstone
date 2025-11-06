@@ -43,7 +43,7 @@ namespace Fungus
 
         [Tooltip("The button which fast forwards the save history to the next save point.")]
         [SerializeField] protected Button forwardButton;
-        
+
         [Tooltip("The button which restarts the game.")]
         [SerializeField] protected Button restartButton;
 
@@ -51,14 +51,14 @@ namespace Fungus
         [SerializeField] protected ScrollRect debugView;
 
         protected static bool saveMenuActive = false;
-
         protected AudioSource clickAudioSource;
-
         protected LTDescr fadeTween;
-
         protected static SaveMenu instance;
-
         protected static bool hasLoadedOnStart = false;
+
+        // ✅ 새로 추가된 필드: 슬롯 번호 추적용
+        [Header("Slot System")]
+        [SerializeField] protected int currentSlot = 1;
 
         protected virtual void Awake()
         {
@@ -114,20 +114,18 @@ namespace Fungus
             var saveManager = FungusManager.Instance.SaveManager;
 
             // Hide the Save and Load buttons if autosave is on
-
             bool showSaveAndLoad = !autoSave;
             if (saveButton.IsActive() != showSaveAndLoad)
             {
                 saveButton.gameObject.SetActive(showSaveAndLoad);
                 loadButton.gameObject.SetActive(showSaveAndLoad);
             }
- 
+
             if (showSaveAndLoad)
             {
                 if (saveButton != null)
                 {
                     // Don't allow saving unless there's at least one save point in the history,
-                    // This avoids the case where you could try to load a save data with 0 save points.
                     saveButton.interactable = saveManager.NumSavePoints > 0 && saveMenuActive;
                 }
                 if (loadButton != null)
@@ -157,7 +155,6 @@ namespace Fungus
                     debugText.text = saveManager.GetDebugInfo();
                 }
             }
-
         }
 
         protected virtual void OnEnable()
@@ -174,8 +171,7 @@ namespace Fungus
         {
             var saveManager = FungusManager.Instance.SaveManager;
 
-            if (autoSave &&
-                saveManager.NumSavePoints > 0)
+            if (autoSave && saveManager.NumSavePoints > 0)
             {
                 saveManager.Save(saveDataKey);
             }
@@ -197,8 +193,25 @@ namespace Fungus
         public virtual string SaveDataKey { get { return saveDataKey; } }
 
         /// <summary>
+        /// 🔹 슬롯별 세이브 키를 외부에서 설정할 수 있도록 추가된 함수.
+        /// </summary>
+        public virtual void SetSaveKey(string key)
+        {
+            saveDataKey = key;
+            Debug.Log($"[SaveMenu] Save key set to: {key}");
+        }
+
+        /// <summary>
+        /// 🔹 현재 슬롯 번호를 외부에서 설정할 수 있는 함수.
+        /// </summary>
+        public virtual void SetCurrentSlot(int slot)
+        {
+            currentSlot = slot;
+            SetSaveKey($"FungusSaveData_Slot{slot}");
+        }
+
+        /// <summary>
         /// Toggles the expanded / collapsed state of the save menu.
-        /// Uses a tween to fade the menu UI in and out.
         /// </summary>
         public virtual void ToggleSaveMenu()
         {
@@ -213,22 +226,16 @@ namespace Fungus
                 // Switch menu off
                 LeanTween.value(saveMenuGroup.gameObject, saveMenuGroup.alpha, 0f, 0.2f)
                     .setEase(LeanTweenType.easeOutQuint)
-                    .setOnUpdate( (t) => {
-                    saveMenuGroup.alpha = t;
-                }).setOnComplete( () => {
-                    saveMenuGroup.alpha = 0f;
-                });
+                    .setOnUpdate((t) => { saveMenuGroup.alpha = t; })
+                    .setOnComplete(() => { saveMenuGroup.alpha = 0f; });
             }
             else
             {
                 // Switch menu on
                 LeanTween.value(saveMenuGroup.gameObject, saveMenuGroup.alpha, 1f, 0.2f)
                     .setEase(LeanTweenType.easeOutQuint)
-                    .setOnUpdate( (t) => {
-                    saveMenuGroup.alpha = t;
-                }).setOnComplete( () => {
-                    saveMenuGroup.alpha = 1f;
-                });
+                    .setOnUpdate((t) => { saveMenuGroup.alpha = t; })
+                    .setOnComplete(() => { saveMenuGroup.alpha = 1f; });
             }
 
             saveMenuActive = !saveMenuActive;
@@ -245,6 +252,7 @@ namespace Fungus
             {
                 PlayClickSound();
                 saveManager.Save(saveDataKey);
+                Debug.Log($"[SaveMenu] Saved using key: {saveDataKey}");
             }
         }
 
@@ -259,8 +267,8 @@ namespace Fungus
             {
                 PlayClickSound();
                 saveManager.Load(saveDataKey);
+                Debug.Log($"[SaveMenu] Loaded using key: {saveDataKey}");
             }
-
         }
 
         /// <summary>
@@ -275,7 +283,6 @@ namespace Fungus
             {
                 saveManager.Rewind();
             }
-
         }
 
         /// <summary>
@@ -313,6 +320,7 @@ namespace Fungus
             {
                 SaveManager.Delete(saveDataKey);
             }
+
             SaveManagerSignals.DoSaveReset();
             SceneManager.LoadScene(saveManager.StartScene);
         }
