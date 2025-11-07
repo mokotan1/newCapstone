@@ -25,14 +25,35 @@ public class UIDialRotator : MonoBehaviour
     private int currentDigit;
     private int finalDigit;
 
+    private string dialKey;
+
+#if UNITY_EDITOR
+    private static bool editorInitialized = false;
+#endif
+
+    // ✅ 에디터에서 Play 버튼 눌렀을 때 딱 한 번만 초기화
+#if UNITY_EDITOR
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void ResetPrefsOnPlay()
+    {
+        if (!editorInitialized)
+        {
+            Debug.Log("🧹 [UIDialRotator] 에디터 Play 시작 — 다이얼 값 초기화됨 (0 0 0)");
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+            editorInitialized = true;
+        }
+    }
+#endif
+
     private void Awake()
     {
         rect = GetComponent<RectTransform>();
+        dialKey = $"Dial_{gameObject.name}_Value"; // 예: Dial_L, Dial_M, Dial_R
     }
 
     private void OnEnable()
     {
-        // 자동으로 UISafeLockController 연결
         var controller = FindObjectOfType<UISafeLockController>();
         if (controller != null)
         {
@@ -43,11 +64,25 @@ public class UIDialRotator : MonoBehaviour
             else if (gameObject.name.Contains("R"))
                 onDigitChanged.AddListener(controller.OnRightChanged);
         }
+
+        // 🔹 이전 값 복원
+        int saved = PlayerPrefs.GetInt(dialKey, 0);
+        currentDigit = saved;
+        finalDigit = saved;
+        totalRotation = saved * stepDegrees;
+        rect.localEulerAngles = new Vector3(0, 0, totalRotation);
+
+        if (dialText != null)
+        {
+            dialText.text = saved.ToString();
+            dialText.ForceMeshUpdate();
+        }
+
+        onDigitChanged?.Invoke(saved);
     }
 
     private void Update()
     {
-        // 🔹 마우스 클릭 시작
         if (Input.GetMouseButtonDown(0))
         {
             if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition))
@@ -59,20 +94,16 @@ public class UIDialRotator : MonoBehaviour
             }
         }
 
-        // 🔹 드래그 중 회전
         if (dragging)
         {
             Vector2 dir = (Vector2)Input.mousePosition - centerScreenPos;
             float newAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             float deltaAngle = Mathf.DeltaAngle(lastAngle, newAngle) * sensitivity;
 
-            // 시계 방향 회전 시 숫자 증가
             totalRotation -= deltaAngle;
             rect.localEulerAngles = new Vector3(0, 0, totalRotation);
 
             int newDigit = Mathf.FloorToInt(((totalRotation / stepDegrees) % 10f + 10f) % 10f);
-
-            // 🔸 숫자 실시간 갱신 (UI만)
             if (newDigit != currentDigit)
             {
                 currentDigit = newDigit;
@@ -86,7 +117,6 @@ public class UIDialRotator : MonoBehaviour
             lastAngle = newAngle;
         }
 
-        // 🔹 마우스 뗐을 때 — 여기서만 정답 체크 실행
         if (Input.GetMouseButtonUp(0))
         {
             if (dragging)
@@ -95,7 +125,9 @@ public class UIDialRotator : MonoBehaviour
                 finalDigit = currentDigit;
                 Debug.Log($"🟢 [UIDialRotator] {gameObject.name} 최종 숫자: {finalDigit}");
 
-                // ✅ UISafeLockController에 알림 (한 번만)
+                PlayerPrefs.SetInt(dialKey, finalDigit);
+                PlayerPrefs.Save();
+
                 onDigitChanged?.Invoke(finalDigit);
             }
         }

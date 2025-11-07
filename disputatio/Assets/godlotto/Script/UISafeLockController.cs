@@ -35,6 +35,17 @@ public class UISafeLockController : MonoBehaviour
     public UnityEvent onUnlock;
 
     private bool lOK, mOK, rOK, unlocked;
+    private const string unlockKey = "SafeLock_Unlocked"; // PlayerPrefs 저장용 키
+
+    private void Start()
+    {
+        // 🔹 이전에 이미 금고가 열린 상태인지 확인
+        unlocked = PlayerPrefs.GetInt(unlockKey, 0) == 1;
+        if (unlocked)
+        {
+            Debug.Log("🔓 금고는 이미 열린 상태 — Fungus 블록은 실행되지 않음");
+        }
+    }
 
     public void OnLeftChanged(int val)
     {
@@ -62,10 +73,15 @@ public class UISafeLockController : MonoBehaviour
 
     private void TryUnlock()
     {
+        // 🔸 이미 열린 상태라면 다시 블록 실행 안 함
         if (unlocked) return;
+
         if (lOK && mOK && rOK)
         {
             unlocked = true;
+            PlayerPrefs.SetInt(unlockKey, 1);
+            PlayerPrefs.Save();
+
             SetFungusBool(allVar, true);
             OnUnlock();
         }
@@ -74,9 +90,7 @@ public class UISafeLockController : MonoBehaviour
     // 🔓 금고 해제 처리
     public void OnUnlock()
     {
-        if (closedImage) closedImage.SetActive(false);
-        if (openImage) openImage.SetActive(true);
-        onUnlock?.Invoke(); // Inspector에서 Fungus 블록 실행 이벤트로 연결 가능
+        onUnlock?.Invoke(); // Fungus 블록 실행은 여기 이벤트로 연결
         Debug.Log("🔓 금고가 열렸습니다!");
     }
 
