@@ -24,6 +24,8 @@ public class PostExposureController : MonoBehaviour
 
     private Vignette vignette;
 
+    private Bloom bloom;
+
 
 
     // 코루틴 추적 변수들 (Vignette 제외)
@@ -92,6 +94,21 @@ public class PostExposureController : MonoBehaviour
 
             // vignette.intensity.value = 0f; // 시작 시 초기화 제거 (원래 Profile 값 유지)
 
+        }
+
+        else
+
+        {
+
+            Debug.LogWarning("지정된 Volume Profile에서 Vignette 효과를 찾을 수 없습니다!", this);
+
+        }
+
+        if (postProcessVolume.profile.TryGet(out bloom))
+
+        {
+            bloom.intensity.value = 2.0f;
+            Debug.Log("Vignette 효과를 찾았습니다.");
         }
 
         else
@@ -185,6 +202,30 @@ public class PostExposureController : MonoBehaviour
         {
 
             vignette.intensity.value = value;
+
+            Debug.Log("Vignette Intensity set to 0 (instant)."); // 디버그 메시지 수정
+
+        }
+
+        else
+
+        {
+
+            Debug.LogError("Cannot set Vignette intensity: Vignette effect not found."); // 디버그 메시지 수정
+
+        }
+
+    }
+
+    public void SetBloomToZero(float value) // 원래 함수 이름 유지
+
+    {
+
+        if (bloom != null)
+
+        {
+
+            bloom.intensity.value = value;
 
             Debug.Log("Vignette Intensity set to 0 (instant)."); // 디버그 메시지 수정
 
