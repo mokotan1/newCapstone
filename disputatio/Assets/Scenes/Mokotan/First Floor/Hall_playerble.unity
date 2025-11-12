@@ -790,6 +790,8 @@ GameObject:
   - component: {fileID: 265606204}
   - component: {fileID: 265606205}
   - component: {fileID: 265606206}
+  - component: {fileID: 265606207}
+  - component: {fileID: 265606208}
   m_Layer: 0
   m_Name: Flowchart_hall
   m_TagString: Untagged
@@ -822,9 +824,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 265606077}
+  - {fileID: 265606020}
   selectedCommands:
-  - {fileID: 265606078}
+  - {fileID: 265606083}
   variables:
   - {fileID: 265606045}
   - {fileID: 265606092}
@@ -989,6 +991,7 @@ MonoBehaviour:
   - {fileID: 265606126}
   - {fileID: 265606158}
   - {fileID: 265606083}
+  - {fileID: 265606208}
   - {fileID: 265606076}
   - {fileID: 265606080}
   suppressAllAutoSelections: 0
@@ -5843,6 +5846,7 @@ MonoBehaviour:
   - {fileID: 265606186}
   - {fileID: 265606183}
   - {fileID: 265606182}
+  - {fileID: 265606207}
   - {fileID: 265606187}
   - {fileID: 265606180}
   suppressAllAutoSelections: 0
@@ -5881,7 +5885,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: UsedBasementKey
-  value: 0
+  value: 1
 --- !u!114 &265606171
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7680,6 +7684,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 177
   indentLevel: 1
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 0.1
+  durationOLD: 0
+--- !u!114 &265606207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 178
+  indentLevel: 1
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 0.1
+  durationOLD: 0
+--- !u!114 &265606208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 179
+  indentLevel: 2
   _duration:
     floatRef: {fileID: 0}
     floatVal: 0.1
