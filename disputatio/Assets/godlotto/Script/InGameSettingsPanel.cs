@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using Fungus;
-using System.Linq; // ★★★ 이 줄을 꼭 추가해주세요! ★★★
+using System.Linq;
 
 public class InGameSettingsPanel : MonoBehaviour
 {
@@ -37,6 +37,10 @@ public class InGameSettingsPanel : MonoBehaviour
     private int currentResolutionIndex = 0;
     private bool isPanelOpen = false;
 
+    // ✅ 플레이 시간 관련 변수
+    private float playTime = 0f;       // 누적된 플레이 시간 (초 단위)
+    private bool isCounting = true;    // 엔딩씬 등에서는 카운트 중단
+
     void Awake()
     {
         if (instance != null)
@@ -57,11 +61,15 @@ public class InGameSettingsPanel : MonoBehaviour
     {
         LoadSettings();
         AssignListeners();
-        InitializeResolutionDropdown(); // ★★★ 함수 이름 변경 ★★★
+        InitializeResolutionDropdown();
     }
 
     void Update()
     {
+        // ✅ 플레이 시간 누적
+        if (isCounting)
+            playTime += Time.deltaTime;
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             ToggleSettingPanel();
@@ -69,6 +77,19 @@ public class InGameSettingsPanel : MonoBehaviour
 
         if (!isPanelOpen) return;
         HandleKeyboardInput();
+    }
+
+    // ✅ 외부에서 호출할 수 있는 플레이 시간 관련 함수
+    public float GetPlayTime() => playTime;
+
+    public void StopCounting()
+    {
+        isCounting = false;
+    }
+
+    public void ResetPlayTime()
+    {
+        playTime = 0f;
     }
 
     private void LoadSettings()
@@ -86,7 +107,6 @@ public class InGameSettingsPanel : MonoBehaviour
         bgmSlider.onValueChanged.AddListener(SetBgmVolume);
         sfxSlider.onValueChanged.AddListener(SetSfxVolume);
         fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
-        // 리스너 추가는 InitializeResolutionDropdown에서 하므로 여기서는 제거합니다.
     }
 
     public void ToggleSettingPanel()
@@ -180,19 +200,13 @@ public class InGameSettingsPanel : MonoBehaviour
         PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
     }
 
-    // ★★★ 이 아래 해상도 관련 함수들이 모두 수정되었습니다. ★★★
-
     private void InitializeResolutionDropdown()
     {
-        // 1. 시스템이 지원하는 모든 해상도를 가져옵니다.
         var allResolutions = Screen.resolutions;
-
-        // 2. Parsec 등으로 인한 주사율 중복을 제거합니다.
         var uniqueResolutions = allResolutions
             .GroupBy(r => new { r.width, r.height })
             .Select(group => group.OrderByDescending(r => r.refreshRateRatio.value).First());
 
-        // 3. 우리가 원하는 일반적인 해상도 목록만 필터링합니다.
         List<Vector2Int> commonResolutions = new List<Vector2Int>()
         {
             new Vector2Int(1280, 720),
@@ -200,18 +214,16 @@ public class InGameSettingsPanel : MonoBehaviour
             new Vector2Int(1600, 900),
             new Vector2Int(1920, 1080),
             new Vector2Int(2560, 1440),
-            new Vector2Int(3840, 2160) // 사용자가 제공한 목록 기준
+            new Vector2Int(3840, 2160)
         };
 
-        // 4. 중복 제거된 해상도 중에서 '일반 해상도'에 포함되는 것만 골라냅니다.
         resolutions = uniqueResolutions
             .Where(r => commonResolutions.Any(c => c.x == r.width && c.y == r.height))
-            .ToList(); // 최종 목록 생성
+            .ToList();
 
-        // 5. 드롭다운 옵션을 구성합니다.
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
-        int defaultResolutionIndex = 0; 
+        int defaultResolutionIndex = 0;
 
         for (int i = 0; i < resolutions.Count; i++)
         {
@@ -225,8 +237,6 @@ public class InGameSettingsPanel : MonoBehaviour
         }
 
         resolutionDropdown.AddOptions(options);
-
-        // 6. 저장된 해상도 값을 불러옵니다.
         currentResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", defaultResolutionIndex);
         if (currentResolutionIndex >= resolutions.Count || currentResolutionIndex < 0)
         {
@@ -236,32 +246,25 @@ public class InGameSettingsPanel : MonoBehaviour
         resolutionDropdown.value = currentResolutionIndex;
         resolutionDropdown.RefreshShownValue();
 
-        // 7. 리스너를 추가합니다.
-        resolutionDropdown.onValueChanged.RemoveAllListeners(); // 중복 방지
+        resolutionDropdown.onValueChanged.RemoveAllListeners();
         resolutionDropdown.onValueChanged.AddListener(OnResolutionDropdownChanged);
-        
-        // 8. 저장된 해상도를 즉시 적용합니다.
         SetResolution(currentResolutionIndex);
     }
 
-    // 드롭다운 값이 변경될 때 호출되는 함수
     private void OnResolutionDropdownChanged(int index)
     {
         SetResolution(index);
     }
 
-    // 해상도를 적용하고 저장하는 함수
     private void SetResolution(int index)
     {
         if (index < 0 || index >= resolutions.Count) return;
-
         currentResolutionIndex = index;
         Resolution resolution = resolutions[index];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
         PlayerPrefs.SetInt("ResolutionIndex", currentResolutionIndex);
     }
-    
-    // (기존 두 번째 스크립트의 나머지 함수들)
+
     public void BackToMainMenu()
     {
         Debug.Log("메인메뉴 이동 버튼 클릭됨");
@@ -271,13 +274,11 @@ public class InGameSettingsPanel : MonoBehaviour
     private IEnumerator GoToMainMenu()
     {
         Time.timeScale = 1f;
-
         if (targetFlowchart != null)
             targetFlowchart.SetBooleanVariable(fungusVariableName, false);
 
         CleanupDontDestroyObjects();
         Debug.Log("모든 DontDestroyOnLoad 오브젝트 삭제 완료");
-
         yield return null;
 
         Debug.Log($"씬 로드 시도: {mainMenuSceneName}");
@@ -300,7 +301,6 @@ public class InGameSettingsPanel : MonoBehaviour
         {
             if (obj == gameObject) continue;
             if (obj.GetComponent<GlobalVariables>() != null) continue;
-            // if (obj.GetComponent<KeepAcrossScenes>() != null) continue; // KeepAcrossScenes가 정의되지 않았다면 주석 처리
             if (obj.name == "Variablemanager") continue;
             Destroy(obj);
         }
