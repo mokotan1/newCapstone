@@ -6027,7 +6027,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61dddfdc5e0e44ca298d8f46f7f5a915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectedFlowchart: {fileID: 819135176}
+  selectedFlowchart: {fileID: 2144482601}
 --- !u!4 &1815301921
 Transform:
   m_ObjectHideFlags: 1
@@ -7498,6 +7498,8 @@ GameObject:
   - component: {fileID: 2144482579}
   - component: {fileID: 2144482603}
   - component: {fileID: 2144482604}
+  - component: {fileID: 2144482605}
+  - component: {fileID: 2144482606}
   m_Layer: 0
   m_Name: Variablemanager
   m_TagString: Untagged
@@ -7863,6 +7865,7 @@ MonoBehaviour:
   - {fileID: 2144482579}
   - {fileID: 2144482584}
   - {fileID: 2144482582}
+  - {fileID: 2144482605}
   - {fileID: 2144482592}
   - {fileID: 2144482589}
   - {fileID: 2144482588}
@@ -7870,6 +7873,7 @@ MonoBehaviour:
   - {fileID: 2144482580}
   - {fileID: 2144482583}
   - {fileID: 2144482581}
+  - {fileID: 2144482606}
   - {fileID: 2144482586}
   - {fileID: 2144482585}
   - {fileID: 2144482603}
@@ -7927,6 +7931,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   globalFlowchartName: Variablemanager
   prevVarKey: PrevScene
+--- !u!114 &2144482605
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144482578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: UsedPrisonKey
+  value: 0
+--- !u!114 &2144482606
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144482578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d02d9822eec54c98afe95bb497211b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scope: 2
+  key: HavePrisonKey
+  value: 0
 --- !u!1001 &1451597505421557019
 PrefabInstance:
   m_ObjectHideFlags: 0
