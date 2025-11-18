@@ -66,7 +66,7 @@ public class FitchenPostExposureController : MonoBehaviour
 
             Debug.Log("Color Adjustments 효과를 찾았습니다.");
 
-            colorAdjustments.postExposure.value = 0f;
+            colorAdjustments.postExposure.value = -1.5f;
 
             colorAdjustments.contrast.value = 50f;
 
@@ -87,7 +87,7 @@ public class FitchenPostExposureController : MonoBehaviour
         if (postProcessVolume.profile.TryGet(out vignette))
 
         {
-            vignette.intensity.value = 0.2f;
+            vignette.intensity.value = 0.4f;
             Debug.Log("Vignette 효과를 찾았습니다.");
 
             // vignette.intensity.value = 0f; // 시작 시 초기화 제거 (원래 Profile 값 유지)
