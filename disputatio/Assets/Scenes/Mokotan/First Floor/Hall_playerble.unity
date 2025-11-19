@@ -745,7 +745,6 @@ GameObject:
   - component: {fileID: 265606140}
   - component: {fileID: 265606143}
   - component: {fileID: 265606144}
-  - component: {fileID: 265606145}
   - component: {fileID: 265606146}
   - component: {fileID: 265606147}
   - component: {fileID: 265606148}
@@ -792,6 +791,9 @@ GameObject:
   - component: {fileID: 265606206}
   - component: {fileID: 265606207}
   - component: {fileID: 265606208}
+  - component: {fileID: 265606209}
+  - component: {fileID: 265606210}
+  - component: {fileID: 265606211}
   m_Layer: 0
   m_Name: Flowchart_hall
   m_TagString: Untagged
@@ -812,7 +814,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 55.789513, y: 54.331444}
+  scrollPos: {x: 261.9217, y: 47.11681}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -824,9 +826,8 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 265606020}
-  selectedCommands:
-  - {fileID: 265606083}
+  - {fileID: 265606023}
+  selectedCommands: []
   variables:
   - {fileID: 265606045}
   - {fileID: 265606092}
@@ -1063,6 +1064,7 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 0}
   commandList:
+  - {fileID: 265606211}
   - {fileID: 265606198}
   - {fileID: 265606022}
   - {fileID: 265606134}
@@ -1578,6 +1580,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 265606202}
   - {fileID: 265606199}
+  - {fileID: 265606210}
   - {fileID: 265606064}
   - {fileID: 265606067}
   - {fileID: 265606148}
@@ -2462,7 +2465,7 @@ MonoBehaviour:
   indentLevel: 0
   _sceneName:
     stringRef: {fileID: 0}
-    stringVal: BedRoom
+    stringVal: 2floorMainHall
   loadingImage: {fileID: 0}
   sceneNameOLD: 
 --- !u!114 &265606109
@@ -2499,7 +2502,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 959.624
+    x: 958.5934
     y: 107.99301
     width: 70.32
     height: 40
@@ -2512,7 +2515,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 265606204}
   - {fileID: 265606109}
-  - {fileID: 265606145}
+  - {fileID: 265606209}
   - {fileID: 265606146}
   - {fileID: 265606108}
   suppressAllAutoSelections: 0
@@ -5024,23 +5027,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &265606145
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265605998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 119
-  indentLevel: 0
-  targetObject: {fileID: 1782780286}
-  methodName: PlayFootstep
-  delay: 0
 --- !u!114 &265606146
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -6835,7 +6821,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: ElectricOn
-  value: 1
+  value: 0
 --- !u!114 &265606190
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7690,7 +7676,7 @@ MonoBehaviour:
   durationOLD: 0
 --- !u!114 &265606207
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -7708,7 +7694,7 @@ MonoBehaviour:
   durationOLD: 0
 --- !u!114 &265606208
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -7724,6 +7710,88 @@ MonoBehaviour:
     floatRef: {fileID: 0}
     floatVal: 0.1
   durationOLD: 0
+--- !u!114 &265606209
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 180
+  indentLevel: 0
+  targetObject: {fileID: 1782780286}
+  methodName: PlayFootstep
+  delay: 0
+--- !u!114 &265606210
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 181
+  indentLevel: 0
+  description: 
+  targetObject: {fileID: 1782780286}
+  targetComponentAssemblyName: AudioBridge, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: AudioBridge
+  targetMethod: CallPlayBGM
+  targetMethodText: 'CallPlayBGM (Int32): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      typeFullname: System.Int32
+      intValue: 1
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
+--- !u!114 &265606211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 265605998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207aecf668a0345388087ccf522f9957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 183
+  indentLevel: 0
+  duration: 1
+  targetAlpha: 1
+  waitUntilFinished: 1
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  fadeTexture: {fileID: 0}
+  fadeTweenType: 4
 --- !u!1 &285306152
 GameObject:
   m_ObjectHideFlags: 0
@@ -8919,7 +8987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2493690748687693286, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 600
+      value: 609.89
       objectReference: {fileID: 0}
     - target: {fileID: 2493690748687693286, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -11746,6 +11814,7 @@ GameObject:
   - component: {fileID: 1782780289}
   - component: {fileID: 1782780288}
   - component: {fileID: 1782780287}
+  - component: {fileID: 1782780290}
   m_Layer: 0
   m_Name: FootSound
   m_TagString: Untagged
@@ -11765,7 +11834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc0b45dd64b2189468ae92fafca738fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicToPlay: {fileID: 0}
+  bgmList: []
   footstepSound: {fileID: 8300000, guid: 7ca5a9710db4327439c9f8cb8204615e, type: 3}
   delayBetweenSteps: 0.3
 --- !u!82 &1782780288
@@ -11880,6 +11949,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1782780290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1782780286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4415380f17943c4a98ac50509ce718b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1846279298
 GameObject:
   m_ObjectHideFlags: 0

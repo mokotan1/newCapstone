@@ -957,6 +957,7 @@ GameObject:
   - component: {fileID: 687597863}
   - component: {fileID: 687597864}
   - component: {fileID: 687597865}
+  - component: {fileID: 687597866}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -977,7 +978,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 83.892334, y: 197.38385}
+  scrollPos: {x: 123.892334, y: 110.38385}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -991,7 +992,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 687597762}
   selectedCommands:
-  - {fileID: 687597865}
+  - {fileID: 687597866}
   variables:
   - {fileID: 687597774}
   - {fileID: 687597850}
@@ -1047,6 +1048,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 687597865}
   - {fileID: 687597857}
+  - {fileID: 687597866}
   - {fileID: 687597856}
   - {fileID: 687597855}
   - {fileID: 687597851}
@@ -4152,6 +4154,51 @@ MonoBehaviour:
   customDescription: 
   fireEvent: 1
   resumeOnLoad: 1
+--- !u!114 &687597866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 186
+  indentLevel: 0
+  description: 
+  targetObject: {fileID: 1219328353}
+  targetComponentAssemblyName: AudioBridge, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: AudioBridge
+  targetMethod: CallPlayBGM
+  targetMethodText: 'CallPlayBGM (Int32): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      typeFullname: System.Int32
+      intValue: 2
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
 --- !u!1001 &719288218
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4264,6 +4311,7 @@ GameObject:
   - component: {fileID: 1219328356}
   - component: {fileID: 1219328355}
   - component: {fileID: 1219328354}
+  - component: {fileID: 1219328357}
   m_Layer: 0
   m_Name: FootSound
   m_TagString: Untagged
@@ -4283,7 +4331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc0b45dd64b2189468ae92fafca738fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicToPlay: {fileID: 0}
+  bgmList: []
   footstepSound: {fileID: 8300000, guid: 7ca5a9710db4327439c9f8cb8204615e, type: 3}
   delayBetweenSteps: 0.3
 --- !u!82 &1219328355
@@ -4398,6 +4446,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1219328357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219328353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4415380f17943c4a98ac50509ce718b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1227302856
 GameObject:
   m_ObjectHideFlags: 1
