@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 15879521}
   - component: {fileID: 15879520}
   - component: {fileID: 15879519}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Fripan
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 26981957}
   - component: {fileID: 26981956}
   - component: {fileID: 26981955}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: TrashBox_pannel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 192235981}
   - component: {fileID: 192235980}
   - component: {fileID: 192235979}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Parret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -620,7 +620,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 751234939840124502, guid: a9dc278980591e24db3527b6072ab9b4, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 751234939840124502, guid: a9dc278980591e24db3527b6072ab9b4, type: 3}
       propertyPath: m_IsActive
@@ -648,7 +648,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4254459223588907982, guid: a9dc278980591e24db3527b6072ab9b4, type: 3}
       propertyPath: m_SortingOrder
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4254459223588907982, guid: a9dc278980591e24db3527b6072ab9b4, type: 3}
       propertyPath: m_SortingLayerID
@@ -769,7 +769,7 @@ GameObject:
   - component: {fileID: 243801843}
   - component: {fileID: 243801842}
   - component: {fileID: 243801841}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: burner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -904,7 +904,7 @@ GameObject:
   - component: {fileID: 284975162}
   - component: {fileID: 284975163}
   - component: {fileID: 284975164}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1351,6 +1351,9 @@ GameObject:
   - component: {fileID: 290854236}
   - component: {fileID: 290854237}
   - component: {fileID: 290854238}
+  - component: {fileID: 290854239}
+  - component: {fileID: 290854241}
+  - component: {fileID: 290854240}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1371,11 +1374,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -63.447266, y: 37.762054}
+  scrollPos: {x: 485.17944, y: 130.9807}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 232
-  zoom: 0.79999995
+  zoom: 0.6500001
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1383,9 +1386,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 290853915}
+  - {fileID: 290853886}
   selectedCommands:
-  - {fileID: 290854238}
+  - {fileID: 290854108}
   variables:
   - {fileID: 290853934}
   - {fileID: 290853970}
@@ -1527,7 +1530,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 391.88678
+    x: 390.34833
     y: 191.41936
     width: 78.03
     height: 40
@@ -1953,6 +1956,9 @@ MonoBehaviour:
   - {fileID: 290854229}
   - {fileID: 290854230}
   - {fileID: 290854236}
+  - {fileID: 290854239}
+  - {fileID: 290854241}
+  - {fileID: 290854240}
   - {fileID: 290853987}
   - {fileID: 290853993}
   - {fileID: 290853990}
@@ -15297,7 +15303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scope: 2
   key: ElectricOn
-  value: 0
+  value: 1
 --- !u!114 &290854196
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -17209,7 +17215,7 @@ MonoBehaviour:
   value: 0
 --- !u!114 &290854236
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -17361,7 +17367,7 @@ MonoBehaviour:
     vector3Val: {x: 0, y: 0, z: 0}
 --- !u!114 &290854237
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -17604,7 +17610,7 @@ MonoBehaviour:
     vector3Val: {x: 0, y: 0, z: 0}
 --- !u!114 &290854238
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -17754,6 +17760,66 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &290854239
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 350
+  indentLevel: 2
+  _targetGameObject:
+    gameObjectRef: {fileID: 0}
+    gameObjectVal: {fileID: 581171985}
+  activeState:
+    booleanRef: {fileID: 0}
+    booleanVal: 1
+  targetGameObjectOLD: {fileID: 0}
+--- !u!114 &290854240
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 352
+  indentLevel: 2
+  _targetGameObject:
+    gameObjectRef: {fileID: 0}
+    gameObjectVal: {fileID: 581171985}
+  activeState:
+    booleanRef: {fileID: 0}
+    booleanVal: 0
+  targetGameObjectOLD: {fileID: 0}
+--- !u!114 &290854241
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 351
+  indentLevel: 2
+  _duration:
+    floatRef: {fileID: 0}
+    floatVal: 3
+  durationOLD: 0
 --- !u!114 &422072702 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2148969391052945776, guid: efa3bb7751c608d4fb3134e5543705b4, type: 3}
@@ -17778,7 +17844,7 @@ GameObject:
   - component: {fileID: 460761962}
   - component: {fileID: 460761964}
   - component: {fileID: 460761965}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: SinkBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17889,7 +17955,7 @@ GameObject:
   - component: {fileID: 480640598}
   - component: {fileID: 480640597}
   - component: {fileID: 480640596}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Burner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18039,7 +18105,7 @@ GameObject:
   - component: {fileID: 535236205}
   - component: {fileID: 535236204}
   - component: {fileID: 535236206}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: backspace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18171,7 +18237,7 @@ GameObject:
   - component: {fileID: 559136593}
   - component: {fileID: 559136592}
   - component: {fileID: 559136595}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Door_toHall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18312,6 +18378,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetFlowchart: {fileID: 290853876}
   blockToExecute: Door_toHall_Clicked
+--- !u!1 &581171985 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6628022298724388889, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+  m_PrefabInstance: {fileID: 849569593}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &586477519 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2088910007708505762, guid: 1abe7bd81627aab4b90a8c254eb2a276, type: 3}
@@ -18343,7 +18414,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: -1522851415
-  m_SortingOrder: 1
+  m_SortingOrder: 3
   m_TargetDisplay: 0
 --- !u!114 &586477525
 MonoBehaviour:
@@ -18374,7 +18445,7 @@ GameObject:
   - component: {fileID: 594939768}
   - component: {fileID: 594939767}
   - component: {fileID: 594939770}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: TrashBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18525,7 +18596,7 @@ GameObject:
   - component: {fileID: 614617305}
   - component: {fileID: 614617308}
   - component: {fileID: 614617309}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Faucet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18832,7 +18903,7 @@ GameObject:
   - component: {fileID: 714739790}
   - component: {fileID: 714739792}
   - component: {fileID: 714739791}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18968,7 +19039,7 @@ GameObject:
   - component: {fileID: 751553754}
   - component: {fileID: 751553756}
   - component: {fileID: 751553755}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Trash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19044,7 +19115,7 @@ GameObject:
   - component: {fileID: 799981558}
   - component: {fileID: 799981557}
   - component: {fileID: 799981559}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: BottleImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19131,6 +19202,96 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_TargetDisplay: 0
+--- !u!1001 &849569593
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1095702674}
+    m_Modifications:
+    - target: {fileID: 1100563558482780475, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987828954404511191, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_SortingOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987828954404511191, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6628022298724388889, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_Name
+      value: Water
+      objectReference: {fileID: 0}
+    - target: {fileID: 6628022298724388889, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6628022298724388889, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986752393153589699, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: fallSpeed
+      value: 75
+      objectReference: {fileID: 0}
+    - target: {fileID: 7986752393153589699, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+      propertyPath: maxLength
+      value: 250
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+--- !u!4 &849569594 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4241264428636138952, guid: b049ab383604a304e99d17a60ee7ab3d, type: 3}
+  m_PrefabInstance: {fileID: 849569593}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &917922932
 GameObject:
   m_ObjectHideFlags: 0
@@ -19143,7 +19304,7 @@ GameObject:
   - component: {fileID: 917922936}
   - component: {fileID: 917922935}
   - component: {fileID: 917922934}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Pannel_backspace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19271,6 +19432,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1766998785}
     m_Modifications:
+    - target: {fileID: 30734766955850120, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
+      propertyPath: m_Layer
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1087019192695242789, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_text
       value: "\uC8FC\uBC29"
@@ -19358,6 +19523,10 @@ PrefabInstance:
     - target: {fileID: 7215913690222960345, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_Name
       value: RoomName
+      objectReference: {fileID: 0}
+    - target: {fileID: 7215913690222960345, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -19519,7 +19688,7 @@ GameObject:
   - component: {fileID: 1095702674}
   - component: {fileID: 1095702676}
   - component: {fileID: 1095702675}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Sink_Pannel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19544,6 +19713,7 @@ RectTransform:
   - {fileID: 799981556}
   - {fileID: 284975158}
   - {fileID: 1172732411}
+  - {fileID: 849569594}
   m_Father: {fileID: 1766998785}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -19602,7 +19772,7 @@ GameObject:
   - component: {fileID: 1167413563}
   - component: {fileID: 1167413565}
   - component: {fileID: 1167413566}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: pannelBackspace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19750,7 +19920,7 @@ GameObject:
   - component: {fileID: 1172732418}
   - component: {fileID: 1172732419}
   - component: {fileID: 1172732420}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: MaidRoomKey
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19958,7 +20128,7 @@ GameObject:
   - component: {fileID: 1254764024}
   - component: {fileID: 1254764026}
   - component: {fileID: 1254764025}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: firpan_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20095,7 +20265,7 @@ GameObject:
   - component: {fileID: 1481154582}
   - component: {fileID: 1481154581}
   - component: {fileID: 1481154584}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Door_toUtility room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20381,7 +20551,7 @@ GameObject:
   - component: {fileID: 1660291350}
   - component: {fileID: 1660291349}
   - component: {fileID: 1660291352}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: refrigerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20530,7 +20700,7 @@ GameObject:
   - component: {fileID: 1666975529}
   - component: {fileID: 1666975532}
   - component: {fileID: 1666975531}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Sink
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20737,7 +20907,7 @@ GameObject:
   - component: {fileID: 1766998788}
   - component: {fileID: 1766998787}
   - component: {fileID: 1766998786}
-  m_Layer: 6
+  m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20817,7 +20987,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 1497324673}
+  m_Camera: {fileID: 1072031614}
   m_PlaneDistance: 1
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -20828,7 +20998,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: -1522851415
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!1001 &1948127509
 PrefabInstance:
@@ -21156,7 +21326,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2088910007708505762, guid: 1abe7bd81627aab4b90a8c254eb2a276, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5034995599154525714, guid: 1abe7bd81627aab4b90a8c254eb2a276, type: 3}
       propertyPath: m_Enabled

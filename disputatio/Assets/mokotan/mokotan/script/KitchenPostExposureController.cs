@@ -24,6 +24,8 @@ public class FitchenPostExposureController : MonoBehaviour
 
     private Vignette vignette;
 
+    private Bloom bloom;
+
 
 
     // 코루틴 추적 변수들 (Vignette 제외)
@@ -92,6 +94,20 @@ public class FitchenPostExposureController : MonoBehaviour
 
             // vignette.intensity.value = 0f; // 시작 시 초기화 제거 (원래 Profile 값 유지)
 
+        }
+
+        else
+
+        {
+
+            Debug.LogWarning("지정된 Volume Profile에서 Vignette 효과를 찾을 수 없습니다!", this);
+
+        }
+
+        if (postProcessVolume.profile.TryGet(out bloom))
+
+        {
+            bloom.intensity.value = 0f;
         }
 
         else
@@ -197,7 +213,19 @@ public class FitchenPostExposureController : MonoBehaviour
             Debug.LogError("Cannot set Vignette intensity: Vignette effect not found."); // 디버그 메시지 수정
 
         }
+    }
 
+    public void SetBloomToZero(float value) // 원래 함수 이름 유지
+    {
+        if (bloom != null)
+
+        {
+            bloom.intensity.value = value;
+        }
+
+        else
+        {
+        }
     }
 
 
