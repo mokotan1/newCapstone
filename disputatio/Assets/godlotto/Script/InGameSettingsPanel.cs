@@ -38,8 +38,8 @@ public class InGameSettingsPanel : MonoBehaviour
     private bool isPanelOpen = false;
 
     // ✅ 플레이 시간 관련 변수
-    private float playTime = 0f;       // 누적된 플레이 시간 (초 단위)
-    private bool isCounting = true;    // 엔딩씬 등에서는 카운트 중단
+    private float playTime = 0f;       
+    private bool isCounting = true;    
 
     void Awake()
     {
@@ -60,13 +60,12 @@ public class InGameSettingsPanel : MonoBehaviour
     void Start()
     {
         LoadSettings();
-        AssignListeners();
-        InitializeResolutionDropdown();
+        AssignListeners(); // 볼륨, 전체화면 리스너 등록
+        InitializeResolutionDropdown(); // ★★★ 여기가 수정되었습니다 ★★★
     }
 
     void Update()
     {
-        // ✅ 플레이 시간 누적
         if (isCounting)
             playTime += Time.deltaTime;
 
@@ -79,7 +78,6 @@ public class InGameSettingsPanel : MonoBehaviour
         HandleKeyboardInput();
     }
 
-    // ✅ 외부에서 호출할 수 있는 플레이 시간 관련 함수
     public float GetPlayTime() => playTime;
 
     public void StopCounting()
@@ -96,8 +94,12 @@ public class InGameSettingsPanel : MonoBehaviour
     {
         bgmSlider.value = PlayerPrefs.GetFloat("BGMVolume", 0.75f);
         sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.75f);
-        fullscreenToggle.isOn = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-
+        
+        // ★ 중요: 전체화면 여부도 PlayerPrefs를 맹신하지 않고 현재 상태를 반영하는 것이 안전합니다.
+        // 하지만 여기선 PlayerPrefs와 현재 상태를 동기화합니다.
+        bool isFull = Screen.fullScreen;
+        fullscreenToggle.isOn = isFull; 
+        
         SetBgmVolume(bgmSlider.value);
         SetSfxVolume(sfxSlider.value);
     }
@@ -131,6 +133,7 @@ public class InGameSettingsPanel : MonoBehaviour
         if (isPanelOpen) ToggleSettingPanel();
     }
 
+    // --- 키보드 입력 처리 생략 (기존과 동일) ---
     private void HandleKeyboardInput()
     {
         bool isKeyboardInput = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
@@ -181,6 +184,7 @@ public class InGameSettingsPanel : MonoBehaviour
             currentIndex = index;
         }
     }
+    // ----------------------------------------
 
     public void SetBgmVolume(float volume)
     {
@@ -200,8 +204,10 @@ public class InGameSettingsPanel : MonoBehaviour
         PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
     }
 
+    // ▼▼▼ [핵심 수정 부분] ▼▼▼
     private void InitializeResolutionDropdown()
     {
+        // 1. 해상도 목록 생성 (SettingManager와 동일한 로직)
         var allResolutions = Screen.resolutions;
         var uniqueResolutions = allResolutions
             .GroupBy(r => new { r.width, r.height })
@@ -221,34 +227,40 @@ public class InGameSettingsPanel : MonoBehaviour
             .Where(r => commonResolutions.Any(c => c.x == r.width && c.y == r.height))
             .ToList();
 
+        // 2. 드롭다운 옵션 추가
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
-        int defaultResolutionIndex = 0;
+        
+        int currentScreenIndex = 0; // 현재 화면 해상도와 일치하는 인덱스를 찾을 변수
 
         for (int i = 0; i < resolutions.Count; i++)
         {
             var r = resolutions[i];
             options.Add($"{r.width} x {r.height}");
-            if (r.width == Screen.currentResolution.width &&
-                r.height == Screen.currentResolution.height)
+
+            // ★ 수정됨: 저장된 값이 아니라, '지금 현재 화면의 해상도'와 일치하는지 확인합니다.
+            // SettingManager에서 이미 해상도를 바꿨다면 Screen.width/height는 바뀐 값을 가지고 있습니다.
+            if (r.width == Screen.width && r.height == Screen.height)
             {
-                defaultResolutionIndex = i;
+                currentScreenIndex = i;
             }
         }
 
         resolutionDropdown.AddOptions(options);
-        currentResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", defaultResolutionIndex);
-        if (currentResolutionIndex >= resolutions.Count || currentResolutionIndex < 0)
-        {
-            currentResolutionIndex = defaultResolutionIndex;
-        }
 
+        // 3. 드롭다운의 값을 '현재 화면 해상도'에 해당하는 인덱스로 설정
+        // 이렇게 하면 1600x900 상태로 들어왔을 때 드롭다운도 1600x900을 가리킵니다.
+        currentResolutionIndex = currentScreenIndex;
         resolutionDropdown.value = currentResolutionIndex;
         resolutionDropdown.RefreshShownValue();
 
+        // 4. 리스너 연결
         resolutionDropdown.onValueChanged.RemoveAllListeners();
         resolutionDropdown.onValueChanged.AddListener(OnResolutionDropdownChanged);
-        SetResolution(currentResolutionIndex);
+
+        // ★ 삭제됨: SetResolution(currentResolutionIndex); 
+        // 시작하자마자 해상도를 강제로 다시 적용하지 않습니다. 
+        // 이미 메인 메뉴에서 설정된 해상도가 유지되어야 하기 때문입니다.
     }
 
     private void OnResolutionDropdownChanged(int index)
@@ -262,6 +274,8 @@ public class InGameSettingsPanel : MonoBehaviour
         currentResolutionIndex = index;
         Resolution resolution = resolutions[index];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
+        
+        // 인게임에서 바꿀 때만 PlayerPrefs에 저장
         PlayerPrefs.SetInt("ResolutionIndex", currentResolutionIndex);
     }
 
@@ -301,7 +315,7 @@ public class InGameSettingsPanel : MonoBehaviour
         {
             if (obj == gameObject) continue;
             if (obj.GetComponent<GlobalVariables>() != null) continue;
-            if (obj.name == "Variablemanager") continue;
+            if (obj.name == "Variablemanager") continue; // 오타 수정 (VariableManager 일 수 있음)
             Destroy(obj);
         }
     }

@@ -83,9 +83,22 @@ public class MainMenu : MonoBehaviour
     // --- 버튼 핸들러 ---
     public void OnStartButton()
     {
-        // ✅ 게임 데이터 초기화
+        // ▼▼▼ [핵심 수정] 다음 씬으로 가기 전에 커서를 무조건 보이게 하고 잠금을 풉니다. ▼▼▼
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        // 기존 로직 (데이터 초기화 등)
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
+        
+        Debug.Log("게임 시작! (커서 잠금 해제 완료)");
+
+        // (참고) 만약 여기서 코드로 씬을 이동한다면:
+        // SceneManager.LoadScene("GameScene");
+        
+        // (참고) 만약 버튼에 Fungus 블록이 연결되어 있다면:
+        // 이 함수가 실행된 후 Fungus가 씬을 이동시키므로, 
+        // 위에서 커서를 풀어주면 다음 씬에서도 풀린 채로 시작됩니다.
     }
 
     public void OnLoadButton()

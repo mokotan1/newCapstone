@@ -655,7 +655,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692949}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InGameSettingsPanel, Assembly-CSharp
         m_MethodName: SetFullscreen
         m_Mode: 6
@@ -1837,13 +1837,8 @@ GameObject:
   - component: {fileID: 684100713}
   - component: {fileID: 684100715}
   - component: {fileID: 684100714}
-  - component: {fileID: 684100718}
   - component: {fileID: 684100720}
   - component: {fileID: 684100719}
-  - component: {fileID: 684100723}
-  - component: {fileID: 684100722}
-  - component: {fileID: 684100721}
-  - component: {fileID: 684100726}
   - component: {fileID: 684100725}
   - component: {fileID: 684100724}
   - component: {fileID: 684100728}
@@ -1867,6 +1862,8 @@ GameObject:
   - component: {fileID: 684100761}
   - component: {fileID: 684100760}
   - component: {fileID: 684100762}
+  - component: {fileID: 684100763}
+  - component: {fileID: 684100765}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1887,7 +1884,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 59.27834, y: -5.6701016}
+  scrollPos: {x: 401.54636, y: -47.938152}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 400
@@ -1901,7 +1898,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 684100715}
   selectedCommands:
-  - {fileID: 684100733}
+  - {fileID: 684100728}
   variables: []
   description: 
   stepPause: 0
@@ -1972,15 +1969,12 @@ MonoBehaviour:
   - {fileID: 684100744}
   - {fileID: 684100760}
   - {fileID: 684100762}
-  - {fileID: 684100718}
+  - {fileID: 684100763}
   - {fileID: 684100720}
   - {fileID: 684100719}
-  - {fileID: 684100726}
+  - {fileID: 684100765}
   - {fileID: 684100725}
   - {fileID: 684100724}
-  - {fileID: 684100723}
-  - {fileID: 684100722}
-  - {fileID: 684100721}
   - {fileID: 684100728}
   - {fileID: 684100729}
   suppressAllAutoSelections: 0
@@ -1999,23 +1993,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &684100718
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 2
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: PlayMusic
-  delay: 0
 --- !u!114 &684100719
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2051,58 +2028,6 @@ MonoBehaviour:
     floatRef: {fileID: 0}
     floatVal: 1.5
   durationOLD: 0
---- !u!114 &684100721
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: StopMusic
-  delay: 0
---- !u!114 &684100722
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 6
-  indentLevel: 0
-  _duration:
-    floatRef: {fileID: 0}
-    floatVal: 1.5
-  durationOLD: 0
---- !u!114 &684100723
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 5
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: PlayMusic
-  delay: 0
 --- !u!114 &684100724
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2138,23 +2063,6 @@ MonoBehaviour:
     floatRef: {fileID: 0}
     floatVal: 1.5
   durationOLD: 0
---- !u!114 &684100726
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 8
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: PlayMusic
-  delay: 0
 --- !u!114 &684100728
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2658,6 +2566,96 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
+--- !u!114 &684100763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 164
+  indentLevel: 0
+  description: 
+  targetObject: {fileID: 1757817566}
+  targetComponentAssemblyName: AudioController, Assembly-CSharp, Version=0.0.0.0,
+    Culture=neutral, PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: AudioController
+  targetMethod: PlaySFX
+  targetMethodText: 'PlaySFX (Int32): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      typeFullname: System.Int32
+      intValue: 0
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
+--- !u!114 &684100765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 165
+  indentLevel: 0
+  description: 
+  targetObject: {fileID: 1757817566}
+  targetComponentAssemblyName: AudioController, Assembly-CSharp, Version=0.0.0.0,
+    Culture=neutral, PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: AudioController
+  targetMethod: PlaySFX
+  targetMethodText: 'PlaySFX (Int32): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+      typeFullname: System.Int32
+      intValue: 0
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 0}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
 --- !u!1 &756037667
 GameObject:
   m_ObjectHideFlags: 0
@@ -2992,7 +2990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 796692950}
-  - component: {fileID: 796692949}
+  - component: {fileID: 796692951}
   - component: {fileID: 796692948}
   m_Layer: 5
   m_Name: SettingPanelManager
@@ -3013,35 +3011,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9fb3bb52ef4eff48a14a0a5cef41b25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &796692949
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 796692947}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82af994fdc3ac8a4fbcf01295529c318, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetFlowchart: {fileID: 0}
-  fungusVariableName: isCalled
-  dialogInput: {fileID: 0}
-  settingPanel: {fileID: 1291858393}
-  audioMixer: {fileID: 24100000, guid: a5aecd8f294b4384a83c3cbaaf8b3189, type: 2}
-  bgmSlider: {fileID: 1624588815}
-  sfxSlider: {fileID: 960994840}
-  resolutionDropdown: {fileID: 173523154}
-  fullscreenToggle: {fileID: 91756392}
-  navigableElements:
-  - {fileID: 1624588815}
-  - {fileID: 960994840}
-  - {fileID: 173523154}
-  - {fileID: 91756392}
-  - {fileID: 1218806930}
-  - {fileID: 2056273725}
-  mainMenuSceneName: MainMenuScene
 --- !u!224 &796692950
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3061,6 +3030,35 @@ RectTransform:
   m_AnchoredPosition: {x: 1567.8845, y: 881.93506}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &796692951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796692947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d81e9a0ed7ecbc046a318c8b5f1fbad8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiMode: 1
+  bgmSlider: {fileID: 1624588815}
+  sfxSlider: {fileID: 960994840}
+  resolutionDropdown: {fileID: 173523154}
+  fullscreenToggle: {fileID: 91756392}
+  mainMenuSceneName: MainMenuScene
+  panelRoot: {fileID: 1291858393}
+  targetFlowchart: {fileID: 0}
+  fungusVariableName: isCalled
+  dialogInput: {fileID: 0}
+  navigableElements:
+  - {fileID: 1624588815}
+  - {fileID: 960994840}
+  - {fileID: 173523154}
+  - {fileID: 91756392}
+  - {fileID: 1218806930}
+  - {fileID: 2056273725}
 --- !u!1 &798361309
 GameObject:
   m_ObjectHideFlags: 0
@@ -3573,7 +3571,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692949}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InGameSettingsPanel, Assembly-CSharp
         m_MethodName: SetSfxVolume
         m_Mode: 4
@@ -4253,8 +4251,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692949}
-        m_TargetAssemblyTypeName: InGameSettingsPanel, Assembly-CSharp
+      - m_Target: {fileID: 796692951}
+        m_TargetAssemblyTypeName: IntegratedSettingUI, Assembly-CSharp
         m_MethodName: BackToMainMenu
         m_Mode: 1
         m_Arguments:
@@ -5018,7 +5016,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692949}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: InGameSettingsPanel, Assembly-CSharp
         m_MethodName: SetBgmVolume
         m_Mode: 4
@@ -5546,7 +5544,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmList: []
-  footstepSound: {fileID: 0}
+  sfxList:
+  - {fileID: 8300000, guid: 6522a13f0cdd5fb42a8b4901bcf91a64, type: 3}
   delayBetweenSteps: 0.3
 --- !u!82 &1757817568
 AudioSource:
@@ -6419,8 +6418,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692949}
-        m_TargetAssemblyTypeName: InGameSettingsPanel, Assembly-CSharp
+      - m_Target: {fileID: 796692951}
+        m_TargetAssemblyTypeName: IntegratedSettingUI, Assembly-CSharp
         m_MethodName: ReturnToGame
         m_Mode: 1
         m_Arguments:

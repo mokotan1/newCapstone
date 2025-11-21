@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using System.Linq; // ★★★ 이 줄을 꼭 추가해주세요! ★★★
 
-public class SettingSceneManager : MonoBehaviour
+public class SettingManager : MonoBehaviour
 {
     [Header("UI Components")]
     public AudioMixer audioMixer;
