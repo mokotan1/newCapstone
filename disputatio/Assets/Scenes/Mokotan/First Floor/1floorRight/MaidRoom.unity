@@ -480,8 +480,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc0b45dd64b2189468ae92fafca738fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicToPlay: {fileID: 0}
-  footstepSound: {fileID: 8300000, guid: 7ca5a9710db4327439c9f8cb8204615e, type: 3}
+  bgmList: []
+  sfxList: []
   delayBetweenSteps: 0.3
 --- !u!82 &161529156
 AudioSource:
@@ -761,6 +761,7 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: 302cdbc4b289cd244a54196fac96319d, type: 2}
   targetFlowchart: {fileID: 285511112}
   fungusVariableName: GetFood
+  executeBlockName: 
 --- !u!1 &268507134
 GameObject:
   m_ObjectHideFlags: 0
@@ -1181,6 +1182,8 @@ GameObject:
   - component: {fileID: 285511290}
   - component: {fileID: 285511291}
   - component: {fileID: 285511292}
+  - component: {fileID: 285511294}
+  - component: {fileID: 285511293}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1201,11 +1204,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -30.06706, y: -244.49948}
+  scrollPos: {x: 23.976082, y: -79.16353}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
-  zoom: 0.85000014
+  zoom: 0.7900002
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1213,8 +1216,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 285511195}
-  selectedCommands: []
+  - {fileID: 285511151}
+  selectedCommands:
+  - {fileID: 285511294}
   variables:
   - {fileID: 285511159}
   - {fileID: 285511156}
@@ -1690,6 +1694,8 @@ MonoBehaviour:
   - {fileID: 285511292}
   - {fileID: 285511254}
   - {fileID: 285511247}
+  - {fileID: 285511294}
+  - {fileID: 285511293}
   - {fileID: 285511248}
   suppressAllAutoSelections: 0
 --- !u!114 &285511152
@@ -9458,6 +9464,79 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &285511293
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285511111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 345
+  indentLevel: 1
+  description: 
+  targetObject: {fileID: 251765670}
+  targetComponentAssemblyName: ItemPickup, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: ItemPickup
+  targetMethod: PickUpDirect
+  targetMethodText: 'PickUpDirect (): Void'
+  methodParameters: []
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
+--- !u!114 &285511294
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285511111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 343
+  indentLevel: 1
+  description: 
+  targetObject: {fileID: 6135082600380105302, guid: d165af602cb8f9d4799711789615e1eb, type: 3}
+  targetComponentAssemblyName: InventoryManager, Assembly-CSharp, Version=0.0.0.0,
+    Culture=neutral, PublicKeyToken=null
+  targetComponentFullname: 'UnityEngine.Component[]'
+  targetComponentText: InventoryManager
+  targetMethod: AddItem
+  targetMethodText: 'AddItem (Item): Void'
+  methodParameters:
+  - objValue:
+      typeAssemblyname: Item, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+        PublicKeyToken=null
+      typeFullname: Item
+      intValue: 0
+      boolValue: 0
+      floatValue: 0
+      stringValue: 
+      colorValue: {r: 0, g: 0, b: 0, a: 0}
+      gameObjectValue: {fileID: 0}
+      materialValue: {fileID: 0}
+      objectValue: {fileID: 11400000, guid: 302cdbc4b289cd244a54196fac96319d, type: 2}
+      spriteValue: {fileID: 0}
+      textureValue: {fileID: 0}
+      vector2Value: {x: 0, y: 0}
+      vector3Value: {x: 0, y: 0, z: 0}
+    variableKey: 
+  saveReturnValue: 0
+  returnValueVariableKey: 
+  returnValueType: System.Void
+  showInherited: 0
+  callMode: 0
 --- !u!1 &358870567
 GameObject:
   m_ObjectHideFlags: 0
@@ -14129,6 +14208,7 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: fdbb615d89f38ee478245637d6a26e32, type: 2}
   targetFlowchart: {fileID: 285511112}
   fungusVariableName: GetFilterCard
+  executeBlockName: 
 --- !u!1 &1907014995
 GameObject:
   m_ObjectHideFlags: 0
