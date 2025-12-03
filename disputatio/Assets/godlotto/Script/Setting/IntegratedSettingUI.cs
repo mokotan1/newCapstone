@@ -167,6 +167,8 @@ public class IntegratedSettingUI : MonoBehaviour
 
     public void BackToMainMenu()
     {
+        Time.timeScale = 1f;
+        
         if (uiMode == UIMode.StandaloneScene)
         {
             SceneManager.LoadScene(mainMenuSceneName);
@@ -181,8 +183,6 @@ public class IntegratedSettingUI : MonoBehaviour
     {
         Time.timeScale = 1f;
         if (targetFlowchart != null) targetFlowchart.SetBooleanVariable(fungusVariableName, false);
-
-        CleanupDontDestroyObjects();
         
         yield return null;
 

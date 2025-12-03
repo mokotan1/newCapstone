@@ -10,6 +10,11 @@ public class MainMenu : MonoBehaviour
     private int currentButtonIndex = 0;
     private Vector3 lastMousePosition;
 
+    void Awake() 
+    {
+        Time.timeScale = 1f; 
+    }
+
     void Start()
     {
         SetKeyboardMode();
