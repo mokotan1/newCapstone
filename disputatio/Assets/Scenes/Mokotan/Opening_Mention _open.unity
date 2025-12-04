@@ -2404,7 +2404,7 @@ MonoBehaviour:
   indentLevel: 0
   storyText: "\uC77C\uB2E8 \uB4E4\uC5B4\uAC00\uC790"
   description: 
-  character: {fileID: 1609836608}
+  character: {fileID: 0}
   portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
   voiceOverClip: {fileID: 0}
   showAlways: 1
@@ -2431,7 +2431,7 @@ MonoBehaviour:
   indentLevel: 0
   storyText: "\uC548 \uC5F4\uB9AC\uAE38 \uBC14\uB7AC\uB294\uB370..."
   description: 
-  character: {fileID: 1609836608}
+  character: {fileID: 0}
   portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
   voiceOverClip: {fileID: 0}
   showAlways: 1
@@ -2458,8 +2458,8 @@ MonoBehaviour:
   indentLevel: 1
   storyText: "\uCCA0\uCC3D\uC774 \uC5F4\uB838\uC73C\uB2C8 \uB4E4\uC5B4\uAC00\uBCF4\uC790."
   description: 
-  character: {fileID: 1609836608}
-  portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
+  character: {fileID: 0}
+  portrait: {fileID: 0}
   voiceOverClip: {fileID: 0}
   showAlways: 1
   showCount: 1
@@ -2486,8 +2486,8 @@ MonoBehaviour:
   storyText: "\uBC18\uC751\uC774 \uC5C6\uB2E4.  \n\uC544\uBB34\uB3C4 \uC0B4\uC9C0
     \uC54A\uB294 \uAC83 \uAC19\uB2E4.\n"
   description: 
-  character: {fileID: 1609836608}
-  portrait: {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
+  character: {fileID: 0}
+  portrait: {fileID: 0}
   voiceOverClip: {fileID: 0}
   showAlways: 1
   showCount: 1
@@ -4546,58 +4546,6 @@ MonoBehaviour:
   maxFrequency: 2
   minBrightness: 0.5
   maxBrightness: 1.5
---- !u!1 &1609836607
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1609836609}
-  - component: {fileID: 1609836608}
-  m_Layer: 0
-  m_Name: Character
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1609836608
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1609836607}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25fb867d2049d41f597aefdd6b19f598, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nameText: "\uC8FC\uC778\uACF5"
-  nameColor: {r: 1, g: 1, b: 1, a: 1}
-  soundEffect: {fileID: 0}
-  portraits:
-  - {fileID: -2563726732660702037, guid: 4d534136abddc514ea1dc856bb08a707, type: 3}
-  portraitsFace: 2
-  setSayDialog: {fileID: 0}
-  description: 
---- !u!4 &1609836609
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1609836607}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1772561401
 GameObject:
   m_ObjectHideFlags: 0
@@ -5828,7 +5776,6 @@ SceneRoots:
   - {fileID: 145574133}
   - {fileID: 1313011452}
   - {fileID: 1136372153}
-  - {fileID: 1609836609}
   - {fileID: 852837939}
   - {fileID: 1990788960}
   - {fileID: 99667454}
