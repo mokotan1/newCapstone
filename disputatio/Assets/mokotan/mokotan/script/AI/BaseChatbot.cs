@@ -10,44 +10,54 @@ using TMPro;
 
 public abstract class BaseChatbot : MonoBehaviour
 {
+    // --- 로컬 서버 설정 ---
+    [Header("Local AI Settings")]
+    [SerializeField] protected string localServerUrl = "http://localhost:5000/chat";
+
     // --- 공통 Unity & Fungus 연결 변수 ---
     [Header("Base Settings")]
     [SerializeField] protected SayDialog chatSayDialog;
+    [SerializeField] protected TMP_InputField targetInputField; 
 
-    // ▼▼▼ [수정됨] 애니메이션 설정 (Trigger 방식) ▼▼▼
     [Header("Animation Settings")]
     [SerializeField] protected Animator npcAnimator; 
-    [SerializeField] protected string talkTriggerName = "TalkTrigger"; // Bool이 아니라 Trigger 이름을 씁니다.
-
-    // --- 공통 OpenAI API 설정 ---
-    protected string API_KEY; 
-    [SerializeField] protected string modelName = "gpt-4o";
-    protected const string API_URL = "https://api.openai.com/v1/chat/completions";
+    [SerializeField] protected string talkTriggerName = "TalkTrigger";
 
     protected List<OpenAIMessage> chatHistory = new List<OpenAIMessage>();
     protected bool isRequestInProgress = false;
 
-    protected virtual void Awake()
+    [Serializable]
+    public class LocalLlamaPayload
     {
-        LoadAPIKey();
+        public string prompt;
+        public string system;
     }
+
+    [Serializable]
+    public class LocalLlamaResponse
+    {
+        public string response;
+    }
+
+    [Serializable]
+    public class OpenAIMessage
+    {
+        public string role;
+        public string content;
+    }
+
+    protected virtual void Awake() { }
 
     protected virtual void Start()
     {
         InitializeChatHistory();
     }
 
-    protected virtual void LoadAPIKey()
-    {
-        TextAsset keyFile = Resources.Load<TextAsset>("APIKey"); 
-        if (keyFile != null) API_KEY = keyFile.text.Trim(); 
-    }
-
     protected virtual void InitializeChatHistory()
     {
         chatHistory.Clear();
         TextAsset introTextAsset = Resources.Load<TextAsset>("introPrompt"); 
-        string basePrompt = introTextAsset != null ? introTextAsset.text : "You are a helpful assistant.";
+        string basePrompt = introTextAsset != null ? introTextAsset.text : "당신은 저택의 도우미입니다.";
         chatHistory.Add(new OpenAIMessage { role = "system", content = basePrompt });
     }
 
@@ -60,72 +70,70 @@ public abstract class BaseChatbot : MonoBehaviour
         }
     }
 
-    protected string ParseGPTResponse(string json)
-    {
-        try
-        {
-            OpenAIResponse response = JsonConvert.DeserializeObject<OpenAIResponse>(json);
-            return response.choices[0].message.content;
-        }
-        catch (Exception e)
-        {
-            return "답변 파싱 실패";
-        }
-    }
-
-    // --- 핵심 로직: API 요청 템플릿 ---
-    
     protected IEnumerator GetGPTResponse(string userMessage = null)
     {
         if (isRequestInProgress) yield break;
         isRequestInProgress = true;
 
-        // ▼▼▼ [핵심 수정] 요청 시작 시 애니메이션 1회 재생 ▼▼▼
-        if (npcAnimator != null)
-        {
-            // Trigger는 "한 번 실행하라"는 신호입니다.
-            npcAnimator.SetTrigger(talkTriggerName);
-        }
+        SetInputState(false);
 
-        Say("...", null); // 생각 중 표시
+        if (npcAnimator != null) npcAnimator.SetTrigger(talkTriggerName);
 
-        if (!string.IsNullOrEmpty(userMessage))
-        {
-            chatHistory.Add(new OpenAIMessage { role = "user", content = userMessage });
-        }
+        Say("...", null);
 
         string finalSystemPrompt = BuildFinalSystemPrompt();
 
-        List<OpenAIMessage> requestMessages = new List<OpenAIMessage>(chatHistory);
-        requestMessages[0] = new OpenAIMessage { role = "system", content = finalSystemPrompt };
-
-        OpenAIPayload payload = new OpenAIPayload { model = this.modelName, messages = requestMessages };
+        LocalLlamaPayload payload = new LocalLlamaPayload 
+        { 
+            prompt = userMessage ?? "", 
+            system = finalSystemPrompt 
+        };
         string payloadJson = JsonConvert.SerializeObject(payload);
 
-        using (UnityWebRequest request = new UnityWebRequest(API_URL, "POST"))
+        using (UnityWebRequest request = new UnityWebRequest(localServerUrl, "POST"))
         {
             byte[] bodyRaw = Encoding.UTF8.GetBytes(payloadJson);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
-            request.SetRequestHeader("Authorization", "Bearer " + API_KEY);
 
             yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("서버로부터 받은 원본 데이터: " + request.downloadHandler.text);
+    // ... 기존 코드
+            }
 
             string chatbotResponse;
             if (request.result != UnityWebRequest.Result.Success)
             {
-                chatbotResponse = "오류: " + request.error;
+                chatbotResponse = "로컬 서버 오류: " + request.error;
             }
             else
             {
-                chatbotResponse = ParseGPTResponse(request.downloadHandler.text);
+                LocalLlamaResponse responseData = JsonConvert.DeserializeObject<LocalLlamaResponse>(request.downloadHandler.text);
+                chatbotResponse = responseData.response;
+
+                if (!string.IsNullOrEmpty(userMessage))
+                    chatHistory.Add(new OpenAIMessage { role = "user", content = userMessage });
+                
                 chatHistory.Add(new OpenAIMessage { role = "assistant", content = chatbotResponse });
             }
 
             isRequestInProgress = false;
+            SetInputState(true);
 
             yield return StartCoroutine(HandleChatbotResponse(chatbotResponse));
+        }
+    }
+
+    private void SetInputState(bool state)
+    {
+        if (targetInputField != null)
+        {
+            targetInputField.interactable = state;
+            if (state) targetInputField.ActivateInputField();
         }
     }
 
