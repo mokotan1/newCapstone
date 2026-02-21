@@ -5,7 +5,7 @@ import json
 app = Flask(__name__)
 
 # Ollama 로컬 서버 주소 (기본값)
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://host.docker.internal:11434/api/generate"
 
 @app.route('/chat', methods=['POST'])
 def chat():

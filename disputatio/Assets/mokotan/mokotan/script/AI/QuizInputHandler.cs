@@ -28,11 +28,24 @@ public class QuizInputHandler : MonoBehaviour
         if (inputField != null)
         {
             inputField.onEndEdit.AddListener(OnInputSubmit); // 입력 완료 시 이벤트 등록
-            inputPanel.SetActive(false); // 시작 시 Input Field 비활성화
+            inputField.interactable = true; // 상호작용 강제 활성화
+            // inputPanel.SetActive(false); // [수정] 시작 시 자동 비활성화 제거 (테스트 및 버그 방지)
         }
         else
         {
             Debug.LogError("QuizInputHandler: InputField가 연결되지 않았습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 오브젝트가 활성화될 때마다 자동으로 포커스를 줍니다.
+    /// </summary>
+    void OnEnable()
+    {
+        if (inputField != null)
+        {
+            inputField.ActivateInputField();
+            inputField.Select();
         }
     }
 
