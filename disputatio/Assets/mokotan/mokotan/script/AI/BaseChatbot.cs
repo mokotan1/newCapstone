@@ -12,7 +12,7 @@ public abstract class BaseChatbot : MonoBehaviour
 {
     // --- 로컬 서버 설정 ---
     [Header("Local AI Settings")]
-    [SerializeField] protected string localServerUrl = "http://localhost:5000/chat";
+    [SerializeField] protected string localServerUrl = "https://newcapstone.onrender.com/chat";
 
     // --- 공통 Unity & Fungus 연결 변수 ---
     [Header("Base Settings")]
