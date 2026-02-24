@@ -21,9 +21,10 @@ public class MiniGameEnemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Projectile"))
+        // Projectile(발사체) 또는 Melee(휘두르기) 히트박스에 닿으면 소멸
+        if (other.CompareTag("Projectile") || other.CompareTag("Melee"))
         {
-            Destroy(other.gameObject);
+            if (other.CompareTag("Projectile")) Destroy(other.gameObject);
             Destroy(gameObject);
         }
     }
