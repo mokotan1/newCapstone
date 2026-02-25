@@ -2,15 +2,23 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using Random = UnityEngine.Random;
+using Unity.Cinemachine;
 
 public class MiniGameManager : MonoBehaviour
 {
     public static MiniGameManager Instance;
 
+    public CinemachineCamera vcam;
+
     [Header("Game Settings")]
     public float gameDuration = 60f;
     public int maxHealth = 5;
     public Vector2 mapSize = new Vector2(5000, 3000); // 전체 맵 사이즈 [cite: 64]
+
+    [Header("Cursor Settings")]
+    public Texture2D cursorTexture; // 조준경 이미지를 여기에 드래그하세요.
     
     [Header("Spawn Points")]
     public Vector3 playerSpawnPos = new Vector3(500, 1500, 0); 
@@ -32,6 +40,17 @@ public class MiniGameManager : MonoBehaviour
 
     void Start()
     {
+
+        if (cursorTexture != null)
+    {
+        // 1. 커서의 정중앙을 클릭 지점으로 설정 (이미지 크기의 절반)
+        Vector2 hotspot = new Vector2(cursorTexture.width / 2, cursorTexture.height / 2);
+        
+        // 2. 커서 변경
+        Cursor.SetCursor(cursorTexture, hotspot, CursorMode.Auto);
+    }
+
+
         currentHealth = maxHealth;
         
         // 1. 플레이어 소환
@@ -41,6 +60,14 @@ public class MiniGameManager : MonoBehaviour
         
         // 3. 적 스폰 시작
         StartCoroutine(EnemySpawner());
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0)) 
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+        }
     }
 
     // 플레이어 소환 로직 추가
@@ -54,6 +81,12 @@ public class MiniGameManager : MonoBehaviour
         else
         {
             Debug.LogError("Player Prefab이 할당되지 않았습니다!");
+        }
+
+        if (vcam != null)
+        {
+            vcam.Follow = playerInstance.transform;
+            // vcam.LookAt = newPlayer.transform; // 필요하다면 설정
         }
     }
 
