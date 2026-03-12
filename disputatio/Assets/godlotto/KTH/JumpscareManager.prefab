@@ -636,7 +636,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5118116236984760510
 Transform:
   m_ObjectHideFlags: 0
@@ -666,18 +666,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetScenes:
-  - sceneName: JumpscareTest2
+  - sceneName: Hall_Right
     spawnPosition: {x: 0, y: 0}
-    spawnChance: 30
+    spawnChance: 100
   - sceneName: JumpscareTest3
     spawnPosition: {x: 0, y: 0}
     spawnChance: 50
   - sceneName: JumpscareTest4
     spawnPosition: {x: 0, y: 0}
     spawnChance: 100
-  waitTimeToScare: 3
+  waitTimeToScare: 60
   animationDuration: 2
-  retrySceneName: JumpscareTest1
+  retrySceneName: Hall_playerble
   triggerButtonRect: {fileID: 7394643591348196865}
   jumpscareAnimator: {fileID: 3011508360203607437}
   gameOverPanel: {fileID: 8453333784470504461}
@@ -839,7 +839,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.000030517, y: -0.00041199}
-  m_SizeDelta: {x: 836, y: 470.33}
+  m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6089435870537133848
 CanvasRenderer:
