@@ -59,6 +59,8 @@ namespace Fungus
 
         protected virtual void OnMouseDown()
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+            
             if (!useEventSystem)
             {
                 DoPointerClick();
