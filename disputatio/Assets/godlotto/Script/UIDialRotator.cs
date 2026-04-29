@@ -49,18 +49,7 @@ public class UIDialRotator : MonoBehaviour
 
     private void OnEnable()
     {
-        var controller = Object.FindFirstObjectByType<UISafeLockController>(FindObjectsInactive.Exclude);
-        if (controller != null)
-        {
-            if (gameObject.name.Contains("L"))
-                onDigitChanged.AddListener(controller.OnLeftChanged);
-            else if (gameObject.name.Contains("M"))
-                onDigitChanged.AddListener(controller.OnMiddleChanged);
-            else if (gameObject.name.Contains("R"))
-                onDigitChanged.AddListener(controller.OnRightChanged);
-        }
-
-        // 🔹 이전 값 복원
+        // 이전 값 복원
         int saved = PlayerPrefs.GetInt(dialKey, 0);
         currentDigit = saved;
         finalDigit = saved;

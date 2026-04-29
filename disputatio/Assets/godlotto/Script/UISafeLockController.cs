@@ -5,98 +5,139 @@ using Fungus;
 
 public class UISafeLockController : MonoBehaviour
 {
-    [Header("다이얼 3개 연결")]
-    public UIDialRotator dialL;
-    public UIDialRotator dialM;
-    public UIDialRotator dialR;
+    [Header("다이얼 (1개)")]
+    public UIDialRotator dial;
 
-    [Header("숫자 텍스트 표시용")]
-    public TMP_Text textL;
-    public TMP_Text textM;
-    public TMP_Text textR;
+    [Header("정답 순서 — 왼쪽부터 차례대로 입력")]
+    public int[] targets = { 3, 0, 5 };
 
-    [Header("정답 조합 (예: 3-0-5)")]
-    public int leftTarget = 3;
-    public int middleTarget = 0;
-    public int rightTarget = 5;
+    [Header("단계 표시 UI (선택)")]
+    public TMP_Text stepIndicatorText;
+    public TMP_Text feedbackText;
 
     [Header("Fungus 연동 (선택)")]
     public Flowchart flowchart;
-    public string leftVar = "safeL_ok";
-    public string middleVar = "safeM_ok";
-    public string rightVar = "safeR_ok";
     public string allVar = "safe_all_ok";
 
     [Header("UI 토글 이미지")]
     public GameObject closedImage;
     public GameObject openImage;
 
-    [Header("금고가 열릴 때 호출되는 이벤트")]
+    [Header("이벤트")]
     public UnityEvent onUnlock;
+    public UnityEvent onStepCorrect;
+    public UnityEvent onWrong;
 
-    private bool lOK, mOK, rOK, unlocked;
-    private const string unlockKey = "SafeLock_Unlocked"; // PlayerPrefs 저장용 키
+    private int currentStep;
+    private int currentDialValue;
+    private bool unlocked;
+
+    private const string UnlockKey = "SafeLock_Unlocked";
+
+#if UNITY_EDITOR
+    [Header("Editor only")]
+    [SerializeField] private bool editorResetOnPlay;
+#endif
 
     private void Start()
     {
-        // 🔹 이전에 이미 금고가 열린 상태인지 확인
-        unlocked = PlayerPrefs.GetInt(unlockKey, 0) == 1;
-        if (unlocked)
+#if UNITY_EDITOR
+        if (editorResetOnPlay)
         {
-            GameLog.Log("🔓 금고는 이미 열린 상태 — Fungus 블록은 실행되지 않음");
+            PlayerPrefs.DeleteKey(UnlockKey);
+            PlayerPrefs.Save();
+            Debug.LogWarning("[Safe] 에디터 자동 초기화 완료");
         }
+#endif
+        unlocked = PlayerPrefs.GetInt(UnlockKey, 0) == 1;
+        currentStep = 0;
+        RefreshStepUI();
+
+        if (unlocked)
+            GameLog.Log("[Safe] 이미 열린 상태");
     }
 
-    public void OnLeftChanged(int val)
+    // UIDialRotator.onDigitChanged 에 인스펙터에서 연결
+    public void OnDialChanged(int val)
     {
-        if (textL) textL.text = val.ToString();
-        lOK = (val == leftTarget);
-        SetFungusBool(leftVar, lOK);
-        TryUnlock();
+        currentDialValue = val;
+        Debug.LogWarning($"[Safe] OnDialChanged 호출됨: val={val}");
     }
 
-    public void OnMiddleChanged(int val)
+    // 확인 버튼 onClick 에 연결
+    public void Confirm()
     {
-        if (textM) textM.text = val.ToString();
-        mOK = (val == middleTarget);
-        SetFungusBool(middleVar, mOK);
-        TryUnlock();
-    }
-
-    public void OnRightChanged(int val)
-    {
-        if (textR) textR.text = val.ToString();
-        rOK = (val == rightTarget);
-        SetFungusBool(rightVar, rOK);
-        TryUnlock();
-    }
-
-    private void TryUnlock()
-    {
-        // 🔸 이미 열린 상태라면 다시 블록 실행 안 함
+        Debug.LogWarning($"[Safe] Confirm 호출됨: unlocked={unlocked}, step={currentStep}, dialVal={currentDialValue}, target={targets[currentStep]}");
         if (unlocked) return;
 
-        if (lOK && mOK && rOK)
+        if (currentDialValue == targets[currentStep])
         {
-            unlocked = true;
-            PlayerPrefs.SetInt(unlockKey, 1);
-            PlayerPrefs.Save();
+            currentStep++;
+            onStepCorrect?.Invoke();
+            GameLog.Log($"[Safe] {currentStep}/{targets.Length} 단계 성공");
 
-            SetFungusBool(allVar, true);
-            OnUnlock();
+            if (currentStep >= targets.Length)
+                Unlock();
+            else
+                RefreshStepUI();
+        }
+        else
+        {
+            GameLog.Log($"[Safe] 틀림 — {currentDialValue} (정답 {targets[currentStep]}), 처음부터 다시");
+            currentStep = 0;
+            onWrong?.Invoke();
+            RefreshStepUI();
         }
     }
 
-    // 🔓 금고 해제 처리
-    public void OnUnlock()
+    private void Unlock()
     {
-        onUnlock?.Invoke(); // Fungus 블록 실행은 여기 이벤트로 연결
-        GameLog.Log("🔓 금고가 열렸습니다!");
+        unlocked = true;
+        PlayerPrefs.SetInt(UnlockKey, 1);
+        PlayerPrefs.Save();
+
+        if (flowchart != null)
+            flowchart.SetBooleanVariable(allVar, true);
+
+        if (closedImage != null) closedImage.SetActive(false);
+        if (openImage != null)   openImage.SetActive(true);
+
+        onUnlock?.Invoke();
+        GameLog.Log("[Safe] 금고 열림!");
     }
 
-    private void SetFungusBool(string name, bool value)
+    private void RefreshStepUI()
     {
-        if (flowchart == null) return;
-        flowchart.SetBooleanVariable(name, value);
+        if (stepIndicatorText != null)
+            stepIndicatorText.text = $"{currentStep + 1}  /  {targets.Length}";
+
+        if (feedbackText != null)
+            feedbackText.text = currentStep == 0
+                ? ""
+                : $"✓  {currentStep}번 맞음";
+    }
+
+#if UNITY_EDITOR
+    private void OnGUI()
+    {
+        GUIStyle style = new GUIStyle(GUI.skin.box);
+        style.fontSize = 20;
+        style.normal.textColor = Color.yellow;
+        GUI.Box(new Rect(10, 10, 220, 40),
+            $"[Safe] 단계: {currentStep + 1} / {targets.Length}  (입력값: {currentDialValue})",
+            style);
+    }
+#endif
+
+    // 에디터에서 금고 상태 초기화용
+    [ContextMenu("금고 초기화 (PlayerPrefs 삭제)")]
+    public void EditorResetLock()
+    {
+        PlayerPrefs.DeleteKey(UnlockKey);
+        PlayerPrefs.Save();
+        unlocked = false;
+        currentStep = 0;
+        RefreshStepUI();
+        GameLog.Log("[Safe] 금고 초기화됨");
     }
 }

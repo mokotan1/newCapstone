@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5928380123702945609}
   - component: {fileID: 5642465678383349190}
   - component: {fileID: 5608330549539343031}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: parret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 7896797202948666635}
   - component: {fileID: 888895032692916273}
   - component: {fileID: 5728027843630681072}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Parret_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,8 +222,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4793192168750313407}
-  - component: {fileID: 6802708330661122014}
-  m_Layer: 6
+  - component: {fileID: 3152938240249568413}
+  m_Layer: 0
   m_Name: chatbotManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -245,7 +245,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7817729329509741123}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6802708330661122014
+--- !u!114 &3152938240249568413
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -254,20 +254,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4108741738346859279}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbea7620df1cabb44b75933bd613cb99, type: 3}
+  m_Script: {fileID: 11500000, guid: 24484ed7dad2bb94da00886ff6e86546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   localServerUrl: http://15.134.24.132:8000/chat
   chatSayDialog: {fileID: 0}
   dialogAdvanceKey: 32
   userInputField: {fileID: 0}
-  globalFlowchart: {fileID: 0}
-  onEmotionTool:
-    m_PersistentCalls:
-      m_Calls: []
-  onGiveHintTool:
-    m_PersistentCalls:
-      m_Calls: []
+  wifeFlowchart: {fileID: 0}
 --- !u!1 &7860102386520925346
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +274,7 @@ GameObject:
   - component: {fileID: 5476230669723379118}
   - component: {fileID: 8704331588156109121}
   - component: {fileID: 1141905689238716972}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Backspace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -412,6 +406,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: InputPanelNotebook
       objectReference: {fileID: 0}
+    - target: {fileID: 40001, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 40002, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -492,6 +490,38 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 40011, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40021, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40031, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40041, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40051, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40061, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40071, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 40081, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 40085, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
@@ -500,10 +530,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 40085, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 6802708330661122014}
     - target: {fileID: 40085, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -519,6 +545,10 @@ PrefabInstance:
     - target: {fileID: 40085, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 40091, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 40094, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_fontAsset

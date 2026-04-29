@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>말풍선 디자인 시안</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    font-family: 'Courier New', monospace;
+    color: #eee;
+    padding: 24px 16px 40px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 32px;
+    letter-spacing: 2px;
+  }
+
+  /* ── 카드 공통 ── */
+  .card {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 3px;
+    padding: 20px 20px 16px;
+    margin-bottom: 32px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .card:hover { border-color: #444; }
+  .card.selected { border-color: #c8a84b; }
+  .card.selected::after {
+    content: '✓ 선택됨';
+    position: absolute;
+    top: 12px; right: 16px;
+    font-size: 11px;
+    color: #c8a84b;
+    letter-spacing: 1px;
+  }
+  .card-label {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 16px;
+    color: #ddd;
+    font-weight: bold;
+    margin-bottom: 18px;
+  }
+  .card-desc {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.8;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  /* 게임 화면 시뮬레이터 */
+  .game-screen {
+    width: 100%;
+    aspect-ratio: 16/7;
+    background: linear-gradient(160deg, #0d0b18 0%, #1a0d0d 50%, #0b100d 100%);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #1a1a1a;
+  }
+  /* 배경 디테일 */
+  .game-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+  }
+  .bg-room {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(180deg, transparent 0%, rgba(10,6,20,0.6) 100%);
+  }
+  .bg-door {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15%;
+    height: 45%;
+    border: 1px solid rgba(80,60,40,0.4);
+    border-bottom: none;
+    background: rgba(15,10,8,0.5);
+  }
+  /* 앵무새 아이콘 (우하단) */
+  .parrot-icon {
+    position: absolute;
+    bottom: 16px;
+    right: 80px;
+    width: 48px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+  .parrot-body {
+    font-size: 36px;
+    line-height: 1;
+    filter: drop-shadow(0 0 8px rgba(0,200,150,0.3));
+  }
+
+  /* ══════════════════════════════════════
+     DESIGN A — "ZERO 클래식"
+     상단 전폭 얇은 바, 청록 이름
+     ══════════════════════════════════════ */
+  .dialog-a {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.94);
+    border-bottom: 1px solid rgba(0, 230, 200, 0.25);
+    display: flex;
+    align-items: stretch;
+    min-height: 80px;
+  }
+  .dialog-a-portrait {
+    width: 80px;
+    flex-shrink: 0;
+    background: rgba(0,220,190,0.06);
+    border-right: 1px solid rgba(0,220,190,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 0;
+  }
+  .dialog-a-portrait .bird { font-size: 26px; }
+  .dialog-a-portrait .name-tag {
+    font-size: 8px;
+    color: #00e5c8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .dialog-a-body {
+    flex: 1;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .dialog-a-speaker {
+    font-size: 9px;
+    color: #00e5c8;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .dialog-a-text {
+    font-size: 12px;
+    color: #e8e8e8;
+    line-height: 1.65;
+    letter-spacing: 0.5px;
+  }
+  .dialog-a-cursor {
+    display: inline-block;
+    width: 7px; height: 12px;
+    background: #00e5c8;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.9s step-end infinite;
+    opacity: 0.9;
+  }
+  .dialog-a-hint {
+    font-size: 9px;
+    color: rgba(0,229,200,0.35);
+    letter-spacing: 1px;
+    padding: 6px 16px 6px;
+    border-top: 1px solid rgba(0,229,200,0.08);
+    text-align: right;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ══════════════════════════════════════
+     DESIGN B — "네온 퍼플"
+     상단 중앙, 글로우 테두리, 보라 포인트
+     ══════════════════════════════════════ */
+  .dialog-b-wrap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 10px 24px 0;
+    display: flex;
+    justify-content: center;
+  }
+  .dialog-b {
+    background: #050508;
+    border: 1px solid #7b2fff;
+    box-shadow: 0 0 12px rgba(123,47,255,0.3), inset 0 0 20px rgba(123,47,255,0.04);
+    width: 100%;
+    position: relative;
+  }
+  .dialog-b::before, .dialog-b::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    border-color: #b06aff;
+    border-style: solid;
+  }
+  .dialog-b::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .dialog-b::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+  .dialog-b-top {
+    background: rgba(123,47,255,0.12);
+    border-bottom: 1px solid rgba(123,47,255,0.3);
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dialog-b-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #9b5aff;
+    box-shadow: 0 0 6px #9b5aff;
+  }
+  .dialog-b-speaker {
+    font-size: 9px;
+    color: #c090ff;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .dialog-b-body {
+    padding: 10px 14px 8px;
+  }
+  .dialog-b-text {
+    font-size: 12px;
+    color: #e0e0e0;
+    line-height: 1.65;
+    letter-spacing: 0.5px;
+  }
+  .dialog-b-cursor {
+    display: inline-block;
+    width: 6px; height: 11px;
+    background: #c090ff;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.9s step-end infinite;
+    box-shadow: 0 0 6px #9b5aff;
+  }
+  .dialog-b-bottom {
+    padding: 4px 14px 6px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .dialog-b-advance {
+    font-size: 9px;
+    color: rgba(176,106,255,0.4);
+    letter-spacing: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+
+  /* ══════════════════════════════════════
+     DESIGN C — "스캔라인 레드"
+     터미널 스타일, 빨간 포인트, 스캔라인
+     ══════════════════════════════════════ */
+  .dialog-c {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: #000;
+    border-bottom: 2px solid #cc1122;
+    position: relative;
+    overflow: hidden;
+  }
+  .dialog-c::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+  }
+  .dialog-c-topbar {
+    background: #cc1122;
+    padding: 3px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dialog-c-dots { display:flex; gap:4px; }
+  .dialog-c-dots span {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+  }
+  .dialog-c-bartitle {
+    font-size: 8px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+  .dialog-c-body {
+    padding: 10px 14px 8px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .dialog-c-prompt {
+    color: #cc1122;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    animation: flicker 4s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%,95%,100%{opacity:1}
+    96%{opacity:0.6}
+    97%{opacity:1}
+    98%{opacity:0.7}
+    99%{opacity:1}
+  }
+  .dialog-c-content { flex: 1; }
+  .dialog-c-speaker {
+    font-size: 9px;
+    color: #cc1122;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .dialog-c-text {
+    font-size: 12px;
+    color: #d8d8d8;
+    line-height: 1.65;
+    letter-spacing: 0.5px;
+  }
+  .dialog-c-cursor {
+    display: inline-block;
+    width: 7px; height: 12px;
+    background: #cc1122;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.9s step-end infinite;
+  }
+  .dialog-c-footer {
+    padding: 3px 14px 6px;
+    text-align: right;
+  }
+  .dialog-c-key {
+    display: inline-block;
+    font-size: 8px;
+    color: #cc1122;
+    border: 1px solid #cc1122;
+    padding: 1px 5px;
+    letter-spacing: 1px;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<h1>말풍선 디자인 시안</h1>
+<p class="subtitle">카타나 제로 스타일 · 화면 상단 고정 · 3종 비교 — 클릭해서 선택</p>
+
+<!-- ── A ── -->
+<div class="card" onclick="pick(this,'a')">
+  <div class="card-label">Option A</div>
+  <div class="card-title">ZERO 클래식 — 청록 라인</div>
+
+  <div class="game-screen">
+    <div class="bg-room"></div>
+    <div class="bg-door"></div>
+    <div class="parrot-icon"><div class="parrot-body">🦜</div></div>
+
+    <div class="dialog-a">
+      <div class="dialog-a-portrait">
+        <div class="bird">🦜</div>
+        <div class="name-tag">Chester</div>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column;">
+        <div class="dialog-a-body">
+          <div class="dialog-a-speaker">Chester · 체셔</div>
+          <div class="dialog-a-text">그 열쇠 말인가... 병 안에 있던 것 말이지. 물의 성질을 떠올려 보게.<div class="dialog-a-cursor"></div></div>
+        </div>
+        <div class="dialog-a-hint">SPACE · CLICK 으로 넘기기</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-desc">
+    전폭 얇은 바 · 좌측 초상 박스 · 청록(#00e5c8) 포인트<br>
+    깜빡이는 커서 · 하단 힌트 텍스트 · 카타나 제로 원본에 가장 가까운 형태
+  </div>
+</div>
+
+<!-- ── B ── -->
+<div class="card" onclick="pick(this,'b')">
+  <div class="card-label">Option B</div>
+  <div class="card-title">네온 퍼플 — 글로우 테두리</div>
+
+  <div class="game-screen">
+    <div class="bg-room"></div>
+    <div class="bg-door"></div>
+    <div class="parrot-icon"><div class="parrot-body">🦜</div></div>
+
+    <div class="dialog-b-wrap" style="position:absolute;top:0;left:0;right:0;padding:10px 20px 0;">
+      <div class="dialog-b" style="position:relative;">
+        <div class="dialog-b-top">
+          <div class="dialog-b-dot"></div>
+          <div class="dialog-b-dot" style="opacity:0.4"></div>
+          <div class="dialog-b-speaker">Chester · 체셔</div>
+        </div>
+        <div class="dialog-b-body">
+          <div class="dialog-b-text">그 열쇠 말인가... 병 안에 있던 것 말이지. 물의 성질을 떠올려 보게.<div class="dialog-b-cursor"></div></div>
+        </div>
+        <div class="dialog-b-bottom">
+          <div class="dialog-b-advance">▼ SPACE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-desc">
+    상단 여백 · 보라(#7b2fff) 글로우 테두리 · 코너 마크<br>
+    상단 이름 바 · 신비로운 분위기 · 현재 게임 오컬트 테마와 어울림
+  </div>
+</div>
+
+<!-- ── C ── -->
+<div class="card" onclick="pick(this,'c')">
+  <div class="card-label">Option C</div>
+  <div class="card-title">스캔라인 레드 — 터미널 스타일</div>
+
+  <div class="game-screen">
+    <div class="bg-room"></div>
+    <div class="bg-door"></div>
+    <div class="parrot-icon"><div class="parrot-body">🦜</div></div>
+
+    <div style="position:absolute;top:0;left:0;right:0;">
+      <div class="dialog-c">
+        <div class="dialog-c-topbar">
+          <div class="dialog-c-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="dialog-c-bartitle">CHESTER — 응답 수신 중</div>
+        </div>
+        <div class="dialog-c-body">
+          <div class="dialog-c-prompt">&gt;_</div>
+          <div class="dialog-c-content">
+            <div class="dialog-c-speaker">CHESTER</div>
+            <div class="dialog-c-text">그 열쇠 말인가... 병 안에 있던 것 말이지. 물의 성질을 떠올려 보게.<div class="dialog-c-cursor"></div></div>
+          </div>
+        </div>
+        <div class="dialog-c-footer">
+          <span class="dialog-c-key">SPACE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-desc">
+    빨간(#cc1122) 상단 바 · >_ 터미널 프롬프트 · 스캔라인 오버레이<br>
+    깜빡이는 레드 커서 · 긴장감 있는 심문·수사 분위기 · AI 응답 느낌 강조
+  </div>
+</div>
+
+<script>
+function pick(el, choice) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  if (window.__superpowers_select) window.__superpowers_select(choice, el.querySelector('.card-title').textContent);
+}
+</script>
+</body>
+</html>
