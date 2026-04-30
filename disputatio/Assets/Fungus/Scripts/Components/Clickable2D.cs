@@ -40,10 +40,11 @@ namespace Fungus
             if (InteractionLock.IsLocked)
                 return;
 
-            InteractionLock.AcquireForClick();
+            InteractionLock.AcquireForClick(this);
 
             var eventDispatcher = FungusManager.Instance.EventDispatcher;
             eventDispatcher.Raise(new ObjectClicked.ObjectClickedEvent(this));
+            InteractionLock.OnRaiseCompletedForWorldClick();
         }
 
         protected virtual void DoPointerEnter()
