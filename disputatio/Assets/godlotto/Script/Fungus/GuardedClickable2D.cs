@@ -243,11 +243,13 @@ namespace Godlotto.FungusIntegration
 
         protected override void DoPointerClick()
         {
+            // 전역 잠금을 먼저 확인해 쿨다운 타이머를 소모하지 않음
+            if (InteractionLock.IsLocked)
+                return;
+
             float t = Time.unscaledTime;
             if (t - lastClickUnscaledTime < cooldownSeconds)
-            {
                 return;
-            }
 
             lastClickUnscaledTime = t;
             base.DoPointerClick();

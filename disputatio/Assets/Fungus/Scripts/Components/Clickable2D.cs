@@ -35,12 +35,14 @@ namespace Fungus
         protected virtual void DoPointerClick()
         {
             if (!clickEnabled)
-            {
                 return;
-            }
+
+            if (InteractionLock.IsLocked)
+                return;
+
+            InteractionLock.AcquireForClick();
 
             var eventDispatcher = FungusManager.Instance.EventDispatcher;
-
             eventDispatcher.Raise(new ObjectClicked.ObjectClickedEvent(this));
         }
 
@@ -59,12 +61,30 @@ namespace Fungus
 
         protected virtual void OnMouseDown()
         {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
-            
-            if (!useEventSystem)
+            if (useEventSystem) return;
+
+            // UI 레이어가 포인터를 가로막아도, 이 오브젝트의 2D 콜라이더가
+            // 포인터 아래에 있으면 클릭을 허용합니다.
+            // (전체화면 투명 UI에 의한 클릭 차단 문제 방지)
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             {
-                DoPointerClick();
+                if (!IsOurColliderUnderPointer())
+                    return;
             }
+
+            DoPointerClick();
+        }
+
+        protected virtual bool IsOurColliderUnderPointer()
+        {
+            Camera cam = Camera.main;
+            if (cam == null) return false;
+            Vector2 world = cam.ScreenToWorldPoint(Input.mousePosition);
+            var colliders = GetComponentsInChildren<Collider2D>(false);
+            foreach (var c in colliders)
+                if (c != null && c.enabled && c.OverlapPoint(world))
+                    return true;
+            return false;
         }
 
         protected virtual void OnMouseEnter()
