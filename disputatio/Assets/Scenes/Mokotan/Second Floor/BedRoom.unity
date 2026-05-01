@@ -1255,8 +1255,6 @@ GameObject:
   - component: {fileID: 687597812}
   - component: {fileID: 687597813}
   - component: {fileID: 687597815}
-  - component: {fileID: 687597817}
-  - component: {fileID: 687597818}
   - component: {fileID: 687597819}
   - component: {fileID: 687597822}
   - component: {fileID: 687597821}
@@ -1321,6 +1319,7 @@ GameObject:
   - component: {fileID: 687597888}
   - component: {fileID: 687597886}
   - component: {fileID: 687597892}
+  - component: {fileID: 687597893}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1341,7 +1340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 183.81766, y: 41.514393}
+  scrollPos: {x: 185.24889, y: 42.39616}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -2872,20 +2871,6 @@ MonoBehaviour:
     booleanRef: {fileID: 0}
     booleanVal: 1
   targetGameObjectOLD: {fileID: 0}
---- !u!114 &687597893
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93cb9773f2ca04e2bbf7a68ccfc23267, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  itemId: 300
-  indentLevel: 0
 --- !u!114 &687597798
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3270,7 +3255,7 @@ MonoBehaviour:
   useCustomTint: 0
   itemId: 174
   blockName: Book_Yes
-  description:
+  description: 
   eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597813}
@@ -3297,7 +3282,7 @@ MonoBehaviour:
   useCustomTint: 0
   itemId: 175
   blockName: Book_No
-  description:
+  description: 
   eventHandler: {fileID: 0}
   commandList: []
   suppressAllAutoSelections: 0
@@ -3340,44 +3325,6 @@ MonoBehaviour:
     floatRef: {fileID: 0}
     floatVal: 0.1
   durationOLD: 0
---- !u!114 &687597817
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 181
-  indentLevel: 0
-  targetObjects:
-  - {fileID: 0}
-  interactableState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
---- !u!114 &687597818
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 182
-  indentLevel: 0
-  targetObjects:
-  - {fileID: 0}
-  interactableState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
 --- !u!114 &687597819
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7605,6 +7552,20 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 1458955814}
   waitFrames: 1
+--- !u!114 &687597893
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93cb9773f2ca04e2bbf7a68ccfc23267, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 300
+  indentLevel: 0
 --- !u!1 &709346019
 GameObject:
   m_ObjectHideFlags: 0
@@ -8161,12 +8122,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 009665f9edab7ce4fa70d08f9cbff703, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   isCookbookPanel: 0
   puzzleBookTxt: {fileID: 0}
   autoMapPuzzleBook: 0
-  puzzleBookResourceKey:
+  puzzleBookResourceKey: 
   overlayFont: {fileID: 0}
   puzzleBookLeftPivot: {x: 0.5, y: 1}
   puzzleBookRightPivot: {x: 0.5, y: 0.5}
@@ -8267,8 +8228,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
@@ -8342,8 +8303,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 0
@@ -9179,21 +9140,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1458955814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1458955810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  clickEnabled: 1
-  hoverCursor: {fileID: 0}
-  useEventSystem: 1
 --- !u!1 &1458955810
 GameObject:
   m_ObjectHideFlags: 0
@@ -9271,6 +9217,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458955810}
   m_CullTransparentMesh: 1
+--- !u!114 &1458955814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458955810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickEnabled: 1
+  hoverCursor: {fileID: 0}
+  useEventSystem: 1
 --- !u!1001 &1488779227
 PrefabInstance:
   m_ObjectHideFlags: 0
