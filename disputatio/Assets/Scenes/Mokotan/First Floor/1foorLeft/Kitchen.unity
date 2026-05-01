@@ -1218,7 +1218,6 @@ GameObject:
   - component: {fileID: 290853972}
   - component: {fileID: 290853979}
   - component: {fileID: 290853981}
-  - component: {fileID: 290853985}
   - component: {fileID: 290853982}
   - component: {fileID: 290853983}
   - component: {fileID: 290853984}
@@ -4944,7 +4943,6 @@ MonoBehaviour:
   - {fileID: 290854237}
   - {fileID: 290854277}
   - {fileID: 290854276}
-  - {fileID: 290853985}
   - {fileID: 290854213}
   - {fileID: 290853982}
   suppressAllAutoSelections: 0
@@ -4957,22 +4955,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 290853875}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
+  m_Script: {fileID: 11500000, guid: 050fb9e6e72f442b3b883da8a965bdeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: 95
   indentLevel: 1
-  text: "\uAC00\uC838\uAC04\uB2E4."
-  description: 
+  targetFlowchart: {fileID: 290853876}
   targetBlock: {fileID: 290853983}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
+  startLabel:
+    stringRef: {fileID: 0}
+    stringVal: 
+  startIndex: 0
+  callMode: 0
 --- !u!114 &290853983
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5053,33 +5047,6 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
---- !u!114 &290853985
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec422cd568a9c4a31ad7c36d0572b9da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 94
-  indentLevel: 1
-  storyText: "\uC5F4\uC1E0\uB97C \uAC00\uC838\uAC08\uAE4C?"
-  description: 
-  character: {fileID: 0}
-  portrait: {fileID: 0}
-  voiceOverClip: {fileID: 0}
-  showAlways: 1
-  showCount: 1
-  extendPrevious: 0
-  fadeWhenDone: 1
-  waitForClick: 1
-  stopVoiceover: 1
-  waitForVO: 0
-  setSayDialog: {fileID: 0}
 --- !u!114 &290853987
 MonoBehaviour:
   m_ObjectHideFlags: 2

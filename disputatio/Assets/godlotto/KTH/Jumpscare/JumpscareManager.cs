@@ -197,7 +197,29 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
                 return entry.spawnPosition;
         }
 
+        // 오른쪽 복도 분기 직전 유령이 카메라 중심 대비 위로 떠 보이는 경우가 많아 기본 오프셋을 내립니다.
+        // 인스펙터의 autoRegisteredSpawnPositionOverrides로 씬별 미세 조정 가능합니다.
+        if (string.Equals(sceneName, SceneNames.HallRight, StringComparison.Ordinal))
+            return new Vector2(0f, -2.75f);
+
         return defaultAutoRegisteredSpawnPosition;
+    }
+
+    /// <summary>
+    /// 유령 트리거가 노출된 상태 또는 점프스케어 연출 중에는 지도 등 게임플레이 UI를 막습니다.
+    /// </summary>
+    public bool IsGhostEncounterBlockingMapUi()
+    {
+        if (isJumpscareInProgress)
+            return true;
+
+        if (triggerObject == null || !triggerObject.activeSelf)
+            return false;
+
+        if (triggerSpriteRenderer != null)
+            return triggerSpriteRenderer.enabled;
+
+        return triggerCollider != null && triggerCollider.enabled;
     }
 
     private void OnEnable()

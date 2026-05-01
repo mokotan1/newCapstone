@@ -12,6 +12,15 @@ public class ClickEffectPlayer : MonoBehaviour
     {
         // 씬이 로드되거나 오브젝트가 활성화될 때 한 번 실행
         FindMainCamera();
+
+        // 이 오브젝트 자신과 자식의 모든 렌더러를 최상위 레이어로 설정
+        foreach (var r in GetComponentsInChildren<Renderer>(true))
+        {
+            r.sortingLayerName = "Setting";
+            r.sortingOrder = 100;
+        }
+
+        SetParticleSystemsUseUnscaledTime(gameObject);
     }
 
     // "EffectCamera" 태그를 가진 카메라를 찾는 함수
@@ -38,6 +47,8 @@ public class ClickEffectPlayer : MonoBehaviour
         }
     }
 
+    private GameObject activeClickEffect;
+
     void Update()
     {
         // 씬 이동 등으로 카메라가 사라졌을 경우 다시 찾도록 시도
@@ -55,10 +66,49 @@ public class ClickEffectPlayer : MonoBehaviour
             Vector3 clickPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
 
             // 5. 2D 게임이나 UI처럼 보이게 하려면 Z축 위치를 고정
-            clickPosition.z = 0; 
+            clickPosition.z = 0;
 
             // 6. 프리팹을 클릭 위치에 생성(Instantiate)
-            Instantiate(clickEffectPrefab, clickPosition, Quaternion.identity);
+            if (activeClickEffect != null) Destroy(activeClickEffect);
+            activeClickEffect = Instantiate(clickEffectPrefab, clickPosition, Quaternion.identity);
+            ConfigureFxInstance(activeClickEffect);
+        }
+
+        // 마우스를 떼는 순간 이펙트 제거 (패널 닫힌 후에도 파티클이 남지 않도록)
+        if (Input.GetMouseButtonUp(0))
+        {
+            if (activeClickEffect != null)
+            {
+                Destroy(activeClickEffect);
+                activeClickEffect = null;
+            }
+        }
+    }
+
+    private static void ConfigureFxInstance(GameObject effect)
+    {
+        SetEffectTopSorting(effect);
+        SetParticleSystemsUseUnscaledTime(effect);
+    }
+
+    private static void SetEffectTopSorting(GameObject effect)
+    {
+        if (effect == null) return;
+        foreach (var psr in effect.GetComponentsInChildren<ParticleSystemRenderer>(true))
+        {
+            psr.sortingLayerName = "Setting";
+            psr.sortingOrder = 100;
+        }
+    }
+
+    /// <summary>Time.timeScale=0 일 때도 클릭 파티클이 재생되게 함.</summary>
+    private static void SetParticleSystemsUseUnscaledTime(GameObject root)
+    {
+        if (root == null) return;
+        foreach (var ps in root.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var main = ps.main;
+            main.useUnscaledTime = true;
         }
     }
 }
