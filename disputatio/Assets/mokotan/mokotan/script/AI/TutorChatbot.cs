@@ -573,6 +573,9 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
         if (quizInputHandler != null)
             quizInputHandler.DeactivateQuizInputPanel();
 
+        // 퀴즈 블록이 Clickable2D 잠금 경로를 타지 않아 InteractionLock이 남는 경우 방 클릭이 막힐 수 있음
+        InteractionLock.ForceUnlock();
+
         if (chatSayDialog == null)
             return;
         chatSayDialog.Stop();

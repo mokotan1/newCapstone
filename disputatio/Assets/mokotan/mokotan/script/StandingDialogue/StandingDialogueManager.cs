@@ -211,6 +211,14 @@ namespace Mokotan.StandingDialogue
             _fadeAllRoutine = StartCoroutine(HideAllRoutine());
         }
 
+        /// <summary>스탠딩 초상화 없이 독백만 출력할 때 슬롯을 비웁니다.</summary>
+        public void ClearStandingCharacterSlots()
+        {
+            EnsureCanvasVisible();
+            ResetSlot(leftCharImage);
+            ResetSlot(rightCharImage);
+        }
+
         public void ShowCharacter(Side side, Sprite sprite)
         {
             var img = GetCharImage(side);

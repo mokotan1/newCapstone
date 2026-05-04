@@ -45,4 +45,13 @@ public sealed class StandingDialogueManagerTests
         Object.DestroyImmediate(go1);
         Object.DestroyImmediate(go2);
     }
+
+    [Test]
+    public void ClearStandingCharacterSlots_DoesNotThrow_WhenImagesUnset()
+    {
+        var go = new GameObject(nameof(ClearStandingCharacterSlots_DoesNotThrow_WhenImagesUnset));
+        StandingDialogueManager mgr = go.AddComponent<StandingDialogueManager>();
+        Assert.DoesNotThrow(() => mgr.ClearStandingCharacterSlots());
+        Object.DestroyImmediate(go);
+    }
 }

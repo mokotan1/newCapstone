@@ -60,6 +60,12 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
         if (panelToActivate == null || !panelToActivate.activeInHierarchy)
             return;
 
+        if (IsJumpscareBlockingMap())
+        {
+            OnCloseMapClick();
+            return;
+        }
+
         if (globalFlowchart == null)
             FindGlobalManager();
 
@@ -100,6 +106,9 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
 
     public void OnOpenMapClick()
     {
+        if (IsJumpscareBlockingMap())
+            return;
+
         if (targetCanvas == null) RefreshReferences();
 
         if (panelToActivate != null && targetCanvas != null)
@@ -206,5 +215,11 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
 
         // 2) 변수 항목 누락/씬 교체 시에도 Fungus 전역 저장소를 fallback으로 조회
         return FlowchartLocator.GetFungusGlobalBoolean(key);
+    }
+
+    private static bool IsJumpscareBlockingMap()
+    {
+        JumpscareManager j = JumpscareManager.Instance;
+        return j != null && j.IsGhostEncounterBlockingMapUi();
     }
 }
