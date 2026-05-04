@@ -1,0 +1,87 @@
+name: Deploy backend
+
+on:
+  workflow_run:
+    workflows: ["Backend Build"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Image SHA to deploy (empty = triggering commit HEAD)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (for rollout reference scripts in repo history)
+        uses: actions/checkout@v4
+
+      - name: Resolve target SHA
+        id: sha
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_SHA: ${{ github.event.inputs.sha }}
+          WORKFLOW_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            if [ -n "${INPUT_SHA}" ]; then
+              echo "value=${INPUT_SHA}" >> "$GITHUB_OUTPUT"
+            else
+              echo "value=${DISPATCH_SHA}" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "value=${WORKFLOW_HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          NEW_SHA: ${{ steps.sha.outputs.value }}
+          HEALTH_URL: ${{ secrets.DEPLOY_HEALTHCHECK_URL }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: NEW_SHA,HEALTH_URL
+          script: |
+            set -euo pipefail
+            cd /opt/newcapstone || exit 1
+            export DEPLOY_HEALTHCHECK_URL="${HEALTH_URL:-}"
+
+            OLD_SHA="$(grep '^IMAGE_TAG' .env | cut -d= -f2- || echo latest)"
+            NEW_SHA="${NEW_SHA}"
+            echo "Deploying ${OLD_SHA} -> ${NEW_SHA}"
+
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${NEW_SHA}/" .env
+            docker compose pull
+            docker compose up -d --remove-orphans
+
+            ./scripts/postdeploy_healthcheck.sh || {
+              echo "::error::Health check failed, rolling back to ${OLD_SHA}"
+              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${OLD_SHA}/" .env
+              docker compose pull
+              docker compose up -d --remove-orphans
+              exit 1
+            }
+
+            printf '%s\n' "${NEW_SHA}" > .last_good_sha
+            echo "Deploy OK: ${NEW_SHA}"
