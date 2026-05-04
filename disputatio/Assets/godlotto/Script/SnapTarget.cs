@@ -21,6 +21,17 @@ public class SnapTarget : MonoBehaviour
         return acceptKind == SnapKind.Any || acceptKind == d.kind;
     }
 
+    private void OnEnable()
+    {
+        int expected = LayerMask.NameToLayer("SnapTarget");
+        if (expected >= 0 && gameObject.layer != expected)
+        {
+            Debug.LogWarning(
+                $"[SnapTarget] '{name}' is on layer '{LayerMask.LayerToName(gameObject.layer)}' " +
+                "(expected 'SnapTarget') — DragManager2D will skip it.", this);
+        }
+    }
+
     private void OnDrawGizmos()
     {
         if (!TryGetComponent<BoxCollider2D>(out var box))
