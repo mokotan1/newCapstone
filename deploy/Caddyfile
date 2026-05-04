@@ -1,0 +1,9 @@
+# Replace api.example.com with your real hostname; DNS A record must point to the VM IP
+# before Caddy can obtain Let's Encrypt certificates.
+#
+# Domain-less option: replace the block below with `:80 { reverse_proxy backend:8000 }`
+
+api.example.com {
+	reverse_proxy backend:8000
+	encode zstd gzip
+}
