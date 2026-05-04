@@ -92,3 +92,5 @@ Unity 클라이언트의 `BaseChatbot.localServerUrl` 은 배포한 서버 주�
 - `data/tutor_rag_index.json` — 임베딩 인덱스 (`build_tutor_rag_index.py`로 생성)
 - `scripts/build_tutor_rag_index.py`, `scripts/validate_quiz_bank.py`
 - `services/tutor_rag_service.py`, `services/quiz_bank.py`, `services/answer_grader.py`, `services/quiz_validation.py`
+
+<!-- Touched to validate backend-build workflow path filters in CI. -->

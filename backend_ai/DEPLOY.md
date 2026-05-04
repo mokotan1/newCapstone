@@ -36,3 +36,20 @@
 | `capstone` | 레거시 Groq 키 (`GROQ_API_KEY` 가 비었을 때만) |
 
 키는 **절대** 저장소에 넣지 말고, 위 경로로만 배포하세요.
+
+## 4. GitHub Container Registry 에서 이미지 받기
+
+CI 가 main 에 머지될 때마다 다음 두 태그로 이미지를 푸시합니다:
+
+- `ghcr.io/<owner>/newcapstone-ai:<commit-sha>` — 특정 커밋의 재현 가능한 빌드
+- `ghcr.io/<owner>/newcapstone-ai:latest` — main 의 최신 이미지
+
+사용 예:
+
+```bash
+docker pull ghcr.io/<owner>/newcapstone-ai:latest
+docker run -e GROQ_API_KEY=... -e GOOGLE_API_KEY=... -p 8000:8000 \
+  ghcr.io/<owner>/newcapstone-ai:latest
+```
+
+`<owner>` 는 이 저장소 owner 의 GitHub 사용자/조직명입니다.
