@@ -196,7 +196,7 @@ async def test_second_turn_system_includes_quiz_bank_block(tmp_path: Path) -> No
         )
     )
     assert prov.last_messages is not None
-    system = prov.last_messages[0]["content"]
-    assert "[문제 은행" in system
-    assert "Q1" in system
-    assert "다윗이 이긴 거인 이름은?" in system
+    user_bundle = "\n".join(m["content"] for m in prov.last_messages if m["role"] == "user")
+    assert "[문제 은행" in user_bundle
+    assert "Q1" in user_bundle
+    assert "다윗이 이긴 거인 이름은?" in user_bundle

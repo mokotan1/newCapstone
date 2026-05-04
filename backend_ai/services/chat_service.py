@@ -4,6 +4,7 @@ import logging
 from typing import AsyncIterator
 
 from config import Settings
+from llm_defense.message_builder import build_llm_messages
 from models.requests import ChatRequest
 from models.responses import ChatResponse, FunctionCallResult, SSEEvent
 from providers.base import AIProvider
@@ -61,13 +62,22 @@ class ChatService:
         "텍스트 응답과 tool 호출은 완전히 분리되어야 합니다."
     )
 
-    def _compose_system(self, request: ChatRequest) -> str:
-        if request.rag_profile != "tutor":
-            return request.system
+    def _limits(self) -> tuple[int, int, int]:
         if self._app_settings is None:
-            return request.system
+            return (4096, 16000, 12000)
+        return (
+            self._app_settings.chat_max_prompt_chars,
+            self._app_settings.chat_max_client_system_chars,
+            self._app_settings.chat_max_external_document_chars,
+        )
 
-        blocks: list[str] = []
+    def _gather_external_documents(self, request: ChatRequest) -> list[tuple[str, str]]:
+        docs: list[tuple[str, str]] = []
+        if request.rag_profile != "tutor":
+            return docs
+        if self._app_settings is None:
+            return docs
+
         if self._tutor_rag:
             q = (request.rag_query or request.prompt).strip()
             top_k = request.rag_top_k or self._app_settings.tutor_rag_top_k
@@ -76,25 +86,28 @@ class ChatService:
                 top_k=top_k,
                 max_context_chars=self._app_settings.tutor_rag_max_context_chars,
             )
-            if rag:
-                blocks.append(rag)
+            if rag.strip():
+                docs.append(("tutor_rag", rag))
 
         if self._quiz_bank and request.current_question_id:
             row = self._quiz_bank.get(request.current_question_id)
             if row:
-                blocks.append(self._quiz_bank.format_bank_context_block(row))
-
-        blocks.append(request.system)
-        return "\n\n".join(blocks)
+                docs.append(("quiz_bank", self._quiz_bank.format_bank_context_block(row)))
+        return docs
 
     def _build_messages(self, request: ChatRequest) -> list[dict]:
-        system_content = self._compose_system(request)
-        if request.use_tools and len(self._registry) > 0:
-            system_content += self._TOOL_INSTRUCTION
-        return [
-            {"role": "system", "content": system_content},
-            {"role": "user", "content": request.prompt},
-        ]
+        mp, ms, mx = self._limits()
+        external = self._gather_external_documents(request)
+        tool_inst = self._TOOL_INSTRUCTION if request.use_tools and len(self._registry) > 0 else None
+        return build_llm_messages(
+            client_system_raw=request.system,
+            user_prompt_raw=request.prompt,
+            external_documents=external,
+            server_tool_instruction=tool_inst,
+            max_prompt_chars=mp,
+            max_client_system_chars=ms,
+            max_external_doc_chars=mx,
+        )
 
     def _get_tools(self, request: ChatRequest) -> list[dict] | None:
         if not request.use_tools or len(self._registry) == 0:
@@ -102,13 +115,14 @@ class ChatService:
         return self._registry.get_all_openai_format()
 
     def _max_tokens_for_request(self, request: ChatRequest) -> int:
-        base = self._max_tokens
-        if self._app_settings is None or request.rag_profile != "tutor":
-            return base
-        cap = self._app_settings.tutor_chat_max_tokens
-        if cap <= 0:
-            return base
-        return min(base, cap)
+        cap = self._max_tokens
+        if self._app_settings is not None:
+            cap = min(cap, self._app_settings.max_tokens_hard_cap)
+        if self._app_settings is not None and request.rag_profile == "tutor":
+            tcap = self._app_settings.tutor_chat_max_tokens
+            if tcap > 0:
+                cap = min(cap, tcap)
+        return max(1, cap)
 
     def _apply_tutor_quiz_override(self, request: ChatRequest, result: ChatResponse) -> ChatResponse:
         """If CSV grader says correct, force update_quiz.is_correct True."""

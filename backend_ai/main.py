@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from config import get_settings
@@ -14,6 +16,8 @@ from providers.groq_provider import GroqProvider
 from providers.gemini_provider import GeminiProvider
 from services.chat_service import ChatService
 from services.quiz_bank import QuizBank
+from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
+from services.rate_limit import build_rate_limiter
 from services.tutor_grade import grade_tutor_answer
 from services.tutor_rag_service import TutorRAGService
 from tools.game_tools import GAME_TOOLS
@@ -21,8 +25,6 @@ from tools.registry import ToolRegistry
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = FastAPI(title="Disputatio AI Backend")
 
 # ---------------------------------------------------------------------------
 # Bootstrap
@@ -65,6 +67,29 @@ chat_service: ChatService | None = (
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    limiter = build_rate_limiter(
+        enabled=settings.rate_limit_enabled,
+        redis_url=settings.redis_url,
+        key_prefix="rl:capstone",
+    )
+    configure_rate_guard(settings, limiter)
+    if settings.rate_limit_enabled and not settings.redis_url.strip():
+        logger.warning(
+            "REDIS_URL unset — using in-process rate limiter only (not suitable for multi-replica).",
+        )
+    try:
+        yield
+    finally:
+        closer = getattr(limiter, "close", None)
+        if closer:
+            await closer()
+
+
+app = FastAPI(title="Disputatio AI Backend", lifespan=lifespan)
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -74,12 +99,14 @@ def health_check():
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: Request, payload: ChatRequest):
     """Backward-compatible endpoint: returns full response + function_calls at once."""
     if chat_service is None:
         raise HTTPException(status_code=500, detail="API 키 설정 필요")
 
-    result = await chat_service.chat(request)
+    await enforce_chat_rate_limits(request, payload)
+
+    result = await chat_service.chat(payload)
 
     if not result.response and not result.function_calls:
         raise HTTPException(status_code=500, detail="모든 AI 엔진 실패")
@@ -95,13 +122,15 @@ async def tutor_grade(request: TutorGradeRequest):
 
 
 @app.post("/chat/stream")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(request: Request, payload: ChatRequest):
     """SSE streaming endpoint – tokens arrive in real-time."""
     if chat_service is None:
         raise HTTPException(status_code=500, detail="API 키 설정 필요")
 
+    await enforce_chat_rate_limits(request, payload)
+
     async def event_generator():
-        async for event in chat_service.stream_chat(request):
+        async for event in chat_service.stream_chat(payload):
             yield f"data: {event.model_dump_json()}\n\n"
 
     return StreamingResponse(
