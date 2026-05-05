@@ -8,14 +8,14 @@ using UnityEngine.Rendering.Universal;
 public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareManager>
 {
     public static event Action OnPlayerDied;
-    public static event Action OnEnemyAppeared; // 추가: 적이 스폰되었을 때
-    public static event Action OnJumpscareReset; // 추가: 상태가 초기화될 때 (씬 이동 등)
+    public static event Action OnEnemyAppeared;
+    public static event Action OnJumpscareReset;
 
     [Header("눈깜빡임 오버레이 (SpriteRenderer)")]
     [Tooltip("카메라 앞에 배치할 전체화면 눈깜빡임 Sprite")]
     public SpriteRenderer blinkOverlay;
 
-    [Header("효과 설정 (블러)")]
+    [Header("효과 설정 (블러 등)")]
     public Volume globalVolume;
 
     [Header("시간 및 확률 설정")]
@@ -25,6 +25,14 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     public float blinkDuration = 0.2f;
     public float closedDuration = 0.1f;
     public string retrySceneName = SceneNames.MainScene;
+
+    [Header("공포 연출 (지연 효과)")]
+    [Tooltip("트리거 발동 후 효과가 시작되기까지의 지연 시간")]
+    public float horrorEffectDelay = 0.5f;
+    [Tooltip("공포 효과(포스트 프로세싱, 카메라 흔들림) 지속 시간")]
+    public float horrorEffectDuration = 1.0f;
+    [Tooltip("카메라 흔들림 강도")]
+    public float cameraShakeMagnitude = 0.2f;
 
     [Header("오브젝트")]
     public GameObject parrotObject;
@@ -43,8 +51,9 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     public string hideObjectTag = "HideOnEnemy";
 
     [Header("포스트 프로세싱")]
-    [Tooltip("적이 등장하면 활성화될 ChromaticAberration")]
     private ChromaticAberration chromaticAberration;
+    private Vignette vignette;
+    private LensDistortion lensDistortion;
     private Coroutine chromaticCoroutine;
 
     private static bool hasVisitedSpecialScene = false;
@@ -53,26 +62,35 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     private readonly int blinkAmountProp = Shader.PropertyToID("_BlinkAmount");
     private bool isBlinkSequenceRunning = false;
 
-    // 점프스케어 진행 중 클릭 차단
     private bool isJumpscareInProgress = false;
-    // 점프스케어 시 비활성화할 SayDialog
     private GameObject sayDialogObject;
 
     private Camera mainCam;
+    private Vector3 originalCameraPos;
 
-    // triggerObject의 보이는 부분만 끄기 위한 캐시
     private SpriteRenderer triggerSpriteRenderer;
     private Collider2D triggerCollider;
 
     void Start()
     {
-        // 연결된 Volume의 Profile에서 Chromatic Aberration 컴포넌트 가져오기
-        if (globalVolume != null && globalVolume.profile.TryGet(out chromaticAberration))
+        if (globalVolume == null)
+            globalVolume = FindFirstObjectByType<Volume>();
+
+        if (globalVolume != null)
         {
-            // 게임 시작 시 기본 상태를 꺼짐(0)으로 설정합니다.
-            chromaticAberration.intensity.value = 0f; 
+            if (globalVolume.profile.TryGet(out chromaticAberration))
+                chromaticAberration.intensity.value = 0f;
+
+            globalVolume.profile.TryGet(out dof);
+            if (dof != null) dof.gaussianMaxRadius.value = 0f;
+
+            globalVolume.profile.TryGet(out vignette);
+            globalVolume.profile.TryGet(out lensDistortion);
+            
+            if (vignette != null) vignette.intensity.value = 0f;
+            if (lensDistortion != null) lensDistortion.intensity.value = 0f;
         }
-        // 인스턴스 Material 생성
+
         if (blinkOverlay != null && blinkOverlay.material != null)
         {
             blinkOverlay.material = new Material(blinkOverlay.material);
@@ -81,19 +99,11 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
         FitBlinkOverlayToScreen();
 
-        // triggerObject의 SpriteRenderer, Collider2D 캐시
         if (triggerObject != null)
         {
             triggerSpriteRenderer = triggerObject.GetComponent<SpriteRenderer>();
             triggerCollider = triggerObject.GetComponent<Collider2D>();
         }
-
-        // globalVolume이 Inspector에서 할당되지 않은 경우 씬에서 자동 탐색
-        if (globalVolume == null)
-            globalVolume = FindFirstObjectByType<Volume>();
-
-        if (globalVolume != null && globalVolume.profile.TryGet(out dof))
-            dof.gaussianMaxRadius.value = 0f;
 
         jumpscareAnimator.gameObject.SetActive(false);
         if (gameOverObject != null) gameOverObject.SetActive(false);
@@ -111,9 +121,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         else ShowParrotOnly();
     }
 
-    /// <summary>
-    /// 눈깜빡임 오버레이 Sprite를 카메라 화면 전체를 덮도록 크기를 조절합니다.
-    /// </summary>
     private void FitBlinkOverlayToScreen()
     {
         if (blinkOverlay == null) return;
@@ -121,8 +128,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         mainCam = Camera.main;
         if (mainCam == null) return;
 
-        Vector3 camPos = mainCam.transform.position;
-        blinkOverlay.transform.position = new Vector3(camPos.x, camPos.y, camPos.z + 1f);
+        blinkOverlay.transform.SetParent(mainCam.transform);
+        blinkOverlay.transform.localPosition = new Vector3(0, 0, 1f);
 
         float worldHeight = mainCam.orthographicSize * 2f;
         float worldWidth = worldHeight * mainCam.aspect;
@@ -146,7 +153,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             SetTriggerVisible(true);
 
             SetHideObjectsByTag(true);
-            OnEnemyAppeared?.Invoke(); // 이 줄을 추가합니다.
+            OnEnemyAppeared?.Invoke();
 
             ChromaticOn();
             StartCoroutine(WaitAndExecuteScare());
@@ -161,11 +168,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         SetHideObjectsByTag(false);
     }
 
-    /// <summary>
-    /// triggerObject 자체는 활성 상태를 유지하면서,
-    /// SpriteRenderer와 Collider2D만 켜고 끕니다.
-    /// (자식인 Jumpscare 오브젝트에 영향을 주지 않기 위함)
-    /// </summary>
     private void SetTriggerVisible(bool visible)
     {
         if (triggerSpriteRenderer != null) triggerSpriteRenderer.enabled = visible;
@@ -176,13 +178,12 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     {
         if (!Input.GetMouseButtonDown(0)) return;
         if (Camera.main == null) return;
-        if (isJumpscareInProgress) return; // 점프스케어 진행 중 클릭 차단
+        if (isJumpscareInProgress) return;
 
         Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D hit = Physics2D.OverlapPoint(worldPos);
         if (hit == null) return;
 
-        // 트리거 오브젝트 클릭 감지
         if (!hasTriggered && triggerObject != null
             && triggerCollider != null && triggerCollider.enabled
             && hit.gameObject == triggerObject)
@@ -191,7 +192,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             return;
         }
 
-        // 리트라이 클릭 감지
         if (retryClickObject != null && retryClickObject.activeSelf
             && hit.gameObject == retryClickObject)
         {
@@ -211,36 +211,73 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         hasTriggered = true;
         StopAllCoroutines();
 
-        // 클릭 차단 시작
         isJumpscareInProgress = true;
-
-        // SayDialog 비활성화
         DisableSayDialog();
-
-        // triggerObject를 끄지 않고, 보이는 부분만 숨김
         SetTriggerVisible(false);
 
+        // 지연 연출 및 점프스케어 시퀀스 시작
+        StartCoroutine(DelayedHorrorSequence());
         StartCoroutine(FullJumpscareSequence());
     }
 
+    // --- 수정된 연출 코루틴 (1초 발동 후 종료) ---
+    private IEnumerator DelayedHorrorSequence()
+    {
+        // 1. 지정된 시간(0.5초) 대기
+        yield return new WaitForSeconds(horrorEffectDelay);
+
+        // 2. 카메라 원래 위치 저장
+        if (Camera.main != null)
+        {
+            originalCameraPos = Camera.main.transform.localPosition;
+        }
+
+        // 3. 지정된 시간(1초) 동안 효과 발동
+        float elapsed = 0f;
+        float effectRampUpTime = 0.2f; // 효과가 최대로 도달하는 시간
+
+        while (elapsed < horrorEffectDuration)
+        {
+            elapsed += Time.deltaTime;
+            
+            // 카메라 흔들림 적용
+            if (Camera.main != null)
+            {
+                float x = UnityEngine.Random.Range(-1f, 1f) * cameraShakeMagnitude;
+                float y = UnityEngine.Random.Range(-1f, 1f) * cameraShakeMagnitude;
+                Camera.main.transform.localPosition = new Vector3(originalCameraPos.x + x, originalCameraPos.y + y, originalCameraPos.z);
+            }
+
+            // 포스트 프로세싱 적용 (부드럽게 최대치 도달 후 유지)
+            float t = Mathf.Clamp01(elapsed / effectRampUpTime);
+            if (vignette != null) vignette.intensity.value = Mathf.Lerp(0f, 0.5f, t);
+            if (lensDistortion != null) lensDistortion.intensity.value = Mathf.Lerp(0f, -0.6f, t);
+
+            yield return null;
+        }
+
+        // 4. 효과 종료 및 원래 상태로 즉시 복구
+        if (Camera.main != null)
+        {
+            Camera.main.transform.localPosition = originalCameraPos;
+        }
+
+        if (vignette != null) vignette.intensity.value = 0f;
+        if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+    }
+    // ---------------------------------------------
+
     private IEnumerator FullJumpscareSequence()
     {
-        // 눈 감기
         yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
         yield return new WaitForSeconds(closedDuration);
 
-        // Animator 활성화 & 재생 시작
         jumpscareAnimator.gameObject.SetActive(true);
         jumpscareAnimator.SetTrigger("Scare");
 
-        // 눈 뜨기
         yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
     }
 
-    /// <summary>
-    /// Animation Event에서 호출하는 메서드입니다.
-    /// 2컷, 3컷, 4컷 시작 키프레임에 이벤트를 배치하세요.
-    /// </summary>
     public void OnFrameTransition()
     {
         if (isBlinkSequenceRunning) return;
@@ -286,11 +323,15 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     {
         jumpscareAnimator.gameObject.SetActive(false);
         if (gameOverObject != null) gameOverObject.SetActive(true);
+        
+        // 만약을 대비한 포스트 프로세싱 초기화 보장
+        if (vignette != null) vignette.intensity.value = 0f;
+        if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+
         OnPlayerDied?.Invoke();
-        OnJumpscareReset?.Invoke(); // 이 줄을 추가합니다.
+        OnJumpscareReset?.Invoke();
         ChromaticOff();
 
-        // GameOver 표시 후 클릭 차단 해제 (리트라이 등 클릭 가능)
         isJumpscareInProgress = false;
     }
 
@@ -306,14 +347,10 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         }
     }
 
-    /// <summary>
-    /// Chromatic Aberration 효과를 켜고 10초 주기로 1 -> 0 -> 1을 반복합니다.
-    /// </summary>
     public void ChromaticOn()
     {
         if (chromaticAberration == null) return;
 
-        // 이미 실행 중인 코루틴이 있다면 중복 실행을 막기 위해 정지
         if (chromaticCoroutine != null)
         {
             StopCoroutine(chromaticCoroutine);
@@ -322,9 +359,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         chromaticCoroutine = StartCoroutine(ChromaticRoutine());
     }
 
-    /// <summary>
-    /// Chromatic Aberration 효과를 완전히 끕니다.
-    /// </summary>
     public void ChromaticOff()
     {
         if (chromaticAberration == null) return;
@@ -345,20 +379,12 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         while (true)
         {
             timer += Time.deltaTime;
-            
-            // 10초를 주기로 1 -> 0 -> 1이 되도록 Cosine 함수 사용
-            // Mathf.Cos는 기본적으로 1 -> -1 -> 1로 변하므로, 이를 1 -> 0 -> 1로 정규화합니다.
             float intensity = 0.5f * Mathf.Cos((timer / 10f) * 2f * Mathf.PI) + 0.5f;
-            
             chromaticAberration.intensity.value = intensity;
-
             yield return null;
         }
     }
 
-    /// <summary>
-    /// 씬에서 Fungus SayDialog를 찾아 비활성화합니다.
-    /// </summary>
     private void DisableSayDialog()
     {
         if (sayDialogObject == null)
@@ -368,9 +394,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             sayDialogObject.SetActive(false);
     }
 
-    /// <summary>
-    /// 비활성화했던 SayDialog를 다시 켭니다.
-    /// </summary>
     private void RestoreSayDialog()
     {
         if (sayDialogObject != null && !sayDialogObject.activeSelf)
