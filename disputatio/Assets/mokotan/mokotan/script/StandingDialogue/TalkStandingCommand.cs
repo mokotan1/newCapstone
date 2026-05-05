@@ -53,40 +53,20 @@ namespace Fungus
 
         public override void OnEnter()
         {
-            if (setStandingDialogue != null)
-                StandingDialogueManager.ActiveStandingDialogue = setStandingDialogue;
+            // 잔존 standing 캔버스가 있으면 숨겨 두 UI가 겹쳐 보이는 것을 방지.
+            StandingDialogueManager standing = StandingDialogueManager.Instance;
+            if (standing != null) standing.HideAll();
 
-            StandingDialogueManager mgr = StandingDialogueManager.GetStandingDialogue();
-            if (mgr == null) { Continue(); return; }
+            SayDialog sayDialog = overrideSayDialog != null
+                ? ResolveSayDialog(overrideSayDialog)
+                : SayDialog.GetSayDialog();
 
-            if (overrideSayDialog != null)
-            {
-                mgr.SetupSpeakerSlots(speakerSide,
-                    speakerSprite, speakerOffset,
-                    otherSprite,   otherOffset);
+            if (sayDialog == null) { Continue(); return; }
 
-                SayDialog sayDialog = ResolveSayDialog(overrideSayDialog);
-                SayDialog.ActiveSayDialog = sayDialog;
-                sayDialog.gameObject.SetActive(true);
-                sayDialog.SetCharacterName(speakerName, Color.white);
-                sayDialog.Say(dialogueText, true, true, true, false, false, null, () => Continue());
-            }
-            else
-            {
-                var typography = new TypographySettings
-                {
-                    Font           = font,
-                    FontSize       = fontSize,
-                    CharsPerSecond = charsPerSecond,
-                };
-
-                mgr.TalkStanding(speakerSide,
-                    speakerSprite, speakerOffset,
-                    otherSprite,   otherOffset,
-                    speakerName,   dialogueText,
-                    typography,
-                    () => Continue());
-            }
+            SayDialog.ActiveSayDialog = sayDialog;
+            sayDialog.gameObject.SetActive(true);
+            sayDialog.SetCharacterName(speakerName, Color.white);
+            sayDialog.Say(dialogueText, true, true, true, false, false, null, () => Continue());
         }
 
         // 프리팹 에셋이 연결된 경우 씬에 인스턴스화해서 반환, 이미 씬 인스턴스이면 그대로 반환

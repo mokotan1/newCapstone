@@ -43,6 +43,7 @@ public class DragManager2D : MonoBehaviour
     {
         cachedDraggables = Object.FindObjectsByType<DraggableSnap2D>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         DraggableSnap2D.RefreshSpriteDepthByWorldY(cachedDraggables);
+        WorldSpriteDepthSorter2D.SortActiveSceneSprites();
     }
 
     void OnDisable()
@@ -88,6 +89,7 @@ public class DragManager2D : MonoBehaviour
             return;
 
         Vector3 mw = MouseWorldOnDragPlane();
+        Physics2D.SyncTransforms();
         Collider2D[] hits = Physics2D.OverlapPointAll(mw, layerMaskWithoutSnapTargets);
         if (hits == null || hits.Length == 0)
             return;
@@ -187,6 +189,7 @@ public class DragManager2D : MonoBehaviour
 
         current.rb.MovePosition(targetPos);
         DraggableSnap2D.RefreshSpriteDepthByWorldY(cachedDraggables);
+        WorldSpriteDepthSorter2D.SortActiveSceneSprites();
     }
 
     private void EndDrag()
@@ -205,12 +208,14 @@ public class DragManager2D : MonoBehaviour
         }
 
         DraggableSnap2D.RefreshSpriteDepthByWorldY(cachedDraggables);
+        WorldSpriteDepthSorter2D.SortActiveSceneSprites();
         current = null;
     }
 
     private SnapTarget FindBestSnapTarget(Vector2 draggablePosition, DraggableSnap2D draggable)
     {
         int snapMask = LayerMask.GetMask("SnapTarget");
+        Physics2D.SyncTransforms();
         var hits = snapMask != 0
             ? Physics2D.OverlapCircleAll(draggablePosition, snapSearchRadius, snapMask)
             : Physics2D.OverlapCircleAll(draggablePosition, snapSearchRadius);
