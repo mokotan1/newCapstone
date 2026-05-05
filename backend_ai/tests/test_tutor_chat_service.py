@@ -56,9 +56,15 @@ async def test_tutor_profile_injects_rag_block_into_system() -> None:
     )
 
     assert cap.last_messages is not None
-    system = cap.last_messages[0]["content"]
-    assert ">>>RAG:플레이어답:" in system
-    assert "BASE" in system
+    assert cap.last_messages[0]["role"] == "system"
+    trusted = cap.last_messages[0]["content"]
+    assert "서버 보안 정책" in trusted
+    user_msgs = [m for m in cap.last_messages if m["role"] == "user"]
+    assert user_msgs
+    bundle = "\n".join(m["content"] for m in user_msgs)
+    assert "&gt;&gt;&gt;RAG:플레이어답:5&lt;&lt;&lt;" in bundle or ">>>RAG:플레이어답:" in bundle
+    assert "<scene_config" in bundle and "BASE" in bundle
+    assert "<user_input>" in bundle
 
 
 @pytest.mark.asyncio

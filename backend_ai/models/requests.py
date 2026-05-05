@@ -10,15 +10,15 @@ class ChatRequest(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    prompt: str = Field(..., min_length=1, max_length=2000)
+    prompt: str = Field(..., min_length=1, max_length=4096)
     system: str = "당신은 저택의 도우미입니다."
     use_tools: bool = True
     #: Gains·운영 분석 호환용. 채팅 로직에서는 사용하지 않음.
     user_id: str | None = Field(default=None, max_length=256)
     #: `prompt`와 동일 텍스트를 기대하는 백엔드 호환용 별칭. prompt가 비었을 때만 채워짐.
-    message: str | None = Field(default=None, max_length=2000)
+    message: str | None = Field(default=None, max_length=4096)
     rag_profile: str | None = None
-    rag_query: str | None = Field(None, max_length=2000)
+    rag_query: str | None = Field(None, max_length=4096)
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
 
@@ -34,8 +34,8 @@ class ChatRequest(BaseModel):
         msg = d.get("message")
         if not prompt_ok and isinstance(msg, str) and len(msg.strip()) >= 1:
             text = msg.strip()
-            if len(text) > 2000:
-                text = text[:2000]
+            if len(text) > 4096:
+                text = text[:4096]
             d["prompt"] = text
         return d
 

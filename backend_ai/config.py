@@ -26,8 +26,21 @@ class Settings(BaseSettings):
 
     default_temperature: float = 0.7
     max_tokens: int = 512
+    #: 모든 경로에 적용되는 프로바이더 토큰 상한(서버 강제 하드 캡).
+    max_tokens_hard_cap: int = 4096
     #: Tutor ``rag_profile`` 요청에만 적용(짧은 대사·툴 호출 위주). 전역 max_tokens와 min.
     tutor_chat_max_tokens: int = 384
+
+    # Untrusted text bounds (defense plan §4.2)
+    chat_max_prompt_chars: int = 4096
+    chat_max_client_system_chars: int = 16000
+    chat_max_external_document_chars: int = 12000
+
+    # Rate limit (§3.2). ``REDIS_URL`` unset → in-process window (단일 워커 전용).
+    redis_url: str = ""
+    rate_limit_enabled: bool = True
+    rate_limit_ip_per_minute: int = 60
+    rate_limit_user_per_minute: int = 30
 
     # Tutor RAG / quiz bank (paths relative to backend_ai/)
     tutor_rag_corpus_dir: str = "data/tutor_rag"

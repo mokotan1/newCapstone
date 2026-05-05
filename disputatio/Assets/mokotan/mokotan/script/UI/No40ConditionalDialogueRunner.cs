@@ -156,7 +156,7 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
 
         yield return null;
 
-        yield return PlayStandingLine(firstEntryLine, () =>
+        yield return PlayLineWithNotebookSayDialog(firstEntryLine, () =>
         {
             PlayerPrefs.SetInt(PrefsKeys.FirstEntryPlayed, 1);
             PlayerPrefs.Save();
@@ -169,7 +169,7 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
     {
         try
         {
-            yield return PlayStandingLine(bloodPathLine, () =>
+            yield return PlayLineWithNotebookSayDialog(bloodPathLine, () =>
             {
                 PlayerPrefs.SetInt(PrefsKeys.BloodPathLinePlayed, 1);
                 PlayerPrefs.Save();
@@ -212,14 +212,14 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
         if (PlayerPrefs.GetInt(PrefsKeys.FirstDeathLinePlayed, 0) != 0)
             yield break;
 
-        yield return PlayDeathLineWithNotebookSayDialog(firstDeathAfterGhostLine, () =>
+        yield return PlayLineWithNotebookSayDialog(firstDeathAfterGhostLine, () =>
         {
             PlayerPrefs.SetInt(PrefsKeys.FirstDeathLinePlayed, 1);
             PlayerPrefs.Save();
         });
     }
 
-    private IEnumerator PlayDeathLineWithNotebookSayDialog(string line, System.Action onRecordedDone)
+    private IEnumerator PlayLineWithNotebookSayDialog(string line, System.Action onRecordedDone)
     {
         SayDialog dlg = GetOrCreateDeathNotebookSayDialog();
         if (dlg == null)
@@ -227,6 +227,10 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
             yield return PlayStandingLine(line, onRecordedDone);
             yield break;
         }
+
+        // 잔존 standing 캔버스가 떠 있으면 숨겨 두 UI 겹침 방지
+        StandingDialogueManager standing = StandingDialogueManager.Instance;
+        if (standing != null) standing.HideAll();
 
         bool finished = false;
         SayDialog.ActiveSayDialog = dlg;

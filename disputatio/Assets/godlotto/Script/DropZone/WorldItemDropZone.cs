@@ -61,12 +61,21 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
         // WorldItemDropZone이 켜진 채로 두면 IDropHandler 등으로 입력이 꼬여 클릭이 안 되는 경우가 있어 항상 비활성화한다.
         bool keepColliderAndSpriteForDoorClick =
             GetComponent<Clickable2D>() != null || GetComponentInParent<Clickable2D>() != null;
+        bool keepColliderForSnapTarget = GetComponent<SnapTarget>() != null;
 
         enabled = false;
 
         var col = GetComponent<Collider2D>();
-        if (col != null && !keepColliderAndSpriteForDoorClick)
-            col.enabled = false;
+        // Some ChildRoom seal targets are both inventory drop zones and snap targets.
+        // After the inventory item is accepted, the same collider must remain active
+        // so DragManager2D can still find the SnapTarget for the revealed world item.
+        if (col != null)
+        {
+            if (keepColliderForSnapTarget)
+                col.enabled = true;
+            else if (!keepColliderAndSpriteForDoorClick)
+                col.enabled = false;
+        }
 
         var sr = GetComponent<SpriteRenderer>();
         if (sr != null && !keepColliderAndSpriteForDoorClick)
@@ -150,6 +159,7 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
         GameLog.Log($"올바른 아이템({requiredItem.itemName})을 사용했습니다!");
 
         onUnlock.Invoke();
+        WorldSpriteDepthSorter2D.SortActiveSceneSprites();
 
         if (InventoryManager.instance != null)
             InventoryManager.instance.RemoveItem(requiredItem);
