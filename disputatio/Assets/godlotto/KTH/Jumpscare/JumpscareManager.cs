@@ -1,7 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 [System.Serializable]
 public struct JumpscareSceneData
@@ -64,6 +67,9 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [Tooltip("진입 직후 스폰에 실패한 경우, 같은 활성 씬에 이 시간(초) 이상 머무르면 등장 확률 100%로 트리거를 띄웁니다.")]
     [SerializeField] private float guaranteedJumpscareAfterSeconds = 60f;
 
+    [Header("효과 설정 (블러 등)")]
+    public Volume globalVolume;
+
     [Header("눈깜빡임 오버레이 (SpriteRenderer)")]
     [SerializeField] private SpriteRenderer blinkOverlay;
 
@@ -73,6 +79,14 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [SerializeField] private float blinkDuration = 0.2f;
     [SerializeField] private float closedDuration = 0.1f;
     [SerializeField] private string retrySceneName = SceneNames.MainScene;
+
+    [Header("공포 연출 (지연 효과)")]
+    [Tooltip("트리거 발동 후 효과가 시작되기까지의 지연 시간")]
+    public float horrorEffectDelay = 0.5f;
+    [Tooltip("공포 효과(포스트 프로세싱, 카메라 흔들림) 지속 시간")]
+    public float horrorEffectDuration = 1.0f;
+    [Tooltip("카메라 흔들림 강도")]
+    public float cameraShakeMagnitude = 0.2f;
 
     [Header("트리거 깊이 (2D 오쏘)")]
     [Tooltip("트리거 월드 Z = Main Camera Z + 이 값. (예: 카메라 z=-10, 스프라이트 평면 z=0 → 10)")]
@@ -101,9 +115,15 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [Tooltip("적이 등장하면 비활성화될 Sprite 오브젝트들의 Tag")]
     [SerializeField] private string hideObjectTag = "HideOnEnemy";
 
+    // 포스트 프로세싱 효과 캐싱
+    private Vignette vignette;
+    private LensDistortion lensDistortion;
+
     private bool hasTriggered = false;
     private bool isJumpscareInProgress = false;
     private GameObject sayDialogObject;
+
+    private Vector3 originalCameraPos;
 
     private SpriteRenderer triggerSpriteRenderer;
     private Collider2D triggerCollider;
@@ -114,6 +134,19 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     protected override void OnSingletonAwake()
     {
         EnsureMokotanJumpscareScenesRegistered();
+
+        // Volume Profile에서 추가 포스트 프로세싱 효과 가져오기
+        if (globalVolume == null)
+            globalVolume = FindFirstObjectByType<Volume>();
+
+        if (globalVolume != null)
+        {
+            globalVolume.profile.TryGet(out vignette);
+            globalVolume.profile.TryGet(out lensDistortion);
+            
+            if (vignette != null) vignette.intensity.value = 0f;
+            if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+        }
 
         _effects = new JumpscareEffects(
             blinkOverlay,
@@ -197,17 +230,12 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
                 return entry.spawnPosition;
         }
 
-        // 오른쪽 복도 분기 직전 유령이 카메라 중심 대비 위로 떠 보이는 경우가 많아 기본 오프셋을 내립니다.
-        // 인스펙터의 autoRegisteredSpawnPositionOverrides로 씬별 미세 조정 가능합니다.
         if (string.Equals(sceneName, SceneNames.HallRight, StringComparison.Ordinal))
             return new Vector2(0f, -2.75f);
 
         return defaultAutoRegisteredSpawnPosition;
     }
 
-    /// <summary>
-    /// 유령 트리거가 노출된 상태 또는 점프스케어 연출 중에는 지도 등 게임플레이 UI를 막습니다.
-    /// </summary>
     public bool IsGhostEncounterBlockingMapUi()
     {
         if (isJumpscareInProgress)
@@ -234,6 +262,10 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // 씬 이동 시 포스트 프로세싱 효과 초기화
+        if (vignette != null) vignette.intensity.value = 0f;
+        if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+
         _effects?.FindAndBindVolume();
         ResetJumpscareState();
         _effects?.FitBlinkOverlayToScreen();
@@ -302,9 +334,53 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         if (triggerObject != null && jumpscareAnimator != null)
             _effects.PositionJumpscareAnimator(triggerObject.transform.position);
 
+        // 지연 연출 효과 코루틴 실행
+        StartCoroutine(DelayedHorrorSequence());
+
         if (_effects != null)
             StartCoroutine(_effects.FullJumpscareSequence());
     }
+
+    // --- 카메라 흔들림 및 포스트 프로세싱 지연 연출 코루틴 ---
+    private IEnumerator DelayedHorrorSequence()
+    {
+        yield return new WaitForSeconds(horrorEffectDelay);
+
+        if (Camera.main != null)
+        {
+            originalCameraPos = Camera.main.transform.localPosition;
+        }
+
+        float elapsed = 0f;
+        float effectRampUpTime = 0.2f;
+
+        while (elapsed < horrorEffectDuration)
+        {
+            elapsed += Time.deltaTime;
+            
+            if (Camera.main != null)
+            {
+                float x = UnityEngine.Random.Range(-1f, 1f) * cameraShakeMagnitude;
+                float y = UnityEngine.Random.Range(-1f, 1f) * cameraShakeMagnitude;
+                Camera.main.transform.localPosition = new Vector3(originalCameraPos.x + x, originalCameraPos.y + y, originalCameraPos.z);
+            }
+
+            float t = Mathf.Clamp01(elapsed / effectRampUpTime);
+            if (vignette != null) vignette.intensity.value = Mathf.Lerp(0f, 0.5f, t);
+            if (lensDistortion != null) lensDistortion.intensity.value = Mathf.Lerp(0f, -0.6f, t);
+
+            yield return null;
+        }
+
+        if (Camera.main != null)
+        {
+            Camera.main.transform.localPosition = originalCameraPos;
+        }
+
+        if (vignette != null) vignette.intensity.value = 0f;
+        if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+    }
+    // ---------------------------------------------------------
 
     public void OnFrameTransition()
     {
@@ -317,6 +393,11 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     {
         _effects?.SetAnimatorActive(false);
         _effects?.ShowGameOverAfterFit();
+        
+        // 포스트 프로세싱 초기화 보장
+        if (vignette != null) vignette.intensity.value = 0f;
+        if (lensDistortion != null) lensDistortion.intensity.value = 0f;
+
         OnPlayerDied?.Invoke();
 
         isJumpscareInProgress = false;
