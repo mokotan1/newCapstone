@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book Overlay Panel Samples</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #1f1712;
+      --paper: #f3e4c9;
+      --paper-soft: #fff3dc;
+      --gold: #c79a4b;
+      --blood: #8d2f26;
+      --muted: #d9cab2;
+      --veil: rgba(5, 4, 4, 0.74);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(39, 34, 30, 0.92), rgba(12, 10, 9, 0.97)),
+        radial-gradient(circle at 26% 22%, rgba(120, 74, 39, 0.28), transparent 36%),
+        #111;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+      color: #f7efe3;
+      overflow-x: hidden;
+    }
+
+    .scene {
+      position: relative;
+      min-height: 100vh;
+      padding: 28px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 18px;
+    }
+
+    .toolbar {
+      position: relative;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .title h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 0;
+      color: #d8cbb9;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid rgba(255, 235, 200, 0.18);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .tabs button {
+      min-width: 110px;
+      border: 1px solid rgba(245, 225, 190, 0.18);
+      background: rgba(255, 244, 219, 0.08);
+      color: #f4e6d0;
+      padding: 10px 14px;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .tabs button[aria-pressed="true"] {
+      background: #e8d0a5;
+      color: #241713;
+      border-color: #fff1ca;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 1;
+      min-height: 660px;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      border: 1px solid rgba(255, 235, 200, 0.13);
+      background:
+        linear-gradient(180deg, rgba(16, 14, 13, 0.12), rgba(0, 0, 0, 0.45)),
+        url("../disputatio/Assets/Sprite/StudyRoom/Bookshelf_Extend_Example.png") center / cover no-repeat;
+      overflow: hidden;
+      box-shadow: 0 18px 70px rgba(0, 0, 0, 0.48);
+    }
+
+    .book-prop {
+      position: absolute;
+      left: 5%;
+      bottom: 6%;
+      width: min(44vw, 520px);
+      filter: drop-shadow(0 30px 24px rgba(0, 0, 0, 0.55));
+      opacity: 0.94;
+      image-rendering: pixelated;
+    }
+
+    .hotspot {
+      position: absolute;
+      left: 17%;
+      bottom: 34%;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 237, 199, 0.42);
+      background: rgba(0, 0, 0, 0.58);
+      font-size: 13px;
+      color: #f7e7c8;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: var(--veil);
+      backdrop-filter: blur(1.5px);
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .panel {
+      position: absolute;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 250, 234, 0.94), rgba(229, 205, 164, 0.96)),
+        var(--paper);
+      border: 1px solid rgba(70, 42, 22, 0.78);
+      box-shadow:
+        0 22px 56px rgba(0, 0, 0, 0.58),
+        inset 0 0 0 4px rgba(255, 246, 220, 0.32);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(121, 78, 39, 0.32);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(93, 57, 31, 0.28);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    .eyebrow {
+      color: var(--blood);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .close {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(54, 35, 25, 0.34);
+      background: rgba(255, 255, 255, 0.28);
+      color: #3b261c;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .body-text {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.72;
+      word-break: keep-all;
+    }
+
+    .note-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .note {
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.24);
+      border-left: 3px solid var(--blood);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .sample-a .panel {
+      left: 50%;
+      top: 50%;
+      width: min(720px, calc(100% - 52px));
+      transform: translate(-50%, -50%);
+      padding: 34px 38px 32px;
+    }
+
+    .sample-b .panel {
+      top: 34px;
+      right: 34px;
+      bottom: 34px;
+      width: min(470px, calc(100% - 68px));
+      padding: 30px 32px;
+      overflow: auto;
+    }
+
+    .sample-b .page-mark {
+      display: flex;
+      gap: 8px;
+      margin: 18px 0 22px;
+    }
+
+    .sample-b .page-mark span {
+      width: 32px;
+      height: 7px;
+      background: rgba(121, 78, 39, 0.26);
+    }
+
+    .sample-b .page-mark span:first-child {
+      background: var(--blood);
+    }
+
+    .sample-c .panel {
+      left: 28px;
+      right: 28px;
+      bottom: 28px;
+      padding: 24px 30px 26px;
+      display: grid;
+      grid-template-columns: 170px 1fr auto;
+      align-items: start;
+      gap: 22px;
+    }
+
+    .sample-c .chapter {
+      min-height: 118px;
+      padding: 14px;
+      border: 1px solid rgba(70, 42, 22, 0.26);
+      background: rgba(70, 42, 22, 0.09);
+    }
+
+    .sample-c .chapter strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--blood);
+      font-size: 14px;
+    }
+
+    .sample-c .chapter span {
+      display: block;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .sample-c .close {
+      align-self: start;
+    }
+
+    .meta {
+      margin-top: 18px;
+      color: #6e523d;
+      font-size: 13px;
+    }
+
+    @media (max-width: 820px) {
+      .scene {
+        padding: 16px;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .tabs {
+        width: 100%;
+      }
+
+      .tabs button {
+        min-width: 0;
+        flex: 1;
+        padding-inline: 8px;
+      }
+
+      .stage {
+        min-height: 680px;
+      }
+
+      .book-prop {
+        width: 82vw;
+        left: 50%;
+        bottom: 8%;
+        transform: translateX(-50%);
+      }
+
+      .hotspot {
+        left: 50%;
+        bottom: 35%;
+        transform: translateX(-50%);
+      }
+
+      .sample-b .panel {
+        left: 18px;
+        right: 18px;
+        top: 70px;
+        bottom: 28px;
+        width: auto;
+      }
+
+      .sample-c .panel {
+        grid-template-columns: 1fr auto;
+      }
+
+      .sample-c .chapter {
+        grid-column: 1 / -1;
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="scene">
+    <div class="toolbar">
+      <div class="title">
+        <h1>책 스크립트 오버레이 견본</h1>
+        <p>같은 책 인터랙션에서 패널 위치와 정보량만 다르게 잡은 3가지 안입니다.</p>
+      </div>
+      <div class="tabs" aria-label="견본 선택">
+        <button type="button" data-sample="sample-a" aria-pressed="true">A 중앙형</button>
+        <button type="button" data-sample="sample-b" aria-pressed="false">B 우측형</button>
+        <button type="button" data-sample="sample-c" aria-pressed="false">C 하단형</button>
+      </div>
+    </div>
+
+    <section class="stage sample-a" id="stage" aria-live="polite">
+      <img class="book-prop" src="../disputatio/Assets/2D Pixel Quest Vol.3 - The UI-GUI/Sprites PNG/Inventory Book/InventoryBook_01.png" alt="열린 책">
+      <div class="hotspot">책을 조사했다</div>
+
+      <article class="overlay active sample-a" data-panel="sample-a">
+        <div class="panel">
+          <header class="panel-header">
+            <div class="panel-title">
+              <span class="eyebrow">SAMPLE A / 중앙 집중형</span>
+              <h2>찢어진 요리책의 메모</h2>
+            </div>
+            <button class="close" type="button" aria-label="닫기">×</button>
+          </header>
+          <p class="body-text">
+            잉크가 번진 문장 사이로 같은 이름이 반복되어 있다. 마지막 줄만 유난히 선명하다.
+            "불을 너무 오래 두지 말 것. 그 냄새를 맡은 사람은 반드시 뒤를 돌아본다."
+          </p>
+          <div class="note-list">
+            <div class="note">추천 용도: 핵심 단서, 짧은 공포 연출, 플레이어 시선을 한 번에 모아야 하는 장면.</div>
+            <div class="note">장점: 가독성이 가장 좋고, 배경을 어둡게 눌러 집중감이 강함.</div>
+          </div>
+          <p class="meta">구현 감각: Canvas 전체 딤 + 중앙 Panel + TMP 본문.</p>
+        </div>
+      </article>
+
+      <article class="overlay sample-b" data-panel="sample-b">
+        <div class="panel">
+          <header class="panel-header">
+            <div class="panel-title">
+              <span class="eyebrow">SAMPLE B / 우측 문서형</span>
+              <h2>관리인의 기록</h2>
+            </div>
+            <button class="close" type="button" aria-label="닫기">×</button>
+          </header>
+          <div class="page-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p class="body-text">
+            오늘도 서재의 책장이 움직였다. 손잡이를 잡지 않았는데도 왼쪽 선반이 조금씩 벌어졌다.
+            그 안쪽에서 발견한 작은 책은 겉표지가 젖어 있었고, 종이 냄새가 아니라 오래 끓인 고기 냄새가 났다.
+            <br><br>
+            세 번째 페이지에는 숫자 셋이 적혀 있었다. 4, 1, 7. 하지만 마지막 숫자 아래에는 누군가 다시 그은 선이 있다.
+            이 기록을 읽는 사람이 있다면, 같은 실수를 반복하지 않기를 바란다.
+          </p>
+          <div class="note-list">
+            <div class="note">추천 용도: 긴 문서, 일기, 규칙 설명, 여러 페이지가 필요한 스크립트.</div>
+            <div class="note">장점: 책 이미지를 화면에 남겨둔 채 본문만 따로 읽게 할 수 있음.</div>
+          </div>
+          <p class="meta">구현 감각: 오른쪽 고정 Panel + ScrollRect + 페이지 탭.</p>
+        </div>
+      </article>
+
+      <article class="overlay sample-c" data-panel="sample-c">
+        <div class="panel">
+          <div class="chapter">
+            <strong>SAMPLE C / 하단 기록형</strong>
+            <span>책 자체는 화면 중심에 남기고, 대사창처럼 아래에서 정보를 전달합니다.</span>
+          </div>
+          <div>
+            <header class="panel-header">
+              <div class="panel-title">
+                <span class="eyebrow">발견한 문장</span>
+                <h2>문 뒤의 소리</h2>
+              </div>
+            </header>
+            <p class="body-text">
+              "문을 두 번 두드리면 대답하지 마라. 세 번째 소리가 들릴 때만 열쇠를 돌려라."
+            </p>
+            <p class="meta">추천 용도: 짧은 힌트, 조사 텍스트, 플레이 흐름을 끊고 싶지 않은 장면.</p>
+          </div>
+          <button class="close" type="button" aria-label="닫기">×</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const stage = document.querySelector("#stage");
+    const buttons = document.querySelectorAll("[data-sample]");
+    const panels = document.querySelectorAll("[data-panel]");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const selected = button.dataset.sample;
+        stage.className = `stage ${selected}`;
+
+        buttons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+
+        panels.forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.panel === selected);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
