@@ -1,0 +1,215 @@
+import csv
+import json
+from pathlib import Path
+
+
+OUT_DIR = Path("docs/generated")
+
+
+ITEMS = [
+    {
+        "id": "WLD_ARTICLE_001",
+        "type": "newspaper_article",
+        "title": "변론하는 자, 다시 손을 내밀다",
+        "act": "world",
+        "location": "저택 복도 / 봉사활동 사진과 표창장 주변",
+        "trigger": "표창장 더미 조사",
+        "speaker": "지역 신문",
+        "summary": "겉으로 알려진 봉사 동아리의 선한 이미지와 실제 사이의 간극을 보여주는 기사.",
+        "body": "XX대학 봉사 동아리 '변론하는 자'가 또 한 번 지역 사회의 주목을 받았다. 이들은 신체의 결손, 가족의 상실, 고독 속에 놓인 이들을 찾아가 식사와 돌봄을 제공하고 있다. 관계자는 '우리는 버려진 사람에게 다시 말할 권리를 돌려주고 싶다'고 말했다. 그러나 기사 한쪽에 작게 실린 사진 속 사람들의 눈빛은 이상하리만치 비슷하다. 모두 누군가에게 구원받았다고 믿는 얼굴이다.",
+        "clue_key": "cult_public_mask",
+        "parse_tags": "article,cult,foreshadowing",
+        "source": "The unholy of mention 세계관.pdf",
+    },
+    {
+        "id": "ACT1_MEMO_001",
+        "type": "case_memo",
+        "title": "저택 조사 의뢰 메모",
+        "act": "1",
+        "location": "탐정 사무소 / 조수의 책상",
+        "trigger": "전화 의뢰 후 자동 획득",
+        "speaker": "조수",
+        "summary": "주인공이 저택으로 향하게 되는 의뢰 정보를 간단히 정리한 메모.",
+        "body": "의뢰 대상: 산속의 지도에 없는 저택. 의뢰 내용: 민원으로 접수된 악취와 수상한 불빛 확인. 특이 사항: 과거 봉사 단체 또는 종교 단체가 사용했다는 소문. 이름은 '변론하는 자'였던 것 같음. 보수: 비정상적으로 높음. 조수 의견: 귀신보다 돈 냄새가 더 진함. 주인공 의견: 고양이 찾는 일보다 낫지만, 느낌이 아주 나쁨.",
+        "clue_key": "mansion_request",
+        "parse_tags": "memo,quest,start",
+        "source": "The unholy of mention 플롯 1막.pdf",
+    },
+    {
+        "id": "ACT2_DIARY_MAID_001",
+        "type": "diary",
+        "title": "가정부의 일기",
+        "act": "2",
+        "location": "1층 가정부 방 / 침대 옆 서랍",
+        "trigger": "병 속 열쇠로 가정부 방 개방",
+        "speaker": "가정부",
+        "summary": "저택 가족이 한때는 다정했고, 아들의 앵무새 체셔가 육포 냄새에 반응한다는 단서.",
+        "body": "사모님이 돌아가시기 전, 이 집은 지금보다 훨씬 따뜻했다. 주인님은 아드님과 사모님, 그리고 나까지 식탁에 앉혀 퍼즐을 풀게 하곤 했다. 체셔는 아드님이 굽는 육포 냄새를 맡으면 어디서든 날아와 재롱을 부렸다. 나는 그 작은 소동이 좋았다. 이 집의 웃음은 늘 그런 사소한 냄새에서 시작되었으니까. 요즘 주인님은 오래 책상 앞에 앉아 계신다. 기도인지 연구인지 알 수 없는 말을 중얼거리면서.",
+        "clue_key": "jerky_parrot_hint",
+        "parse_tags": "diary,maid,parrot,puzzle",
+        "source": "the unholy of mention 플롯 2막.pdf",
+    },
+    {
+        "id": "ACT2_BOOK_RECIPE_001",
+        "type": "book",
+        "title": "찢어진 요리책",
+        "act": "2",
+        "location": "1층 가정부 방 / 작은 책장",
+        "trigger": "요리책 조사",
+        "speaker": "요리책",
+        "summary": "남아 있는 세 페이지의 페이지 번호가 서랍 자물쇠 힌트로 쓰인다.",
+        "body": "대부분의 페이지가 찢겨 나갔다. 남은 것은 세 장뿐이다. 카레: P18~19. 비프 부르기뇽: P10~11. 멕시칸 타코: P20~21. 기름 얼룩이 가장 짙은 페이지는 카레 쪽이다. 노란 소스가 번진 자국 옆에 작은 발톱 자국이 남아 있다.",
+        "clue_key": "recipe_page_code_1819",
+        "parse_tags": "book,recipe,code,1819",
+        "source": "the unholy of mention 플롯 2막.pdf",
+    },
+    {
+        "id": "ACT2_BOOK_PUZZLE_001",
+        "type": "book",
+        "title": "퍼즐책과 아크릴 판",
+        "act": "2",
+        "location": "1층 가정부 방 / 책장",
+        "trigger": "퍼즐책 조사",
+        "speaker": "퍼즐책",
+        "summary": "서재의 알파벳 카드와 책장 색상 개수를 읽는 도구.",
+        "body": "책 사이에 투명한 아크릴 판이 끼워져 있다. 판에는 네모난 구멍이 듬성듬성 뚫려 있고, 가장자리에는 희미하게 '방향을 바꾸면 문장도 바뀐다'는 문구가 적혀 있다. 이 판은 단독으로는 아무 뜻도 없지만, 알파벳 카드 위에 겹치면 특정한 책장 방향과 책 색깔만 남긴다.",
+        "clue_key": "acrylic_overlay",
+        "parse_tags": "book,puzzle,overlay,study",
+        "source": "the unholy of mention 플롯 2막.pdf",
+    },
+    {
+        "id": "ACT2_DIARY_OWNER_001",
+        "type": "diary",
+        "title": "집주인의 첫 번째 일기",
+        "act": "2",
+        "location": "1층 서재 / 다이얼 자물쇠 공책",
+        "trigger": "아크릴 판 퍼즐 해결",
+        "speaker": "알프레드",
+        "summary": "아내의 죽음 이후 신에 대한 의심이 싹트는 기록.",
+        "body": "나는 그녀를 사랑했다. 이 집의 모든 방은 그녀의 목소리를 기억한다. 그러나 출산의 밤, 신은 침묵했다. 아이의 울음소리는 살아남았고 그녀의 숨은 끊어졌다. 사람들은 그것을 섭리라 불렀다. 나는 그것을 방치라 부르기로 했다. 신이 죽음을 허락한다면, 인간은 그 허락을 거부할 권리가 있다.",
+        "clue_key": "alfred_doubt",
+        "parse_tags": "diary,owner,grief,blasphemy",
+        "source": "the unholy of mention 플롯 2막.pdf",
+    },
+    {
+        "id": "ACT3_BOOK_BIBLE_COMMENTARY_001",
+        "type": "book",
+        "title": "소실된 성경 해석본",
+        "act": "3",
+        "location": "1층 서재 / 책 홀더",
+        "trigger": "아내 방의 성경 구절 확인 후 조사",
+        "speaker": "성경 해석본",
+        "summary": "부활절 비밀번호와 안방 금고 숫자의 근거가 되는 해석본.",
+        "body": "남은 페이지는 두 장뿐이다. 첫 장: 예수의 부활은 요한복음 11장 25~26절과 연결되며, 부활절은 매년 춘분 직후의 만월 다음 첫 번째 일요일이다. 둘째 장: 나사로는 예수에 의해 4일 만에 부활했다. 마리아는 300데나리온의 향유를 예수의 발에 부었다. 마르타는 예수에게 한 가지를 부탁했다.",
+        "clue_key": "easter_150405_and_safe_numbers",
+        "parse_tags": "book,bible,easter,code",
+        "source": "The unholy of mention 플롯 3막.pdf",
+    },
+    {
+        "id": "ACT3_DIARY_WIFE_001",
+        "type": "diary",
+        "title": "사모님의 마지막 일기",
+        "act": "3",
+        "location": "2층 아내 방 / 잠긴 서랍",
+        "trigger": "부활절 날짜 150405 입력",
+        "speaker": "사모님",
+        "summary": "아들을 부탁하는 유언과 부활 구절. 붉은 천에 싸인 성정 단서와 함께 발견된다.",
+        "body": "내 몸이 오래 버티지 못할 것을 안다. 알프레드는 내게 괜찮을 거라 말하지만, 그의 기도는 점점 기도가 아니게 되어 간다. 내가 떠난 뒤에도 아이를 원망하지 말아 주세요. 이 죽음은 누구의 죄도 아닙니다. 마지막 장에는 내가 붙잡고 싶은 말만 적는다. '나는 부활이요 생명이니 나를 믿는 자는 죽어도 살겠고.'",
+        "clue_key": "wife_last_will_relic",
+        "parse_tags": "diary,wife,relic,resurrection",
+        "source": "The unholy of mention 플롯 3막.pdf",
+    },
+    {
+        "id": "ACT3_BOOK_CHILD_BIBLE_001",
+        "type": "picture_book",
+        "title": "아들의 그림 성경책",
+        "act": "3",
+        "location": "2층 아이 방 / 책장",
+        "trigger": "목마 퍼즐 시작",
+        "speaker": "그림 성경책",
+        "summary": "종말의 4기사 목마 퍼즐의 순서와 상징을 알려준다.",
+        "body": "첫 번째 봉인이 열리니 흰 말을 탄 기사가 왕관을 쓰고 활을 들고 나아갔단다. 두 번째 봉인이 열리니 붉은 말을 탄 기사가 큰 칼을 들고 땅에서 평화를 거두었지. 세 번째 봉인이 열리니 검은 말을 탄 기사가 손에 저울을 들고 있었어. 네 번째 봉인이 열리니 창백한 말 탄 기사가 나타났고, 죽음이 그 뒤를 따랐단다.",
+        "clue_key": "four_horsemen_order",
+        "parse_tags": "book,picture_bible,puzzle,horsemen",
+        "source": "The unholy of mention 플롯 3막.pdf",
+    },
+    {
+        "id": "ACT3_DIARY_OWNER_002",
+        "type": "diary",
+        "title": "안방의 일기장",
+        "act": "3",
+        "location": "2층 안방 / 침대",
+        "trigger": "마지막 방 입장",
+        "speaker": "알프레드",
+        "summary": "알프레드의 오만, 변론하는 자의 타락, 지하 통로와 아들 희생의 진실.",
+        "body": "나는 더는 기다리지 않는다. 기도는 답을 주지 않았으나, 실험은 답을 주었다. 변론하는 자들은 세상을 고친다고 믿는다. 그 믿음이 그들을 움직이게 한다면, 진실은 중요하지 않다. 엘레나를 나사로처럼 일으킬 것이다. 지하의 길만이 밖으로 통한다. 아이는 종말의 첫 문이었다. 그녀를 빼앗아 간 생명이니, 그녀를 되돌리는 생명이 되어야 했다.",
+        "clue_key": "basement_route_and_son_truth",
+        "parse_tags": "diary,owner,cult,basement",
+        "source": "The unholy of mention 플롯 3막.pdf",
+    },
+    {
+        "id": "ACT3_NOTE_SON_001",
+        "type": "note",
+        "title": "감옥의 쪽지",
+        "act": "3",
+        "location": "감옥 / 책상 위",
+        "trigger": "감옥 열쇠 사용",
+        "speaker": "아들",
+        "summary": "체셔를 교육한 이유와 아버지를 막아 달라는 부탁.",
+        "body": "이 글을 읽는 사람이 있다면, 아직 늦지 않았기를 바랍니다. 나는 아버지를 막기 위해 체셔에게 말을 가르쳤습니다. 체셔는 겁이 많지만 길을 압니다. 아버지는 어머니를 되찾는다고 말하지만, 지하에 있는 것은 어머니가 아닙니다. 제발 아버지를 멈춰 주세요. 그리고 체셔가 밖으로 나갈 수 있다면, 창문을 열어 주세요.",
+        "clue_key": "son_request_stop_alfred",
+        "parse_tags": "note,son,parrot,basement_key",
+        "source": "The unholy of mention 플롯 3막.pdf",
+    },
+    {
+        "id": "ACT4_RESEARCH_001",
+        "type": "research_log",
+        "title": "지하 연구 기록",
+        "act": "4",
+        "location": "지하 연구실 / 실험 자료 책상",
+        "trigger": "연구실 자료 조사",
+        "speaker": "연구 기록",
+        "summary": "성물 실험, 노숙자 실험, 마몬 소환, 아내와 살덩이의 합일을 설명하는 핵심 기록.",
+        "body": "성물에서 추출한 신성은 육체의 회복을 유도했다. 초기 피험자의 세포 복구는 성공적이었다. 그러나 신앙 없는 육체에 신성을 주입한 결과, 회복은 재생이 아닌 증식으로 변질되었다. 살점은 서로를 삼키며 하나의 덩어리로 뭉쳤고, 더럽혀진 신성과 탐욕은 악마 마몬을 불러냈다. 마몬은 엘레나의 부활을 약속하며 제물을 요구했다. 결과: 엘레나는 살았으나 의식은 없고, 살덩이는 계속 제물을 원한다.",
+        "clue_key": "mammon_origin",
+        "parse_tags": "research,basement,mammon,truth",
+        "source": "The unholy of mention 플롯 4막.pdf",
+    },
+]
+
+
+def main() -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    json_path = OUT_DIR / "collectible_scripts.json"
+    csv_path = OUT_DIR / "collectible_scripts.csv"
+
+    json_path.write_text(
+        json.dumps({"schema_version": 1, "items": ITEMS}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    fieldnames = [
+        "id",
+        "type",
+        "title",
+        "act",
+        "location",
+        "trigger",
+        "speaker",
+        "summary",
+        "body",
+        "clue_key",
+        "parse_tags",
+        "source",
+    ]
+    with csv_path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(ITEMS)
+
+    print(json_path.resolve())
+    print(csv_path.resolve())
+
+
+if __name__ == "__main__":
+    main()

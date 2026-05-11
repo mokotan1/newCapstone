@@ -6,8 +6,6 @@ public class MainMenu : MonoBehaviour
 {
     public Button[] menuButtons; // Start, Load, Setting, Exit
 
-    [SerializeField] private SaveSlotManager saveSlotManager;
-
     private int currentButtonIndex = 0;
     private Vector3 lastMousePosition;
 
@@ -93,9 +91,8 @@ public class MainMenu : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        // 기존 로직 (데이터 초기화 등)
-        PlayerPrefs.DeleteAll();
-        PlayerPrefs.Save();
+        // 새 게임 시작 시 진행 데이터만 초기화하고 오디오/화면 설정은 유지합니다.
+        PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings();
         
         GameLog.Log("게임 시작! (커서 잠금 해제 완료)");
 
@@ -110,18 +107,7 @@ public class MainMenu : MonoBehaviour
     public void OnLoadButton()
     {
         UnlockCursorForSceneChange();
-
-        var manager = saveSlotManager != null
-            ? saveSlotManager
-            : Object.FindFirstObjectByType<SaveSlotManager>(FindObjectsInactive.Include);
-
-        if (manager == null)
-        {
-            GameLog.LogWarning("[MainMenu] SaveSlotManager를 찾을 수 없습니다. 씬에 SaveSlotManager가 있는지 확인하세요.");
-            return;
-        }
-
-        manager.LoadLastOrFirstSlot();
+        CheckpointLoadCoordinator.LoadLatestOrFallback(SceneNames.MainScene);
     }
 
     public void OnSettingButton()

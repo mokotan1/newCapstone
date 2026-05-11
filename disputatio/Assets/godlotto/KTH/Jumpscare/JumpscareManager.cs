@@ -314,7 +314,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         if (retryClickObject != null && retryClickObject.activeSelf
             && hit.gameObject == retryClickObject)
         {
-            SceneManager.LoadScene(retrySceneName);
+            CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
         }
     }
 

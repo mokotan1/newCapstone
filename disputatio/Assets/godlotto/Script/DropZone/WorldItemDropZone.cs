@@ -158,7 +158,12 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
 
         GameLog.Log($"올바른 아이템({requiredItem.itemName})을 사용했습니다!");
 
+        string checkpointUnlockKey = !string.IsNullOrEmpty(completedGlobalBoolKeyOverride)
+            ? completedGlobalBoolKeyOverride
+            : PersistBoolKeyForItem(requiredItem);
+
         onUnlock.Invoke();
+        SaveRoomUnlockCheckpointIfKnown(checkpointUnlockKey);
         WorldSpriteDepthSorter2D.SortActiveSceneSprites();
 
         if (InventoryManager.instance != null)
@@ -166,6 +171,12 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
 
         ApplyDropZoneCompletedVisuals();
         return true;
+    }
+
+    private static void SaveRoomUnlockCheckpointIfKnown(string unlockKey)
+    {
+        if (RoomCheckpointDefinition.TryGetByUnlockKey(unlockKey, out _))
+            RoomUnlockCheckpointService.SaveRoomUnlock(unlockKey);
     }
 
     private bool CanUseWhileDialog()

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Fungus;
@@ -133,6 +134,28 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
 
         if (selectedItem == item)
             DeselectItem();
+
+        UpdateUI();
+    }
+
+    public void RestoreItemsByIds(IEnumerable<int> itemIds)
+    {
+        items.Clear();
+        if (selectedItem != null)
+            DeselectItem();
+
+        if (itemIds != null)
+        {
+            Item[] allItems = Resources.FindObjectsOfTypeAll<Item>();
+            foreach (int itemId in itemIds)
+            {
+                Item found = allItems.FirstOrDefault(x => x != null && x.itemId == itemId);
+                if (found != null && !items.Contains(found))
+                    items.Add(found);
+                else if (found == null)
+                    GameLog.LogWarning($"[InventoryManager] 체크포인트 복원 실패: itemId={itemId} 에 해당하는 Item을 찾을 수 없습니다.");
+            }
+        }
 
         UpdateUI();
     }

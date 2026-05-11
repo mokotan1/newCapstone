@@ -37,13 +37,6 @@ public class IntegratedSettingUI : MonoBehaviour
     private int currentIndex = 0;
     private Vector3 lastMousePosition;
 
-    SaveLoadBrowserView _saveLoadBrowser;
-
-    void Awake()
-    {
-        _saveLoadBrowser = GetComponent<SaveLoadBrowserView>();
-    }
-
     void Start()
     {
         if (GlobalSettingManager.Instance == null)
@@ -135,12 +128,6 @@ public class IntegratedSettingUI : MonoBehaviour
             // 패널은 닫지 않도록 return 합니다.
             if (IsDropdownExpanded()) return;
 
-            if (_saveLoadBrowser != null && _saveLoadBrowser.IsOverlayOpen)
-            {
-                _saveLoadBrowser.CloseOverlay();
-                return;
-            }
-
             if (uiMode == UIMode.StandaloneScene)
             {
                 BackToMainMenu();
@@ -162,8 +149,6 @@ public class IntegratedSettingUI : MonoBehaviour
         if (panelRoot != null) panelRoot.SetActive(true);
 
         EnsureSettingsCanvasSortsAboveSayDialog();
-        if (_saveLoadBrowser != null)
-            _saveLoadBrowser.EnsureUiBuilt();
         
         if (dialogInput != null) dialogInput.enabled = false;
         Flowchart fcOpen = FlowchartLocator.Resolve(targetFlowchart);
@@ -191,9 +176,6 @@ public class IntegratedSettingUI : MonoBehaviour
 
     public void ReturnToGame()
     {
-        if (_saveLoadBrowser != null)
-            _saveLoadBrowser.CloseOverlay();
-
         if (panelRoot != null) panelRoot.SetActive(false);
         
         Flowchart fcClose = FlowchartLocator.Resolve(targetFlowchart);
