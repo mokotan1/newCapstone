@@ -102,6 +102,18 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
             userInputField.onSubmit.RemoveListener(OnInputFieldSubmit);
     }
 
+    public void ConfigureSharedBindings(
+        SayDialog sharedChatSayDialog,
+        TMP_InputField sharedUserInputField,
+        string serverUrlOverride = null)
+    {
+        chatSayDialog = sharedChatSayDialog;
+        userInputField = sharedUserInputField;
+        if (!string.IsNullOrWhiteSpace(serverUrlOverride))
+            localServerUrl = serverUrlOverride;
+        CacheDialogInput();
+    }
+
     // ---------------------------------------------------------------
     //  Input handling
     // ---------------------------------------------------------------
