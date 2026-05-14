@@ -21,7 +21,7 @@ public class InventoryTooltipController : MonoBehaviour
         if (item == null || root == null || contentText == null)
             return;
 
-        contentText.text = ItemTooltipTextFormatter.Build(item.itemName, item.itemDescription);
+        contentText.text = ItemTooltipTextFormatter.Build(item.itemName, item.itemDescription, item.tooltipRows);
         root.SetActive(true);
         Place(pointerPosition);
     }

@@ -65,11 +65,12 @@ public class ItemTooltipAuthoringWindow : EditorWindow
 
         EditorGUILayout.PropertyField(serializedObject.FindProperty("itemName"), new GUIContent("Item Name"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("itemDescription"), new GUIContent("Tooltip Description"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("tooltipRows"), new GUIContent("Tooltip Table"), true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("icon"), new GUIContent("Icon"));
 
         EditorGUILayout.Space(8f);
         EditorGUILayout.LabelField("Tooltip Preview", EditorStyles.boldLabel);
-        string preview = ItemTooltipTextFormatter.Build(item.itemName, item.itemDescription);
+        string preview = ItemTooltipTextFormatter.Build(item.itemName, item.itemDescription, item.tooltipRows);
         EditorGUILayout.HelpBox(preview, MessageType.None);
 
         EditorGUILayout.EndScrollView();
