@@ -5,9 +5,12 @@ using UnityEngine;
 
 public class ItemTooltipAuthoringWindow : EditorWindow
 {
+    private const string TooltipTableResourcePath = "Assets/Resources/Scenario/item_tooltip_table.csv";
+
     private readonly List<Item> items = new List<Item>();
     private int selectedIndex;
     private Vector2 scrollPosition;
+    private ItemTooltipTable tooltipTable;
 
     [MenuItem("Tools/Godlotto/Item Tooltip Authoring")]
     private static void OpenWindow()
@@ -57,6 +60,7 @@ public class ItemTooltipAuthoringWindow : EditorWindow
     {
         string[] options = BuildItemNameOptions();
         selectedIndex = EditorGUILayout.Popup("Item", selectedIndex, options);
+        ItemTooltipContent tableContent = GetTableContent(item);
 
         var serializedObject = new SerializedObject(item);
         serializedObject.Update();
@@ -66,11 +70,15 @@ public class ItemTooltipAuthoringWindow : EditorWindow
         EditorGUILayout.PropertyField(serializedObject.FindProperty("itemName"), new GUIContent("Item Name"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("itemDescription"), new GUIContent("Tooltip Description"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("tooltipRows"), new GUIContent("Tooltip Table"), true);
+        DrawParsedTooltipTable(tableContent);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("icon"), new GUIContent("Icon"));
 
         EditorGUILayout.Space(8f);
         EditorGUILayout.LabelField("Tooltip Preview", EditorStyles.boldLabel);
-        string preview = ItemTooltipTextFormatter.Build(item.itemName, item.itemDescription, item.tooltipRows);
+        string preview = ItemTooltipTextFormatter.Build(
+            tableContent.itemName,
+            tableContent.itemDescription,
+            tableContent.rows.Count > 0 ? tableContent.rows : item.tooltipRows);
         EditorGUILayout.HelpBox(preview, MessageType.None);
 
         EditorGUILayout.EndScrollView();
@@ -96,6 +104,7 @@ public class ItemTooltipAuthoringWindow : EditorWindow
 
     private void RefreshItems()
     {
+        RefreshTooltipTable();
         items.Clear();
         string[] guids = AssetDatabase.FindAssets("t:Item");
         foreach (string guid in guids)
@@ -108,6 +117,39 @@ public class ItemTooltipAuthoringWindow : EditorWindow
 
         selectedIndex = 0;
         Repaint();
+    }
+
+    private void RefreshTooltipTable()
+    {
+        TextAsset csv = AssetDatabase.LoadAssetAtPath<TextAsset>(TooltipTableResourcePath);
+        tooltipTable = ItemTooltipTable.FromCsv(csv != null ? csv.text : "");
+    }
+
+    private ItemTooltipContent GetTableContent(Item item)
+    {
+        if (tooltipTable == null)
+            RefreshTooltipTable();
+
+        return tooltipTable.GetContent(item.itemId, item.itemName, item.itemDescription);
+    }
+
+    private static void DrawParsedTooltipTable(ItemTooltipContent tableContent)
+    {
+        if (tableContent.rows.Count == 0)
+            return;
+
+        EditorGUILayout.Space(4f);
+        EditorGUILayout.LabelField("Parsed Tooltip Table", EditorStyles.boldLabel);
+        using (new EditorGUI.DisabledScope(true))
+        {
+            foreach (ItemTooltipRow row in tableContent.rows)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.TextField(row.key);
+                EditorGUILayout.TextField(row.value);
+                EditorGUILayout.EndHorizontal();
+            }
+        }
     }
 }
 #endif

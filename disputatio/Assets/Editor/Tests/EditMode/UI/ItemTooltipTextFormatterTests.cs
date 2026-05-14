@@ -27,6 +27,19 @@ public class ItemTooltipTextFormatterTests
     }
 
     [Test]
+    public void Build_OmitsFallbackDescription_WhenDescriptionIsMissingButRowsExist()
+    {
+        var rows = new[]
+        {
+            new ItemTooltipRow { key = "획득 장소", value = "서재" }
+        };
+
+        string result = ItemTooltipTextFormatter.Build("Lantern", " ", rows);
+
+        Assert.AreEqual("Lantern\n획득 장소: 서재", result);
+    }
+
+    [Test]
     public void Build_AppendsTooltipTableRows_WhenRowsHaveKeysAndValues()
     {
         var rows = new[]

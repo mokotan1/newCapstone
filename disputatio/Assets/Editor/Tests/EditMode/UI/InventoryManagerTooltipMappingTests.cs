@@ -31,4 +31,12 @@ public class InventoryManagerTooltipMappingTests
 
         Object.DestroyImmediate(discoveredObject);
     }
+
+    [Test]
+    public void SelectTooltipController_ReturnsNull_WhenBothMissing()
+    {
+        InventoryTooltipController result = InventoryManager.SelectTooltipController(null, null);
+
+        Assert.IsNull(result);
+    }
 }
