@@ -45,6 +45,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         if (tooltipController == null && fallback != null)
             GameLog.LogWarning($"[{nameof(InventoryManager)}] tooltipController resolved via FindFirstObjectByType — assign in Inspector for faster startup.");
         tooltipController = SelectTooltipController(tooltipController, fallback);
+        if (tooltipController == null)
+        {
+            tooltipController = gameObject.AddComponent<InventoryTooltipController>();
+            GameLog.LogWarning($"[{nameof(InventoryManager)}] tooltipController가 없어 런타임에 자동 생성했습니다.");
+        }
     }
 
     void OnEnable()

@@ -1,4 +1,12 @@
 using UnityEngine;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class ItemTooltipRow
+{
+    public string key = "";
+    public string value = "";
+}
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class Item : ScriptableObject
@@ -11,4 +19,5 @@ public class Item : ScriptableObject
     public Sprite icon = null;
     [TextArea]
     public string itemDescription = "";
+    public List<ItemTooltipRow> tooltipRows = new List<ItemTooltipRow>();
 }
