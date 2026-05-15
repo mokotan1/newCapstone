@@ -1,0 +1,193 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "v1-5-pruned-emaonly-fp16.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load SD1.5 checkpoint"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": "sprite_reference.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load fixed character reference"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "preset": "STANDARD (medium strength)"
+    },
+    "class_type": "IPAdapterUnifiedLoader",
+    "_meta": {
+      "title": "Load IPAdapter SD1.5"
+    }
+  },
+  "4": {
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "ipadapter": [
+        "3",
+        1
+      ],
+      "image": [
+        "2",
+        0
+      ],
+      "weight": 0.72,
+      "start_at": 0,
+      "end_at": 0.82,
+      "weight_type": "linear"
+    },
+    "class_type": "IPAdapter",
+    "_meta": {
+      "title": "Keep subject identity from reference"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "single full body 2d game character sprite, isolated character, centered, orthographic front view, clear silhouette, simple readable outfit, horror mystery visual novel game asset, clean edges, limited color palette, transparent or plain background, pixel art friendly",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive sprite prompt"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "text, watermark, logo, signature, blurry, noisy, realistic photo, 3d render, extra limbs, bad hands, cropped head, cropped feet, multiple characters, complex background, messy silhouette, low contrast, gradients everywhere",
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative sprite prompt"
+    }
+  },
+  "7": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 4
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Generate 4 sprite candidates"
+    }
+  },
+  "8": {
+    "inputs": {
+      "seed": 330033,
+      "steps": 28,
+      "cfg": 7,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Consistent candidate sampler"
+    }
+  },
+  "9": {
+    "inputs": {
+      "samples": [
+        "8",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode candidates"
+    }
+  },
+  "10": {
+    "inputs": {
+      "pixel_size": 4,
+      "conversion_method": "edge_preserving",
+      "color_similarity_threshold": 24,
+      "enable_ai_enhancement": true,
+      "noise_reduction": 0.2,
+      "edge_enhancement": 0.8,
+      "color_quantization": 24,
+      "dithering_strength": 0.1,
+      "palette_extraction": "k_means_vibrant_preserved",
+      "color_matching_space": "oklab",
+      "contrast_boost": 1.15,
+      "saturation_boost": 1.05,
+      "preserve_details": true,
+      "anti_aliasing": false,
+      "batch_processing": true,
+      "image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "AIPixelArtEnhancer",
+    "_meta": {
+      "title": "Pixel art pass"
+    }
+  },
+  "11": {
+    "inputs": {
+      "filename_prefix": "newcapstone/sprite-candidates",
+      "images": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save pixel sprite candidates"
+    }
+  },
+  "12": {
+    "inputs": {
+      "filename_prefix": "newcapstone/sprite-palette",
+      "images": [
+        "10",
+        2
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save sprite palette"
+    }
+  }
+}

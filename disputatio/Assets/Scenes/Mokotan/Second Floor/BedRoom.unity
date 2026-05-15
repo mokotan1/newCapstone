@@ -8733,6 +8733,10 @@ MonoBehaviour:
   - {fileID: 728395127}
   targetSprites: []
   flashlightPrefab: {fileID: 0}
+  detectionRadius: 2
+  maxAlphaRadius: 0.5
+  maxAlphaValue: 1
+  interactableTargets: []
 --- !u!4 &1050452976
 Transform:
   m_ObjectHideFlags: 0
@@ -9791,7 +9795,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1522851415
   m_SortingLayer: -1
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -6750318277770773909, guid: 849900b4acc848e45b1cd43a4e199aaf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -10025,8 +10029,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -362872839
-  m_SortingLayer: -2
+  m_SortingLayerID: -1522851415
+  m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: -7021336165141699813, guid: 19c2ddbcca1fe294db4f8400443455aa, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

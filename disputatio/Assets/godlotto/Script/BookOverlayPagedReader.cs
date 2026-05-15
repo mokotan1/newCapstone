@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +34,14 @@ public class BookOverlayPagedReader : MonoBehaviour
 
     private readonly List<string> pages = new List<string>();
     private int currentPageIndex;
+    private bool lastPageShownSinceOpen;
+
+    public event Action<BookOverlayPagedReader> LastPageShown;
+    public event Action<BookOverlayPagedReader> Closed;
+    public event Action<BookOverlayPagedReader, int, int> PageShown;
+    public bool HasShownLastPageSinceOpen => lastPageShownSinceOpen;
+    public int CurrentPageIndex => currentPageIndex;
+    public int PageCount => pages.Count;
 
     private void Awake()
     {
@@ -49,6 +58,7 @@ public class BookOverlayPagedReader : MonoBehaviour
         RebuildPages();
         if (resetToFirstPageOnOpen)
             currentPageIndex = 0;
+        lastPageShownSinceOpen = false;
         ShowPage(currentPageIndex);
     }
 
@@ -67,6 +77,14 @@ public class BookOverlayPagedReader : MonoBehaviour
         title = newTitle;
         fullText = newFullText;
         currentPageIndex = 0;
+        lastPageShownSinceOpen = false;
+        RebuildPages();
+        ShowPage(currentPageIndex);
+    }
+
+    public void SetMaxCharactersPerPage(int value)
+    {
+        maxCharactersPerPage = Mathf.Max(40, value);
         RebuildPages();
         ShowPage(currentPageIndex);
     }
@@ -89,6 +107,7 @@ public class BookOverlayPagedReader : MonoBehaviour
 
     public void Close()
     {
+        Closed?.Invoke(this);
         gameObject.SetActive(false);
     }
 
@@ -105,7 +124,30 @@ public class BookOverlayPagedReader : MonoBehaviour
         }
 
         string normalized = source.Replace("\r\n", "\n").Replace('\r', '\n');
-        string[] paragraphs = normalized.Split(new[] { "\n\n" }, System.StringSplitOptions.None);
+        if (normalized.IndexOf('\f') >= 0)
+        {
+            string[] forcedPageGroups = normalized.Split('\f');
+            foreach (string forcedPageGroup in forcedPageGroups)
+            {
+                string forcedPage = forcedPageGroup.Trim();
+                if (!string.IsNullOrEmpty(forcedPage))
+                    pages.Add(forcedPage);
+            }
+        }
+        else
+        {
+            AddPagesFromTextGroup(normalized, limit);
+        }
+
+        if (pages.Count == 0)
+            pages.Add(string.Empty);
+
+        currentPageIndex = Mathf.Clamp(currentPageIndex, 0, pages.Count - 1);
+    }
+
+    private void AddPagesFromTextGroup(string textGroup, int limit)
+    {
+        string[] paragraphs = textGroup.Split(new[] { "\n\n" }, System.StringSplitOptions.None);
         var page = new StringBuilder(limit + 32);
 
         foreach (string rawParagraph in paragraphs)
@@ -131,10 +173,6 @@ public class BookOverlayPagedReader : MonoBehaviour
         }
 
         FlushPage(page);
-        if (pages.Count == 0)
-            pages.Add(string.Empty);
-
-        currentPageIndex = Mathf.Clamp(currentPageIndex, 0, pages.Count - 1);
     }
 
     private void SplitLongParagraph(string paragraph, int limit)
@@ -191,5 +229,13 @@ public class BookOverlayPagedReader : MonoBehaviour
             previousButton.interactable = hasPrevious;
         if (nextButton != null)
             nextButton.interactable = hasNext;
+
+        PageShown?.Invoke(this, currentPageIndex, pages.Count);
+
+        if (pages.Count > 0 && currentPageIndex >= pages.Count - 1 && !lastPageShownSinceOpen)
+        {
+            lastPageShownSinceOpen = true;
+            LastPageShown?.Invoke(this);
+        }
     }
 }
