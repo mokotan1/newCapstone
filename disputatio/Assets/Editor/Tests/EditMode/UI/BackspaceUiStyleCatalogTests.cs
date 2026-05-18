@@ -51,13 +51,57 @@ public class BackspaceUiStyleCatalogTests
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("MainMenuScene"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("Opening_Office"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("Hall_animate"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("Hall_playerble"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("StudyRoomCutScene"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("POAnimation"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("GoPrisonAnimation"));
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("BetaEnd"));
 
-        Assert.IsFalse(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("Hall_playerble"));
         Assert.IsFalse(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("MaidRoom"));
         Assert.IsFalse(BackspaceUiSceneApplier.IsSceneBackspaceExcludedSceneName("BasementHallway"));
+    }
+
+    [Test]
+    public void SceneBackCanvas_SortsBehindPanels()
+    {
+        Assert.Less(BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder, 0);
+        Assert.Greater(BackspaceUiPrefabBuilder.PanelBackCanvasSortingOrder, BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder);
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesPanelBackspaceCandidateNames()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("backspace"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("LockBackspace"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("PuzzleBookBackspace"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("SceneBackNavigator_Ribbon"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("SceneBackRibbon"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("CloseButton"));
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesKnownInteractionPanels()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelName("DiaryPanel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelName("TrashBox_pannel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelName("WhiteBoardPanel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelName("WallclockPanel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelName("ChestPanel"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelName("SceneBackNavigator_Ribbon"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelName("Main Camera"));
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesSceneSpecificInteractionPanelTargets()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("BasementResearchRoom", "Panel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("MaidRoom", "PuzzlePanel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("Kitchen", "Sink_Pannel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("WifeRoom", "WallclockPanel"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("Opening_Office", "Panel"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("Hall_playerble", "Panel"));
     }
 }

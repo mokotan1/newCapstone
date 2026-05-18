@@ -2,14 +2,18 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using Fungus;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public static class BackspaceUiSceneApplier
 {
     public const string SceneBackRootName = "SceneBackNavigator_Ribbon";
+    private const string KoreanFontAssetPath = "Assets/Font/JalnanGothic SDF.asset";
+    private const string CornerFoldSpritePath = BackspaceUiStyleCatalog.PrefabRoot + "/CornerFoldTriangle.png";
     private const string PendingRequestFileName = "BackspaceSceneApply.request";
     private static readonly string[] LegacySceneBackspaceObjectNames = { "Backspace" };
     private static readonly string[] LegacySceneBackspaceBlockNames =
@@ -28,11 +32,86 @@ public static class BackspaceUiSceneApplier
         "Opening_Mention",
         "Opening_Mention _open",
         "Hall_animate",
+        "Hall_playerble",
         "StudyRoomCutScene",
         "POAnimation",
         "GoPrisonAnimation",
         "BetaEnd"
     };
+    private static readonly string[] InteractionPanelNames =
+    {
+        "Panel",
+        "ShowcasePanel1",
+        "ShowcasePanel2",
+        "ShowcasePanel3",
+        "electrical control panel_Panel",
+        "pot_Panel",
+        "ButtonPanel",
+        "TrashBox_pannel",
+        "Sink_Pannel",
+        "firpan_Panel",
+        "BookcasePanel",
+        "BookPanel",
+        "SafePanel",
+        "DiaryPanel",
+        "CardStackPanel",
+        "LockPanel",
+        "WindowPanel",
+        "WhiteBoardPanel",
+        "NotePanel",
+        "CalendarPanel",
+        "DrawerPanel",
+        "WallclockPanel",
+        "Diary_Panel",
+        "CookBook_Panel",
+        "PuzzlePanel",
+        "Key_Panel",
+        "TablePanel",
+        "BedfloorPanel",
+        "ChestPanel"
+    };
+    private static readonly string[] InteractionPanelTargets =
+    {
+        "BasementResearchRoom|Panel",
+        "2floorHallway_Left|ShowcasePanel1",
+        "2floorHallway_Left|ShowcasePanel2",
+        "2floorHallway_Left|ShowcasePanel3",
+        "2floorLeft|ShowcasePanel1",
+        "2floorLeft|ShowcasePanel2",
+        "2floorLeft|ShowcasePanel3",
+        "UtilityRoom|electrical control panel_Panel",
+        "Hallway_Left|pot_Panel",
+        "Hall_Left|pot_Panel",
+        "BookCase2|ButtonPanel",
+        "Kitchen|TrashBox_pannel",
+        "Kitchen|Sink_Pannel",
+        "Kitchen|firpan_Panel",
+        "BedRoom|BookcasePanel",
+        "BedRoom|BookPanel",
+        "BedRoom|SafePanel",
+        "StudyRoom|DiaryPanel",
+        "StudyRoom|CardStackPanel",
+        "StudyRoom|LockPanel",
+        "TutorRoom|WindowPanel",
+        "TutorRoom|WhiteBoardPanel",
+        "Prison|NotePanel",
+        "PrisonEntrance|LockPanel",
+        "DressingRoom|CalendarPanel",
+        "WifeRoom|LockPanel",
+        "WifeRoom|DrawerPanel",
+        "WifeRoom|WallclockPanel",
+        "MaidRoom|Diary_Panel",
+        "MaidRoom|CookBook_Panel",
+        "MaidRoom|PuzzlePanel",
+        "MaidRoom|Key_Panel",
+        "MaidRoom|LockPanel",
+        "ChildRoom|DrawerPanel",
+        "ChildRoom|TablePanel",
+        "ChildRoom|BedfloorPanel",
+        "ChildRoom|ChestPanel"
+    };
+    private static readonly Color Ink = new Color(0.13f, 0.09f, 0.06f, 1f);
+    private static readonly Color Gold = new Color(0.78f, 0.58f, 0.29f, 1f);
 
     [InitializeOnLoadMethod]
     private static void ApplyPendingRequestOnEditorReload()
@@ -130,6 +209,37 @@ public static class BackspaceUiSceneApplier
         Debug.Log($"[BackspaceUiSceneApplier] Removed scene backspace from {changedScenes} flow-locked scene(s), {removedObjects} object(s) total.");
     }
 
+    [MenuItem("Tools/godlotto/UI/Apply Panel Backspace Skin To Build Scenes")]
+    public static void ApplyPanelBackspaceSkinToBuildScenes()
+    {
+        BackspaceUiPrefabBuilder.GenerateAll();
+
+        int changedScenes = 0;
+        int changedButtons = 0;
+
+        foreach (var buildScene in EditorBuildSettings.scenes)
+        {
+            if (!buildScene.enabled || string.IsNullOrEmpty(buildScene.path))
+                continue;
+
+            var scene = EditorSceneManager.OpenScene(buildScene.path, OpenSceneMode.Single);
+            var sceneChangedButtons = ApplyPanelBackspaceSkin(scene);
+            sceneChangedButtons += EnsureInteractionPanelBackspaces(scene);
+            sceneChangedButtons += RemoveGeneratedBackspacesFromNonTargetPanels(scene);
+            var sceneChangedCanvases = ApplySceneBackspaceCanvasOrder(scene);
+
+            if (sceneChangedButtons == 0 && sceneChangedCanvases == 0)
+                continue;
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            changedScenes++;
+            changedButtons += sceneChangedButtons;
+        }
+
+        Debug.Log($"[BackspaceUiSceneApplier] Panel backspace skin applied in {changedScenes} scene(s), {changedButtons} button(s) total.");
+    }
+
     public static bool IsSceneBackspaceName(string objectName)
     {
         return string.Equals(objectName, SceneBackRootName, StringComparison.Ordinal)
@@ -157,6 +267,35 @@ public static class BackspaceUiSceneApplier
         foreach (var legacyName in LegacySceneBackspaceObjectNames)
         {
             if (string.Equals(objectName, legacyName, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool IsPanelBackspaceCandidateName(string objectName)
+    {
+        return !IsSceneBackspaceName(objectName)
+            && objectName.IndexOf("backspace", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    public static bool IsKnownInteractionPanelName(string objectName)
+    {
+        foreach (var panelName in InteractionPanelNames)
+        {
+            if (string.Equals(objectName, panelName, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool IsKnownInteractionPanelTarget(string sceneName, string objectName)
+    {
+        var key = sceneName + "|" + objectName;
+        foreach (var target in InteractionPanelTargets)
+        {
+            if (string.Equals(key, target, StringComparison.Ordinal))
                 return true;
         }
 
@@ -214,6 +353,221 @@ public static class BackspaceUiSceneApplier
         }
 
         return false;
+    }
+
+    private static int ApplySceneBackspaceCanvasOrder(Scene scene)
+    {
+        int changedCount = 0;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var canvas in root.GetComponentsInChildren<Canvas>(true))
+            {
+                if (!string.Equals(canvas.gameObject.name, SceneBackRootName, StringComparison.Ordinal))
+                    continue;
+
+                if (!canvas.overrideSorting || canvas.sortingOrder != BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder)
+                {
+                    canvas.overrideSorting = true;
+                    canvas.sortingOrder = BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder;
+                    EditorUtility.SetDirty(canvas);
+                    changedCount++;
+                }
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static int ApplyPanelBackspaceSkin(Scene scene)
+    {
+        int changedCount = 0;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var button in root.GetComponentsInChildren<Button>(true))
+            {
+                if (!IsPanelBackspaceCandidate(button.transform))
+                    continue;
+
+                ApplyCornerFoldSkin(button);
+                changedCount++;
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static int EnsureInteractionPanelBackspaces(Scene scene)
+    {
+        int changedCount = 0;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var rect in root.GetComponentsInChildren<RectTransform>(true))
+            {
+                if (rect == null)
+                    continue;
+                if (!IsKnownInteractionPanelName(rect.gameObject.name))
+                    continue;
+                if (!IsKnownInteractionPanelTarget(scene.name, rect.gameObject.name))
+                    continue;
+
+                var button = FindPanelBackspaceButton(rect);
+                if (button == null)
+                    button = CreatePanelBackspaceButton(rect);
+
+                EnsurePanelBackspaceCloser(button, rect.gameObject);
+                ApplyCornerFoldSkin(button);
+                changedCount++;
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static int RemoveGeneratedBackspacesFromNonTargetPanels(Scene scene)
+    {
+        int changedCount = 0;
+        var buttonsToRemove = new List<GameObject>();
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var button in root.GetComponentsInChildren<Button>(true))
+            {
+                if (button == null)
+                    continue;
+                if (!string.Equals(button.gameObject.name, "BackspaceCornerFold", StringComparison.Ordinal))
+                    continue;
+                if (button.transform.parent == null)
+                    continue;
+                if (IsKnownInteractionPanelTarget(scene.name, button.transform.parent.gameObject.name))
+                    continue;
+
+                buttonsToRemove.Add(button.gameObject);
+            }
+        }
+
+        foreach (var buttonObject in buttonsToRemove)
+        {
+            if (buttonObject == null)
+                continue;
+
+            UnityEngine.Object.DestroyImmediate(buttonObject);
+            changedCount++;
+        }
+
+        return changedCount;
+    }
+
+    private static Button FindPanelBackspaceButton(Transform panel)
+    {
+        for (int i = 0; i < panel.childCount; i++)
+        {
+            var child = panel.GetChild(i);
+            if (!IsPanelBackspaceCandidateName(child.gameObject.name))
+                continue;
+
+            var button = child.GetComponent<Button>();
+            if (button != null)
+                return button;
+        }
+
+        return null;
+    }
+
+    private static Button CreatePanelBackspaceButton(Transform panel)
+    {
+        var buttonObject = new GameObject("BackspaceCornerFold", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        buttonObject.transform.SetParent(panel, false);
+        return buttonObject.GetComponent<Button>();
+    }
+
+    private static void EnsurePanelBackspaceCloser(Button button, GameObject targetPanel)
+    {
+        var closer = button.GetComponent<PanelBackspaceCloser>();
+        if (closer == null)
+            closer = button.gameObject.AddComponent<PanelBackspaceCloser>();
+
+        var serialized = new SerializedObject(closer);
+        serialized.FindProperty("targetPanel").objectReferenceValue = targetPanel;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(closer);
+    }
+
+    private static bool IsPanelBackspaceCandidate(Transform transform)
+    {
+        return IsPanelBackspaceCandidateName(transform.gameObject.name)
+            && !IsInsideSceneBackspace(transform);
+    }
+
+    private static void ApplyCornerFoldSkin(Button button)
+    {
+        var rect = button.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchorMin = Vector2.one;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = Vector2.one;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(64f, 64f);
+        }
+
+        var image = button.GetComponent<Image>();
+        if (image == null)
+            image = button.gameObject.AddComponent<Image>();
+
+        image.color = Gold;
+        image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(CornerFoldSpritePath);
+        image.type = Image.Type.Simple;
+        image.raycastTarget = true;
+        button.targetGraphic = image;
+
+        var colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 0.95f, 0.82f, 1f);
+        colors.pressedColor = new Color(0.78f, 0.67f, 0.48f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+
+        RemoveVisualChildren(button.transform);
+        CreateCornerFoldLabel(button.transform);
+        EditorUtility.SetDirty(button);
+    }
+
+    private static void RemoveVisualChildren(Transform transform)
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+            UnityEngine.Object.DestroyImmediate(transform.GetChild(i).gameObject);
+    }
+
+    private static void CreateCornerFoldLabel(Transform parent)
+    {
+        var labelObject = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        labelObject.transform.SetParent(parent, false);
+
+        var rect = labelObject.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.one;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = Vector2.one;
+        rect.anchoredPosition = new Vector2(-16f, -15f);
+        rect.sizeDelta = new Vector2(28f, 28f);
+
+        var label = labelObject.GetComponent<TextMeshProUGUI>();
+        label.text = "X";
+        label.fontSize = 18f;
+        label.fontStyle = FontStyles.Bold;
+        label.color = Ink;
+        label.alignment = TextAlignmentOptions.Center;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+        label.raycastTarget = false;
+
+        var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(KoreanFontAssetPath);
+        if (fontAsset != null)
+        {
+            label.font = fontAsset;
+            label.fontSharedMaterial = fontAsset.material;
+        }
     }
 
     private static int RemoveSceneBackspaceObjects(Scene scene)

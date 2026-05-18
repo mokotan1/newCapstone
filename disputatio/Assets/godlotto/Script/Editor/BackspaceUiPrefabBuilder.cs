@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public static class BackspaceUiPrefabBuilder
 {
     private const string KoreanFontAssetPath = "Assets/Font/JalnanGothic SDF.asset";
+    public const int SceneBackCanvasSortingOrder = -10;
+    public const int PanelBackCanvasSortingOrder = 30;
 
     private static readonly Color Clear = new Color(1f, 1f, 1f, 0f);
     private static readonly Color Ink = new Color(0.13f, 0.09f, 0.06f, 1f);
@@ -66,7 +68,7 @@ public static class BackspaceUiPrefabBuilder
     private static GameObject CreateSceneBackRibbonPrefab()
     {
         var root = CreateCanvasRoot("SceneBackNavigator_Ribbon");
-        root.GetComponent<Canvas>().sortingOrder = 20;
+        root.GetComponent<Canvas>().sortingOrder = SceneBackCanvasSortingOrder;
 
         var button = CreateButton(root.transform, "SceneBackRibbon", new Vector2(0f, 1f), new Vector2(42f, -42f), new Vector2(280f, 72f), new Color(0.07f, 0.065f, 0.06f, 0.82f));
         var navigator = button.gameObject.AddComponent<BackNavigator>();
@@ -142,7 +144,7 @@ public static class BackspaceUiPrefabBuilder
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.pixelPerfect = true;
         canvas.overrideSorting = true;
-        canvas.sortingOrder = 30;
+        canvas.sortingOrder = PanelBackCanvasSortingOrder;
 
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
