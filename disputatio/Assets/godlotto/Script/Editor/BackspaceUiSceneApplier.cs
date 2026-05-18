@@ -16,6 +16,13 @@ public static class BackspaceUiSceneApplier
     private const string CornerFoldSpritePath = BackspaceUiStyleCatalog.PrefabRoot + "/CornerFoldTriangle.png";
     private const string PendingRequestFileName = "BackspaceSceneApply.request";
     private static readonly string[] LegacySceneBackspaceObjectNames = { "Backspace" };
+    private static readonly string[] CurrentBackspaceObjectNames =
+    {
+        SceneBackRootName,
+        "SceneBackRibbon",
+        "BackspaceCornerFold",
+        "BackspaceNameplate"
+    };
     private static readonly string[] LegacySceneBackspaceBlockNames =
     {
         "Backspace_Clicked",
@@ -110,7 +117,24 @@ public static class BackspaceUiSceneApplier
         "ChildRoom|BedfloorPanel",
         "ChildRoom|ChestPanel"
     };
+    private static readonly string[] ChatbotPanelTargets =
+    {
+        "Hall_playerble|Parret_Panel",
+        "TutorRoom|Parret_Panel",
+        "WifeRoom|Parret_Panel",
+        "BedRoom|Parret_Panel",
+        "ChildRoom|Parret_Panel"
+    };
+    private static readonly string[] LegacyCloseBlockTargets =
+    {
+        "StudyRoom|DiaryPanel|DiaryBackspace",
+        "StudyRoom|CardStackPanel|CardStackBackspace",
+        "Prison|NotePanel|PanelBackspace",
+        "PrisonEntrance|LockPanel|LockBackspace",
+        "MaidRoom|Diary_Panel|PanelBackspace"
+    };
     private static readonly Color Ink = new Color(0.13f, 0.09f, 0.06f, 1f);
+    private static readonly Color Paper = new Color(0.91f, 0.81f, 0.62f, 0.96f);
     private static readonly Color Gold = new Color(0.78f, 0.58f, 0.29f, 1f);
 
     [InitializeOnLoadMethod]
@@ -164,6 +188,8 @@ public static class BackspaceUiSceneApplier
         {
             if (!buildScene.enabled || string.IsNullOrEmpty(buildScene.path))
                 continue;
+            if (!IsKnownInteractionPanelTargetScene(Path.GetFileNameWithoutExtension(buildScene.path)))
+                continue;
 
             var scene = EditorSceneManager.OpenScene(buildScene.path, OpenSceneMode.Single);
             var sceneRemovedObjects = RemoveLegacyBackspaceObjects(scene);
@@ -213,7 +239,12 @@ public static class BackspaceUiSceneApplier
     public static void ApplyPanelBackspaceSkinToBuildScenes()
     {
         BackspaceUiPrefabBuilder.GenerateAll();
+        ApplyPanelBackspaceSkinToBuildScenesWithoutRegeneratingPrefabs();
+    }
 
+    [MenuItem("Tools/godlotto/UI/Apply Panel Backspace Skin Only To Build Scenes")]
+    public static void ApplyPanelBackspaceSkinToBuildScenesWithoutRegeneratingPrefabs()
+    {
         int changedScenes = 0;
         int changedButtons = 0;
 
@@ -240,10 +271,82 @@ public static class BackspaceUiSceneApplier
         Debug.Log($"[BackspaceUiSceneApplier] Panel backspace skin applied in {changedScenes} scene(s), {changedButtons} button(s) total.");
     }
 
+    [MenuItem("Tools/godlotto/UI/Apply Chatbot Backspace Nameplate Only To Build Scenes")]
+    public static void ApplyChatbotBackspaceNameplateToBuildScenes()
+    {
+        int changedScenes = 0;
+        int changedButtons = 0;
+
+        foreach (var buildScene in EditorBuildSettings.scenes)
+        {
+            if (!buildScene.enabled || string.IsNullOrEmpty(buildScene.path))
+                continue;
+            if (!IsKnownChatbotPanelTargetScene(Path.GetFileNameWithoutExtension(buildScene.path)))
+                continue;
+
+            var scene = EditorSceneManager.OpenScene(buildScene.path, OpenSceneMode.Single);
+            var sceneChangedButtons = EnsureChatbotBackspaces(scene);
+            if (sceneChangedButtons == 0)
+                continue;
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            changedScenes++;
+            changedButtons += sceneChangedButtons;
+        }
+
+        Debug.Log($"[BackspaceUiSceneApplier] Chatbot backspace nameplate applied in {changedScenes} scene(s), {changedButtons} button(s) total.");
+    }
+
+    [MenuItem("Tools/godlotto/UI/Configure Scene Backspace Camera Canvases And Cleanup Legacy")]
+    public static void ConfigureSceneBackspaceCameraCanvasesAndCleanupLegacy()
+    {
+        var prefabChanged = ConfigureSceneBackspacePrefabCanvas();
+        int changedScenes = 0;
+        int changedCanvases = 0;
+        int ensuredButtons = 0;
+        int removedObjects = 0;
+
+        foreach (var buildScene in EditorBuildSettings.scenes)
+        {
+            if (!buildScene.enabled || string.IsNullOrEmpty(buildScene.path))
+                continue;
+
+            var scene = EditorSceneManager.OpenScene(buildScene.path, OpenSceneMode.Single);
+            var sceneChangedCanvases = ApplySceneBackspaceCanvasOrder(scene);
+            var sceneEnsuredButtons = EnsureInteractionPanelBackspaces(scene) + EnsureChatbotBackspaces(scene);
+            sceneEnsuredButtons += RemoveGeneratedBackspacesFromNonTargetPanels(scene);
+            var sceneRemovedObjects = RemoveNonCurrentBackspaceObjects(scene);
+
+            if (sceneChangedCanvases == 0 && sceneEnsuredButtons == 0 && sceneRemovedObjects == 0)
+                continue;
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            changedScenes++;
+            changedCanvases += sceneChangedCanvases;
+            ensuredButtons += sceneEnsuredButtons;
+            removedObjects += sceneRemovedObjects;
+        }
+
+        Debug.Log($"[BackspaceUiSceneApplier] Scene backspace camera canvas cleanup done. Prefab changed: {prefabChanged}, changed {changedScenes} scene(s), configured {changedCanvases} canvas(es), ensured {ensuredButtons} current button(s), removed {removedObjects} old backspace object(s).");
+    }
+
     public static bool IsSceneBackspaceName(string objectName)
     {
         return string.Equals(objectName, SceneBackRootName, StringComparison.Ordinal)
             || string.Equals(objectName, "SceneBackRibbon", StringComparison.Ordinal);
+    }
+
+    public static bool IsCurrentBackspaceObjectName(string objectName)
+    {
+        foreach (var currentName in CurrentBackspaceObjectNames)
+        {
+            if (string.Equals(objectName, currentName, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
     }
 
     public static bool IsSceneBackspaceExcludedScenePath(string scenePath)
@@ -276,6 +379,7 @@ public static class BackspaceUiSceneApplier
     public static bool IsPanelBackspaceCandidateName(string objectName)
     {
         return !IsSceneBackspaceName(objectName)
+            && !string.Equals(objectName, "BackspaceNameplate", StringComparison.Ordinal)
             && objectName.IndexOf("backspace", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
@@ -300,6 +404,52 @@ public static class BackspaceUiSceneApplier
         }
 
         return false;
+    }
+
+    public static bool IsKnownInteractionPanelTargetScene(string sceneName)
+    {
+        foreach (var target in InteractionPanelTargets)
+        {
+            if (target.StartsWith(sceneName + "|", StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool IsKnownChatbotPanelTarget(string sceneName, string objectName)
+    {
+        var key = sceneName + "|" + objectName;
+        foreach (var target in ChatbotPanelTargets)
+        {
+            if (string.Equals(key, target, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool IsKnownChatbotPanelTargetScene(string sceneName)
+    {
+        foreach (var target in ChatbotPanelTargets)
+        {
+            if (target.StartsWith(sceneName + "|", StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static string ResolveLegacyCloseBlockName(string sceneName, string panelName)
+    {
+        var key = sceneName + "|" + panelName + "|";
+        foreach (var target in LegacyCloseBlockTargets)
+        {
+            if (target.StartsWith(key, StringComparison.Ordinal))
+                return target.Substring(key.Length);
+        }
+
+        return string.Empty;
     }
 
     [MenuItem("Tools/godlotto/UI/Request Scene Backspace Apply On Reload")]
@@ -358,6 +508,7 @@ public static class BackspaceUiSceneApplier
     private static int ApplySceneBackspaceCanvasOrder(Scene scene)
     {
         int changedCount = 0;
+        var sceneCamera = FindSceneCamera(scene);
 
         foreach (var root in scene.GetRootGameObjects())
         {
@@ -366,17 +517,104 @@ public static class BackspaceUiSceneApplier
                 if (!string.Equals(canvas.gameObject.name, SceneBackRootName, StringComparison.Ordinal))
                     continue;
 
-                if (!canvas.overrideSorting || canvas.sortingOrder != BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder)
-                {
-                    canvas.overrideSorting = true;
-                    canvas.sortingOrder = BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder;
-                    EditorUtility.SetDirty(canvas);
+                if (ConfigureSceneBackspaceCanvas(canvas, sceneCamera))
                     changedCount++;
-                }
             }
         }
 
         return changedCount;
+    }
+
+    private static bool ConfigureSceneBackspacePrefabCanvas()
+    {
+        var prefabRoot = PrefabUtility.LoadPrefabContents(BackspaceUiStyleCatalog.SceneBackPrefabPath);
+        if (prefabRoot == null)
+            return false;
+
+        try
+        {
+            var canvas = prefabRoot.GetComponent<Canvas>();
+            if (canvas == null)
+                return false;
+
+            if (!ConfigureSceneBackspaceCanvas(canvas, null))
+                return false;
+
+            PrefabUtility.SaveAsPrefabAsset(prefabRoot, BackspaceUiStyleCatalog.SceneBackPrefabPath);
+            return true;
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(prefabRoot);
+        }
+    }
+
+    private static bool ConfigureSceneBackspaceCanvas(Canvas canvas, Camera sceneCamera)
+    {
+        bool changed = false;
+
+        if (canvas.renderMode != RenderMode.ScreenSpaceCamera)
+        {
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            changed = true;
+        }
+
+        if (canvas.worldCamera != sceneCamera)
+        {
+            canvas.worldCamera = sceneCamera;
+            changed = true;
+        }
+
+        if (!canvas.overrideSorting)
+        {
+            canvas.overrideSorting = true;
+            changed = true;
+        }
+
+        if (!string.Equals(canvas.sortingLayerName, BackspaceUiPrefabBuilder.SceneBackCanvasSortingLayerName, StringComparison.Ordinal))
+        {
+            canvas.sortingLayerName = BackspaceUiPrefabBuilder.SceneBackCanvasSortingLayerName;
+            changed = true;
+        }
+
+        if (canvas.sortingOrder != BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder)
+        {
+            canvas.sortingOrder = BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder;
+            changed = true;
+        }
+
+        if (!Mathf.Approximately(canvas.planeDistance, BackspaceUiPrefabBuilder.SceneBackCanvasPlaneDistance))
+        {
+            canvas.planeDistance = BackspaceUiPrefabBuilder.SceneBackCanvasPlaneDistance;
+            changed = true;
+        }
+
+        if (changed)
+            EditorUtility.SetDirty(canvas);
+
+        return changed;
+    }
+
+    private static Camera FindSceneCamera(Scene scene)
+    {
+        Camera fallback = null;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var camera in root.GetComponentsInChildren<Camera>(true))
+            {
+                if (camera == null)
+                    continue;
+                if (fallback == null)
+                    fallback = camera;
+                if (camera.CompareTag("MainCamera") || string.Equals(camera.gameObject.name, "Main Camera", StringComparison.Ordinal))
+                {
+                    return camera;
+                }
+            }
+        }
+
+        return fallback;
     }
 
     private static int ApplyPanelBackspaceSkin(Scene scene)
@@ -413,7 +651,7 @@ public static class BackspaceUiSceneApplier
                 if (!IsKnownInteractionPanelTarget(scene.name, rect.gameObject.name))
                     continue;
 
-                var button = FindPanelBackspaceButton(rect);
+                var button = FindDirectChildButton(rect, "BackspaceCornerFold");
                 if (button == null)
                     button = CreatePanelBackspaceButton(rect);
 
@@ -460,6 +698,53 @@ public static class BackspaceUiSceneApplier
         return changedCount;
     }
 
+    private static int EnsureChatbotBackspaces(Scene scene)
+    {
+        int changedCount = 0;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            foreach (var rect in root.GetComponentsInChildren<RectTransform>(true))
+            {
+                if (rect == null)
+                    continue;
+                if (!IsKnownChatbotPanelTarget(scene.name, rect.gameObject.name))
+                    continue;
+
+                var button = FindDirectChildButton(rect, "BackspaceNameplate");
+                if (button == null)
+                    button = CreateChatbotBackspaceButton(rect);
+
+                EnsurePanelBackspaceCloser(button, rect.gameObject);
+                ApplyChatNameplateSkin(button);
+                changedCount++;
+            }
+        }
+
+        return changedCount;
+    }
+
+    private static Button FindDirectChildButton(Transform parent, string objectName)
+    {
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            var child = parent.GetChild(i);
+            if (!string.Equals(child.gameObject.name, objectName, StringComparison.Ordinal))
+                continue;
+
+            return child.GetComponent<Button>();
+        }
+
+        return null;
+    }
+
+    private static Button CreateChatbotBackspaceButton(Transform panel)
+    {
+        var buttonObject = new GameObject("BackspaceNameplate", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        buttonObject.transform.SetParent(panel, false);
+        return buttonObject.GetComponent<Button>();
+    }
+
     private static Button FindPanelBackspaceButton(Transform panel)
     {
         for (int i = 0; i < panel.childCount; i++)
@@ -491,6 +776,7 @@ public static class BackspaceUiSceneApplier
 
         var serialized = new SerializedObject(closer);
         serialized.FindProperty("targetPanel").objectReferenceValue = targetPanel;
+        serialized.FindProperty("executeBlockName").stringValue = ResolveLegacyCloseBlockName(targetPanel.scene.name, targetPanel.name);
         serialized.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(closer);
     }
@@ -510,7 +796,7 @@ public static class BackspaceUiSceneApplier
             rect.anchorMax = Vector2.one;
             rect.pivot = Vector2.one;
             rect.anchoredPosition = Vector2.zero;
-            rect.sizeDelta = new Vector2(64f, 64f);
+            rect.sizeDelta = new Vector2(96f, 96f);
         }
 
         var image = button.GetComponent<Image>();
@@ -535,6 +821,69 @@ public static class BackspaceUiSceneApplier
         EditorUtility.SetDirty(button);
     }
 
+    private static void ApplyChatNameplateSkin(Button button)
+    {
+        var rect = button.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchorMin = Vector2.one;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = Vector2.one;
+            rect.anchoredPosition = new Vector2(-88f, -32f);
+            rect.sizeDelta = new Vector2(175f, 71f);
+        }
+
+        var image = button.GetComponent<Image>();
+        if (image == null)
+            image = button.gameObject.AddComponent<Image>();
+
+        image.color = Paper;
+        image.sprite = null;
+        image.type = Image.Type.Simple;
+        image.raycastTarget = true;
+        button.targetGraphic = image;
+
+        var colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 0.95f, 0.82f, 1f);
+        colors.pressedColor = new Color(0.78f, 0.67f, 0.48f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+
+        RemoveVisualChildren(button.transform);
+        CreateChatNameplateLabel(button.transform);
+        EditorUtility.SetDirty(button);
+    }
+
+    private static void CreateChatNameplateLabel(Transform parent)
+    {
+        var labelObject = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        labelObject.transform.SetParent(parent, false);
+
+        var rect = labelObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(122f, 32f);
+
+        var label = labelObject.GetComponent<TextMeshProUGUI>();
+        label.text = "닫기  X";
+        label.fontSize = 16f;
+        label.fontStyle = FontStyles.Bold;
+        label.color = Ink;
+        label.alignment = TextAlignmentOptions.Center;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+        label.raycastTarget = false;
+
+        var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(KoreanFontAssetPath);
+        if (fontAsset != null)
+        {
+            label.font = fontAsset;
+            label.fontSharedMaterial = fontAsset.material;
+        }
+    }
+
     private static void RemoveVisualChildren(Transform transform)
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
@@ -550,12 +899,12 @@ public static class BackspaceUiSceneApplier
         rect.anchorMin = Vector2.one;
         rect.anchorMax = Vector2.one;
         rect.pivot = Vector2.one;
-        rect.anchoredPosition = new Vector2(-16f, -15f);
-        rect.sizeDelta = new Vector2(28f, 28f);
+        rect.anchoredPosition = new Vector2(-25f, -24f);
+        rect.sizeDelta = new Vector2(48f, 48f);
 
         var label = labelObject.GetComponent<TextMeshProUGUI>();
         label.text = "X";
-        label.fontSize = 18f;
+        label.fontSize = 34f;
         label.fontStyle = FontStyles.Bold;
         label.color = Ink;
         label.alignment = TextAlignmentOptions.Center;
@@ -629,6 +978,53 @@ public static class BackspaceUiSceneApplier
             UnityEngine.Object.DestroyImmediate(legacyObject);
 
         return legacyObjects.Count;
+    }
+
+    private static int RemoveNonCurrentBackspaceObjects(Scene scene)
+    {
+        var oldBackspaceObjects = new List<GameObject>();
+
+        foreach (var root in scene.GetRootGameObjects())
+            CollectNonCurrentBackspaceObjects(root.transform, oldBackspaceObjects);
+
+        foreach (var oldBackspaceObject in oldBackspaceObjects)
+        {
+            if (oldBackspaceObject != null)
+                UnityEngine.Object.DestroyImmediate(oldBackspaceObject);
+        }
+
+        return oldBackspaceObjects.Count;
+    }
+
+    private static void CollectNonCurrentBackspaceObjects(Transform transform, List<GameObject> oldBackspaceObjects)
+    {
+        if (IsNonCurrentBackspaceObjectName(transform.gameObject.name) && !HasCurrentBackspaceAncestor(transform.parent))
+        {
+            oldBackspaceObjects.Add(transform.gameObject);
+            return;
+        }
+
+        for (int i = 0; i < transform.childCount; i++)
+            CollectNonCurrentBackspaceObjects(transform.GetChild(i), oldBackspaceObjects);
+    }
+
+    private static bool IsNonCurrentBackspaceObjectName(string objectName)
+    {
+        return objectName.IndexOf("backspace", StringComparison.OrdinalIgnoreCase) >= 0
+            && !IsCurrentBackspaceObjectName(objectName);
+    }
+
+    private static bool HasCurrentBackspaceAncestor(Transform transform)
+    {
+        while (transform != null)
+        {
+            if (IsCurrentBackspaceObjectName(transform.gameObject.name))
+                return true;
+
+            transform = transform.parent;
+        }
+
+        return false;
     }
 
     private static void CollectLegacyBackspaceObjects(Transform transform, List<GameObject> legacyObjects)

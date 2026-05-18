@@ -34,6 +34,8 @@ public class BackNavigator : MonoBehaviour
 
         GameLog.Log($"[BackNavigator] 이전 씬으로 이동 중 → {prev}");
         SceneManager.LoadScene(prev);
+
+        Debug.Log("클릭됨");
     }
 
     private void TryFallback()

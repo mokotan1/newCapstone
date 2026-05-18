@@ -64,8 +64,22 @@ public class BackspaceUiStyleCatalogTests
     [Test]
     public void SceneBackCanvas_SortsBehindPanels()
     {
+        Assert.AreEqual("Ui", BackspaceUiPrefabBuilder.SceneBackCanvasSortingLayerName);
         Assert.Less(BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder, 0);
         Assert.Greater(BackspaceUiPrefabBuilder.PanelBackCanvasSortingOrder, BackspaceUiPrefabBuilder.SceneBackCanvasSortingOrder);
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesCurrentBackspaceObjectNames()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("SceneBackNavigator_Ribbon"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("SceneBackRibbon"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("BackspaceCornerFold"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("BackspaceNameplate"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("backspace"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("LockBackspace"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsCurrentBackspaceObjectName("PanelBackspace"));
     }
 
     [Test]
@@ -77,6 +91,7 @@ public class BackspaceUiStyleCatalogTests
 
         Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("SceneBackNavigator_Ribbon"));
         Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("SceneBackRibbon"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("BackspaceNameplate"));
         Assert.IsFalse(BackspaceUiSceneApplier.IsPanelBackspaceCandidateName("CloseButton"));
     }
 
@@ -103,5 +118,52 @@ public class BackspaceUiStyleCatalogTests
 
         Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("Opening_Office", "Panel"));
         Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTarget("Hall_playerble", "Panel"));
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesScenesThatContainKnownInteractionPanelTargets()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("MaidRoom"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("Kitchen"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("BasementResearchRoom"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("Opening_Office"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("Hall_playerble"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownInteractionPanelTargetScene("CreateEffect"));
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesChatbotPanelTargets()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTarget("TutorRoom", "Parret_Panel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTarget("WifeRoom", "Parret_Panel"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTarget("Hall_playerble", "Parret_Panel"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownChatbotPanelTarget("Opening_Office", "Parret_Panel"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownChatbotPanelTarget("TutorRoom", "WhiteBoardPanel"));
+    }
+
+    [Test]
+    public void SceneApplier_RecognizesScenesThatContainKnownChatbotPanelTargets()
+    {
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTargetScene("TutorRoom"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTargetScene("ChildRoom"));
+        Assert.IsTrue(BackspaceUiSceneApplier.IsKnownChatbotPanelTargetScene("Hall_playerble"));
+
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownChatbotPanelTargetScene("Opening_Office"));
+        Assert.IsFalse(BackspaceUiSceneApplier.IsKnownChatbotPanelTargetScene("CreateEffect"));
+    }
+
+    [Test]
+    public void SceneApplier_MapsPanelsWithLegacyCloseBlocks()
+    {
+        Assert.AreEqual("DiaryBackspace", BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("StudyRoom", "DiaryPanel"));
+        Assert.AreEqual("CardStackBackspace", BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("StudyRoom", "CardStackPanel"));
+        Assert.AreEqual("PanelBackspace", BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("Prison", "NotePanel"));
+        Assert.AreEqual("LockBackspace", BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("PrisonEntrance", "LockPanel"));
+        Assert.AreEqual("PanelBackspace", BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("MaidRoom", "Diary_Panel"));
+
+        Assert.AreEqual(string.Empty, BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("Kitchen", "Sink_Pannel"));
+        Assert.AreEqual(string.Empty, BackspaceUiSceneApplier.ResolveLegacyCloseBlockName("TutorRoom", "WhiteBoardPanel"));
     }
 }

@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public static class BackspaceUiPrefabBuilder
 {
     private const string KoreanFontAssetPath = "Assets/Font/JalnanGothic SDF.asset";
+    public const string SceneBackCanvasSortingLayerName = "Ui";
+    public const float SceneBackCanvasPlaneDistance = 10f;
     public const int SceneBackCanvasSortingOrder = -10;
     public const int PanelBackCanvasSortingOrder = 30;
 
@@ -59,7 +61,7 @@ public static class BackspaceUiPrefabBuilder
         CreateLabel(panel.transform, "SpeakerName", "가정교사", 20f, new Vector2(0f, 1f), new Vector2(140f, -34f), new Vector2(260f, 40f), new Color(0.98f, 0.9f, 0.75f), TextAlignmentOptions.Left);
         CreateLabel(panel.transform, "ChatText", "플레이어가 언제든 대화를 닫을 수 있도록 상단 명패형 백스페이스를 사용합니다.", 18f, new Vector2(0f, 1f), new Vector2(140f, -84f), new Vector2(780f, 96f), new Color(0.82f, 0.75f, 0.64f), TextAlignmentOptions.TopLeft);
 
-        var button = CreateButton(panel.transform, "BackspaceNameplate", new Vector2(1f, 1f), new Vector2(-38f, 18f), new Vector2(126f, 42f), Paper);
+        var button = CreateButton(panel.transform, "BackspaceNameplate", new Vector2(1f, 1f), new Vector2(-88f, -32f), new Vector2(151f, 67f), Paper);
         BindPanelClose(button, root);
         CreateLabel(button.transform, "Label", "닫기  X", 15f, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(104f, 30f), Ink, TextAlignmentOptions.Center);
         return root;
@@ -68,7 +70,12 @@ public static class BackspaceUiPrefabBuilder
     private static GameObject CreateSceneBackRibbonPrefab()
     {
         var root = CreateCanvasRoot("SceneBackNavigator_Ribbon");
-        root.GetComponent<Canvas>().sortingOrder = SceneBackCanvasSortingOrder;
+        var canvas = root.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        canvas.worldCamera = null;
+        canvas.sortingLayerName = SceneBackCanvasSortingLayerName;
+        canvas.sortingOrder = SceneBackCanvasSortingOrder;
+        canvas.planeDistance = SceneBackCanvasPlaneDistance;
 
         var button = CreateButton(root.transform, "SceneBackRibbon", new Vector2(0f, 1f), new Vector2(42f, -42f), new Vector2(280f, 72f), new Color(0.07f, 0.065f, 0.06f, 0.82f));
         var navigator = button.gameObject.AddComponent<BackNavigator>();
@@ -213,11 +220,11 @@ public static class BackspaceUiPrefabBuilder
 
     private static void CreateCornerFoldClose(Transform parent, GameObject target)
     {
-        var button = CreateButton(parent, "BackspaceCornerFold", new Vector2(1f, 1f), Vector2.zero, new Vector2(64f, 64f), Gold);
+        var button = CreateButton(parent, "BackspaceCornerFold", new Vector2(1f, 1f), Vector2.zero, new Vector2(96f, 96f), Gold);
         button.image.sprite = GetCornerFoldSprite();
         button.image.type = Image.Type.Simple;
         BindPanelClose(button, target);
-        var label = CreateLabel(button.transform, "Label", "X", 18f, new Vector2(1f, 1f), new Vector2(-16f, -15f), new Vector2(28f, 28f), Ink, TextAlignmentOptions.Center);
+        var label = CreateLabel(button.transform, "Label", "X", 34f, new Vector2(1f, 1f), new Vector2(-25f, -24f), new Vector2(48f, 48f), Ink, TextAlignmentOptions.Center);
         label.fontStyle = FontStyles.Bold;
     }
 
