@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Backspace Button Design Samples</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --paper: #ead7b8;
+      --paper-2: #f7e8ca;
+      --ink: #211812;
+      --red: #8e3128;
+      --amber: #c8954c;
+      --steel: #8da0a8;
+      --mist: rgba(238, 226, 204, 0.72);
+      --line: rgba(240, 224, 190, 0.24);
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(15, 13, 12, 0.96), rgba(37, 31, 27, 0.92)),
+        #111;
+      color: #f7eddc;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    }
+
+    main {
+      width: min(1220px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 34px 0 48px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .lead {
+      margin-top: 8px;
+      color: #d8c7ad;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 8px;
+      color: #d7c7b1;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    .dot.scene::before {
+      background: var(--steel);
+    }
+
+    .section {
+      margin-top: 26px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: baseline;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      font-size: 18px;
+    }
+
+    .section-title span {
+      color: #bfae98;
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .sample {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(237, 218, 181, 0.18);
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+    }
+
+    .sample.selected {
+      border-color: rgba(230, 192, 108, 0.82);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.32),
+        0 0 0 2px rgba(230, 192, 108, 0.22);
+    }
+
+    .selected-badge {
+      position: absolute;
+      z-index: 5;
+      top: 10px;
+      right: 10px;
+      padding: 5px 9px;
+      border: 1px solid rgba(255, 235, 180, 0.5);
+      background: rgba(37, 26, 14, 0.86);
+      color: #ffe3a8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .stage {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(12, 10, 9, 0.1), rgba(0, 0, 0, 0.36)),
+        url("../disputatio/Assets/Sprite/StudyRoom/Library_Front_BG.png") center / cover no-repeat;
+    }
+
+    .stage.hall {
+      background:
+        linear-gradient(180deg, rgba(16, 14, 14, 0.1), rgba(0, 0, 0, 0.42)),
+        url("../disputatio/Assets/Sprite/2floorHall/2f_mainhall_BG.png") center / cover no-repeat;
+    }
+
+    .stage.chat {
+      background:
+        linear-gradient(180deg, rgba(10, 10, 11, 0.2), rgba(0, 0, 0, 0.52)),
+        url("../disputatio/Assets/Sprite/TutorRoom/2f_studyroom_BG.png") center / cover no-repeat;
+    }
+
+    .stage.interaction {
+      background:
+        linear-gradient(180deg, rgba(15, 12, 10, 0.12), rgba(0, 0, 0, 0.5)),
+        url("../disputatio/Assets/Sprite/Uti_room/Panel.png") center / cover no-repeat;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 46px 40px 42px;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 248, 230, 0.96), rgba(226, 199, 159, 0.97)),
+        var(--paper);
+      border: 1px solid rgba(83, 52, 26, 0.72);
+      box-shadow: 0 18px 38px var(--shadow), inset 0 0 0 4px rgba(255, 245, 218, 0.28);
+      padding: 22px;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px solid rgba(100, 67, 35, 0.26);
+      pointer-events: none;
+    }
+
+    .panel h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .panel p {
+      color: #5b422f;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .chat-panel {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 22px;
+      min-height: 142px;
+      padding: 18px 20px 18px 92px;
+      border: 1px solid rgba(226, 217, 199, 0.34);
+      background: rgba(22, 21, 20, 0.86);
+      color: #f6ead8;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.48);
+    }
+
+    .chat-face {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(236, 219, 184, 0.36);
+      background: rgba(237, 216, 180, 0.12);
+      color: #ecd8b4;
+      font-weight: 700;
+    }
+
+    .chat-panel h3 {
+      margin-bottom: 7px;
+      font-size: 15px;
+    }
+
+    .chat-panel p {
+      color: #d8c7ad;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .object-panel {
+      position: absolute;
+      inset: 34px 36px;
+      border: 1px solid rgba(225, 207, 172, 0.32);
+      background: rgba(10, 9, 8, 0.7);
+      box-shadow: inset 0 0 0 1px rgba(255, 241, 208, 0.07), 0 18px 38px rgba(0, 0, 0, 0.5);
+    }
+
+    .object-card {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 22px;
+      min-height: 82px;
+      padding: 14px 16px;
+      border: 1px solid rgba(225, 207, 172, 0.3);
+      background: rgba(229, 211, 177, 0.9);
+      color: #241a12;
+    }
+
+    .object-card h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .object-card p {
+      color: #55402e;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    button {
+      font: inherit;
+      cursor: default;
+    }
+
+    .panel-close {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 0;
+      color: #2c2019;
+      background: transparent;
+      line-height: 1;
+    }
+
+    .panel-close.paper-tab {
+      top: -18px;
+      right: 22px;
+      width: 58px;
+      height: 42px;
+      border: 1px solid rgba(88, 55, 28, 0.66);
+      border-bottom: 0;
+      background: linear-gradient(180deg, #fff1cf, #d9b780);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+      font-size: 22px;
+    }
+
+    .panel-close.seal {
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(70, 25, 20, 0.45);
+      background:
+        radial-gradient(circle at 36% 28%, rgba(255, 217, 170, 0.42), transparent 32%),
+        #8d3128;
+      color: #ffe8c2;
+      box-shadow: 0 7px 15px rgba(63, 15, 11, 0.36);
+      font-size: 19px;
+    }
+
+    .panel-close.corner-fold {
+      top: 0;
+      right: 0;
+      width: 54px;
+      height: 54px;
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      background: #d0a35b;
+      color: #2c1d12;
+      align-items: start;
+      justify-items: end;
+      padding: 8px 9px 0 0;
+      font-size: 18px;
+    }
+
+    .chat-close {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(236, 219, 184, 0.3);
+      color: #f6ead8;
+      background: rgba(0, 0, 0, 0.3);
+      line-height: 1;
+    }
+
+    .chat-close.mini-corner {
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+    }
+
+    .chat-close.nameplate {
+      top: -18px;
+      right: 16px;
+      height: 34px;
+      padding: 0 12px;
+      gap: 7px;
+      display: flex;
+      background: #d8be8b;
+      color: #211812;
+      border-color: rgba(255, 239, 196, 0.65);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chat-close.soft-arrow {
+      left: 18px;
+      top: -20px;
+      width: 46px;
+      height: 38px;
+      background: rgba(224, 210, 184, 0.18);
+      border-color: rgba(226, 217, 199, 0.38);
+      font-size: 20px;
+    }
+
+    .object-close {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(238, 221, 184, 0.36);
+      color: #f7ecd7;
+      line-height: 1;
+    }
+
+    .object-close.corner-fold {
+      top: 0;
+      right: 0;
+      width: 58px;
+      height: 58px;
+      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      background: #c9974f;
+      color: #24170f;
+      align-items: start;
+      justify-items: end;
+      padding: 9px 10px 0 0;
+      font-size: 18px;
+    }
+
+    .object-close.side-tab {
+      right: -1px;
+      top: 42%;
+      width: 42px;
+      height: 72px;
+      background: rgba(18, 15, 13, 0.86);
+      border-right: 0;
+      font-size: 20px;
+    }
+
+    .object-close.bottom-key {
+      left: 50%;
+      bottom: -1px;
+      transform: translateX(-50%);
+      height: 38px;
+      min-width: 112px;
+      background: rgba(18, 15, 13, 0.88);
+      border-bottom: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .scene-back {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(236, 220, 188, 0.32);
+      background: rgba(14, 13, 12, 0.68);
+      color: #f8ead1;
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.38);
+    }
+
+    .scene-back.ribbon {
+      left: 18px;
+      top: 18px;
+      height: 42px;
+      padding: 0 15px 0 13px;
+      border-left: 4px solid var(--steel);
+    }
+
+    .scene-back.plate {
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      height: 44px;
+      min-width: 150px;
+      justify-content: center;
+      border-color: rgba(198, 151, 80, 0.58);
+      background:
+        linear-gradient(180deg, rgba(64, 44, 28, 0.84), rgba(18, 14, 12, 0.82));
+    }
+
+    .scene-back.ghost {
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 96px;
+      justify-content: center;
+      border-color: rgba(217, 231, 236, 0.38);
+      background: rgba(8, 12, 14, 0.48);
+    }
+
+    .arrow {
+      font-size: 21px;
+      line-height: 1;
+    }
+
+    .label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .caption {
+      min-height: 138px;
+      padding: 15px 16px 17px;
+      border-top: 1px solid rgba(236, 220, 188, 0.14);
+      background: rgba(0, 0, 0, 0.16);
+    }
+
+    .caption h3 {
+      color: #fff3dd;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .caption p {
+      color: #cdbda7;
+      font-size: 13px;
+      line-height: 1.62;
+    }
+
+    .tag {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 4px 8px;
+      border: 1px solid rgba(235, 212, 174, 0.24);
+      color: #e9d2a8;
+      font-size: 12px;
+    }
+
+    .tag.scene {
+      color: #cfe0e5;
+    }
+
+    .tag.chat {
+      color: #e6d9ef;
+    }
+
+    .tag.object {
+      color: #e8d5a8;
+    }
+
+    @media (max-width: 920px) {
+      main {
+        width: min(100% - 28px, 640px);
+      }
+
+      header {
+        display: block;
+      }
+
+      .legend {
+        margin-top: 16px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>백스페이스 버튼 디자인 견본</h1>
+        <p class="lead">패널 내부 닫기와 씬 이동용 뒤로가기를 서로 다른 시각 언어로 분리한 6가지 안입니다.</p>
+      </div>
+      <div class="legend" aria-label="용도 구분">
+        <span class="dot">패널 안: 닫기</span>
+        <span class="dot scene">화면 가장자리: 씬 이동</span>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>패널 안에서 사용할 백스페이스</h2>
+        <span>PanelBackspaceCloser 용도</span>
+      </div>
+      <div class="grid">
+        <article class="sample">
+          <div class="stage">
+            <div class="panel">
+              <button class="panel-close paper-tab" type="button" aria-label="패널 닫기">×</button>
+              <h3>관리인의 기록</h3>
+              <p>종이 탭처럼 패널 상단에 붙어 있어, 문서를 덮는 버튼이라는 느낌이 강합니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag">PANEL A</span>
+            <h3>상단 종이 탭</h3>
+            <p>책, 메모, 일지 패널에 가장 잘 맞습니다. 버튼이 패널에 소속되어 보이기 때문에 씬 이동 버튼과 혼동이 적습니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage">
+            <div class="panel">
+              <button class="panel-close seal" type="button" aria-label="패널 닫기">×</button>
+              <h3>찢어진 요리책</h3>
+              <p>붉은 봉인처럼 닫기 버튼을 처리해 공포 분위기와 상호작용성을 함께 강조합니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag">PANEL B</span>
+            <h3>붉은 봉인 버튼</h3>
+            <p>중요 단서나 긴장감 있는 오브젝트 패널에 좋습니다. 색이 강해서 발견성은 높지만, 반복 사용 시 조금 튈 수 있습니다.</p>
+          </div>
+        </article>
+
+        <article class="sample selected">
+          <span class="selected-badge">채택</span>
+          <div class="stage">
+            <div class="panel">
+              <button class="panel-close corner-fold" type="button" aria-label="패널 닫기">×</button>
+              <h3>접힌 페이지</h3>
+              <p>모서리가 접힌 듯한 처리로, UI 장식과 닫기 기능을 하나로 묶습니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag">PANEL C</span>
+            <h3>접힌 모서리</h3>
+            <p>가장 장식적인 안입니다. 공간을 적게 먹고 예쁘지만, 버튼이라는 인지가 약할 수 있어 hover/press 연출이 필요합니다.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>챗봇 패널에서 사용할 백스페이스</h2>
+        <span>대화창을 가리지 않는 닫기 버튼</span>
+      </div>
+      <div class="grid">
+        <article class="sample">
+          <div class="stage chat">
+            <div class="chat-panel">
+              <button class="chat-close mini-corner" type="button" aria-label="챗봇 패널 닫기">×</button>
+              <div class="chat-face">AI</div>
+              <h3>가정교사와 대화</h3>
+              <p>버튼을 작게 우상단에 고정해 기존 창 닫기 문법을 그대로 사용합니다. 본문과 입력 영역을 거의 침범하지 않습니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag chat">CHAT A</span>
+            <h3>미니 코너 닫기</h3>
+            <p>가장 익숙한 챗봇 패널용 닫기입니다. 접힌 모서리안보다 덜 장식적이라 대화 UI에서는 안정적으로 읽힙니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage chat">
+            <div class="chat-panel">
+              <button class="chat-close nameplate" type="button" aria-label="챗봇 패널 닫기">
+                <span>닫기</span>
+                <span>×</span>
+              </button>
+              <div class="chat-face">AI</div>
+              <h3>실마리 질문</h3>
+              <p>상단 명패처럼 올려 버튼 목적을 텍스트로 분명히 보여줍니다. 처음 접하는 플레이어에게 가장 친절합니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag chat">CHAT B</span>
+            <h3>상단 명패형</h3>
+            <p>닫기인지 뒤로가기인지 혼동될 가능성이 가장 낮습니다. 대신 텍스트가 들어가서 분위기는 조금 UI답게 보입니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage chat">
+            <div class="chat-panel">
+              <button class="chat-close soft-arrow" type="button" aria-label="챗봇 패널 닫기">←</button>
+              <div class="chat-face">AI</div>
+              <h3>대화 중단</h3>
+              <p>왼쪽 위에 작은 뒤로가기 표식을 올려, 대화 흐름에서 한 단계 빠지는 느낌을 줍니다.</p>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag chat">CHAT C</span>
+            <h3>소프트 백 애로우</h3>
+            <p>패널 닫기보다 대화 이전 단계로 돌아간다는 느낌이 강합니다. 챗봇에 하위 메뉴가 생길 경우 특히 잘 맞습니다.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>다른 상호작용 패널에서 사용할 백스페이스</h2>
+        <span>오브젝트 확대, 퍼즐, 조사 패널용</span>
+      </div>
+      <div class="grid">
+        <article class="sample selected">
+          <span class="selected-badge">기본안</span>
+          <div class="stage interaction">
+            <div class="object-panel">
+              <button class="object-close corner-fold" type="button" aria-label="상호작용 패널 닫기">×</button>
+              <div class="object-card">
+                <h3>배전반 확대</h3>
+                <p>패널 안 기본 채택안과 같은 접힌 모서리를 사용해 전체 상호작용 UI의 규칙을 통일합니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag object">OBJECT A</span>
+            <h3>접힌 모서리 공통형</h3>
+            <p>사용자가 선택한 패널 3번을 일반 상호작용에도 그대로 확장한 안입니다. 책, 단서, 퍼즐 패널의 닫기 문법이 통일됩니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage interaction">
+            <div class="object-panel">
+              <button class="object-close side-tab" type="button" aria-label="상호작용 패널 닫기">×</button>
+              <div class="object-card">
+                <h3>금고 조작</h3>
+                <p>조작 영역을 가리지 않도록 오른쪽 가장자리에 손잡이처럼 붙이는 방식입니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag object">OBJECT B</span>
+            <h3>우측 사이드 탭</h3>
+            <p>다이얼, 숫자판, 배전반처럼 중앙 조작이 많은 UI에 좋습니다. 손잡이처럼 보여 패널 바깥으로 빠지는 느낌도 있습니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage interaction">
+            <div class="object-panel">
+              <button class="object-close bottom-key" type="button" aria-label="상호작용 패널 닫기">닫기</button>
+              <div class="object-card">
+                <h3>사진 조사</h3>
+                <p>하단 키처럼 분리해, 화면 위쪽 오브젝트나 힌트를 가리지 않습니다.</p>
+              </div>
+            </div>
+          </div>
+          <div class="caption">
+            <span class="tag object">OBJECT C</span>
+            <h3>하단 키 버튼</h3>
+            <p>오브젝트를 크게 보여주는 조사 패널에 적합합니다. 기능은 명확하지만, 다른 채택안보다 게임 UI 느낌이 조금 강합니다.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>씬 이동용 백스페이스</h2>
+        <span>BackNavigator 용도</span>
+      </div>
+      <div class="grid">
+        <article class="sample selected">
+          <span class="selected-badge">채택</span>
+          <div class="stage hall">
+            <button class="scene-back ribbon" type="button" aria-label="이전 씬으로 이동">
+              <span class="arrow">←</span>
+              <span class="label">이전 공간</span>
+            </button>
+          </div>
+          <div class="caption">
+            <span class="tag scene">SCENE A</span>
+            <h3>좌상단 리본</h3>
+            <p>가장 표준적인 내비게이션 형태입니다. 언제나 같은 위치에 둘 수 있어 학습 비용이 낮고, 패널 버튼과도 명확히 다릅니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage hall">
+            <button class="scene-back plate" type="button" aria-label="이전 씬으로 이동">
+              <span class="arrow">←</span>
+              <span class="label">복도로 돌아가기</span>
+            </button>
+          </div>
+          <div class="caption">
+            <span class="tag scene">SCENE B</span>
+            <h3>하단 명패형</h3>
+            <p>방에서 복도, 확대 화면에서 원래 공간으로 돌아가는 느낌을 텍스트로 직접 전달합니다. 모바일 터치 영역도 확보하기 쉽습니다.</p>
+          </div>
+        </article>
+
+        <article class="sample">
+          <div class="stage hall">
+            <button class="scene-back ghost" type="button" aria-label="이전 씬으로 이동">
+              <span class="arrow">←</span>
+            </button>
+          </div>
+          <div class="caption">
+            <span class="tag scene">SCENE C</span>
+            <h3>좌측 세로 핸들</h3>
+            <p>화면 가장자리에 붙은 물리적 손잡이처럼 보입니다. 몰입감은 좋지만, 처음 보는 플레이어에게는 기능 설명이 약할 수 있습니다.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
