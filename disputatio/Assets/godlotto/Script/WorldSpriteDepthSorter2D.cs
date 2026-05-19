@@ -13,8 +13,8 @@ public static class WorldSpriteDepthSorter2D
 
     private static readonly HashSet<string> SortableLayerNames = new HashSet<string>
     {
-        "UiBackGround",
-        "Ui",
+        // World depth sorter must not touch Ui/UiBackGround sprites — those layers
+        // are an intentional choice by the scene author and own their own ordering.
         "Default"
     };
 

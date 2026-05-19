@@ -27,6 +27,16 @@ public static class ProgressSnapshotApplier
             }
         }
 
+        if (data.fungusIntegers != null)
+        {
+            for (int i = 0; i < data.fungusIntegers.Length; i++)
+            {
+                var entry = data.fungusIntegers[i];
+                if (!string.IsNullOrEmpty(entry.key))
+                    fc.SetIntegerVariable(entry.key, entry.value);
+            }
+        }
+
         if (data.fungusStrings != null)
         {
             for (int i = 0; i < data.fungusStrings.Length; i++)

@@ -37,6 +37,16 @@ public static class CheckpointLoadCoordinator
         SceneManager.LoadScene(fallbackSceneName);
     }
 
+    public static bool RefreshLatestProgressSnapshot()
+    {
+        if (!CheckpointRepository.TryLoad(out var data))
+            return false;
+
+        ProgressSnapshotCollector.TryRefreshRuntimeSnapshot(data);
+        CheckpointRepository.Save(data);
+        return true;
+    }
+
     public static void ClearContinueData()
     {
         pendingApply = null;

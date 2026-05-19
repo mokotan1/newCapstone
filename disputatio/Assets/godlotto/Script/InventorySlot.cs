@@ -37,6 +37,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (item != null)
         {
+            ClearDragState();
+
             // 현재 드래그 중인 아이템 저장
             draggedItem = item;
 
@@ -53,6 +55,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
+    private void OnDisable()
+    {
+        ClearDragState();
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
         if (dragIcon != null)
@@ -63,17 +70,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        // 드래그 아이콘이 있다면 파괴합니다.
-        if (dragIcon != null)
-        {
-            Destroy(dragIcon);
-        }
-
         // 1. UI 드롭존이 먼저 처리했는지 확인합니다 (기존 기능).
         if (eventData.pointerEnter != null && eventData.pointerEnter.GetComponent<DropZone>() != null)
         {
             // DropZone.cs가 OnDrop을 실행할 것이므로, 여기서는 아무것도 할 필요가 없습니다.
-            draggedItem = null;
+            ClearDragState();
             return;
         }
 
@@ -89,6 +90,21 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
 
         // 드롭에 성공했든 실패했든 static 변수를 초기화합니다.
+        ClearDragState();
+    }
+
+    public static void ClearDragState()
+    {
+        if (dragIcon != null)
+        {
+            if (Application.isPlaying)
+                Destroy(dragIcon);
+            else
+                DestroyImmediate(dragIcon);
+
+            dragIcon = null;
+        }
+
         draggedItem = null;
     }
 

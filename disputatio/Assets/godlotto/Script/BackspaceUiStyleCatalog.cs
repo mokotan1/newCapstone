@@ -45,6 +45,7 @@ public static class BackspaceUiStyleCatalog
     public const BackspaceSceneNavigationStyle SelectedSceneNavigationStyle = BackspaceSceneNavigationStyle.TopLeftRibbon;
 
     public const string PrefabRoot = "Assets/godlotto/Prefab/Backspace";
+    public const string PanelBackspaceButtonPrefabPath = PrefabRoot + "/BackspaceCornerFold.prefab";
     public const string PanelClosePrefabPath = PrefabRoot + "/PanelBackspace_CornerFold.prefab";
     public const string ChatClosePrefabPath = PrefabRoot + "/ChatbotBackspace_Nameplate.prefab";
     public const string SceneBackPrefabPath = PrefabRoot + "/SceneBackNavigator_Ribbon.prefab";

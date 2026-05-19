@@ -60,6 +60,8 @@ public static class CheckpointRepository
             data.itemIds = new int[0];
         if (data.fungusBooleans == null)
             data.fungusBooleans = new BoolCheckpointEntry[0];
+        if (data.fungusIntegers == null)
+            data.fungusIntegers = new IntCheckpointEntry[0];
         if (data.fungusStrings == null)
             data.fungusStrings = new StringCheckpointEntry[0];
 
