@@ -26,6 +26,7 @@ public static class BackspaceUiPrefabBuilder
     {
         EnsureDirectory(BackspaceUiStyleCatalog.PrefabRoot);
 
+        SavePrefab(CreatePanelBackspaceButtonPrefab(), BackspaceUiStyleCatalog.PanelBackspaceButtonPrefabPath);
         SavePrefab(CreatePanelClosePrefab(), BackspaceUiStyleCatalog.PanelClosePrefabPath);
         SavePrefab(CreateChatNameplatePrefab(), BackspaceUiStyleCatalog.ChatClosePrefabPath);
         SavePrefab(CreateSceneBackRibbonPrefab(), BackspaceUiStyleCatalog.SceneBackPrefabPath);
@@ -36,6 +37,17 @@ public static class BackspaceUiPrefabBuilder
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[BackspaceUiPrefabBuilder] Backspace UI prefabs generated.");
+    }
+
+    private static GameObject CreatePanelBackspaceButtonPrefab()
+    {
+        var button = CreateButton(null, "BackspaceCornerFold", new Vector2(1f, 1f), Vector2.zero, new Vector2(96f, 96f), Gold);
+        button.image.sprite = GetCornerFoldSprite();
+        button.image.type = Image.Type.Simple;
+        button.gameObject.AddComponent<PanelBackspaceCloser>();
+        var label = CreateLabel(button.transform, "Label", "X", 34f, new Vector2(1f, 1f), new Vector2(-25f, -24f), new Vector2(48f, 48f), Ink, TextAlignmentOptions.Center);
+        label.fontStyle = FontStyles.Bold;
+        return button.gameObject;
     }
 
     private static GameObject CreatePanelClosePrefab()
@@ -171,7 +183,8 @@ public static class BackspaceUiPrefabBuilder
     private static Image CreateImage(Transform parent, string name, Vector2 pivotAnchor, Vector2 anchoredPosition, Vector2 size, Color color)
     {
         var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        go.transform.SetParent(parent, false);
+        if (parent != null)
+            go.transform.SetParent(parent, false);
         SetAnchor(go.GetComponent<RectTransform>(), pivotAnchor, pivotAnchor, anchoredPosition, size);
         var image = go.GetComponent<Image>();
         image.color = color;

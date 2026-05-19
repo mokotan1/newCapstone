@@ -763,6 +763,15 @@ public static class BackspaceUiSceneApplier
 
     private static Button CreatePanelBackspaceButton(Transform panel)
     {
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BackspaceUiStyleCatalog.PanelBackspaceButtonPrefabPath);
+        if (prefab != null)
+        {
+            var prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, panel.gameObject.scene);
+            prefabInstance.name = "BackspaceCornerFold";
+            prefabInstance.transform.SetParent(panel, false);
+            return prefabInstance.GetComponent<Button>();
+        }
+
         var buttonObject = new GameObject("BackspaceCornerFold", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         buttonObject.transform.SetParent(panel, false);
         return buttonObject.GetComponent<Button>();

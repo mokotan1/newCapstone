@@ -19,6 +19,7 @@ public class CheckpointSaveData
     public string createdAtUtc;
     public int[] itemIds = new int[0];
     public BoolCheckpointEntry[] fungusBooleans = new BoolCheckpointEntry[0];
+    public IntCheckpointEntry[] fungusIntegers = new IntCheckpointEntry[0];
     public StringCheckpointEntry[] fungusStrings = new StringCheckpointEntry[0];
 }
 
@@ -29,6 +30,19 @@ public struct BoolCheckpointEntry
     public bool value;
 
     public BoolCheckpointEntry(string key, bool value)
+    {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+[Serializable]
+public struct IntCheckpointEntry
+{
+    public string key;
+    public int value;
+
+    public IntCheckpointEntry(string key, int value)
     {
         this.key = key;
         this.value = value;

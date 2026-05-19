@@ -28,7 +28,11 @@ public class CheckpointRepositoryTests
             unlockedRoomKey = FungusVariableKeys.UsedStudyKey,
             resumeSceneName = SceneNames.StudyRoom,
             resumeSpawnId = "room_start",
-            itemIds = new[] { 3, 7 }
+            itemIds = new[] { 3, 7 },
+            fungusIntegers = new[]
+            {
+                new IntCheckpointEntry(ItemAcquisitionTracker.FungusVariableKey, 42)
+            }
         };
 
         CheckpointRepository.Save(data);
@@ -40,6 +44,9 @@ public class CheckpointRepositoryTests
         Assert.That(loaded.unlockedRoomKey, Is.EqualTo(FungusVariableKeys.UsedStudyKey));
         Assert.That(loaded.resumeSceneName, Is.EqualTo(SceneNames.StudyRoom));
         Assert.That(loaded.itemIds, Is.EquivalentTo(new[] { 3, 7 }));
+        Assert.That(loaded.fungusIntegers.Length, Is.EqualTo(1));
+        Assert.That(loaded.fungusIntegers[0].key, Is.EqualTo(ItemAcquisitionTracker.FungusVariableKey));
+        Assert.That(loaded.fungusIntegers[0].value, Is.EqualTo(42));
     }
 
     [Test]

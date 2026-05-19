@@ -25,6 +25,14 @@ public class BackspaceUiStyleCatalogTests
     }
 
     [Test]
+    public void PanelBackspaceButtonPrefabPath_PointsToReusableButtonPrefab()
+    {
+        Assert.AreEqual(
+            BackspaceUiStyleCatalog.PrefabRoot + "/BackspaceCornerFold.prefab",
+            BackspaceUiStyleCatalog.PanelBackspaceButtonPrefabPath);
+    }
+
+    [Test]
     public void SceneApplier_RecognizesOnlySceneNavigationBackspaceNames()
     {
         Assert.IsTrue(BackspaceUiSceneApplier.IsSceneBackspaceName("SceneBackNavigator_Ribbon"));
