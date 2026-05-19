@@ -1696,15 +1696,12 @@ GameObject:
   - component: {fileID: 1167277993}
   - component: {fileID: 1167277992}
   - component: {fileID: 1167277991}
-  - component: {fileID: 1167277997}
-  - component: {fileID: 1167277999}
   - component: {fileID: 1167278000}
   - component: {fileID: 1167278008}
   - component: {fileID: 1167278007}
   - component: {fileID: 1167278006}
   - component: {fileID: 1167278004}
   - component: {fileID: 1167278002}
-  - component: {fileID: 1167278001}
   - component: {fileID: 1167278009}
   - component: {fileID: 1167278010}
   - component: {fileID: 1167278011}
@@ -1734,7 +1731,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -272.58096, y: -123.94291}
+  scrollPos: {x: -901.1961, y: -306.584}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -1746,7 +1743,7 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1167278000}
+  - {fileID: 1167277939}
   selectedCommands: []
   variables:
   - {fileID: 1167277951}
@@ -2140,8 +2137,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 693.7741
-    y: 455.1414
+    x: 694.873
+    y: 454.04248
     width: 83.67
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -2152,7 +2149,6 @@ MonoBehaviour:
   eventHandler: {fileID: 0}
   commandList:
   - {fileID: 1167277989}
-  - {fileID: 1167277997}
   - {fileID: 1167277894}
   - {fileID: 1167277935}
   - {fileID: 1167277934}
@@ -3058,8 +3054,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 993.9378
-    y: 526.6584
+    x: 989.0598
+    y: 522.99994
     width: 117.88
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -3071,7 +3067,6 @@ MonoBehaviour:
   commandList:
   - {fileID: 1167277938}
   - {fileID: 1167277988}
-  - {fileID: 1167277999}
   suppressAllAutoSelections: 0
 --- !u!114 &1167277940
 MonoBehaviour:
@@ -7592,44 +7587,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &1167277997
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167277873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 335
-  indentLevel: 0
-  targetObjects:
-  - {fileID: 0}
-  interactableState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &1167277999
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167277873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 337
-  indentLevel: 0
-  targetObjects:
-  - {fileID: 0}
-  interactableState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
 --- !u!114 &1167278000
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7662,27 +7619,7 @@ MonoBehaviour:
   - {fileID: 1167278017}
   - {fileID: 1167278004}
   - {fileID: 1167278002}
-  - {fileID: 1167278001}
   suppressAllAutoSelections: 0
---- !u!114 &1167278001
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167277873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab0d0ed4a2ca94c81a230a0ecce6e6e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 346
-  indentLevel: 0
-  targetObjects:
-  - {fileID: 0}
-  interactableState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
 --- !u!114 &1167278002
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -8888,8 +8825,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1522851415
+  m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: ea8f56c43254d41728f5ac4e8299b6c9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
