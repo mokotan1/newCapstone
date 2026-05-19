@@ -1887,7 +1887,7 @@ MonoBehaviour:
   scrollPos: {x: 401.54636, y: -47.938152}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
-  blockViewHeight: 400
+  blockViewHeight: 320
   zoom: 0.97
   scrollViewRect:
     serializedVersion: 2
@@ -3072,9 +3072,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4d8e91a2f3b4c5d9e0f1a2b3c4d5e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slotCount: 12
-  integratedSettings: {fileID: 0}
-  saveSlotManager: {fileID: 0}
 --- !u!1 &798361309
 GameObject:
   m_ObjectHideFlags: 0
@@ -4267,8 +4264,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692951}
-        m_TargetAssemblyTypeName: IntegratedSettingUI, Assembly-CSharp
+      - m_Target: {fileID: 1291858398}
+        m_TargetAssemblyTypeName: SettingPanelButtonActions, Assembly-CSharp
         m_MethodName: BackToMainMenu
         m_Mode: 1
         m_Arguments:
@@ -4499,6 +4496,7 @@ GameObject:
   - component: {fileID: 1291858394}
   - component: {fileID: 1291858396}
   - component: {fileID: 1291858395}
+  - component: {fileID: 1291858398}
   m_Layer: 6
   m_Name: SettingPanel
   m_TagString: Untagged
@@ -4575,6 +4573,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1291858393}
   m_CullTransparentMesh: 1
+--- !u!114 &1291858398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291858393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 733072325e3e164488bbdd151a5d7ca5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  mainMenuSceneName: MainMenuScene
+  targetFlowchart: {fileID: 0}
+  fungusVariableName: isCalled
+  dialogInput: {fileID: 0}
+  mainMenuButton: {fileID: 1218806930}
+  returnButton: {fileID: 2056273725}
+  panelRoot: {fileID: 1291858393}
 --- !u!1 &1333575395
 GameObject:
   m_ObjectHideFlags: 0
@@ -6433,8 +6450,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 796692951}
-        m_TargetAssemblyTypeName: IntegratedSettingUI, Assembly-CSharp
+      - m_Target: {fileID: 1291858398}
+        m_TargetAssemblyTypeName: SettingPanelButtonActions, Assembly-CSharp
         m_MethodName: ReturnToGame
         m_Mode: 1
         m_Arguments:
