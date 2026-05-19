@@ -63,6 +63,13 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     void Update()
     {
+        if (SceneManager.GetActiveScene().name == SceneNames.MainMenu)
+        {
+            if (isPanelOpen)
+                CloseSettingPanel();
+            return;
+        }
+
         if (isCounting)
             playTime += Time.deltaTime;
 
@@ -115,10 +122,14 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
         if (isPanelOpen)
         {
             EnsureSettingsCanvasSortsAboveSayDialog();
+            SettingPanelWorldInputBlocker.Begin(settingPanel);
             Time.timeScale = 0f;
         }
         else
+        {
+            SettingPanelWorldInputBlocker.End();
             Time.timeScale = 1f;
+        }
     }
 
     void EnsureSettingsCanvasSortsAboveSayDialog()
@@ -248,16 +259,39 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
         foreach (var obj in roots)
         {
-            if (obj == gameObject) continue;
-            if (obj.GetComponent<GlobalVariables>() != null) continue;
-            if (obj.name == "Variablemanager") continue;
+            if (ShouldPreserveDontDestroyRoot(obj, gameObject))
+                continue;
+
             Destroy(obj);
         }
+    }
+
+    public static bool ShouldPreserveDontDestroyRoot(GameObject root, GameObject currentSettingsObject)
+    {
+        if (root == null)
+            return false;
+
+        if (root == currentSettingsObject)
+            return true;
+
+        if (root.GetComponent<GlobalSettingManager>() != null)
+            return true;
+
+        if (root.GetComponent<GlobalVariables>() != null)
+            return true;
+
+        return root.name == "Variablemanager";
     }
 
     public void ReturnToGame()
     {
         CloseSettingPanel();
         GameLog.Log("게임 복귀");
+    }
+
+    protected override void OnDestroy()
+    {
+        SettingPanelWorldInputBlocker.End();
+        base.OnDestroy();
     }
 }

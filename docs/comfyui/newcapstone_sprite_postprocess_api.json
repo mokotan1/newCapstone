@@ -1,0 +1,77 @@
+{
+  "10": {
+    "inputs": {
+      "image": "sprite_source.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load sprite_source.png from ComfyUI/input"
+    }
+  },
+  "20": {
+    "inputs": {
+      "pixel_size": 4,
+      "conversion_method": "edge_preserving",
+      "color_similarity_threshold": 24,
+      "enable_ai_enhancement": true,
+      "noise_reduction": 0.2,
+      "edge_enhancement": 0.8,
+      "color_quantization": 24,
+      "dithering_strength": 0.1,
+      "palette_extraction": "k_means_vibrant_preserved",
+      "color_matching_space": "oklab",
+      "contrast_boost": 1.15,
+      "saturation_boost": 1.05,
+      "preserve_details": true,
+      "anti_aliasing": false,
+      "batch_processing": true,
+      "image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "AIPixelArtEnhancer",
+    "_meta": {
+      "title": "Project Pixel Sprite Enhancer"
+    }
+  },
+  "30": {
+    "inputs": {
+      "filename_prefix": "newcapstone/sprite-enhanced",
+      "images": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save enhanced sprite"
+    }
+  },
+  "31": {
+    "inputs": {
+      "filename_prefix": "newcapstone/sprite-comparison",
+      "images": [
+        "20",
+        1
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save comparison grid"
+    }
+  },
+  "32": {
+    "inputs": {
+      "filename_prefix": "newcapstone/sprite-palette",
+      "images": [
+        "20",
+        2
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save palette"
+    }
+  }
+}

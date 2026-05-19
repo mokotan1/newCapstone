@@ -36,6 +36,7 @@ public class IntegratedSettingUI : MonoBehaviour
     public Selectable[] navigableElements;
     private int currentIndex = 0;
     private Vector3 lastMousePosition;
+    private bool isReturningToMainMenu;
 
     void Start()
     {
@@ -61,6 +62,7 @@ public class IntegratedSettingUI : MonoBehaviour
 
     void OnEnable()
     {
+        isReturningToMainMenu = false;
         if (GlobalSettingManager.Instance != null)
         {
             SyncUIWithManager();
@@ -115,6 +117,13 @@ public class IntegratedSettingUI : MonoBehaviour
 
     void Update()
     {
+        if (IsMainMenuSceneActive())
+        {
+            if (uiMode == UIMode.PopupPanel && panelRoot != null && panelRoot.activeSelf)
+                panelRoot.SetActive(false);
+            return;
+        }
+
         if (Vector3.Distance(Input.mousePosition, lastMousePosition) > 1f) 
         {
             UnlockCursor();
@@ -149,6 +158,7 @@ public class IntegratedSettingUI : MonoBehaviour
         if (panelRoot != null) panelRoot.SetActive(true);
 
         EnsureSettingsCanvasSortsAboveSayDialog();
+        SettingPanelWorldInputBlocker.Begin(panelRoot);
         
         if (dialogInput != null) dialogInput.enabled = false;
         Flowchart fcOpen = FlowchartLocator.Resolve(targetFlowchart);
@@ -177,6 +187,7 @@ public class IntegratedSettingUI : MonoBehaviour
     public void ReturnToGame()
     {
         if (panelRoot != null) panelRoot.SetActive(false);
+        SettingPanelWorldInputBlocker.End();
         
         Flowchart fcClose = FlowchartLocator.Resolve(targetFlowchart);
         if (fcClose != null) fcClose.SetBooleanVariable(fungusVariableName, false);
@@ -190,9 +201,20 @@ public class IntegratedSettingUI : MonoBehaviour
         }
     }
 
+    private bool IsMainMenuSceneActive()
+    {
+        return SceneManager.GetActiveScene().name == SceneNames.MainMenu;
+    }
+
     public void BackToMainMenu()
     {
+        if (isReturningToMainMenu)
+            return;
+
+        isReturningToMainMenu = true;
         Time.timeScale = 1f;
+        if (panelRoot != null)
+            panelRoot.SetActive(false);
         
         if (uiMode == UIMode.StandaloneScene)
         {
@@ -207,6 +229,10 @@ public class IntegratedSettingUI : MonoBehaviour
     private IEnumerator GoToMainMenuProcess()
     {
         Time.timeScale = 1f;
+        SettingPanelWorldInputBlocker.End();
+        if (panelRoot != null)
+            panelRoot.SetActive(false);
+
         Flowchart fcMenu = FlowchartLocator.Resolve(targetFlowchart);
         if (fcMenu != null) fcMenu.SetBooleanVariable(fungusVariableName, false);
         
@@ -214,6 +240,11 @@ public class IntegratedSettingUI : MonoBehaviour
 
         SceneManager.LoadScene(mainMenuSceneName);
         Destroy(gameObject); 
+    }
+
+    private void OnDestroy()
+    {
+        SettingPanelWorldInputBlocker.End();
     }
 
     private void CleanupDontDestroyObjects()
