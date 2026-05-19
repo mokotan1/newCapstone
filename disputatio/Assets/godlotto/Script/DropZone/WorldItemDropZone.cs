@@ -136,6 +136,7 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
     public void OnDrop(PointerEventData eventData)
     {
         TryApplyDroppedItem(InventorySlot.draggedItem);
+        InventorySlot.ClearDragState();
     }
 
     /// <summary>
