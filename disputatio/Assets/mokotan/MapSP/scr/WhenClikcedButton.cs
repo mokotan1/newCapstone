@@ -141,6 +141,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
         }
 
         if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(globalFlowchart);
     }
 
     public void MoveScene(string sceneName)

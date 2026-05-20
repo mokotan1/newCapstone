@@ -34,6 +34,7 @@ public class ClickedBubble : MonoBehaviour
         flowchart = FlowchartLocator.Find();
         if (flowchart != null)
             flowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart);
 
         // 4. 씬 로드
         SceneManager.LoadScene(sceneName);

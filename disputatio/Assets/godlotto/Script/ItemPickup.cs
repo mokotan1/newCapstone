@@ -13,7 +13,7 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
     public string fungusVariableName;
     public string executeBlockName;
 
-    private void Awake()
+    private void Start()
     {
         SuppressIfAlreadyTaken();
     }

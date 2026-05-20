@@ -109,6 +109,7 @@ public class BookOverlayPagedReader : MonoBehaviour
     {
         Closed?.Invoke(this);
         gameObject.SetActive(false);
+        ClickInteractionCleanup.ResetAfterUiBoundary();
     }
 
     private void RebuildPages()
