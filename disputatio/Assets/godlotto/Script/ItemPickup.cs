@@ -77,6 +77,7 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
             GameLog.LogWarning("[ItemPickup] InventoryManager.instance 또는 item이 null입니다!");
         }
 
+        ClickInteractionCleanup.ResetAfterUiBoundary(fc);
         Destroy(gameObject);
     }
 }

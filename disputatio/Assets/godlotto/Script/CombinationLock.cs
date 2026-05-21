@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro; // TextMeshPro를 사용하기 위해 필요
 using UnityEngine.Events; // UnityEvent를 사용하기 위해 필요
 using Fungus;
+using System.Collections.Generic;
 
 public class CombinationLock : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class CombinationLock : MonoBehaviour
     public UnityEvent onUnlockFail;    // 오답일 때 실행될 이벤트
     [SerializeField]
     public Flowchart flowchart;
+    [SerializeField] private bool presentChildPickupsOnUnlock = true;
+    [SerializeField] private ItemPickup[] rewardPickups;
+    [SerializeField] private float rewardFadeSeconds = 1f;
     bool solved;
 
     private int[] currentDigits;
@@ -67,9 +71,15 @@ public class CombinationLock : MonoBehaviour
             if (onUnlockSuccess != null)
             {
                 onUnlockSuccess.Invoke(); // 성공 이벤트 실행
-                flowchart.SetBooleanVariable("solved", true);
             }
+
+            PresentUnlockRewards();
+            if (flowchart != null)
+                flowchart.SetBooleanVariable("solved", true);
+
+            ClickInteractionCleanup.ResetAfterUiBoundary(flowchart);
             gameObject.SetActive(false); // 자물쇠 UI 끄기
+            DeferredClickCleanup.Run(flowchart);
         }
         else
         {
@@ -89,4 +99,64 @@ public class CombinationLock : MonoBehaviour
             digitDisplays[i].text = currentDigits[i].ToString();
         }
     }
+
+    private void PresentUnlockRewards()
+    {
+        HashSet<ItemPickup> pickups = new HashSet<ItemPickup>();
+
+        if (rewardPickups != null)
+        {
+            foreach (ItemPickup pickup in rewardPickups)
+            {
+                if (pickup != null)
+                    pickups.Add(pickup);
+            }
+        }
+
+        if (presentChildPickupsOnUnlock)
+        {
+            foreach (ItemPickup pickup in GetComponentsInChildren<ItemPickup>(true))
+            {
+                if (pickup != null)
+                    pickups.Add(pickup);
+            }
+        }
+
+        foreach (ItemPickup pickup in pickups)
+            PresentPickup(pickup);
+    }
+
+    private void PresentPickup(ItemPickup pickup)
+    {
+        if (pickup == null)
+            return;
+
+        GameObject rewardObject = pickup.gameObject;
+        Transform rewardParent = transform.parent != null ? transform.parent : transform;
+        rewardObject.transform.SetParent(rewardParent, false);
+        rewardObject.transform.SetAsLastSibling();
+        rewardObject.SetActive(true);
+
+        RectTransform rectTransform = rewardObject.GetComponent<RectTransform>();
+        if (rectTransform != null)
+        {
+            rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.localScale = Vector3.one;
+        }
+        else
+        {
+            rewardObject.transform.localPosition = Vector3.zero;
+            rewardObject.transform.localScale = Vector3.one;
+        }
+
+        RewardFadePresenter presenter = rewardObject.GetComponent<RewardFadePresenter>();
+        if (presenter == null)
+            presenter = rewardObject.AddComponent<RewardFadePresenter>();
+
+        presenter.Play(rewardFadeSeconds);
+    }
+
 }
