@@ -16,6 +16,7 @@ public static class InteractionLock
     static int _pendingBlocks;
     static bool _firstBlockSeen;
     static float _lockedAtUnscaled;
+    static bool _lockedUntilUiBoundary;
 
     /// <summary>AcquireForClick 시점의 클릭 소스. 대응하는 ObjectClicked 블록이 시작될 때까지 다른 블록은 무시.</summary>
     static Clickable2D _acquireSource;
@@ -34,7 +35,7 @@ public static class InteractionLock
         get
         {
             if (!_locked) return false;
-            if (Time.unscaledTime - _lockedAtUnscaled > SafetyTimeout)
+            if (!_lockedUntilUiBoundary && Time.unscaledTime - _lockedAtUnscaled > SafetyTimeout)
             {
                 Unlock();
                 return false;
@@ -52,6 +53,7 @@ public static class InteractionLock
         _acquireSource = null;
         _awaitingRootObjectClickedBlock = false;
         _objectClickedMatchedThisRaise = false;
+        _lockedUntilUiBoundary = false;
 
         // -= 후 += : 에디터 도메인 리로드 없는 재시작 시 중복 구독 방지
         BlockSignals.OnBlockStart -= OnBlockStart;
@@ -72,6 +74,7 @@ public static class InteractionLock
         _acquireSource = clickableSource;
         _awaitingRootObjectClickedBlock = true;
         _objectClickedMatchedThisRaise = false;
+        _lockedUntilUiBoundary = false;
     }
 
     /// <summary>ObjectClicked 등에서 해당 Clickable 포인터에 대한 실행이 예약된 경우 호출.</summary>
@@ -88,6 +91,22 @@ public static class InteractionLock
 
     /// <summary>외부에서 강제 해제가 필요한 경우 (예: 씬 전환 연출 등).</summary>
     public static void ForceUnlock() => Unlock();
+
+    /// <summary>
+    /// 책/설정 같은 모달 UI가 열려 있는 동안 월드 오브젝트 클릭을 막습니다.
+    /// 닫기 버튼처럼 UI 경계가 끝나는 지점에서 ForceUnlock 또는 ResetAfterUiBoundary를 호출해야 합니다.
+    /// </summary>
+    public static void LockUntilUiBoundary()
+    {
+        _locked = true;
+        _pendingBlocks = 0;
+        _firstBlockSeen = false;
+        _lockedAtUnscaled = Time.unscaledTime;
+        _acquireSource = null;
+        _awaitingRootObjectClickedBlock = false;
+        _objectClickedMatchedThisRaise = false;
+        _lockedUntilUiBoundary = true;
+    }
 
     static void OnBlockStart(Block block)
     {
@@ -132,5 +151,6 @@ public static class InteractionLock
         _acquireSource = null;
         _awaitingRootObjectClickedBlock = false;
         _objectClickedMatchedThisRaise = false;
+        _lockedUntilUiBoundary = false;
     }
 }

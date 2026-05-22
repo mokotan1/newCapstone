@@ -602,10 +602,11 @@ public class BookPanelController : MonoBehaviour
 
     private static readonly string[] MemoNameKeywords  = { "memo", "scrap", "right", "right" };
     private static readonly string[] RecipeNameKeywords = { "recipe", "left" };
+    private static readonly string[] TextChromeAncestorNames = { "BackspaceCornerFold" };
 
     private void AutoDiscoverTextOverlays()
     {
-        var allTmp = GetComponentsInChildren<TextMeshProUGUI>(true);
+        var allTmp = GetContentTextCandidates();
 
         // 1차: 이름 패턴으로 분류
         foreach (var tmp in allTmp)
@@ -678,6 +679,42 @@ public class BookPanelController : MonoBehaviour
         rt.offsetMax        = Vector2.zero;
         rt.anchoredPosition = Vector2.zero;
         return tmp;
+    }
+
+    private TextMeshProUGUI[] GetContentTextCandidates()
+    {
+        var candidates = new System.Collections.Generic.List<TextMeshProUGUI>();
+        var allTmp = GetComponentsInChildren<TextMeshProUGUI>(true);
+
+        foreach (var tmp in allTmp)
+        {
+            if (tmp == null || IsBookUiChromeText(tmp))
+                continue;
+
+            candidates.Add(tmp);
+        }
+
+        return candidates.ToArray();
+    }
+
+    private static bool IsBookUiChromeText(TextMeshProUGUI tmp)
+    {
+        Transform current = tmp.transform;
+        while (current != null)
+        {
+            foreach (string chromeName in TextChromeAncestorNames)
+            {
+                if (string.Equals(current.name, chromeName, StringComparison.Ordinal))
+                    return true;
+            }
+
+            if (current.GetComponent<Button>() != null)
+                return true;
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private static int ExtractTrailingInt(string name)
