@@ -9,6 +9,7 @@ public class MapPlayerLocationMarker : MonoBehaviour
     [SerializeField] private GameObject floor1Object;
     [SerializeField] private GameObject floor2Object;
     [SerializeField] private bool activateCurrentFloor = true;
+    [SerializeField] private ControlFloor controlFloor;
 
     private string lastSceneName;
 
@@ -70,13 +71,16 @@ public class MapPlayerLocationMarker : MonoBehaviour
 
         if (activateCurrentFloor)
         {
-            if (floor1Object != null) floor1Object.SetActive(location.Floor == 1);
-            if (floor2Object != null) floor2Object.SetActive(location.Floor == 2);
+            ActivateFloor(location.Floor);
         }
     }
 
     private void ResolveReferences()
     {
+        if (controlFloor == null)
+            controlFloor = GetComponentInChildren<ControlFloor>(true);
+        if (controlFloor == null)
+            controlFloor = GetComponentInParent<ControlFloor>(true);
         if (floor1Marker == null)
             floor1Marker = FindChildRect("PlayerLocationMarker_1F");
         if (floor2Marker == null)
@@ -104,6 +108,21 @@ public class MapPlayerLocationMarker : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void ActivateFloor(int floor)
+    {
+        if (controlFloor != null)
+        {
+            if (floor == 2)
+                controlFloor.ActivateFloor2();
+            else
+                controlFloor.ActivateFloor1();
+            return;
+        }
+
+        if (floor1Object != null) floor1Object.SetActive(floor == 1);
+        if (floor2Object != null) floor2Object.SetActive(floor == 2);
     }
 
     private static void SetMarkerVisible(RectTransform marker, bool visible)
