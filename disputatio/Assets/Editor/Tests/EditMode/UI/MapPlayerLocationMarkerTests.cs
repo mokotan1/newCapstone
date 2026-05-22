@@ -74,6 +74,24 @@ public class MapPlayerLocationMarkerTests
         Assert.IsTrue(downButton.activeSelf);
     }
 
+    [Test]
+    public void ShouldBlockSceneLoad_ReturnsTrue_WhenTargetIsCurrentScene()
+    {
+        Assert.IsTrue(MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneNames.Kitchen, SceneNames.Kitchen));
+    }
+
+    [Test]
+    public void ShouldBlockSceneLoad_ReturnsFalse_WhenTargetIsDifferentScene()
+    {
+        Assert.IsFalse(MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneNames.Kitchen, SceneNames.MaidRoom));
+    }
+
+    [Test]
+    public void ShouldBlockSceneLoad_ReturnsFalse_WhenTargetIsEmpty()
+    {
+        Assert.IsFalse(MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneNames.Kitchen, ""));
+    }
+
     private static void SetPrivateField<T>(object target, string fieldName, T value)
     {
         target.GetType()

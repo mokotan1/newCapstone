@@ -5,6 +5,9 @@ using Fungus;
 public class ClickedBubble : MonoBehaviour
 {
     [SerializeField] public GameObject penel; 
+    [Tooltip("같은 방 버블을 눌렀을 때 메시지를 띄울 SayDialogNotebook 프리펩 또는 씬 인스턴스입니다.")]
+    [SerializeField] private SayDialog currentLocationSayDialogNotebook;
+    [SerializeField] private string currentLocationMessage = "현재 위치입니다";
     private Transform originalParent;
     
     // 씬이 바뀌면 이전 Flowchart는 파괴되므로, 
@@ -23,6 +26,13 @@ public class ClickedBubble : MonoBehaviour
     // 다음 씬에서 지도를 다시 쓸 수 있게 만드는 핵심 로직
     private void SafeLoadScene(string sceneName)
     {
+        if (MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneManager.GetActiveScene().name, sceneName))
+        {
+            currentLocationSayDialogNotebook =
+                MapCurrentLocationFeedback.Show(currentLocationSayDialogNotebook, currentLocationMessage);
+            return;
+        }
+
         // 2. 씬 이동 전 패널 회수 (DontDestroyOnLoad로 같이 넘어가기 위함)
         if (penel != null && originalParent != null)
         {
