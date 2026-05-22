@@ -176,7 +176,10 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
             return;
 
         filterCardImageRect.anchoredPosition = Vector2.zero;
-        filterCardImageRect.localScale = new Vector3(0.22f, 0.22f, 1f);
+        // 카드 크기를 고정값으로 강제한다. 스케일 대신 sizeDelta로 직접 지정해
+        // RectTransform의 Width/Height가 곧 표시 크기가 되도록 한다.
+        filterCardImageRect.sizeDelta = new Vector2(710.8362f, 695.5485f);
+        filterCardImageRect.localScale = Vector3.one;
         filterCardImageRect.localRotation = Quaternion.identity;
         filterCardImageRect.SetAsLastSibling();
         KeepCloseButtonOnTop();
