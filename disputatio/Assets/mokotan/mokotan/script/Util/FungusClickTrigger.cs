@@ -35,6 +35,10 @@ public class FungusClickTrigger : MonoBehaviour
         if (InteractionLock.IsLocked)
             return;
 
+        // 뒤로가기 버튼 등 진짜 UI 컨트롤 위에서의 클릭이 월드로 새지 않도록 막습니다.
+        if (Clickable2D.IsInteractiveUiUnderPointer(Input.mousePosition))
+            return;
+
         if (IsFungusConversationBlockingRepeatWorldClick())
             return;
 

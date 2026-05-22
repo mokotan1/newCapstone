@@ -125,6 +125,13 @@ namespace Godlotto.FungusIntegration
                 {
                     return;
                 }
+
+                // 투명 차단 UI는 통과시키되, 진짜 인터랙티브 UI(뒤로가기 버튼 등) 위라면
+                // 월드 클릭을 막습니다. (버튼 아래 오브젝트 오클릭 방지)
+                if (IsInteractiveUiUnderPointer(screenPosition))
+                {
+                    return;
+                }
             }
 
             DoPointerClick();
