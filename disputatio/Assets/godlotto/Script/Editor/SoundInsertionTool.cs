@@ -17,6 +17,8 @@ public sealed class SoundInsertionTool : EditorWindow
     private Flowchart targetFlowchart;
     private int selectedBlockIndex;
     private int insertAfterCommandIndex = -1;
+    private string randomSfxIndicesText = "0, 1";
+    private bool stopAllSfx;
     private Vector2 scrollPosition;
 
     [MenuItem("Tools/Godlotto/Audio/Sound Insertion Tool")]
@@ -242,6 +244,22 @@ public sealed class SoundInsertionTool : EditorWindow
 
         if (GUILayout.Button("Insert Play Registered SFX Command"))
             QueueInsertPlayRegisteredSfxCommand(block, insertAfterCommandIndex, sfxIndex);
+
+        EditorGUILayout.Space(6f);
+        randomSfxIndicesText = EditorGUILayout.TextField("Random SFX Indices", randomSfxIndicesText);
+        if (GUILayout.Button("Insert Random Registered SFX Command"))
+        {
+            int[] indices = ParseSfxIndices(randomSfxIndicesText);
+            if (indices.Length == 0)
+                Debug.LogWarning("[SoundInsertionTool] Random SFX indices are empty.");
+            else
+                QueueInsertRandomRegisteredSfxCommand(block, insertAfterCommandIndex, indices);
+        }
+
+        EditorGUILayout.Space(6f);
+        stopAllSfx = EditorGUILayout.Toggle("Stop All SFX", stopAllSfx);
+        if (GUILayout.Button("Insert Stop Registered SFX Command"))
+            QueueInsertStopRegisteredSfxCommand(block, insertAfterCommandIndex, sfxIndex, stopAllSfx);
     }
 
     private static string[] BuildCommandPositionOptions(Block block)
@@ -266,6 +284,22 @@ public sealed class SoundInsertionTool : EditorWindow
             return;
 
         EditorApplication.delayCall += () => InsertPlayRegisteredSfxCommand(block, afterCommandIndex, index);
+    }
+
+    private static void QueueInsertRandomRegisteredSfxCommand(Block block, int afterCommandIndex, int[] indices)
+    {
+        if (block == null)
+            return;
+
+        EditorApplication.delayCall += () => InsertRandomRegisteredSfxCommand(block, afterCommandIndex, indices);
+    }
+
+    private static void QueueInsertStopRegisteredSfxCommand(Block block, int afterCommandIndex, int index, bool stopAll)
+    {
+        if (block == null)
+            return;
+
+        EditorApplication.delayCall += () => InsertStopRegisteredSfxCommand(block, afterCommandIndex, index, stopAll);
     }
 
     private static void InsertPlayRegisteredSfxCommand(Block block, int afterCommandIndex, int index)
@@ -309,7 +343,101 @@ public sealed class SoundInsertionTool : EditorWindow
         Debug.Log($"[SoundInsertionTool] {flowchart.name}/{block.BlockName}의 command index {insertIndex}에 Play Registered SFX({index})를 추가했습니다.");
     }
 
-    private static void VerifyInsertedCommand(Block block, PlayRegisteredSfx command, int insertIndex, int index)
+    private static void InsertRandomRegisteredSfxCommand(Block block, int afterCommandIndex, int[] indices)
+    {
+        if (block == null)
+            return;
+
+        Flowchart flowchart = block.GetFlowchart();
+        if (flowchart == null)
+            return;
+
+        int undoGroup = Undo.GetCurrentGroup();
+        Undo.SetCurrentGroupName("Insert Random Registered SFX");
+        Undo.RecordObject(flowchart, "Insert Random Registered SFX");
+        Undo.RecordObject(block, "Insert Random Registered SFX");
+
+        PlayRandomRegisteredSfx command = Undo.AddComponent<PlayRandomRegisteredSfx>(flowchart.gameObject);
+        flowchart.AddSelectedCommand(command);
+        command.ParentBlock = block;
+        command.ItemId = flowchart.NextItemId();
+        command.SetSfxIndices(indices);
+        command.OnCommandAdded(block);
+
+        int insertIndex = Mathf.Clamp(afterCommandIndex + 1, 0, block.CommandList.Count);
+        block.CommandList.Insert(insertIndex, command);
+        FinishInsertCommand(flowchart, block, command, undoGroup);
+
+        string label = command.GetSummary();
+        EditorApplication.delayCall += () => VerifyInsertedCommand(block, command, insertIndex, label);
+        Debug.Log($"[SoundInsertionTool] {flowchart.name}/{block.BlockName} command index {insertIndex} added {label}.");
+    }
+
+    private static void InsertStopRegisteredSfxCommand(Block block, int afterCommandIndex, int index, bool stopAll)
+    {
+        if (block == null)
+            return;
+
+        Flowchart flowchart = block.GetFlowchart();
+        if (flowchart == null)
+            return;
+
+        int undoGroup = Undo.GetCurrentGroup();
+        Undo.SetCurrentGroupName("Insert Stop Registered SFX");
+        Undo.RecordObject(flowchart, "Insert Stop Registered SFX");
+        Undo.RecordObject(block, "Insert Stop Registered SFX");
+
+        StopRegisteredSfx command = Undo.AddComponent<StopRegisteredSfx>(flowchart.gameObject);
+        flowchart.AddSelectedCommand(command);
+        command.ParentBlock = block;
+        command.ItemId = flowchart.NextItemId();
+        command.SetStopTarget(index, stopAll);
+        command.OnCommandAdded(block);
+
+        int insertIndex = Mathf.Clamp(afterCommandIndex + 1, 0, block.CommandList.Count);
+        block.CommandList.Insert(insertIndex, command);
+        FinishInsertCommand(flowchart, block, command, undoGroup);
+
+        string label = command.GetSummary();
+        EditorApplication.delayCall += () => VerifyInsertedCommand(block, command, insertIndex, label);
+        Debug.Log($"[SoundInsertionTool] {flowchart.name}/{block.BlockName} command index {insertIndex} added {label}.");
+    }
+
+    private static void FinishInsertCommand(Flowchart flowchart, Block block, Command command, int undoGroup)
+    {
+        block.UpdateIndentLevels();
+
+        flowchart.ClearSelectedCommands();
+        flowchart.SelectedBlock = block;
+        flowchart.AddSelectedCommand(command);
+
+        EditorUtility.SetDirty(command);
+        EditorUtility.SetDirty(block);
+        EditorUtility.SetDirty(flowchart);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(block);
+        EditorSceneManager.MarkSceneDirty(block.gameObject.scene);
+
+        Selection.activeObject = flowchart.gameObject;
+        Undo.CollapseUndoOperations(undoGroup);
+    }
+
+    private static int[] ParseSfxIndices(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return new int[0];
+
+        string[] parts = text.Split(',');
+        var indices = new List<int>();
+        foreach (string part in parts)
+        {
+            if (int.TryParse(part.Trim(), out int index) && index >= 0)
+                indices.Add(index);
+        }
+
+        return indices.ToArray();
+    }
+
+    private static void VerifyInsertedCommand(Block block, Command command, int insertIndex, object index)
     {
         if (block == null)
             return;

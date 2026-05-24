@@ -128,7 +128,6 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
 
     private void DrawCommandRow(Block block, Command command, int index, AudioClip[] clips)
     {
-        PlayRegisteredSfx registeredSfx = command as PlayRegisteredSfx;
         string typeName = command.GetType().Name;
         string summary = command.GetSummary();
         if (string.IsNullOrWhiteSpace(summary))
@@ -138,12 +137,12 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
         GUILayout.Label(index.ToString(), GUILayout.Width(36f));
         GUILayout.Label(typeName, GUILayout.Width(180f));
         GUILayout.Label(new GUIContent(summary), GUILayout.MinWidth(180f));
-        GUILayout.Label(BuildAudioLabel(registeredSfx, clips), GUILayout.Width(210f));
+        GUILayout.Label(BuildAudioLabel(command, clips), GUILayout.Width(210f));
 
         if (GUILayout.Button("Select", GUILayout.Width(70f)))
             SelectCommand(block, command);
 
-        using (new EditorGUI.DisabledScope(registeredSfx == null))
+        using (new EditorGUI.DisabledScope(!IsManagedAudioCommand(command)))
         {
             if (GUILayout.Button("Remove", GUILayout.Width(80f)))
                 RemoveCommand(block, command);
@@ -152,17 +151,39 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
-    private static string BuildAudioLabel(PlayRegisteredSfx command, AudioClip[] clips)
+    private static string BuildAudioLabel(Command command, AudioClip[] clips)
     {
-        if (command == null)
-            return "";
+        if (command is PlayRegisteredSfx playSfx)
+            return BuildSingleSfxLabel(playSfx.SfxIndex, clips);
 
-        int index = command.SfxIndex;
+        if (command is PlayRandomRegisteredSfx randomSfx)
+            return BuildRandomSfxLabel(randomSfx.SfxIndices, clips);
+
+        if (command is StopRegisteredSfx stopSfx)
+            return stopSfx.StopAllSfx ? "Stop all SFX" : "Stop " + BuildSingleSfxLabel(stopSfx.SfxIndex, clips);
+
+        return "";
+    }
+
+    private static string BuildSingleSfxLabel(int index, AudioClip[] clips)
+    {
         if (clips == null || index < 0 || index >= clips.Length)
             return $"SFX {index}: out of range";
 
         AudioClip clip = clips[index];
         return clip == null ? $"SFX {index}: empty" : $"SFX {index}: {clip.name}";
+    }
+
+    private static string BuildRandomSfxLabel(int[] indices, AudioClip[] clips)
+    {
+        if (indices == null || indices.Length == 0)
+            return "Random SFX: empty";
+
+        var labels = new List<string>();
+        foreach (int index in indices)
+            labels.Add(BuildSingleSfxLabel(index, clips));
+
+        return string.Join(", ", labels);
     }
 
     private static AudioClip[] LoadRuntimeSfxList()
@@ -206,6 +227,14 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
             PlayRegisteredSfx sfx = command as PlayRegisteredSfx;
             if (sfx != null && sfx.SfxIndex == index)
                 targets.Add(command);
+
+            PlayRandomRegisteredSfx randomSfx = command as PlayRandomRegisteredSfx;
+            if (randomSfx != null && ContainsIndex(randomSfx.SfxIndices, index))
+                targets.Add(command);
+
+            StopRegisteredSfx stopSfx = command as StopRegisteredSfx;
+            if (stopSfx != null && !stopSfx.StopAllSfx && stopSfx.SfxIndex == index)
+                targets.Add(command);
         }
 
         RemoveCommands(block, targets, $"Remove SFX Index {index} Commands");
@@ -214,18 +243,53 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
     private static void RemoveConsecutiveDuplicateSfxCommands(Block block)
     {
         var targets = new List<Command>();
-        PlayRegisteredSfx previous = null;
+        string previousSignature = null;
 
         foreach (Command command in block.CommandList)
         {
-            PlayRegisteredSfx current = command as PlayRegisteredSfx;
-            if (current != null && previous != null && current.SfxIndex == previous.SfxIndex)
-                targets.Add(current);
+            string currentSignature = GetManagedAudioSignature(command);
+            if (!string.IsNullOrEmpty(currentSignature) && currentSignature == previousSignature)
+                targets.Add(command);
 
-            previous = current;
+            previousSignature = currentSignature;
         }
 
         RemoveCommands(block, targets, "Remove Consecutive Duplicate SFX Commands");
+    }
+
+    private static bool IsManagedAudioCommand(Command command)
+    {
+        return command is PlayRegisteredSfx ||
+               command is PlayRandomRegisteredSfx ||
+               command is StopRegisteredSfx;
+    }
+
+    private static string GetManagedAudioSignature(Command command)
+    {
+        if (command is PlayRegisteredSfx playSfx)
+            return $"play:{playSfx.SfxIndex}";
+
+        if (command is PlayRandomRegisteredSfx randomSfx)
+            return $"random:{string.Join(",", randomSfx.SfxIndices ?? new int[0])}";
+
+        if (command is StopRegisteredSfx stopSfx)
+            return stopSfx.StopAllSfx ? "stop:all" : $"stop:{stopSfx.SfxIndex}";
+
+        return null;
+    }
+
+    private static bool ContainsIndex(int[] indices, int index)
+    {
+        if (indices == null)
+            return false;
+
+        foreach (int candidate in indices)
+        {
+            if (candidate == index)
+                return true;
+        }
+
+        return false;
     }
 
     private static void RemoveCommands(Block block, List<Command> commands, string undoName)
