@@ -1,6 +1,5 @@
 using Fungus;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -44,25 +43,8 @@ public class PanelBackspaceCloser : MonoBehaviour
         if (panel != null)
             panel.SetActive(false);
 
-        ClearCurrentUiSelection();
-        ResetClickLockVariables();
         ExecuteCloseBlock();
-    }
-
-    private static void ClearCurrentUiSelection()
-    {
-        if (EventSystem.current != null)
-            EventSystem.current.SetSelectedGameObject(null);
-    }
-
-    private void ResetClickLockVariables()
-    {
-        Flowchart flowchart = ResolveFlowchart();
-        if (flowchart == null)
-            return;
-
-        SetBooleanIfPresent(flowchart, FungusVariableKeys.IsCalled, false);
-        SetBooleanIfPresent(flowchart, FungusVariableKeys.IsClicked, false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(ResolveFlowchart());
     }
 
     private void ExecuteCloseBlock()
@@ -99,9 +81,4 @@ public class PanelBackspaceCloser : MonoBehaviour
         return null;
     }
 
-    private static void SetBooleanIfPresent(Flowchart flowchart, string variableName, bool value)
-    {
-        if (flowchart.GetVariable(variableName) is BooleanVariable)
-            flowchart.SetBooleanVariable(variableName, value);
-    }
 }

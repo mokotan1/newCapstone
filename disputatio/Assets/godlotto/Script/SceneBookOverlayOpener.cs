@@ -344,6 +344,7 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
         rect.anchoredPosition = Vector2.zero;
 
         StretchCenterPanel(panel.transform);
+        PlaceCloseButtonInsidePanel(panel.transform);
         ApplyReadableTextSizes(panel.transform);
 
         var reader = panel.GetComponent<BookOverlayPagedReader>();
@@ -365,6 +366,22 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
         rect.localScale = Vector3.one;
         rect.anchoredPosition = Vector2.zero;
         rect.sizeDelta = Vector2.zero;
+    }
+
+    private static void PlaceCloseButtonInsidePanel(Transform overlayRoot)
+    {
+        Transform closeButton = FindChildByName(overlayRoot, "CloseButton");
+        var rect = closeButton != null ? closeButton.GetComponent<RectTransform>() : null;
+        if (rect == null)
+            return;
+
+        rect.anchorMin = Vector2.one;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(1f, 1f);
+        rect.sizeDelta = new Vector2(52f, 52f);
+        rect.anchoredPosition = new Vector2(-32f, -32f);
+        rect.localScale = Vector3.one;
+        rect.SetAsLastSibling();
     }
 
     private static void ApplyReadableTextSizes(Transform overlayRoot)

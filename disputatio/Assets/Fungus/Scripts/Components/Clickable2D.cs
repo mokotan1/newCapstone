@@ -1,8 +1,10 @@
 // This code is part of the Fungus library (https://github.com/snozbot/fungus)
 // It is released for free under the MIT open source license (https://github.com/snozbot/fungus/blob/master/LICENSE)
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Fungus
 {
@@ -71,6 +73,12 @@ namespace Fungus
             {
                 if (!IsOurColliderUnderPointer())
                     return;
+
+                // 콜라이더가 포인터 아래 있더라도, 그 위에 진짜 인터랙티브 UI
+                // (뒤로가기 버튼 등 Selectable)가 있으면 클릭은 UI 차지입니다.
+                // 투명 차단 UI에는 Selectable이 없으므로 위 통과 로직은 그대로 유지됩니다.
+                if (IsInteractiveUiUnderPointer(Input.mousePosition))
+                    return;
             }
 
             DoPointerClick();
@@ -85,6 +93,50 @@ namespace Fungus
             foreach (var c in colliders)
                 if (c != null && c.enabled && c.OverlapPoint(world))
                     return true;
+            return false;
+        }
+
+        static readonly List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
+
+        /// <summary>
+        /// 지정한 화면 좌표 위에 '실제로 상호작용하는 UI 컨트롤'(Button 등 Selectable)이
+        /// 올라와 있는지 검사합니다. Selectable이 없는 투명 차단용 UI는 false로 처리해
+        /// 월드 클릭이 그대로 통과하도록 둡니다.
+        /// 뒤로가기 버튼처럼 진짜 UI 버튼 위에서의 클릭이 아래 월드 오브젝트로 새는 것을 막는 용도입니다.
+        /// </summary>
+        public static bool IsInteractiveUiUnderPointer(Vector2 screenPosition)
+        {
+            EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null)
+                return false;
+
+            var pointerData = new PointerEventData(eventSystem) { position = screenPosition };
+            uiRaycastResults.Clear();
+            eventSystem.RaycastAll(pointerData, uiRaycastResults);
+            bool blocked = ContainsInteractiveUi(uiRaycastResults);
+            uiRaycastResults.Clear();
+            return blocked;
+        }
+
+        /// <summary>
+        /// UI 레이캐스트 결과 중 상호작용 가능한 Selectable(버튼 등)이 하나라도 있으면 true.
+        /// </summary>
+        public static bool ContainsInteractiveUi(List<RaycastResult> raycastResults)
+        {
+            if (raycastResults == null)
+                return false;
+
+            for (int i = 0; i < raycastResults.Count; i++)
+            {
+                GameObject hit = raycastResults[i].gameObject;
+                if (hit == null)
+                    continue;
+
+                Selectable selectable = hit.GetComponentInParent<Selectable>();
+                if (selectable != null && selectable.IsInteractable())
+                    return true;
+            }
+
             return false;
         }
 

@@ -27,6 +27,11 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
     [SerializeField] private GameObject Lock_2_3;
     [SerializeField] private GameObject Lock_2_4;
 
+    [Header("현재 위치 클릭 피드백")]
+    [Tooltip("같은 방을 눌렀을 때 메시지를 띄울 SayDialogNotebook 프리펩 또는 씬 인스턴스입니다.")]
+    [SerializeField] private SayDialog currentLocationSayDialogNotebook;
+    [SerializeField] private string currentLocationMessage = "현재 위치입니다";
+
     private Transform targetCanvas;
     private Flowchart globalFlowchart; // Variablemanager의 변수를 가져올 용도
 
@@ -141,10 +146,18 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
         }
 
         if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(globalFlowchart);
     }
 
     public void MoveScene(string sceneName)
     {
+        if (MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneManager.GetActiveScene().name, sceneName))
+        {
+            currentLocationSayDialogNotebook =
+                MapCurrentLocationFeedback.Show(currentLocationSayDialogNotebook, currentLocationMessage);
+            return;
+        }
+
         OnCloseMapClick();
         SceneManager.LoadScene(sceneName); //
     }
@@ -221,5 +234,59 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
     {
         JumpscareManager j = JumpscareManager.Instance;
         return j != null && j.IsGhostEncounterBlockingMapUi();
+    }
+}
+
+public static class MapSceneNavigationGuard
+{
+    public static bool ShouldBlockSceneLoad(string currentSceneName, string targetSceneName)
+    {
+        if (string.IsNullOrEmpty(targetSceneName))
+            return false;
+
+        return string.Equals(currentSceneName, targetSceneName, System.StringComparison.Ordinal);
+    }
+}
+
+public static class MapCurrentLocationFeedback
+{
+    public static SayDialog Show(SayDialog mappedDialog, string message)
+    {
+        SayDialog sayDialog = ResolveRuntimeDialog(mappedDialog);
+
+        if (sayDialog == null)
+            return mappedDialog;
+
+        EnsureActiveInHierarchy(sayDialog);
+        SayDialog.ActiveSayDialog = sayDialog;
+        sayDialog.SetCharacterImage(null);
+        sayDialog.SetCharacterName(string.Empty, Color.white);
+        sayDialog.Say(string.IsNullOrEmpty(message) ? "현재 위치입니다" : message, true, true, true, true, false, null, null);
+
+        return sayDialog;
+    }
+
+    private static SayDialog ResolveRuntimeDialog(SayDialog mappedDialog)
+    {
+        if (mappedDialog == null)
+            return null;
+
+        if (mappedDialog.gameObject.scene.IsValid())
+            return mappedDialog;
+
+        SayDialog instance = Object.Instantiate(mappedDialog);
+        instance.name = mappedDialog.name;
+        Object.DontDestroyOnLoad(instance.gameObject);
+        instance.gameObject.SetActive(false);
+        return instance;
+    }
+
+    private static void EnsureActiveInHierarchy(SayDialog sayDialog)
+    {
+        for (Transform t = sayDialog.transform; t != null; t = t.parent)
+        {
+            if (!t.gameObject.activeSelf)
+                t.gameObject.SetActive(true);
+        }
     }
 }

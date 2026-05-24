@@ -55,11 +55,17 @@ public class BookOverlayPagedReader : MonoBehaviour
 
     private void OnEnable()
     {
+        InteractionLock.LockUntilUiBoundary();
         RebuildPages();
         if (resetToFirstPageOnOpen)
             currentPageIndex = 0;
         lastPageShownSinceOpen = false;
         ShowPage(currentPageIndex);
+    }
+
+    private void OnDisable()
+    {
+        InteractionLock.ForceUnlock();
     }
 
     private void OnDestroy()
@@ -109,6 +115,7 @@ public class BookOverlayPagedReader : MonoBehaviour
     {
         Closed?.Invoke(this);
         gameObject.SetActive(false);
+        ClickInteractionCleanup.ResetAfterUiBoundary();
     }
 
     private void RebuildPages()

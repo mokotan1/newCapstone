@@ -33,6 +33,7 @@ public class BackNavigator : MonoBehaviour
         }
 
         GameLog.Log($"[BackNavigator] 이전 씬으로 이동 중 → {prev}");
+        ClickInteractionCleanup.ResetAfterUiBoundary(global);
         SceneManager.LoadScene(prev);
 
         Debug.Log("클릭됨");
@@ -43,6 +44,7 @@ public class BackNavigator : MonoBehaviour
         if (!string.IsNullOrEmpty(fallbackSceneName))
         {
             GameLog.Log($"[BackNavigator] PrevScene이 비어 있어서 '{fallbackSceneName}'로 이동합니다.");
+            ClickInteractionCleanup.ResetAfterUiBoundary();
             SceneManager.LoadScene(fallbackSceneName);
         }
         else
