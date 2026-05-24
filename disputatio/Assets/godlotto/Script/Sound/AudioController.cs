@@ -10,7 +10,8 @@ public class AudioController : SingletonMonoBehaviour<AudioController>
     protected override bool PersistAcrossScenes => true;
 
     [Header("Settings")]
-    private AudioSource audioSource;
+    [SerializeField] private AudioSource bgmAudioSource;
+    [SerializeField] private AudioSource sfxAudioSource;
 
     [Header("BGM Playlist")]
     public AudioClip[] bgmList; // [0]:메인, [1]:게임, [2]:보스 등
@@ -23,11 +24,19 @@ public class AudioController : SingletonMonoBehaviour<AudioController>
 
     protected override void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
-        if (bgmList == null || bgmList.Length == 0)
-            return;
-
+        ResolveAudioSources();
         base.Awake();
+    }
+
+    private void ResolveAudioSources()
+    {
+        AudioSource[] sources = GetComponents<AudioSource>();
+
+        if (bgmAudioSource == null)
+            bgmAudioSource = sources.Length > 0 ? sources[0] : gameObject.AddComponent<AudioSource>();
+
+        if (sfxAudioSource == null)
+            sfxAudioSource = sources.Length > 1 ? sources[1] : bgmAudioSource;
     }
 
     // ★★★★★ MainMenuScene에서 음악 자동 정지
@@ -57,37 +66,39 @@ public class AudioController : SingletonMonoBehaviour<AudioController>
     {
         if (bgmList == null || index < 0 || index >= bgmList.Length) return;
 
-        if (audioSource != null)
+        if (bgmAudioSource != null)
         {
-            if (audioSource.isPlaying && audioSource.clip == bgmList[index]) return;
+            if (bgmAudioSource.isPlaying && bgmAudioSource.clip == bgmList[index]) return;
 
-            audioSource.clip = bgmList[index];
-            audioSource.loop = true;
-            audioSource.Play();
+            bgmAudioSource.clip = bgmList[index];
+            bgmAudioSource.loop = true;
+            bgmAudioSource.Play();
         }
     }
 
     public void StopMusic()
     {
-        if (audioSource != null)
-            audioSource.Stop();
+        if (bgmAudioSource != null)
+            bgmAudioSource.Stop();
     }
 
     // SFX 기능
     public void PlaySFX(int index)
     {
         if (sfxList == null || index < 0 || index >= sfxList.Length) return;
+        if (sfxList[index] == null) return;
 
-        if (audioSource != null)
-            audioSource.PlayOneShot(sfxList[index]);
+        if (sfxAudioSource != null)
+            sfxAudioSource.PlayOneShot(sfxList[index]);
     }
 
     // 발자국 기능
     public void PlayFootstep(int index)
     {
         if (sfxList == null || index < 0 || index >= sfxList.Length) return;
+        if (sfxList[index] == null) return;
 
-        if (audioSource != null)
+        if (sfxAudioSource != null)
             StartCoroutine(FootstepCoroutine(index));
     }
 
@@ -95,7 +106,7 @@ public class AudioController : SingletonMonoBehaviour<AudioController>
     {
         for (int i = 0; i < 4; i++)
         {
-            audioSource.PlayOneShot(sfxList[index]);
+            sfxAudioSource.PlayOneShot(sfxList[index]);
             yield return new WaitForSeconds(delayBetweenSteps);
         }
     }
