@@ -10,6 +10,7 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
 {
     [Header("Shared Chat UI")]
     [SerializeField] private SayDialog chatSayDialog;
+    [SerializeField] private SayDialog chatSayDialogPrefab;
     [SerializeField] private string chatSayDialogObjectName = "SayDialogChatbot";
     [SerializeField] private TMP_InputField userInputField;
     [SerializeField] private Button sendButton;
@@ -61,6 +62,18 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         }
     }
 
+    public static TutorPanelSayDialogSync EnsurePanelSayDialogSync(GameObject panelRoot, SayDialog sayDialog)
+    {
+        if (panelRoot == null || sayDialog == null)
+            return null;
+
+        var sync = panelRoot.GetComponent<TutorPanelSayDialogSync>();
+        if (sync == null)
+            sync = panelRoot.AddComponent<TutorPanelSayDialogSync>();
+        sync.Initialize(sayDialog);
+        return sync;
+    }
+
     private BaseChatbot GetOrAddChatbot(Type chatbotType)
     {
         BaseChatbot selected = null;
@@ -91,8 +104,9 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         if (sendButton == null)
             sendButton = FindSendButton();
 
-        if (chatSayDialog == null)
+        if (ShouldUseDedicatedChatSayDialog())
             chatSayDialog = FindChatSayDialog();
+        EnsurePanelSayDialogSync(gameObject, chatSayDialog);
 
         if (sceneFlowchart == null)
             sceneFlowchart = ResolveSceneFlowchart();
@@ -109,14 +123,24 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         return null;
     }
 
+    private bool ShouldUseDedicatedChatSayDialog()
+    {
+        if (chatSayDialog == null)
+            return true;
+
+        if (string.IsNullOrWhiteSpace(chatSayDialogObjectName))
+            return false;
+
+        return chatSayDialog.gameObject.name != chatSayDialogObjectName;
+    }
+
     private SayDialog FindChatSayDialog()
     {
-        if (!string.IsNullOrWhiteSpace(chatSayDialogObjectName))
-        {
-            GameObject sayDialogObject = GameObject.Find(chatSayDialogObjectName);
-            if (sayDialogObject != null && sayDialogObject.TryGetComponent(out SayDialog namedSayDialog))
-                return namedSayDialog;
-        }
+        SayDialog dedicatedSayDialog = ChatSayDialogResolver.ResolveExistingOrInstantiate(
+            chatSayDialogObjectName,
+            chatSayDialogPrefab);
+        if (dedicatedSayDialog != null)
+            return dedicatedSayDialog;
 
         return FindFirstObjectByType<SayDialog>(FindObjectsInactive.Include);
     }
