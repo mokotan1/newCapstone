@@ -79,6 +79,34 @@ public class Clickable2DInteractiveUiGuardTests
         Assert.IsFalse(Clickable2D.ContainsInteractiveUi(new List<RaycastResult>()));
     }
 
+    [Test]
+    public void IsModalSayDialogOpen_ReturnsTrue_WhenVisibleSayDialogIsActive()
+    {
+        SayDialog.ActiveSayDialog = null;
+        var dialogObject = new GameObject("SayDialog", typeof(CanvasGroup));
+        spawned.Add(dialogObject);
+        dialogObject.AddComponent<SayDialog>();
+        dialogObject.GetComponent<CanvasGroup>().alpha = 1f;
+
+        Assert.IsTrue(
+            Clickable2D.IsModalSayDialogOpen(),
+            "SayDialog가 화면에 떠 있으면 아래 월드 오브젝트 클릭을 막아야 합니다.");
+    }
+
+    [Test]
+    public void IsModalSayDialogOpen_ReturnsFalse_WhenSayDialogIsHidden()
+    {
+        SayDialog.ActiveSayDialog = null;
+        var dialogObject = new GameObject("SayDialog", typeof(CanvasGroup));
+        spawned.Add(dialogObject);
+        dialogObject.AddComponent<SayDialog>();
+        dialogObject.GetComponent<CanvasGroup>().alpha = 0f;
+
+        Assert.IsFalse(
+            Clickable2D.IsModalSayDialogOpen(),
+            "완전히 숨겨진 SayDialog는 월드 클릭을 막지 않아야 합니다.");
+    }
+
     private T CreateUi<T>(string name) where T : Component
     {
         var go = new GameObject(name, typeof(RectTransform));
