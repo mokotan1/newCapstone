@@ -178,7 +178,6 @@ public sealed class JumpscareEffects
         if (_jumpscareAnimator != null)
         {
             _jumpscareAnimator.gameObject.SetActive(true);
-            _jumpscareAnimator.SetTrigger("Scare");
         }
 
         yield return AnimateBlink(0f, 0.5f, 2.0f, 0f, _blinkDuration);

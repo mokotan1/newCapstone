@@ -88,6 +88,12 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [Tooltip("카메라 흔들림 강도")]
     public float cameraShakeMagnitude = 0.2f;
 
+    [Header("Jumpscare SFX")]
+    [SerializeField] private AudioClip heartbeatSound;
+    [SerializeField] private AudioSource heartbeatAudioSource;
+    [SerializeField] private AudioClip jumpscareSound;
+    [SerializeField] private AudioSource jumpscareAudioSource;
+
     [Header("트리거 깊이 (2D 오쏘)")]
     [Tooltip("트리거 월드 Z = Main Camera Z + 이 값. (예: 카메라 z=-10, 스프라이트 평면 z=0 → 10)")]
     [SerializeField] private float triggerWorldZOffsetFromCamera = 10f;
@@ -175,6 +181,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
             hideObjectTag,
             useUnlitMaterialForTrigger,
             () => hasTriggered,
+            HandleEnemyAppeared,
             ExecuteJumpscare
 #if UNITY_EDITOR
             , logTriggerRenderingAfterSpawn
@@ -185,6 +192,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         _effects.FindAndBindVolume();
         _effects.FitBlinkOverlayToScreen();
         _effects.FitGameOverOverlayToScreen();
+        EnsureHeartbeatAudioSource();
+        EnsureJumpscareAudioSource();
 
         _spawner.ApplyUnlitTriggerMaterialIfNeeded();
     }
@@ -289,6 +298,9 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
         _spawner?.SetHideObjectsByTag(false);
         _spawner?.SetMainCanvasVisible(true);
+        OnJumpscareReset?.Invoke();
+        StopHeartbeatSound();
+        StopJumpscareSound();
 
         RestoreSayDialog();
     }
@@ -314,6 +326,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         if (retryClickObject != null && retryClickObject.activeSelf
             && hit.gameObject == retryClickObject)
         {
+            StopHeartbeatSound();
+            StopJumpscareSound();
             CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
             CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
         }
@@ -346,6 +360,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     private IEnumerator DelayedHorrorSequence()
     {
         yield return new WaitForSeconds(horrorEffectDelay);
+
+        PlayJumpscareSound();
 
         if (Camera.main != null)
         {
@@ -383,6 +399,68 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     }
     // ---------------------------------------------------------
 
+    private void HandleEnemyAppeared()
+    {
+        PlayHeartbeatSound();
+        OnEnemyAppeared?.Invoke();
+    }
+
+    private void EnsureHeartbeatAudioSource()
+    {
+        if (heartbeatAudioSource != null)
+            return;
+
+        heartbeatAudioSource = gameObject.AddComponent<AudioSource>();
+        heartbeatAudioSource.playOnAwake = false;
+        heartbeatAudioSource.loop = true;
+        heartbeatAudioSource.spatialBlend = 0f;
+    }
+
+    private void PlayHeartbeatSound()
+    {
+        if (heartbeatSound == null)
+            return;
+
+        EnsureHeartbeatAudioSource();
+        heartbeatAudioSource.clip = heartbeatSound;
+        heartbeatAudioSource.Play();
+    }
+
+    private void StopHeartbeatSound()
+    {
+        if (heartbeatAudioSource != null)
+            heartbeatAudioSource.Stop();
+    }
+
+    private void EnsureJumpscareAudioSource()
+    {
+        if (jumpscareAudioSource != null)
+            return;
+
+        jumpscareAudioSource = gameObject.AddComponent<AudioSource>();
+        jumpscareAudioSource.playOnAwake = false;
+        jumpscareAudioSource.loop = false;
+        jumpscareAudioSource.spatialBlend = 0f;
+    }
+
+    private void PlayJumpscareSound()
+    {
+        StopHeartbeatSound();
+
+        if (jumpscareSound == null)
+            return;
+
+        EnsureJumpscareAudioSource();
+        jumpscareAudioSource.clip = jumpscareSound;
+        jumpscareAudioSource.Play();
+    }
+
+    private void StopJumpscareSound()
+    {
+        if (jumpscareAudioSource != null)
+            jumpscareAudioSource.Stop();
+    }
+
     public void OnFrameTransition()
     {
         if (_effects == null || _effects.IsBlinkSequenceRunning)
@@ -400,6 +478,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         if (lensDistortion != null) lensDistortion.intensity.value = 0f;
 
         OnPlayerDied?.Invoke();
+        OnJumpscareReset?.Invoke();
 
         isJumpscareInProgress = false;
     }

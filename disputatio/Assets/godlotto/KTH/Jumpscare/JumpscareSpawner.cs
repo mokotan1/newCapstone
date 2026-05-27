@@ -27,6 +27,7 @@ public sealed class JumpscareSpawner
     private readonly string _hideObjectTag;
     private readonly bool _useUnlitMaterialForTrigger;
     private readonly Func<bool> _isSpawnConsumed;
+    private readonly Action _onEnemyAppeared;
     private readonly Action _executeJumpscare;
 
 #if UNITY_EDITOR
@@ -51,6 +52,7 @@ public sealed class JumpscareSpawner
         string hideObjectTag,
         bool useUnlitMaterialForTrigger,
         Func<bool> isSpawnConsumed,
+        Action onEnemyAppeared,
         Action executeJumpscare
 #if UNITY_EDITOR
         , bool logTriggerRenderingAfterSpawn
@@ -70,6 +72,7 @@ public sealed class JumpscareSpawner
         _hideObjectTag = hideObjectTag;
         _useUnlitMaterialForTrigger = useUnlitMaterialForTrigger;
         _isSpawnConsumed = isSpawnConsumed;
+        _onEnemyAppeared = onEnemyAppeared;
         _executeJumpscare = executeJumpscare;
 #if UNITY_EDITOR
         _logTriggerRenderingAfterSpawn = logTriggerRenderingAfterSpawn;
@@ -169,6 +172,7 @@ public sealed class JumpscareSpawner
         SetTriggerVisible(true);
         SetHideObjectsByTag(true);
         SetMainCanvasVisible(false);
+        _onEnemyAppeared?.Invoke();
     }
 
     private float GetTriggerWorldPlaneZ()
