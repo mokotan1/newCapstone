@@ -1,4 +1,5 @@
 using System;
+using Fungus;
 using UnityEngine;
 
 public class AudioBridge : MonoBehaviour
@@ -7,8 +8,6 @@ public class AudioBridge : MonoBehaviour
     {
         if (AudioController.instance != null)
             AudioController.instance.PlayBGM(index);
-        else
-            GameLog.LogWarning("AudioController(본체)가 없습니다!");
     }
 
     public void CallStopMusic()
