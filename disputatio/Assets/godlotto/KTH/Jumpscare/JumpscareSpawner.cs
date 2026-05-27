@@ -12,6 +12,7 @@ public sealed class JumpscareSpawner
 {
     private const float NonRightHallSpawnChancePercent = 20f;
     private const string RightHallSceneName = SceneNames.HallRight;
+    private const string RightHall2SceneName = "Hall_Right2";
     private const string SpriteUnlitShaderName = "Universal Render Pipeline/2D/Sprite-Unlit-Default";
     private const string MainCanvasTag = "MainCanvas";
 
@@ -29,6 +30,8 @@ public sealed class JumpscareSpawner
     private readonly Func<bool> _isSpawnConsumed;
     private readonly Action _onEnemyAppeared;
     private readonly Action _executeJumpscare;
+    private readonly Quaternion _defaultTriggerRotation;
+    private readonly Vector3 _defaultTriggerScale;
 
 #if UNITY_EDITOR
     private readonly bool _logTriggerRenderingAfterSpawn;
@@ -74,6 +77,8 @@ public sealed class JumpscareSpawner
         _isSpawnConsumed = isSpawnConsumed;
         _onEnemyAppeared = onEnemyAppeared;
         _executeJumpscare = executeJumpscare;
+        _defaultTriggerRotation = triggerObject != null ? triggerObject.transform.rotation : Quaternion.identity;
+        _defaultTriggerScale = triggerObject != null ? triggerObject.transform.localScale : Vector3.one;
 #if UNITY_EDITOR
         _logTriggerRenderingAfterSpawn = logTriggerRenderingAfterSpawn;
 #endif
@@ -110,7 +115,7 @@ public sealed class JumpscareSpawner
             float effectiveSpawnChance = IsRightHallScene(scene.name) ? data.spawnChance : NonRightHallSpawnChancePercent;
             float randomValue = UnityEngine.Random.Range(0f, 100f);
             if (randomValue <= effectiveSpawnChance)
-                _coroutineHost.StartCoroutine(SpawnTriggerFlow(data.spawnPosition));
+                _coroutineHost.StartCoroutine(SpawnTriggerFlow(scene.name, data.spawnPosition));
             else if (_guaranteedJumpscareAfterSeconds > 0f)
                 _coroutineHost.StartCoroutine(GuaranteedSpawnAfterStay(scene.name, data.spawnPosition));
             break;
@@ -133,12 +138,17 @@ public sealed class JumpscareSpawner
         if (SceneManager.GetActiveScene().name != expectedSceneName)
             yield break;
 
-        yield return SpawnTriggerFlow(spawnPosition);
+        yield return SpawnTriggerFlow(expectedSceneName, spawnPosition);
     }
 
     public IEnumerator SpawnTriggerFlow(Vector2 spawnPos)
     {
-        PrepareSpawn(spawnPos);
+        yield return SpawnTriggerFlow(SceneManager.GetActiveScene().name, spawnPos);
+    }
+
+    public IEnumerator SpawnTriggerFlow(string sceneName, Vector2 spawnPos)
+    {
+        PrepareSpawn(sceneName, spawnPos);
 
 #if UNITY_EDITOR
         if (_logTriggerRenderingAfterSpawn && _triggerObject != null)
@@ -149,7 +159,7 @@ public sealed class JumpscareSpawner
         _executeJumpscare();
     }
 
-    private void PrepareSpawn(Vector2 spawnPos)
+    private void PrepareSpawn(string sceneName, Vector2 spawnPos)
     {
         if (_triggerObject != null)
             _triggerObject.SetActive(true);
@@ -158,15 +168,24 @@ public sealed class JumpscareSpawner
 
         if (_triggerObject != null)
         {
-            float worldZ = GetTriggerWorldPlaneZ();
+            if (TryGetSceneSpecificTriggerTransform(sceneName, out Vector3 position, out Quaternion rotation, out Vector3 scale))
+            {
+                _triggerObject.transform.SetLocalPositionAndRotation(position, rotation);
+                _triggerObject.transform.localScale = scale;
+            }
+            else
+            {
+                float worldZ = GetTriggerWorldPlaneZ();
 
-            if (_mainCam == null)
-                _mainCam = Camera.main;
+                if (_mainCam == null)
+                    _mainCam = Camera.main;
 
-            Vector2 cameraCenter = _mainCam != null ? (Vector2)_mainCam.transform.position : Vector2.zero;
-            float wx = cameraCenter.x + spawnPos.x;
-            float wy = cameraCenter.y + spawnPos.y;
-            _triggerObject.transform.position = new Vector3(wx, wy, worldZ);
+                Vector2 cameraCenter = _mainCam != null ? (Vector2)_mainCam.transform.position : Vector2.zero;
+                float wx = cameraCenter.x + spawnPos.x;
+                float wy = cameraCenter.y + spawnPos.y;
+                _triggerObject.transform.SetPositionAndRotation(new Vector3(wx, wy, worldZ), _defaultTriggerRotation);
+                _triggerObject.transform.localScale = _defaultTriggerScale;
+            }
         }
 
         SetTriggerVisible(true);
@@ -182,6 +201,27 @@ public sealed class JumpscareSpawner
         if (_mainCam == null)
             return 0f;
         return _mainCam.transform.position.z + _triggerWorldZOffsetFromCamera;
+    }
+
+    public static bool TryGetSceneSpecificTriggerTransform(
+        string sceneName,
+        out Vector3 position,
+        out Quaternion rotation,
+        out Vector3 scale)
+    {
+        if (string.Equals(sceneName, RightHall2SceneName, StringComparison.Ordinal)
+            || string.Equals(sceneName, RightHallSceneName, StringComparison.Ordinal))
+        {
+            position = new Vector3(-15f, -260f, 13.331f);
+            rotation = Quaternion.identity;
+            scale = new Vector3(50f, 40f, 1f);
+            return true;
+        }
+
+        position = default;
+        rotation = default;
+        scale = default;
+        return false;
     }
 
     public void SetTriggerVisible(bool visible)

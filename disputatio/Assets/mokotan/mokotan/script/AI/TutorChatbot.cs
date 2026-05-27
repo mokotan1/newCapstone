@@ -85,7 +85,14 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     // ---- public properties (API unchanged) ----
 
     /// <summary>패널과 SayDialog 동기화(<see cref="TutorPanelSayDialogSync"/>)용.</summary>
-    public SayDialog TutorSayDialogForPanelSync => chatSayDialog;
+    public SayDialog TutorSayDialogForPanelSync
+    {
+        get
+        {
+            EnsureDedicatedChatSayDialog();
+            return chatSayDialog;
+        }
+    }
 
     /// <summary>서버 응답 처리 및 Say가 끝날 때까지 true — 이 동안 추가 제출은 막습니다.</summary>
     public bool IsAiResponseInFlight => isRequestInProgress;
