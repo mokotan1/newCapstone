@@ -39,6 +39,28 @@ public class MapPlayerLocationMarkerTests
         Assert.AreEqual(new Vector2(-321f, 293.42548f), position);
     }
 
+    [TestCase("2floorMainHall")]
+    [TestCase("2floorLeft")]
+    [TestCase("2floorLeftCross")]
+    [TestCase("TutorEntrance")]
+    [TestCase("TutorRoom")]
+    [TestCase("ChildEntrance")]
+    [TestCase("ChildRoom")]
+    [TestCase("2floorHallway_Left")]
+    [TestCase("2floorRight")]
+    [TestCase("2floorRightCross")]
+    [TestCase("BedEntrance")]
+    [TestCase("BedRoom")]
+    [TestCase("WifeEntrance")]
+    [TestCase("WifeRoom")]
+    [TestCase("DressingRoom")]
+    [TestCase("2floorHallway_Right")]
+    public void SecondFloorScenes_HaveSecondFloorMarkerLocation(string sceneName)
+    {
+        Assert.IsTrue(MapPlayerLocationMarker.TryGetLocationForScene(sceneName, out int floor, out Vector2 _));
+        Assert.AreEqual(2, floor);
+    }
+
     [Test]
     public void Refresh_OnSecondFloorScene_SyncsFloorNavigationButtons()
     {

@@ -188,26 +188,47 @@ public class MapPlayerLocationMarker : MonoBehaviour
                 location = new MarkerLocation(2, new Vector2(0f, -420f));
                 return true;
 
+            case "2floorLeft":
+                location = new MarkerLocation(2, new Vector2(-288f, -250f));
+                return true;
+
+            case "2floorLeftCross":
+                location = new MarkerLocation(2, new Vector2(-288f, 105f));
+                return true;
+
             case "2floorHallway_Left":
                 location = new MarkerLocation(2, new Vector2(-288f, 105f));
+                return true;
+
+            case "2floorRight":
+                location = new MarkerLocation(2, new Vector2(349f, -250f));
+                return true;
+
+            case "2floorRightCross":
+                location = new MarkerLocation(2, new Vector2(349f, 106f));
                 return true;
 
             case "2floorHallway_Right":
                 location = new MarkerLocation(2, new Vector2(349f, 106f));
                 return true;
 
+            case "ChildEntrance":
             case SceneNames.ChildRoom:
                 location = new MarkerLocation(2, new Vector2(-256f, 342f));
                 return true;
 
+            case "TutorEntrance":
             case SceneNames.TutorRoom:
                 location = new MarkerLocation(2, new Vector2(-321f, -108f));
                 return true;
 
+            case "WifeEntrance":
+            case "DressingRoom":
             case SceneNames.WifeRoom:
                 location = new MarkerLocation(2, new Vector2(339f, -129f));
                 return true;
 
+            case "BedEntrance":
             case SceneNames.BedRoom:
                 location = new MarkerLocation(2, new Vector2(339f, 348f));
                 return true;
