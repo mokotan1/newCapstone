@@ -28,6 +28,7 @@ public sealed class JumpscareSpawner
     private readonly string _hideObjectTag;
     private readonly bool _useUnlitMaterialForTrigger;
     private readonly Func<bool> _isSpawnConsumed;
+    private readonly Action _onEnemyAppeared;
     private readonly Action _executeJumpscare;
     private readonly Quaternion _defaultTriggerRotation;
     private readonly Vector3 _defaultTriggerScale;
@@ -54,6 +55,7 @@ public sealed class JumpscareSpawner
         string hideObjectTag,
         bool useUnlitMaterialForTrigger,
         Func<bool> isSpawnConsumed,
+        Action onEnemyAppeared,
         Action executeJumpscare
 #if UNITY_EDITOR
         , bool logTriggerRenderingAfterSpawn
@@ -73,6 +75,7 @@ public sealed class JumpscareSpawner
         _hideObjectTag = hideObjectTag;
         _useUnlitMaterialForTrigger = useUnlitMaterialForTrigger;
         _isSpawnConsumed = isSpawnConsumed;
+        _onEnemyAppeared = onEnemyAppeared;
         _executeJumpscare = executeJumpscare;
         _defaultTriggerRotation = triggerObject != null ? triggerObject.transform.rotation : Quaternion.identity;
         _defaultTriggerScale = triggerObject != null ? triggerObject.transform.localScale : Vector3.one;
@@ -188,6 +191,7 @@ public sealed class JumpscareSpawner
         SetTriggerVisible(true);
         SetHideObjectsByTag(true);
         SetMainCanvasVisible(false);
+        _onEnemyAppeared?.Invoke();
     }
 
     private float GetTriggerWorldPlaneZ()
