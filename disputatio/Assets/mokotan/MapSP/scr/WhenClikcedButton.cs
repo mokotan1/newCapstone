@@ -104,7 +104,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
 
         // Variablemanager를 못 찾는 씬에서도 전역(Fungus Global) fallback으로 상태를 갱신한다.
         if (globalFlowchart != null)
-            globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false); //
+            globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, false);
 
         UpdateAllRoomStates(); // 씬 로드 시 상태 갱신
     }
@@ -132,7 +132,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
                 rect.SetAsLastSibling();
             }
 
-            if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, true);
+            if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, true);
         }
     }
 
@@ -145,7 +145,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
             panelToActivate.transform.SetParent(this.transform);
         }
 
-        if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false);
+        if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, false);
         ClickInteractionCleanup.ResetAfterUiBoundary(globalFlowchart);
     }
 

@@ -7,7 +7,7 @@ public class SettingPanelButtonActions : MonoBehaviour
 {
     [SerializeField] private string mainMenuSceneName = SceneNames.MainMenu;
     [SerializeField] private Flowchart targetFlowchart;
-    [SerializeField] private string fungusVariableName = FungusVariableKeys.IsCalled;
+    [SerializeField] private string fungusVariableName = FungusVariableKeys.IsClicked;
     [SerializeField] private Fungus.DialogInput dialogInput;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button returnButton;

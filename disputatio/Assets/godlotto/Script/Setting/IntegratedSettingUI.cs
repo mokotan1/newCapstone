@@ -29,7 +29,7 @@ public class IntegratedSettingUI : MonoBehaviour
     [Header("Fungus Integration")]
     [Tooltip("비우면 FlowchartLocator(Variablemanager)를 사용합니다.")]
     public Flowchart targetFlowchart;
-    public string fungusVariableName = FungusVariableKeys.IsCalled;
+    public string fungusVariableName = FungusVariableKeys.IsClicked;
     public Fungus.DialogInput dialogInput;
 
     [Header("Keyboard Input")]

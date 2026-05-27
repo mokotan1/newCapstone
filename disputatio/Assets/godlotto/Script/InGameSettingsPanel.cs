@@ -17,7 +17,7 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     [Header("Fungus 연동")]
     [SerializeField] private Flowchart targetFlowchart;
-    [SerializeField] private string fungusVariableName = FungusVariableKeys.IsCalled;
+    [SerializeField] private string fungusVariableName = FungusVariableKeys.IsClicked;
     [SerializeField] private Fungus.DialogInput dialogInput;
 
     [Header("UI Components")]

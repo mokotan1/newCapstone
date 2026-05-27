@@ -40,10 +40,10 @@ public class ClickedBubble : MonoBehaviour
             penel.transform.SetParent(originalParent, false);
         }
 
-        // 3. Variablemanager 글로벌 Flowchart에서 isCalled 해제 (임의 씬 Flowchart가 아님)
+        // 3. Variablemanager 글로벌 Flowchart에서 isClicked 해제 (임의 씬 Flowchart가 아님)
         flowchart = FlowchartLocator.Find();
         if (flowchart != null)
-            flowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, false);
+            flowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, false);
         ClickInteractionCleanup.ResetAfterUiBoundary(flowchart);
 
         // 4. 씬 로드

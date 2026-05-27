@@ -1,7 +1,9 @@
 using Fungus;
+using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.TestTools;
 
 public class ClickInteractionCleanupTests
 {
@@ -52,22 +54,32 @@ public class ClickInteractionCleanupTests
     }
 
     [Test]
-    public void ResetAfterUiBoundary_ClearsUppercaseIsCalledUsedBySomeScenes()
-    {
-        Flowchart flowchart = CreateFlowchartWithClickFlags("UppercaseIsCalledFlowchart");
-        AddBooleanVariable(flowchart, "IsCalled", true);
-
-        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart);
-
-        Assert.IsFalse(flowchart.GetBooleanVariable("IsCalled"));
-    }
-
-    [Test]
     public void ResetAfterUiBoundary_WhenWindowClickedResetSkipped_PreservesWindowClicked()
     {
         Flowchart flowchart = CreateFlowchartWithClickFlags("PreserveWindowClickedFlowchart");
 
         ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
+    }
+
+    [UnityTest]
+    public IEnumerator DeferredCleanup_WhenWindowClickedResetSkipped_ClearsLateIsClickedAndPreservesWindowClicked()
+    {
+        Flowchart flowchart = CreateFlowchartWithClickFlags("DeferredPreserveWindowClickedFlowchart");
+
+        DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+        flowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, true);
+
+        yield return null;
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
+
+        flowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, true);
+
+        yield return null;
 
         Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));

@@ -37,9 +37,9 @@ public class ControllExit : MonoBehaviour
         // 3. 기존 Fungus 로직 처리
         if (flowchart != null)
         {
-            bool isCalled = flowchart.GetBooleanVariable(FungusVariableKeys.IsCalled);
-            isCalled = !isCalled;
-            flowchart.SetBooleanVariable(FungusVariableKeys.IsCalled, isCalled);
+            bool isClicked = flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked);
+            isClicked = !isClicked;
+            flowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, isClicked);
         }
     }
 }

@@ -8,8 +8,6 @@ using UnityEngine.EventSystems;
 /// </summary>
 public static class ClickInteractionCleanup
 {
-    private const string LegacyUppercaseIsCalled = "IsCalled";
-
     public static void ResetAfterUiBoundary(Flowchart preferredFlowchart = null, bool resetWindowClicked = true)
     {
         InteractionLock.ForceUnlock();
@@ -49,8 +47,6 @@ public static class ClickInteractionCleanup
         if (resetFlowcharts != null && !resetFlowcharts.Add(flowchart))
             return;
 
-        SetBooleanIfPresent(flowchart, FungusVariableKeys.IsCalled, false);
-        SetBooleanIfPresent(flowchart, LegacyUppercaseIsCalled, false);
         SetBooleanIfPresent(flowchart, FungusVariableKeys.IsClicked, false);
         if (resetWindowClicked)
             SetBooleanIfPresent(flowchart, FungusVariableKeys.WindowClicked, false);
