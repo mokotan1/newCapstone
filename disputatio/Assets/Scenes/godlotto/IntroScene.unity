@@ -2888,7 +2888,7 @@ Transform:
   m_GameObject: {fileID: 756037667}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalPosition: {x: 1055, y: 377, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3753,7 +3753,7 @@ Transform:
   m_GameObject: {fileID: 1067870140}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalPosition: {x: 1055, y: 377, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4583,8 +4583,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 733072325e3e164488bbdd151a5d7ca5, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   mainMenuSceneName: MainMenuScene
   targetFlowchart: {fileID: 0}
   fungusVariableName: isClicked
@@ -4768,12 +4768,12 @@ SpriteRenderer:
   m_SortingLayerID: -362872839
   m_SortingLayer: -2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1777755370495069639, guid: 5e63466442dde604c89a096a95d4df5a, type: 3}
+  m_Sprite: {fileID: 7353465539156018417, guid: b27ce963361fdd64b850d356f1c6a9ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 19.2, y: 10.8}
+  m_Size: {x: 26.827602, y: 15.679999}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -5283,6 +5283,7 @@ GameObject:
   - component: {fileID: 1664163021}
   - component: {fileID: 1664163020}
   - component: {fileID: 1664163019}
+  - component: {fileID: 1664163022}
   m_Layer: 5
   m_Name: first_chainsaw_4_0
   m_TagString: Untagged
@@ -5510,6 +5511,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1664163022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1664163018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b8f4e2c9a6d4b1f8c3e0a5d9f2b6c10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 57187459}
+  cameraPosition: {x: 538, y: 797, z: -10}
+  orthographicSize: 300
 --- !u!1 &1709849540
 GameObject:
   m_ObjectHideFlags: 0
@@ -5576,6 +5592,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc0b45dd64b2189468ae92fafca738fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bgmAudioSource: {fileID: 0}
+  sfxAudioSource: {fileID: 0}
   bgmList: []
   sfxList:
   - {fileID: 8300000, guid: 6522a13f0cdd5fb42a8b4901bcf91a64, type: 3}
@@ -6361,7 +6379,7 @@ Transform:
   m_GameObject: {fileID: 1997386212}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalPosition: {x: 1055, y: 377, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
