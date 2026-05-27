@@ -34,6 +34,12 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     [Tooltip("카메라 흔들림 강도")]
     public float cameraShakeMagnitude = 0.2f;
 
+    [Header("Jumpscare SFX")]
+    [SerializeField] private AudioClip heartbeatSound;
+    [SerializeField] private AudioSource heartbeatAudioSource;
+    [SerializeField] private AudioClip jumpscareSound;
+    [SerializeField] private AudioSource jumpscareAudioSource;
+
     [Header("오브젝트")]
     public GameObject parrotObject;
     [Tooltip("적 클릭 트리거용 오브젝트 (SpriteRenderer + Collider2D 필요)")]
@@ -98,6 +104,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         }
 
         FitBlinkOverlayToScreen();
+        EnsureHeartbeatAudioSource();
+        EnsureJumpscareAudioSource();
 
         if (triggerObject != null)
         {
@@ -154,6 +162,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
             SetHideObjectsByTag(true);
             OnEnemyAppeared?.Invoke();
+            PlayHeartbeatSound();
 
             ChromaticOn();
             StartCoroutine(WaitAndExecuteScare());
@@ -166,6 +175,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         SetTriggerVisible(false);
 
         SetHideObjectsByTag(false);
+        StopHeartbeatSound();
     }
 
     private void SetTriggerVisible(bool visible)
@@ -195,6 +205,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         if (retryClickObject != null && retryClickObject.activeSelf
             && hit.gameObject == retryClickObject)
         {
+            StopHeartbeatSound();
+            StopJumpscareSound();
             CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
             CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
         }
@@ -226,6 +238,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     {
         // 1. 지정된 시간(0.5초) 대기
         yield return new WaitForSeconds(horrorEffectDelay);
+
+        PlayJumpscareSound();
 
         // 2. 카메라 원래 위치 저장
         if (Camera.main != null)
@@ -268,13 +282,68 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     }
     // ---------------------------------------------
 
+    private void EnsureHeartbeatAudioSource()
+    {
+        if (heartbeatAudioSource != null)
+            return;
+
+        heartbeatAudioSource = gameObject.AddComponent<AudioSource>();
+        heartbeatAudioSource.playOnAwake = false;
+        heartbeatAudioSource.loop = true;
+        heartbeatAudioSource.spatialBlend = 0f;
+    }
+
+    private void PlayHeartbeatSound()
+    {
+        if (heartbeatSound == null)
+            return;
+
+        EnsureHeartbeatAudioSource();
+        heartbeatAudioSource.clip = heartbeatSound;
+        heartbeatAudioSource.Play();
+    }
+
+    private void StopHeartbeatSound()
+    {
+        if (heartbeatAudioSource != null)
+            heartbeatAudioSource.Stop();
+    }
+
+    private void EnsureJumpscareAudioSource()
+    {
+        if (jumpscareAudioSource != null)
+            return;
+
+        jumpscareAudioSource = gameObject.AddComponent<AudioSource>();
+        jumpscareAudioSource.playOnAwake = false;
+        jumpscareAudioSource.loop = false;
+        jumpscareAudioSource.spatialBlend = 0f;
+    }
+
+    private void PlayJumpscareSound()
+    {
+        StopHeartbeatSound();
+
+        if (jumpscareSound == null)
+            return;
+
+        EnsureJumpscareAudioSource();
+        jumpscareAudioSource.clip = jumpscareSound;
+        jumpscareAudioSource.Play();
+    }
+
+    private void StopJumpscareSound()
+    {
+        if (jumpscareAudioSource != null)
+            jumpscareAudioSource.Stop();
+    }
+
     private IEnumerator FullJumpscareSequence()
     {
         yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
         yield return new WaitForSeconds(closedDuration);
 
         jumpscareAnimator.gameObject.SetActive(true);
-        jumpscareAnimator.SetTrigger("Scare");
 
         yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
     }
