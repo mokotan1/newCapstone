@@ -1,7 +1,23 @@
 using NUnit.Framework;
+using Fungus;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class ParretPanelChatbotBinderTests
 {
+    private readonly List<GameObject> _createdObjects = new List<GameObject>();
+
+    [TearDown]
+    public void TearDown()
+    {
+        foreach (GameObject createdObject in _createdObjects)
+        {
+            if (createdObject != null)
+                Object.DestroyImmediate(createdObject);
+        }
+        _createdObjects.Clear();
+    }
+
     [Test]
     public void ResolveChatbotType_ReturnsGlobalChatbot_ForMainHallPlayable()
     {
@@ -26,5 +42,48 @@ public class ParretPanelChatbotBinderTests
         Assert.AreSame(
             typeof(GlobalChatbot),
             ParretPanelChatbotBinder.ResolveChatbotType("SomeOtherScene"));
+    }
+
+    [Test]
+    public void ResolveExistingOrInstantiateSayDialog_CreatesDedicatedPrefab_WhenSceneInstanceIsMissing()
+    {
+        var prefabObject = new GameObject("SayDialogChatbotPrefab");
+        _createdObjects.Add(prefabObject);
+        var prefabSayDialog = prefabObject.AddComponent<SayDialog>();
+
+        SayDialog resolved = ChatSayDialogResolver.ResolveExistingOrInstantiate(
+            "SayDialogChatbot",
+            prefabSayDialog);
+        _createdObjects.Add(resolved.gameObject);
+
+        Assert.NotNull(resolved);
+        Assert.AreEqual("SayDialogChatbot", resolved.gameObject.name);
+        Assert.IsFalse(resolved.gameObject.activeSelf);
+        Assert.AreNotSame(prefabSayDialog, resolved);
+        Assert.AreSame(resolved, SayDialog.ActiveSayDialog);
+    }
+
+    [Test]
+    public void EnsurePanelSayDialogSync_AttachesSyncToPanelRoot()
+    {
+        var panel = new GameObject("Parret_Panel");
+        _createdObjects.Add(panel);
+        var sayObject = new GameObject("SayDialogChatbot");
+        _createdObjects.Add(sayObject);
+        var sayDialog = sayObject.AddComponent<SayDialog>();
+
+        TutorPanelSayDialogSync sync = ParretPanelChatbotBinder.EnsurePanelSayDialogSync(panel, sayDialog);
+
+        Assert.NotNull(sync);
+        Assert.AreSame(sync, panel.GetComponent<TutorPanelSayDialogSync>());
+    }
+
+    [Test]
+    public void StripInlineFunctionTags_RemovesToolMarkupFromDisplayedText()
+    {
+        string result = ChatResponseDisplayText.StripInlineFunctionTags(
+            "푸드덕! <function=give_hint></function> 힌트가 필요하군?");
+
+        Assert.AreEqual("푸드덕! 힌트가 필요하군?", result);
     }
 }

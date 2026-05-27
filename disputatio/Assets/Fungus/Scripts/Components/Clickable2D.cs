@@ -39,6 +39,9 @@ namespace Fungus
             if (!clickEnabled)
                 return;
 
+            if (IsModalSayDialogOpen())
+                return;
+
             if (InteractionLock.IsLocked)
                 return;
 
@@ -138,6 +141,44 @@ namespace Fungus
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// SayDialog is modal while it is visible or waiting for player input, so world clicks
+        /// behind it must not trigger ObjectClicked handlers.
+        /// </summary>
+        public static bool IsModalSayDialogOpen()
+        {
+            if (IsBlockingSayDialog(SayDialog.ActiveSayDialog))
+                return true;
+
+#if UNITY_2023_1_OR_NEWER
+            var dialogs = Object.FindObjectsByType<SayDialog>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+#else
+            var dialogs = Object.FindObjectsOfType<SayDialog>();
+#endif
+            for (int i = 0; i < dialogs.Length; i++)
+            {
+                if (IsBlockingSayDialog(dialogs[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool IsBlockingSayDialog(SayDialog dialog)
+        {
+            if (dialog == null || !dialog.gameObject.activeInHierarchy)
+                return false;
+
+            Writer writer = dialog.GetComponent<Writer>();
+            if (writer != null && (writer.IsWriting || writer.IsWaitingForInput))
+                return true;
+
+            CanvasGroup group = dialog.GetComponent<CanvasGroup>();
+            return group == null || group.alpha > 0.01f;
         }
 
         protected virtual void OnMouseEnter()

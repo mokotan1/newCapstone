@@ -204,14 +204,14 @@ public sealed class ChatHttpClient
                 try
                 {
                     var parsed = JsonConvert.DeserializeObject<ChatResponseData>(rawJson);
-                    chatbotResponse = parsed.response ?? "";
+                    chatbotResponse = ChatResponseDisplayText.StripInlineFunctionTags(parsed.response ?? "");
                     if (parsed.function_calls != null)
                         functionCalls = parsed.function_calls;
                 }
                 catch (Exception e)
                 {
                     Debug.LogError("Response parse error: " + e.Message);
-                    chatbotResponse = rawJson;
+                    chatbotResponse = ChatResponseDisplayText.StripInlineFunctionTags(rawJson);
                 }
                 _history.AddMessage("assistant", chatbotResponse);
             }
@@ -339,7 +339,7 @@ public sealed class ChatHttpClient
                 _host.OnChatHttpWaitFinished();
             }
 
-            string responseText = fullText.ToString();
+            string responseText = ChatResponseDisplayText.StripInlineFunctionTags(fullText.ToString());
             _history.AddMessage("assistant", responseText);
 
             yield return _host.StartHostCoroutine(

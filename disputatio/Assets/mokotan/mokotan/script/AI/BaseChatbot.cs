@@ -26,6 +26,8 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     [Header("Base UI Settings")]
     [SerializeField] protected SayDialog chatSayDialog;
+    [SerializeField] private SayDialog chatSayDialogPrefab;
+    [SerializeField] private string chatSayDialogObjectName = "SayDialogChatbot";
     [SerializeField] private KeyCode dialogAdvanceKey = KeyCode.Space;
 
     [Header("Chat Input")]
@@ -75,6 +77,7 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
         InitializeChatHistory();
         _ = SceneRevisitTracker.Instance;
+        EnsureDedicatedChatSayDialog();
         CacheDialogInput();
         if (userInputField != null && RegisterInputFieldSubmitListener)
             userInputField.onSubmit.AddListener(OnInputFieldSubmit);
@@ -197,6 +200,18 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     {
         if (chatSayDialog == null) return;
         chatDialogInput = chatSayDialog.GetComponentInChildren<DialogInput>(true);
+    }
+
+    protected void EnsureDedicatedChatSayDialog()
+    {
+        if (chatSayDialog != null
+            && (string.IsNullOrWhiteSpace(chatSayDialogObjectName)
+                || chatSayDialog.gameObject.name == chatSayDialogObjectName))
+            return;
+
+        chatSayDialog = ChatSayDialogResolver.ResolveExistingOrInstantiate(
+            chatSayDialogObjectName,
+            chatSayDialogPrefab);
     }
 
     private void TryAdvanceChatDialog()
