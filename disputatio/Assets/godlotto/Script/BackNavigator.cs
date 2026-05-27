@@ -9,14 +9,50 @@ public class BackNavigator : MonoBehaviour
     [SerializeField] string prevVarKey = "PrevScene";
     [SerializeField] string fallbackSceneName = ""; // 비상용 (없으면 생략 가능)
 
-    private void Awake()
-    {
+    [Header("고정 복귀 씬 설정")]
+    [SerializeField] bool useFixedReturnRoutes = true;
 
+    internal static bool TryResolveFixedReturnScene(string currentSceneName, out string returnSceneName)
+    {
+        switch (currentSceneName)
+        {
+            case "MaidRoom":
+            case "StudyRoom":
+                returnSceneName = "Hallway_Right";
+                return true;
+
+            case "PrisonEntrance":
+                returnSceneName = "StudyRoom";
+                return true;
+
+            case "BedRoom":
+            case "WifeRoom":
+                returnSceneName = "2floorHallway_Right";
+                return true;
+
+            case "TutorRoom":
+            case "ChildRoom":
+                returnSceneName = "2floorHallway_Left";
+                return true;
+
+            default:
+                returnSceneName = string.Empty;
+                return false;
+        }
     }
 
     public void GoBack()
     {
         Flowchart global = FlowchartLocator.FindByGameObjectName(globalFlowchartName);
+        string fixedReturnScene = ResolveFixedReturnScene();
+        if (!string.IsNullOrEmpty(fixedReturnScene))
+        {
+            GameLog.Log($"[BackNavigator] 고정 복귀 씬으로 이동 중 -> {fixedReturnScene}");
+            ClickInteractionCleanup.ResetAfterUiBoundary(global);
+            SceneManager.LoadScene(fixedReturnScene);
+            return;
+        }
+
         if (global == null)
         {
             GameLog.LogWarning($"전역 Flowchart '{globalFlowchartName}'를 찾지 못했습니다.");
@@ -37,6 +73,17 @@ public class BackNavigator : MonoBehaviour
         SceneManager.LoadScene(prev);
 
         Debug.Log("클릭됨");
+    }
+
+    private string ResolveFixedReturnScene()
+    {
+        if (!useFixedReturnRoutes)
+            return string.Empty;
+
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        return TryResolveFixedReturnScene(currentSceneName, out string returnSceneName)
+            ? returnSceneName
+            : string.Empty;
     }
 
     private void TryFallback()
