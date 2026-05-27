@@ -44,7 +44,7 @@ public class PanelBackspaceCloser : MonoBehaviour
             panel.SetActive(false);
 
         ExecuteCloseBlock();
-        ClickInteractionCleanup.ResetAfterUiBoundary(ResolveFlowchart());
+        ClickInteractionCleanup.ResetAfterUiBoundary(ResolveFlowchart(), resetWindowClicked: false);
     }
 
     private void ExecuteCloseBlock()

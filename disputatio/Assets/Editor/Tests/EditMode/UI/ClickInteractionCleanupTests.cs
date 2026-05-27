@@ -62,6 +62,17 @@ public class ClickInteractionCleanupTests
         Assert.IsFalse(flowchart.GetBooleanVariable("IsCalled"));
     }
 
+    [Test]
+    public void ResetAfterUiBoundary_WhenWindowClickedResetSkipped_PreservesWindowClicked()
+    {
+        Flowchart flowchart = CreateFlowchartWithClickFlags("PreserveWindowClickedFlowchart");
+
+        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
+    }
+
     private Flowchart CreateFlowchartWithClickFlags(string name)
     {
         GameObject flowchartObject = new GameObject(name);

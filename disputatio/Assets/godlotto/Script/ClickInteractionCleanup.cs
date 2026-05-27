@@ -10,17 +10,17 @@ public static class ClickInteractionCleanup
 {
     private const string LegacyUppercaseIsCalled = "IsCalled";
 
-    public static void ResetAfterUiBoundary(Flowchart preferredFlowchart = null)
+    public static void ResetAfterUiBoundary(Flowchart preferredFlowchart = null, bool resetWindowClicked = true)
     {
         InteractionLock.ForceUnlock();
         ClearCurrentUiSelection();
 
         HashSet<Flowchart> resetFlowcharts = new HashSet<Flowchart>();
-        ResetFlowchartClickFlags(preferredFlowchart, resetFlowcharts);
+        ResetFlowchartClickFlags(preferredFlowchart, resetFlowcharts, resetWindowClicked);
 
         Flowchart globalFlowchart = FlowchartLocator.Find();
-        ResetFlowchartClickFlags(globalFlowchart, resetFlowcharts);
-        ResetLoadedSceneFlowcharts(resetFlowcharts);
+        ResetFlowchartClickFlags(globalFlowchart, resetFlowcharts, resetWindowClicked);
+        ResetLoadedSceneFlowcharts(resetFlowcharts, resetWindowClicked);
     }
 
     private static void ClearCurrentUiSelection()
@@ -29,7 +29,7 @@ public static class ClickInteractionCleanup
             EventSystem.current.SetSelectedGameObject(null);
     }
 
-    private static void ResetLoadedSceneFlowcharts(HashSet<Flowchart> resetFlowcharts)
+    private static void ResetLoadedSceneFlowcharts(HashSet<Flowchart> resetFlowcharts, bool resetWindowClicked)
     {
         var flowcharts = Resources.FindObjectsOfTypeAll<Flowchart>();
         foreach (var flowchart in flowcharts)
@@ -37,11 +37,11 @@ public static class ClickInteractionCleanup
             if (flowchart == null || !flowchart.gameObject.scene.IsValid() || !flowchart.gameObject.scene.isLoaded)
                 continue;
 
-            ResetFlowchartClickFlags(flowchart, resetFlowcharts);
+            ResetFlowchartClickFlags(flowchart, resetFlowcharts, resetWindowClicked);
         }
     }
 
-    private static void ResetFlowchartClickFlags(Flowchart flowchart, HashSet<Flowchart> resetFlowcharts)
+    private static void ResetFlowchartClickFlags(Flowchart flowchart, HashSet<Flowchart> resetFlowcharts, bool resetWindowClicked)
     {
         if (flowchart == null)
             return;
@@ -52,7 +52,8 @@ public static class ClickInteractionCleanup
         SetBooleanIfPresent(flowchart, FungusVariableKeys.IsCalled, false);
         SetBooleanIfPresent(flowchart, LegacyUppercaseIsCalled, false);
         SetBooleanIfPresent(flowchart, FungusVariableKeys.IsClicked, false);
-        SetBooleanIfPresent(flowchart, FungusVariableKeys.WindowClicked, false);
+        if (resetWindowClicked)
+            SetBooleanIfPresent(flowchart, FungusVariableKeys.WindowClicked, false);
     }
 
     private static void SetBooleanIfPresent(Flowchart flowchart, string variableName, bool value)
