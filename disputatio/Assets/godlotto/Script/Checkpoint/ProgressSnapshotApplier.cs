@@ -22,7 +22,7 @@ public static class ProgressSnapshotApplier
             for (int i = 0; i < data.fungusBooleans.Length; i++)
             {
                 var entry = data.fungusBooleans[i];
-                if (!string.IsNullOrEmpty(entry.key))
+                if (ShouldApplyFungusKey(entry.key))
                     fc.SetBooleanVariable(entry.key, entry.value);
             }
         }
@@ -32,7 +32,7 @@ public static class ProgressSnapshotApplier
             for (int i = 0; i < data.fungusIntegers.Length; i++)
             {
                 var entry = data.fungusIntegers[i];
-                if (!string.IsNullOrEmpty(entry.key))
+                if (ShouldApplyFungusKey(entry.key))
                     fc.SetIntegerVariable(entry.key, entry.value);
             }
         }
@@ -42,10 +42,15 @@ public static class ProgressSnapshotApplier
             for (int i = 0; i < data.fungusStrings.Length; i++)
             {
                 var entry = data.fungusStrings[i];
-                if (!string.IsNullOrEmpty(entry.key))
+                if (ShouldApplyFungusKey(entry.key))
                     fc.SetStringVariable(entry.key, entry.value ?? string.Empty);
             }
         }
+    }
+
+    private static bool ShouldApplyFungusKey(string key)
+    {
+        return ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(key);
     }
 
     private static void ApplyInventory(CheckpointSaveData data)

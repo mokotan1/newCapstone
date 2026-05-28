@@ -17,6 +17,8 @@ public class RoomCheckpointDefinitionTests
         Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(SettingPlayerPrefsKeys.BgmVolume), Is.False);
         Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey("Dial_CurrentAngle"), Is.False);
         Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey("SnapState_ChildRoom_Horse1"), Is.False);
+        Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(FungusVariableKeys.IsClicked), Is.False);
+        Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(FungusVariableKeys.WindowClicked), Is.False);
         Assert.That(ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey("No40_FirstDeathLinePlayed"), Is.True);
     }
 }

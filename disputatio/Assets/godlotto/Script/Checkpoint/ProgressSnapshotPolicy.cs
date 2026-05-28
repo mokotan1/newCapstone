@@ -10,7 +10,9 @@ public static class ProgressSnapshotPolicy
         if (string.Equals(key, SettingPlayerPrefsKeys.BgmVolume, StringComparison.Ordinal) ||
             string.Equals(key, SettingPlayerPrefsKeys.SfxVolume, StringComparison.Ordinal) ||
             string.Equals(key, SettingPlayerPrefsKeys.Fullscreen, StringComparison.Ordinal) ||
-            string.Equals(key, SettingPlayerPrefsKeys.ResolutionIndex, StringComparison.Ordinal))
+            string.Equals(key, SettingPlayerPrefsKeys.ResolutionIndex, StringComparison.Ordinal) ||
+            string.Equals(key, FungusVariableKeys.IsClicked, StringComparison.Ordinal) ||
+            string.Equals(key, FungusVariableKeys.WindowClicked, StringComparison.Ordinal))
         {
             return false;
         }

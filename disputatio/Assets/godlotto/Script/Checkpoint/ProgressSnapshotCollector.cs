@@ -12,8 +12,6 @@ public static class ProgressSnapshotCollector
         FungusVariableKeys.UsedWifeKey,
         FungusVariableKeys.UsedTutorKey,
         FungusVariableKeys.UsedChildKey,
-        FungusVariableKeys.WindowClicked,
-        FungusVariableKeys.IsClicked,
     };
 
     private static readonly string[] IntegerKeys =
