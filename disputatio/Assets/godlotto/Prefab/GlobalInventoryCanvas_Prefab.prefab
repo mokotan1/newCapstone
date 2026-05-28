@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 844446805754888769}
   - component: {fileID: 8432011457589529400}
   - component: {fileID: 4380253192595619072}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: GlobalInventoryCanvas_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76,10 +76,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -121,7 +121,13 @@ MonoBehaviour:
   inventoryUI_Background: {fileID: 7176177690824875223}
   slotsHolder: {fileID: 7501851496962813981}
   slotPrefab: {fileID: 5978059533391442340, guid: 0e37c81f71df42441af6f33ddb63632a, type: 3}
-  maxSlots: 8
+  maxSlots: 9
+  targetflowchart: {fileID: 0}
+  tooltipController: {fileID: 0}
+  guideController: {fileID: 0}
+  slotSpacing: {x: 62.5, y: 0}
+  cellSize: {x: 150, y: 150}
+  pressTab: 0
 --- !u!114 &4380253192595619072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,7 +150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7501851496962813981}
   - component: {fileID: 341197623026083510}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: SlotsHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -206,7 +212,7 @@ GameObject:
   - component: {fileID: 6629190207751616338}
   - component: {fileID: 4006151063543885999}
   - component: {fileID: 1451389425717909967}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: InventoryUI_Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -254,7 +260,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.754717, g: 0.7369171, b: 0.7369171, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

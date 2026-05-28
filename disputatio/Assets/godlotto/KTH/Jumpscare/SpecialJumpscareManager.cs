@@ -207,6 +207,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         {
             StopHeartbeatSound();
             StopJumpscareSound();
+            RestoreInputStateBeforeRetry();
+            InventoryAccessState.TryUnlockAfterRetry(SceneManager.GetActiveScene().name, retrySceneName, true);
             CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
             CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
         }
@@ -336,6 +338,12 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     {
         if (jumpscareAudioSource != null)
             jumpscareAudioSource.Stop();
+    }
+
+    private void RestoreInputStateBeforeRetry()
+    {
+        Time.timeScale = 1f;
+        SettingPanelWorldInputBlocker.End();
     }
 
     private IEnumerator FullJumpscareSequence()

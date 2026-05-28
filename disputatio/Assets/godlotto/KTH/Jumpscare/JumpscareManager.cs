@@ -289,7 +289,6 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         StopAllCoroutines();
         hasTriggered = false;
         isJumpscareInProgress = false;
-
         _spawner?.SetTriggerVisible(false);
         _effects?.SetAnimatorActive(false);
         _effects?.SetGameOverActive(false);
@@ -328,6 +327,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         {
             StopHeartbeatSound();
             StopJumpscareSound();
+            RestoreInputStateBeforeRetry();
+            InventoryAccessState.TryUnlockAfterRetry(SceneManager.GetActiveScene().name, retrySceneName, true);
             CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
             CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
         }
@@ -405,6 +406,13 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         OnEnemyAppeared?.Invoke();
     }
 
+    private void RestoreInputStateBeforeRetry()
+    {
+        Time.timeScale = 1f;
+        SettingPanelWorldInputBlocker.End();
+        _spawner?.SetMainCanvasVisible(true);
+    }
+
     private void EnsureHeartbeatAudioSource()
     {
         if (heartbeatAudioSource != null)
@@ -479,7 +487,6 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
         OnPlayerDied?.Invoke();
         OnJumpscareReset?.Invoke();
-
         isJumpscareInProgress = false;
     }
 

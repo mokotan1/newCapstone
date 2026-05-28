@@ -9,6 +9,7 @@ public class InventoryTooltipController : MonoBehaviour
     [SerializeField] private GameObject root;
     [SerializeField] private Text contentText;
     [SerializeField] private RectTransform rootRect;
+    [SerializeField] private CanvasGroup rootGroup;
 
     [Header("Tooltip Table")]
     [SerializeField] private TextAsset tooltipTableCsv;
@@ -45,14 +46,18 @@ public class InventoryTooltipController : MonoBehaviour
             tooltipContent.itemName,
             tooltipContent.itemDescription,
             tooltipContent.rows);
-        root.SetActive(true);
+        EnsureActive(root);
+        SetCanvasGroupVisible(rootGroup, true);
         Place(pointerPosition);
     }
 
     public void Hide()
     {
         if (root != null)
-            root.SetActive(false);
+        {
+            EnsureActive(root);
+            SetCanvasGroupVisible(rootGroup, false);
+        }
     }
 
     private void Place(Vector2 pointerPosition)
@@ -83,11 +88,15 @@ public class InventoryTooltipController : MonoBehaviour
     private void EnsureTooltipUi()
     {
         if (root != null && contentText != null && rootRect != null)
+        {
+            rootGroup = EnsureCanvasGroup(root);
             return;
+        }
 
         GameObject tooltipRoot = new GameObject("InventoryTooltip");
         tooltipRoot.layer = gameObject.layer;
         tooltipRoot.transform.SetParent(transform, false);
+        rootGroup = EnsureCanvasGroup(tooltipRoot);
 
         rootRect = tooltipRoot.AddComponent<RectTransform>();
         rootRect.sizeDelta = new Vector2(460f, 190f);
@@ -117,6 +126,34 @@ public class InventoryTooltipController : MonoBehaviour
         contentText.raycastTarget = false;
 
         root = tooltipRoot;
+    }
+
+    internal static void SetCanvasGroupVisible(CanvasGroup group, bool visible)
+    {
+        if (group == null)
+            return;
+
+        group.alpha = visible ? 1f : 0f;
+        group.interactable = false;
+        group.blocksRaycasts = false;
+    }
+
+    private static CanvasGroup EnsureCanvasGroup(GameObject target)
+    {
+        if (target == null)
+            return null;
+
+        EnsureActive(target);
+        if (!target.TryGetComponent(out CanvasGroup group))
+            group = target.AddComponent<CanvasGroup>();
+
+        return group;
+    }
+
+    private static void EnsureActive(GameObject target)
+    {
+        if (target != null && !target.activeSelf)
+            target.SetActive(true);
     }
 
     private static Vector2 GetTooltipScreenSize(RectTransform rectTransform)

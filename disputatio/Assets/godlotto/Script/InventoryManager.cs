@@ -25,6 +25,7 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
     [SerializeField] private int maxSlots = 12;
     [SerializeField] private Flowchart targetflowchart;
     [SerializeField] private InventoryTooltipController tooltipController;
+    [SerializeField] private InventoryGuideController guideController;
 
     [Header("슬롯 레이아웃")]
     [Tooltip("슬롯 사이의 가로/세로 간격 (픽셀)")]
@@ -50,6 +51,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
             tooltipController = gameObject.AddComponent<InventoryTooltipController>();
             GameLog.LogWarning($"[{nameof(InventoryManager)}] tooltipController가 없어 런타임에 자동 생성했습니다.");
         }
+
+        var guideFallback = FindFirstObjectByType<InventoryGuideController>(FindObjectsInactive.Include);
+        guideController = SelectGuideController(guideController, guideFallback);
+        if (guideController == null)
+            guideController = gameObject.AddComponent<InventoryGuideController>();
     }
 
     void OnEnable()
@@ -73,7 +79,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         }
 
         animator = inventoryUI_Background.GetComponent<Animator>();
-        inventoryUI_Background.SetActive(false);
+        EnsureInventoryRootActive(inventoryUI_Background);
+        NormalizeInventoryCanvasTransform(inventoryUI_Background.transform);
+        SetInitialClosedState();
+        if (guideController != null)
+            guideController.BindInventoryRoot(inventoryUI_Background.transform);
 
         if (ResolveFlowchart() != null)
             pressTab = targetflowchart.GetBooleanVariable(FungusVariableKeys.PressTab);
@@ -87,19 +97,26 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         if (!Input.GetKeyDown(KeyCode.Tab))
             return;
 
+        if (!InventoryAccessState.ShouldAllowInventoryInput(InventoryAccessState.IsUnlocked))
+            return;
+
+        EnsureInventoryRootActive(inventoryUI_Background);
+        NormalizeInventoryCanvasTransform(inventoryUI_Background != null ? inventoryUI_Background.transform : null);
+
         isOpen = !isOpen;
         if (isOpen)
         {
             pressTab = true;
             SyncPressTab();
-            inventoryUI_Background.SetActive(true);
-            animator.SetTrigger("Open");
+            guideController?.OnInventoryOpened();
+            animator?.SetTrigger("Open");
         }
         else
         {
             pressTab = false;
             SyncPressTab();
-            animator.SetTrigger("Close");
+            guideController?.HideGuide();
+            animator?.SetTrigger("Close");
 
             if (selectedItem != null)
                 DeselectItem();
@@ -311,5 +328,45 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         InventoryTooltipController discoveredController)
     {
         return assignedController != null ? assignedController : discoveredController;
+    }
+
+    public static InventoryGuideController SelectGuideController(
+        InventoryGuideController assignedController,
+        InventoryGuideController discoveredController)
+    {
+        return assignedController != null ? assignedController : discoveredController;
+    }
+
+    internal static void EnsureInventoryRootActive(GameObject inventoryRoot)
+    {
+        if (inventoryRoot != null && !inventoryRoot.activeSelf)
+            inventoryRoot.SetActive(true);
+    }
+
+    internal static void NormalizeInventoryCanvasTransform(Transform inventoryRoot)
+    {
+        if (inventoryRoot == null)
+            return;
+
+        Canvas canvas = inventoryRoot.GetComponentInParent<Canvas>(true);
+        if (canvas == null)
+            return;
+
+        Transform canvasTransform = canvas.transform;
+        if (canvasTransform.localScale == Vector3.zero)
+            canvasTransform.localScale = Vector3.one;
+    }
+
+    private void SetInitialClosedState()
+    {
+        isOpen = false;
+        pressTab = false;
+        SyncPressTab();
+
+        if (animator == null)
+            return;
+
+        animator.Play("Inventory_Close", 0, 1f);
+        animator.Update(0f);
     }
 }

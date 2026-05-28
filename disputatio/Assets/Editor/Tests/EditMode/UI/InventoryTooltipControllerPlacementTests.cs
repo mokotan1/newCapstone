@@ -26,4 +26,26 @@ public class InventoryTooltipControllerPlacementTests
 
         Assert.AreEqual(new Vector2(1560f, 940f), result);
     }
+
+    [Test]
+    public void SetCanvasGroupVisible_HidesTooltipWithoutDeactivatingObject()
+    {
+        GameObject target = new GameObject("InventoryTooltip", typeof(CanvasGroup));
+
+        try
+        {
+            CanvasGroup group = target.GetComponent<CanvasGroup>();
+
+            InventoryTooltipController.SetCanvasGroupVisible(group, false);
+
+            Assert.IsTrue(target.activeSelf);
+            Assert.AreEqual(0f, group.alpha);
+            Assert.IsFalse(group.interactable);
+            Assert.IsFalse(group.blocksRaycasts);
+        }
+        finally
+        {
+            Object.DestroyImmediate(target);
+        }
+    }
 }
