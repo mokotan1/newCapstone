@@ -5,6 +5,8 @@ public class BackNavigatorTests
 {
     [TestCase("MaidRoom", "Hallway_Right")]
     [TestCase("StudyRoom", "Hallway_Right")]
+    [TestCase("MaidEntrance", "Hallway_Right")]
+    [TestCase("StudyEntrance", "Hallway_Right")]
     [TestCase("PrisonEntrance", "StudyRoom")]
     [TestCase("BedRoom", "2floorHallway_Right")]
     [TestCase("WifeRoom", "2floorHallway_Right")]

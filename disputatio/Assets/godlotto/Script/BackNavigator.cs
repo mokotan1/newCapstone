@@ -18,6 +18,8 @@ public class BackNavigator : MonoBehaviour
         {
             case "MaidRoom":
             case "StudyRoom":
+            case "MaidEntrance":
+            case "StudyEntrance":
                 returnSceneName = "Hallway_Right";
                 return true;
 
@@ -27,11 +29,15 @@ public class BackNavigator : MonoBehaviour
 
             case "BedRoom":
             case "WifeRoom":
+            case "BedEntrance":
+            case "WifeEntrance":
                 returnSceneName = "2floorHallway_Right";
                 return true;
 
             case "TutorRoom":
             case "ChildRoom":
+            case "TutorEntrance":
+            case "ChildEntrance":
                 returnSceneName = "2floorHallway_Left";
                 return true;
 
