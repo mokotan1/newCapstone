@@ -253,10 +253,30 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
         if (string.Equals(SceneManager.GetActiveScene().name, "StudyRoom", StringComparison.OrdinalIgnoreCase)
             && string.Equals(content.id, "ACT2_DIARY_OWNER_001", StringComparison.OrdinalIgnoreCase))
         {
+            if (IsStudyRoomRewardAlreadyClaimed())
+                return BuildStudyRoomAlreadySolvedBody(content.body);
+
             return BuildStudyRoomDiaryBody(content.body);
         }
 
         return BuildSinglePageBody(content.body);
+    }
+
+    public static bool ShouldUseAlreadySolvedStudyRoomBody(
+        string sceneName,
+        string collectibleId,
+        bool diarySolved,
+        bool hasTutorKey)
+    {
+        return string.Equals(sceneName, "StudyRoom", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(collectibleId, "ACT2_DIARY_OWNER_001", StringComparison.OrdinalIgnoreCase)
+            && (diarySolved || hasTutorKey);
+    }
+
+    public static string BuildStudyRoomAlreadySolvedBody(string body)
+    {
+        string source = string.IsNullOrWhiteSpace(body) ? string.Empty : body.Trim();
+        return source + "\f[체셔]\n나는 이미 문제를 풀었어. 더 얻을 열쇠는 없어.";
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -317,6 +337,12 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
         if (!string.Equals(sceneName, "StudyRoom", StringComparison.OrdinalIgnoreCase)
             || !string.Equals(rewardCollectibleId, "ACT2_DIARY_OWNER_001", StringComparison.OrdinalIgnoreCase))
             return;
+
+        if (IsStudyRoomRewardAlreadyClaimed())
+        {
+            rewardGranted = true;
+            return;
+        }
 
         rewardGranted = true;
         SetFlowchartBool("DiarySolved", true);
@@ -450,6 +476,25 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
     {
         string source = string.IsNullOrWhiteSpace(body) ? string.Empty : body.Trim();
         return source + "\f";
+    }
+
+    private static bool IsStudyRoomRewardAlreadyClaimed()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        return ShouldUseAlreadySolvedStudyRoomBody(
+            sceneName,
+            "ACT2_DIARY_OWNER_001",
+            GetActiveSceneOrGlobalBool("DiarySolved"),
+            GetActiveSceneOrGlobalBool("HaveTutorKey"));
+    }
+
+    private static bool GetActiveSceneOrGlobalBool(string key)
+    {
+        Flowchart fc = FindActiveSceneFlowchart();
+        if (fc != null && fc.GetBooleanVariable(key))
+            return true;
+
+        return FlowchartLocator.GetFungusGlobalBoolean(key);
     }
 
     private void AttachButtons(string sceneName)

@@ -55,6 +55,8 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
                 return typeof(KitchenChatbot);
             case "TutorRoom":
                 return typeof(TutorChatbot);
+            case "StudyRoom":
+                return typeof(StudyRoomChatbot);
             case "Hall_playerble":
                 return typeof(GlobalChatbot);
             default:
@@ -177,6 +179,9 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
                 break;
             case TutorChatbot tutorChatbot:
                 tutorChatbot.flowchart = sceneFlowchart;
+                break;
+            case StudyRoomChatbot studyRoomChatbot:
+                studyRoomChatbot.studyFlowchart = sceneFlowchart;
                 break;
             case GlobalChatbot globalChatbot:
                 globalChatbot.globalFlowchart = FlowchartLocator.Find() ?? sceneFlowchart;

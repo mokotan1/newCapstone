@@ -34,6 +34,7 @@ public class ParretPanelChatbotBinderTests
         Assert.AreSame(typeof(MainBedroomChatbot), ParretPanelChatbotBinder.ResolveChatbotType("BedRoom"));
         Assert.AreSame(typeof(KitchenChatbot), ParretPanelChatbotBinder.ResolveChatbotType("Kitchen"));
         Assert.AreSame(typeof(TutorChatbot), ParretPanelChatbotBinder.ResolveChatbotType("TutorRoom"));
+        Assert.AreSame(typeof(StudyRoomChatbot), ParretPanelChatbotBinder.ResolveChatbotType("StudyRoom"));
     }
 
     [Test]
