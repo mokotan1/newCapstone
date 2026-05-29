@@ -41,6 +41,10 @@ public class BackNavigator : MonoBehaviour
                 returnSceneName = "2floorHallway_Left";
                 return true;
 
+            case "2floorMainHall":
+                returnSceneName = "Hall_playerble";
+                return true;
+
             default:
                 returnSceneName = string.Empty;
                 return false;

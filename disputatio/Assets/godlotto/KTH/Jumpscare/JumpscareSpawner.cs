@@ -13,8 +13,13 @@ public sealed class JumpscareSpawner
     private const float NonRightHallSpawnChancePercent = 20f;
     private const string RightHallSceneName = SceneNames.HallRight;
     private const string RightHall2SceneName = "Hall_Right2";
+    private const string HallwayRight2SceneName = "Hallway_Right2";
     private const string SpriteUnlitShaderName = "Universal Render Pipeline/2D/Sprite-Unlit-Default";
     private const string MainCanvasTag = "MainCanvas";
+    private static readonly Vector3 RightHallTriggerPosition = new Vector3(-15f, -260f, 13.331f);
+    private static readonly Vector3 RightHallTriggerScale = new Vector3(50f, 40f, 1f);
+    private static readonly Vector3 HallwayRight2TriggerPosition = new Vector3(-8f, -225.668793f, 13.3310041f);
+    private static readonly Vector3 HallwayRight2TriggerScale = new Vector3(41.6790009f, 37.7220001f, 1f);
 
     private readonly GameObject _triggerObject;
     private readonly SpriteRenderer _triggerSpriteRenderer;
@@ -212,9 +217,17 @@ public sealed class JumpscareSpawner
         if (string.Equals(sceneName, RightHall2SceneName, StringComparison.Ordinal)
             || string.Equals(sceneName, RightHallSceneName, StringComparison.Ordinal))
         {
-            position = new Vector3(-15f, -260f, 13.331f);
+            position = RightHallTriggerPosition;
             rotation = Quaternion.identity;
-            scale = new Vector3(50f, 40f, 1f);
+            scale = RightHallTriggerScale;
+            return true;
+        }
+
+        if (string.Equals(sceneName, HallwayRight2SceneName, StringComparison.Ordinal))
+        {
+            position = HallwayRight2TriggerPosition;
+            rotation = Quaternion.identity;
+            scale = HallwayRight2TriggerScale;
             return true;
         }
 
