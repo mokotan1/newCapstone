@@ -3,13 +3,23 @@ using NUnit.Framework;
 public class SceneBookOverlayRuntimeStudyRoomRewardTests
 {
     [Test]
-    public void ShouldUseAlreadySolvedStudyRoomBody_WhenDiarySolved()
+    public void ShouldUseAlreadySolvedStudyRoomBody_WhenOnlyDiarySolved_ReturnsFalse()
+    {
+        Assert.IsFalse(SceneBookOverlayRuntime.ShouldUseAlreadySolvedStudyRoomBody(
+            "StudyRoom",
+            "ACT2_DIARY_OWNER_001",
+            diarySolved: true,
+            hasTutorKey: false));
+    }
+
+    [Test]
+    public void ShouldUseAlreadySolvedStudyRoomBody_WhenTutorKeyAcquired()
     {
         Assert.IsTrue(SceneBookOverlayRuntime.ShouldUseAlreadySolvedStudyRoomBody(
             "StudyRoom",
             "ACT2_DIARY_OWNER_001",
             diarySolved: true,
-            hasTutorKey: false));
+            hasTutorKey: true));
     }
 
     [Test]

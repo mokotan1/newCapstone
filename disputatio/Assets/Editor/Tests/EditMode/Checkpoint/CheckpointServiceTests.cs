@@ -1,10 +1,15 @@
+using Fungus;
 using NUnit.Framework;
+using UnityEngine;
 
 public class CheckpointServiceTests
 {
+    private GameObject variableManagerObject;
+
     [TearDown]
     public void TearDown()
     {
+        Object.DestroyImmediate(variableManagerObject);
         CheckpointRepository.Clear();
     }
 
@@ -60,5 +65,41 @@ public class CheckpointServiceTests
         Assert.That(loaded.resumeSceneName, Is.EqualTo(SceneNames.WifeRoom));
         Assert.That(loaded.resumeSpawnId, Is.EqualTo("room_start"));
         Assert.That(loaded.itemIds, Is.EquivalentTo(new[] { 5, 8 }));
+    }
+
+    [Test]
+    public void Apply_DoesNotRestoreTransientClickFlags()
+    {
+        Flowchart flowchart = CreateVariableManagerFlowchart();
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.WindowClicked, false);
+
+        ProgressSnapshotApplier.Apply(new CheckpointSaveData
+        {
+            resumeSceneName = SceneNames.BedRoom,
+            fungusBooleans = new[]
+            {
+                new BoolCheckpointEntry(FungusVariableKeys.IsClicked, true),
+                new BoolCheckpointEntry(FungusVariableKeys.WindowClicked, true)
+            }
+        });
+
+        Assert.That(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked), Is.False);
+        Assert.That(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked), Is.False);
+    }
+
+    private Flowchart CreateVariableManagerFlowchart()
+    {
+        variableManagerObject = new GameObject("Variablemanager");
+        return variableManagerObject.AddComponent<Flowchart>();
+    }
+
+    private static void AddBooleanVariable(Flowchart flowchart, string key, bool value)
+    {
+        BooleanVariable variable = flowchart.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Scope = VariableScope.Public;
+        variable.Value = value;
+        flowchart.Variables.Add(variable);
     }
 }

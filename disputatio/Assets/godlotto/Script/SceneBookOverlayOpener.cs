@@ -270,7 +270,7 @@ public sealed class SceneBookOverlayRuntime : MonoBehaviour
     {
         return string.Equals(sceneName, "StudyRoom", StringComparison.OrdinalIgnoreCase)
             && string.Equals(collectibleId, "ACT2_DIARY_OWNER_001", StringComparison.OrdinalIgnoreCase)
-            && (diarySolved || hasTutorKey);
+            && hasTutorKey;
     }
 
     public static string BuildStudyRoomAlreadySolvedBody(string body)

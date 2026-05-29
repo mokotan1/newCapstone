@@ -58,7 +58,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [Header("Mokotan 점프스케어 씬 자동 등록")]
     [Tooltip("코드에 정의된 Mokotan 복도·층 씬이 targetScenes에 없을 때 추가하며, 이때 사용할 진입 직후 spawnChance입니다. 이미 있는 sceneName은 건드리지 않습니다.")]
     [Range(0f, 100f)]
-    [SerializeField] private float defaultSpawnChanceForMokotanScenes = 20f;
+    [SerializeField] private float defaultSpawnChanceForMokotanScenes = 100f;
     [Tooltip("자동 등록되는 씬에 공통 적용할 기본 적 스폰 위치입니다.")]
     [SerializeField] private Vector2 defaultAutoRegisteredSpawnPosition = Vector2.zero;
     [Tooltip("자동 등록되는 씬별 적 스폰 위치 오버라이드 목록입니다. sceneName 일치 시 이 값이 우선 적용됩니다.")]
