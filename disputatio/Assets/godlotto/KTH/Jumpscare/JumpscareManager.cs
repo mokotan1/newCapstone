@@ -78,6 +78,14 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     [SerializeField] private float animationDuration = 2f;
     [SerializeField] private float blinkDuration = 0.2f;
     [SerializeField] private float closedDuration = 0.1f;
+    [SerializeField, Min(1)] private int initialBlinkCount = 1;
+    [SerializeField, Min(0f)] private float blinkInterval = 0f;
+    [SerializeField, Min(0.001f)] private float darkOverlayStartSize = 0.01f;
+    [SerializeField, Min(0f)] private float secondFrameTime = 0.41666666f;
+    [SerializeField, Min(0f)] private float fourthFrameTime = 0.75f;
+    [SerializeField, Min(0f)] private float blackScreenShakeDuration = 1.5f;
+    [Min(0.01f)]
+    [SerializeField] private float jumpscareAnimationSpeed = 1f;
     [SerializeField] private string retrySceneName = SceneNames.MainScene;
 
     [Header("공포 연출 (지연 효과)")]
@@ -127,6 +135,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
     private bool hasTriggered = false;
     private bool isJumpscareInProgress = false;
+    private bool isFinishControlledBySequence = false;
     private GameObject sayDialogObject;
 
     private Vector3 originalCameraPos;
@@ -159,7 +168,10 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
             gameOverObject,
             jumpscareAnimator,
             blinkDuration,
-            closedDuration);
+            closedDuration,
+            initialBlinkCount,
+            blinkInterval,
+            darkOverlayStartSize);
 
         if (triggerObject != null)
         {
@@ -289,6 +301,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         StopAllCoroutines();
         hasTriggered = false;
         isJumpscareInProgress = false;
+        isFinishControlledBySequence = false;
         _spawner?.SetTriggerVisible(false);
         _effects?.SetAnimatorActive(false);
         _effects?.SetGameOverActive(false);
@@ -342,26 +355,58 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         StopAllCoroutines();
 
         isJumpscareInProgress = true;
+        isFinishControlledBySequence = true;
 
         DisableSayDialog();
 
-        _spawner?.SetTriggerVisible(false);
-
-        if (triggerObject != null && jumpscareAnimator != null)
-            _effects.PositionJumpscareAnimator(triggerObject.transform.position);
-
-        // 지연 연출 효과 코루틴 실행
-        StartCoroutine(DelayedHorrorSequence());
-
         if (_effects != null)
-            StartCoroutine(_effects.FullJumpscareSequence());
+        {
+            Vector3 darkenCenter = triggerObject != null
+                ? GetScreenCenterWorldPosition(triggerObject.transform.position.z)
+                : Vector3.zero;
+            StartCoroutine(_effects.FullJumpscareSequence(
+                darkenCenter,
+                horrorEffectDuration,
+                blackScreenShakeDuration,
+                animationDuration,
+                secondFrameTime,
+                fourthFrameTime,
+                PrepareSecondFrameAtCenter,
+                StartHorrorEffectNow,
+                CompleteJumpscareFromSequence));
+        }
     }
 
-    // --- 카메라 흔들림 및 포스트 프로세싱 지연 연출 코루틴 ---
-    private IEnumerator DelayedHorrorSequence()
+    private void PrepareSecondFrameAtCenter()
     {
-        yield return new WaitForSeconds(horrorEffectDelay);
+        _spawner?.SetTriggerVisible(false);
 
+        if (triggerObject == null || jumpscareAnimator == null)
+            return;
+
+        Vector3 centerPosition = GetScreenCenterWorldPosition(triggerObject.transform.position.z);
+        triggerObject.transform.position = centerPosition;
+        _effects.PositionJumpscareAnimator(centerPosition);
+        jumpscareAnimator.speed = jumpscareAnimationSpeed;
+    }
+
+    private void StartHorrorEffectNow()
+    {
+        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration));
+    }
+
+    private static Vector3 GetScreenCenterWorldPosition(float z)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return new Vector3(0f, 0f, z);
+
+        return new Vector3(cam.transform.position.x, cam.transform.position.y, z);
+    }
+
+    // --- 카메라 흔들림 및 포스트 프로세싱 연출 코루틴 ---
+    private IEnumerator HorrorEffectSequence(float duration)
+    {
         PlayJumpscareSound();
 
         if (Camera.main != null)
@@ -372,7 +417,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         float elapsed = 0f;
         float effectRampUpTime = 0.2f;
 
-        while (elapsed < horrorEffectDuration)
+        float safeDuration = Mathf.Max(0.01f, duration);
+        while (elapsed < safeDuration)
         {
             elapsed += Time.deltaTime;
             
@@ -478,6 +524,25 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
     public void OnJumpscareFinished()
     {
+        if (!isJumpscareInProgress)
+            return;
+        if (isFinishControlledBySequence)
+            return;
+
+        CompleteJumpscare();
+    }
+
+    private void CompleteJumpscareFromSequence()
+    {
+        isFinishControlledBySequence = false;
+        CompleteJumpscare();
+    }
+
+    private void CompleteJumpscare()
+    {
+        if (!isJumpscareInProgress)
+            return;
+
         _effects?.SetAnimatorActive(false);
         _effects?.ShowGameOverAfterFit();
         
@@ -488,6 +553,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         OnPlayerDied?.Invoke();
         OnJumpscareReset?.Invoke();
         isJumpscareInProgress = false;
+        isFinishControlledBySequence = false;
     }
 
     private void DisableSayDialog()

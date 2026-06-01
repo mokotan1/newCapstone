@@ -4469,6 +4469,7 @@ GameObject:
   - component: {fileID: 1313011553}
   - component: {fileID: 1313011555}
   - component: {fileID: 1313011556}
+  - component: {fileID: 1313011557}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -4501,9 +4502,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 1313011486}
+  - {fileID: 1313011474}
   selectedCommands:
-  - {fileID: 1313011480}
+  - {fileID: 1313011557}
   variables:
   - {fileID: 1313011520}
   - {fileID: 1313011529}
@@ -4716,6 +4717,7 @@ MonoBehaviour:
   - {fileID: 1313011547}
   - {fileID: 1313011511}
   - {fileID: 1313011521}
+  - {fileID: 1313011557}
   suppressAllAutoSelections: 0
 --- !u!114 &1313011480
 MonoBehaviour:
@@ -7253,6 +7255,32 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
+--- !u!114 &1313011557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313011441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5faf6ee47ee8c524eb700ecb221b5682, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 101
+  indentLevel: 0
+  setStandingDialogue: {fileID: 0}
+  overrideSayDialog: {fileID: 40007, guid: a4b5c6d7e8f9012345678901234bcdef, type: 3}
+  speakerSide: 0
+  speakerName: 
+  dialogueText: "\uD639\uC2DC \uBAA8\uB974\uB2C8 \uCD08\uC778\uC885\uC744 \uB20C\uB7EC\uBCF4\uC790.\n"
+  speakerSprite: {fileID: 0}
+  speakerOffset: {x: 0, y: -50}
+  otherSprite: {fileID: 0}
+  otherOffset: {x: 0, y: -50}
+  font: {fileID: 0}
+  fontSize: 0
+  charsPerSecond: 0
 --- !u!1 &1404235570
 GameObject:
   m_ObjectHideFlags: 0

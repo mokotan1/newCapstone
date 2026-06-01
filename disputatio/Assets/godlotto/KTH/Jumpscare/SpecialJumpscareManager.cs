@@ -7,6 +7,14 @@ using UnityEngine.Rendering.Universal;
 
 public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareManager>
 {
+    private const float OverlayPlaneZOffsetFromCamera = 1f;
+    private const int DarkOverlaySortingOrder = 32000;
+    private const int JumpscareTopSortingOrder = 32760;
+    private const int BlinkOverlaySortingOrder = 32767;
+    private const float GhostSecondFrameDelay = 0.4166667f;
+    private const int DarkOverlayTextureSize = 128;
+    private const float DarkOverlaySoftEdgePixels = 3f;
+
     public static event Action OnPlayerDied;
     public static event Action OnEnemyAppeared;
     public static event Action OnJumpscareReset;
@@ -24,6 +32,13 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     public float spawnChance = 100f;
     public float blinkDuration = 0.2f;
     public float closedDuration = 0.1f;
+    [Min(1)] public int initialBlinkCount = 1;
+    [Min(0f)] public float blinkInterval = 0f;
+    [Min(0.001f)] public float darkOverlayStartSize = 0.01f;
+    [Min(0f)] public float secondFrameTime = 0.16666667f;
+    [Min(0f)] public float fourthFrameTime = 0.5f;
+    [Min(0f)] public float blackScreenShakeDuration = 1.5f;
+    public float finalFrameHoldDuration = 2f;
     public string retrySceneName = SceneNames.MainScene;
 
     [Header("공포 연출 (지연 효과)")]
@@ -69,6 +84,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     private bool isBlinkSequenceRunning = false;
 
     private bool isJumpscareInProgress = false;
+    private bool isFinishControlledBySequence = false;
     private GameObject sayDialogObject;
 
     private Camera mainCam;
@@ -76,6 +92,9 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
     private SpriteRenderer triggerSpriteRenderer;
     private Collider2D triggerCollider;
+    private SpriteRenderer darkOverlay;
+    private Sprite darkOverlaySprite;
+    private Material darkOverlayMaterial;
 
     void Start()
     {
@@ -138,6 +157,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
         blinkOverlay.transform.SetParent(mainCam.transform);
         blinkOverlay.transform.localPosition = new Vector3(0, 0, 1f);
+        blinkOverlay.sortingOrder = Mathf.Max(blinkOverlay.sortingOrder, BlinkOverlaySortingOrder);
 
         float worldHeight = mainCam.orthographicSize * 2f;
         float worldWidth = worldHeight * mainCam.aspect;
@@ -227,37 +247,44 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         StopAllCoroutines();
 
         isJumpscareInProgress = true;
+        isFinishControlledBySequence = true;
         DisableSayDialog();
-        SetTriggerVisible(false);
 
-        // 지연 연출 및 점프스케어 시퀀스 시작
-        StartCoroutine(DelayedHorrorSequence());
         StartCoroutine(FullJumpscareSequence());
     }
 
-    // --- 수정된 연출 코루틴 (1초 발동 후 종료) ---
-    private IEnumerator DelayedHorrorSequence()
+    private void StartHorrorEffectNow()
     {
-        // 1. 지정된 시간(0.5초) 대기
-        yield return new WaitForSeconds(horrorEffectDelay);
+        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration));
+    }
 
+    private static Vector3 GetScreenCenterWorldPosition(float z)
+    {
+        Camera cam = Camera.main;
+        if (cam == null)
+            return new Vector3(0f, 0f, z);
+
+        return new Vector3(cam.transform.position.x, cam.transform.position.y, z);
+    }
+
+    // --- 카메라 흔들림 및 포스트 프로세싱 연출 코루틴 ---
+    private IEnumerator HorrorEffectSequence(float duration)
+    {
         PlayJumpscareSound();
 
-        // 2. 카메라 원래 위치 저장
         if (Camera.main != null)
         {
             originalCameraPos = Camera.main.transform.localPosition;
         }
 
-        // 3. 지정된 시간(1초) 동안 효과 발동
         float elapsed = 0f;
-        float effectRampUpTime = 0.2f; // 효과가 최대로 도달하는 시간
+        float effectRampUpTime = 0.2f;
 
-        while (elapsed < horrorEffectDuration)
+        float safeDuration = Mathf.Max(0.01f, duration);
+        while (elapsed < safeDuration)
         {
             elapsed += Time.deltaTime;
             
-            // 카메라 흔들림 적용
             if (Camera.main != null)
             {
                 float x = UnityEngine.Random.Range(-1f, 1f) * cameraShakeMagnitude;
@@ -265,7 +292,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
                 Camera.main.transform.localPosition = new Vector3(originalCameraPos.x + x, originalCameraPos.y + y, originalCameraPos.z);
             }
 
-            // 포스트 프로세싱 적용 (부드럽게 최대치 도달 후 유지)
             float t = Mathf.Clamp01(elapsed / effectRampUpTime);
             if (vignette != null) vignette.intensity.value = Mathf.Lerp(0f, 0.5f, t);
             if (lensDistortion != null) lensDistortion.intensity.value = Mathf.Lerp(0f, -0.6f, t);
@@ -273,7 +299,6 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             yield return null;
         }
 
-        // 4. 효과 종료 및 원래 상태로 즉시 복구
         if (Camera.main != null)
         {
             Camera.main.transform.localPosition = originalCameraPos;
@@ -348,12 +373,87 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
     private IEnumerator FullJumpscareSequence()
     {
+        isBlinkSequenceRunning = true;
+
+        yield return StartCoroutine(BlinkRepeated(Mathf.Max(1, initialBlinkCount)));
+
+        PrepareSecondFrameAtCenter();
+        ShowJumpscareAnimatorFrameAtTopLayer(secondFrameTime);
+
+        Vector3 darkenCenter = triggerObject != null ? triggerObject.transform.position : Vector3.zero;
+        yield return StartCoroutine(DarkenFromWorldPoint(darkenCenter, horrorEffectDuration));
+
+        StartHorrorEffectNow();
+        if (blackScreenShakeDuration > 0f)
+            yield return new WaitForSeconds(blackScreenShakeDuration);
+
         yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
         yield return new WaitForSeconds(closedDuration);
 
-        jumpscareAnimator.gameObject.SetActive(true);
+        ShowJumpscareAnimatorFrameAtTopLayer(fourthFrameTime);
 
         yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
+
+        if (finalFrameHoldDuration > 0f)
+            yield return new WaitForSeconds(finalFrameHoldDuration);
+
+        isBlinkSequenceRunning = false;
+        if (jumpscareAnimator != null)
+            jumpscareAnimator.speed = 0f;
+        isFinishControlledBySequence = false;
+        OnJumpscareFinished();
+    }
+
+    private void PrepareSecondFrameAtCenter()
+    {
+        SetTriggerVisible(false);
+
+        if (triggerObject != null)
+            triggerObject.transform.position = GetScreenCenterWorldPosition(triggerObject.transform.position.z);
+        if (jumpscareAnimator != null)
+            jumpscareAnimator.transform.position = GetScreenCenterWorldPosition(jumpscareAnimator.transform.position.z);
+    }
+
+    private IEnumerator BlinkOnce()
+    {
+        yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
+        yield return new WaitForSeconds(closedDuration);
+        yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
+    }
+
+    private IEnumerator BlinkRepeated(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            yield return StartCoroutine(BlinkOnce());
+            if (i < count - 1 && blinkInterval > 0f)
+                yield return new WaitForSeconds(blinkInterval);
+        }
+    }
+
+    private void ShowJumpscareAnimatorFrameAtTopLayer(float clipTime)
+    {
+        if (jumpscareAnimator == null)
+            return;
+
+        jumpscareAnimator.gameObject.SetActive(true);
+        jumpscareAnimator.enabled = true;
+        jumpscareAnimator.speed = 0f;
+        RaiseAnimatorRenderersAboveDarkOverlay();
+        jumpscareAnimator.Rebind();
+        SetAnimatorClipTime(clipTime);
+    }
+
+    private void SetAnimatorClipTime(float clipTime)
+    {
+        RuntimeAnimatorController controller = jumpscareAnimator.runtimeAnimatorController;
+        float clipLength = 1f;
+        if (controller != null && controller.animationClips != null && controller.animationClips.Length > 0)
+            clipLength = Mathf.Max(0.0001f, controller.animationClips[0].length);
+
+        float normalizedTime = Mathf.Clamp01(clipTime / clipLength);
+        jumpscareAnimator.Play(0, 0, normalizedTime);
+        jumpscareAnimator.Update(0f);
     }
 
     public void OnFrameTransition()
@@ -399,7 +499,18 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
     public void OnJumpscareFinished()
     {
-        jumpscareAnimator.gameObject.SetActive(false);
+        if (!isJumpscareInProgress)
+            return;
+        if (isFinishControlledBySequence)
+            return;
+
+        if (jumpscareAnimator != null)
+        {
+            jumpscareAnimator.speed = 1f;
+            jumpscareAnimator.enabled = true;
+            jumpscareAnimator.gameObject.SetActive(false);
+        }
+        HideDarkOverlay();
         if (gameOverObject != null) gameOverObject.SetActive(true);
         
         // 만약을 대비한 포스트 프로세싱 초기화 보장
@@ -411,6 +522,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         ChromaticOff();
 
         isJumpscareInProgress = false;
+        isFinishControlledBySequence = false;
     }
 
     private void SetHideObjectsByTag(bool hide)
@@ -477,5 +589,135 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         if (sayDialogObject != null && !sayDialogObject.activeSelf)
             sayDialogObject.SetActive(true);
         sayDialogObject = null;
+    }
+
+    private IEnumerator DarkenFromWorldPoint(Vector3 centerWorld, float duration)
+    {
+        EnsureDarkOverlay();
+        if (darkOverlay == null)
+            yield break;
+
+        Camera cam = Camera.main;
+        if (cam == null)
+            yield break;
+
+        darkOverlay.gameObject.SetActive(true);
+        darkOverlay.transform.position = new Vector3(centerWorld.x, centerWorld.y, cam.transform.position.z + OverlayPlaneZOffsetFromCamera);
+        float startSize = Mathf.Max(0.001f, darkOverlayStartSize);
+        darkOverlay.transform.localScale = new Vector3(startSize, startSize, 1f);
+        darkOverlay.color = Color.black;
+
+        float targetDiameter = CalculateScreenCoveringDiameter(centerWorld, cam);
+        float elapsed = 0f;
+        float safeDuration = Mathf.Max(0.01f, duration);
+
+        while (elapsed < safeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / safeDuration));
+            float size = Mathf.Lerp(startSize, targetDiameter, t);
+            darkOverlay.transform.localScale = new Vector3(size, size, 1f);
+            yield return null;
+        }
+
+        darkOverlay.transform.localScale = new Vector3(targetDiameter, targetDiameter, 1f);
+    }
+
+    private void EnsureDarkOverlay()
+    {
+        if (darkOverlay != null)
+            return;
+
+        GameObject overlayObject = new GameObject("SpecialJumpscareCenterDarkOverlay");
+        DontDestroyOnLoad(overlayObject);
+        darkOverlay = overlayObject.AddComponent<SpriteRenderer>();
+        darkOverlaySprite = CreateDarkOverlaySprite();
+        darkOverlay.sprite = darkOverlaySprite;
+        darkOverlayMaterial = CreateDarkOverlayMaterial();
+        if (darkOverlayMaterial != null)
+            darkOverlay.material = darkOverlayMaterial;
+        darkOverlay.sortingLayerID = blinkOverlay != null ? blinkOverlay.sortingLayerID : 0;
+        darkOverlay.sortingOrder = DarkOverlaySortingOrder;
+        darkOverlay.gameObject.SetActive(false);
+    }
+
+    private static Sprite CreateDarkOverlaySprite()
+    {
+        Texture2D texture = new Texture2D(DarkOverlayTextureSize, DarkOverlayTextureSize, TextureFormat.RGBA32, false)
+        {
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp
+        };
+
+        float center = (DarkOverlayTextureSize - 1) * 0.5f;
+        float radius = center - DarkOverlaySoftEdgePixels;
+        Color[] pixels = new Color[DarkOverlayTextureSize * DarkOverlayTextureSize];
+
+        for (int y = 0; y < DarkOverlayTextureSize; y++)
+        {
+            for (int x = 0; x < DarkOverlayTextureSize; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                float alpha = 1f - Mathf.Clamp01((distance - radius) / DarkOverlaySoftEdgePixels);
+                pixels[y * DarkOverlayTextureSize + x] = new Color(1f, 1f, 1f, alpha);
+            }
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, DarkOverlayTextureSize, DarkOverlayTextureSize), new Vector2(0.5f, 0.5f), DarkOverlayTextureSize);
+    }
+
+    private static Material CreateDarkOverlayMaterial()
+    {
+        Shader shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+        if (shader == null)
+            shader = Shader.Find("Sprites/Default");
+        return shader != null ? new Material(shader) : null;
+    }
+
+    private void HideDarkOverlay()
+    {
+        if (darkOverlay != null)
+            darkOverlay.gameObject.SetActive(false);
+    }
+
+    private static float CalculateScreenCoveringDiameter(Vector3 centerWorld, Camera cam)
+    {
+        float worldHeight = cam.orthographicSize * 2f;
+        float worldWidth = worldHeight * cam.aspect;
+        Vector3 camPos = cam.transform.position;
+
+        Vector2[] corners =
+        {
+            new Vector2(camPos.x - worldWidth * 0.5f, camPos.y - worldHeight * 0.5f),
+            new Vector2(camPos.x - worldWidth * 0.5f, camPos.y + worldHeight * 0.5f),
+            new Vector2(camPos.x + worldWidth * 0.5f, camPos.y - worldHeight * 0.5f),
+            new Vector2(camPos.x + worldWidth * 0.5f, camPos.y + worldHeight * 0.5f)
+        };
+
+        float maxDistance = 0f;
+        Vector2 center = centerWorld;
+        foreach (Vector2 corner in corners)
+            maxDistance = Mathf.Max(maxDistance, Vector2.Distance(center, corner));
+
+        return maxDistance * 2.1f;
+    }
+
+    private void RaiseAnimatorRenderersAboveDarkOverlay()
+    {
+        if (jumpscareAnimator == null)
+            return;
+
+        int sortingLayerID = darkOverlay != null
+            ? darkOverlay.sortingLayerID
+            : (blinkOverlay != null ? blinkOverlay.sortingLayerID : 0);
+
+        Renderer[] renderers = jumpscareAnimator.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.sortingLayerID = sortingLayerID;
+            renderer.sortingOrder = JumpscareTopSortingOrder;
+        }
     }
 }
