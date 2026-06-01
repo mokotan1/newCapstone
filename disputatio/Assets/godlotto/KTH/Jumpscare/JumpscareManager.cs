@@ -372,7 +372,8 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
                 secondFrameTime,
                 fourthFrameTime,
                 PrepareSecondFrameAtCenter,
-                StartHorrorEffectNow,
+                StartBlackScreenHorrorEffectNow,
+                StartFinalFrameHorrorEffectNow,
                 CompleteJumpscareFromSequence));
         }
     }
@@ -390,9 +391,19 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         jumpscareAnimator.speed = jumpscareAnimationSpeed;
     }
 
-    private void StartHorrorEffectNow()
+    private void StartBlackScreenHorrorEffectNow()
     {
-        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration));
+        StartHorrorEffectNow(playJumpscareSound: true);
+    }
+
+    private void StartHorrorEffectNow(bool playJumpscareSound)
+    {
+        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration, playJumpscareSound));
+    }
+
+    private void StartFinalFrameHorrorEffectNow()
+    {
+        StartHorrorEffectNow(playJumpscareSound: false);
     }
 
     private static Vector3 GetScreenCenterWorldPosition(float z)
@@ -405,9 +416,10 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
     }
 
     // --- 카메라 흔들림 및 포스트 프로세싱 연출 코루틴 ---
-    private IEnumerator HorrorEffectSequence(float duration)
+    private IEnumerator HorrorEffectSequence(float duration, bool playJumpscareSound)
     {
-        PlayJumpscareSound();
+        if (playJumpscareSound)
+            PlayJumpscareSound();
 
         if (Camera.main != null)
         {

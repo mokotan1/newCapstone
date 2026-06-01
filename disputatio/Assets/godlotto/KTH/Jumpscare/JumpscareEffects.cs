@@ -205,6 +205,7 @@ public sealed class JumpscareEffects
         float fourthFrameTime,
         Action onSecondFrameWillShow,
         Action onBlackScreenShakeStarted,
+        Action onFinalFrameShakeStarted,
         Action onSequenceFinished)
     {
         _isBlinkSequenceRunning = true;
@@ -222,6 +223,7 @@ public sealed class JumpscareEffects
 
         yield return AnimateBlink(0.5f, 0f, 0f, 2.0f, _blinkDuration);
         ShowJumpscareAnimatorFrameAtTopLayer(fourthFrameTime);
+        onFinalFrameShakeStarted?.Invoke();
         yield return new WaitForSeconds(_closedDuration);
         yield return AnimateBlink(0f, 0.5f, 2.0f, 0f, _blinkDuration);
 

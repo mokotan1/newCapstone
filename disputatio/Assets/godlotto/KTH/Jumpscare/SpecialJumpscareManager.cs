@@ -253,9 +253,9 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         StartCoroutine(FullJumpscareSequence());
     }
 
-    private void StartHorrorEffectNow()
+    private void StartHorrorEffectNow(bool playJumpscareSound = true)
     {
-        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration));
+        StartCoroutine(HorrorEffectSequence(blackScreenShakeDuration, playJumpscareSound));
     }
 
     private static Vector3 GetScreenCenterWorldPosition(float z)
@@ -268,9 +268,10 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     }
 
     // --- 카메라 흔들림 및 포스트 프로세싱 연출 코루틴 ---
-    private IEnumerator HorrorEffectSequence(float duration)
+    private IEnumerator HorrorEffectSequence(float duration, bool playJumpscareSound)
     {
-        PlayJumpscareSound();
+        if (playJumpscareSound)
+            PlayJumpscareSound();
 
         if (Camera.main != null)
         {
@@ -389,6 +390,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
         yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
         ShowJumpscareAnimatorFrameAtTopLayer(fourthFrameTime);
+        StartHorrorEffectNow(playJumpscareSound: false);
         yield return new WaitForSeconds(closedDuration);
 
         yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
