@@ -21,6 +21,7 @@ public sealed class JumpscareEffects
 
     private readonly SpriteRenderer _blinkOverlay;
     private readonly GameObject _gameOverObject;
+    private readonly GameObject _retryClickObject;
     private readonly Animator _jumpscareAnimator;
     private readonly float _blinkDuration;
     private readonly float _closedDuration;
@@ -40,6 +41,7 @@ public sealed class JumpscareEffects
     public JumpscareEffects(
         SpriteRenderer blinkOverlay,
         GameObject gameOverObject,
+        GameObject retryClickObject,
         Animator jumpscareAnimator,
         float blinkDuration,
         float closedDuration,
@@ -49,6 +51,7 @@ public sealed class JumpscareEffects
     {
         _blinkOverlay = blinkOverlay;
         _gameOverObject = gameOverObject;
+        _retryClickObject = retryClickObject;
         _jumpscareAnimator = jumpscareAnimator;
         _blinkDuration = blinkDuration;
         _closedDuration = closedDuration;
@@ -117,10 +120,7 @@ public sealed class JumpscareEffects
 
     public void FitGameOverOverlayToScreen()
     {
-        if (_gameOverObject == null) return;
-        SpriteRenderer sr = _gameOverObject.GetComponent<SpriteRenderer>();
-        if (sr == null) return;
-        FitFullscreenSpriteRendererToMainCamera(sr);
+        JumpscareGameOverLayout.FitGameOverScreen(_gameOverObject, _retryClickObject);
     }
 
     private static void FitFullscreenSpriteRendererToMainCamera(SpriteRenderer sr)
@@ -185,9 +185,30 @@ public sealed class JumpscareEffects
 
     public void ShowGameOverAfterFit()
     {
+        JumpscareGameOverLayout.DeactivateCenterDarkOverlayCirclesInScene();
+        HideDarkOverlay();
+        DismissJumpscareOverlaysForGameOver();
         FitGameOverOverlayToScreen();
+
         if (_gameOverObject != null)
             _gameOverObject.SetActive(true);
+
+        if (_retryClickObject != null)
+        {
+            _retryClickObject.SetActive(true);
+            SpriteRenderer retryRenderer = _retryClickObject.GetComponent<SpriteRenderer>();
+            if (retryRenderer != null)
+                JumpscareGameOverLayout.ApplyHallPlayableRetryLayout(retryRenderer);
+        }
+    }
+
+    private void DismissJumpscareOverlaysForGameOver()
+    {
+        SetBlinkOverlayActive(false);
+        if (_blinkOverlay != null && _blinkOverlay.material != null)
+            _blinkOverlay.material.SetFloat(_blinkAmountProp, 0f);
+        if (_dof != null)
+            _dof.gaussianMaxRadius.value = 0f;
     }
 
     public void PositionJumpscareAnimator(Vector3 worldPosition)

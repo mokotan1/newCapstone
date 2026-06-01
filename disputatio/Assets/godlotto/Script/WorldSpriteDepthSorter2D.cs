@@ -51,7 +51,29 @@ public static class WorldSpriteDepthSorter2D
         if (sr.GetComponent<SnapTarget>() != null)
             return false;
 
+        if (IsJumpscareGameOverOverlay(sr))
+            return false;
+
         return true;
+    }
+
+    private static bool IsJumpscareGameOverOverlay(SpriteRenderer sr)
+    {
+        Transform current = sr.transform;
+        while (current != null)
+        {
+            string name = current.name;
+            if (name == "GameOver" || name == "Retry")
+                return true;
+
+            if (current.GetComponent<JumpscareManager>() != null
+                || current.GetComponent<SpecialJumpscareManager>() != null)
+                return true;
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private static bool IsBackgroundLike(SpriteRenderer sr)

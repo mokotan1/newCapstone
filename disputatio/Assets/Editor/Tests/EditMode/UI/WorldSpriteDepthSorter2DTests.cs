@@ -52,6 +52,28 @@ public class WorldSpriteDepthSorter2DTests
     }
 
     [Test]
+    public void SortActiveSceneSprites_SkipsJumpscareGameOverOverlay()
+    {
+        GameObject go = new GameObject("GameOver");
+        try
+        {
+            go.transform.position = new Vector3(0f, 130f, 0f);
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingLayerName = "Default";
+            sr.sortingOrder = 32767;
+
+            WorldSpriteDepthSorter2D.SortActiveSceneSprites();
+
+            Assert.AreEqual("Default", sr.sortingLayerName);
+            Assert.AreEqual(32767, sr.sortingOrder);
+        }
+        finally
+        {
+            Object.DestroyImmediate(go);
+        }
+    }
+
+    [Test]
     public void SortActiveSceneSprites_StillSortsDefaultLayerSprites()
     {
         GameObject go = new GameObject("WorldSprite");

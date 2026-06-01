@@ -166,6 +166,7 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
         _effects = new JumpscareEffects(
             blinkOverlay,
             gameOverObject,
+            retryClickObject,
             jumpscareAnimator,
             blinkDuration,
             closedDuration,
@@ -557,7 +558,10 @@ public class JumpscareManager : SingletonMonoBehaviour<JumpscareManager>
 
         _effects?.SetAnimatorActive(false);
         _effects?.ShowGameOverAfterFit();
-        
+
+        if (retryClickObject != null)
+            retryClickObject.SetActive(true);
+
         // 포스트 프로세싱 초기화 보장
         if (vignette != null) vignette.intensity.value = 0f;
         if (lensDistortion != null) lensDistortion.intensity.value = 0f;
