@@ -639,6 +639,9 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         if (root.name == No40UiHooksObjectName)
             return true;
 
+        if (root.GetComponent<Flowchart>() != null)
+            return true;
+
         Camera activeCamera = Camera.main;
         if (activeCamera != null && root == activeCamera.gameObject)
             return true;
