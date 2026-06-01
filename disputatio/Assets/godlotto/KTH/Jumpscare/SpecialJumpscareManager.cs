@@ -1,5 +1,7 @@
 using System.Collections;
 using System;
+using System.Collections.Generic;
+using Fungus;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
@@ -8,6 +10,9 @@ using UnityEngine.Rendering.Universal;
 public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareManager>
 {
     private const float OverlayPlaneZOffsetFromCamera = 1f;
+    private const string MainCanvasTag = "MainCanvas";
+    private const string BackgroundImageObjectName = "BackgroundImage";
+    private const string No40UiHooksObjectName = "No40_UI_Hooks";
     private const int DarkOverlaySortingOrder = 32000;
     private const int JumpscareTopSortingOrder = 32760;
     private const int BlinkOverlaySortingOrder = 32767;
@@ -92,6 +97,7 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
 
     private SpriteRenderer triggerSpriteRenderer;
     private Collider2D triggerCollider;
+    private readonly List<GameObject> hiddenRootObjects = new List<GameObject>();
     private SpriteRenderer darkOverlay;
     private Sprite darkOverlaySprite;
     private Material darkOverlayMaterial;
@@ -135,17 +141,60 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         jumpscareAnimator.gameObject.SetActive(false);
         if (gameOverObject != null) gameOverObject.SetActive(false);
 
+
         if (!hasVisitedSpecialScene)
         {
             float randomValue = UnityEngine.Random.Range(0f, 100f);
             if (randomValue <= spawnChance)
             {
                 hasVisitedSpecialScene = true;
-                SetupEnemyState(true);
+                if (ShouldDeferGhostUntilFirstEntryDialogue())
+                {
+                    ApplyPreRetrySceneIsolation();
+                    StartCoroutine(WaitForFirstEntryThenSpawnEnemy());
+                }
+                else
+                    SetupEnemyState(true);
             }
             else ShowParrotOnly();
         }
         else ShowParrotOnly();
+    }
+
+    private static bool ShouldDeferGhostUntilFirstEntryDialogue()
+    {
+        return string.Equals(SceneManager.GetActiveScene().name, SceneNames.HallPlayable, StringComparison.Ordinal)
+            && PlayerPrefs.GetInt(No40ConditionalDialogueRunner.PrefsKeys.FirstEntryPlayed, 0) == 0;
+    }
+
+    private IEnumerator WaitForFirstEntryThenSpawnEnemy()
+    {
+        if (PlayerPrefs.GetInt(No40ConditionalDialogueRunner.PrefsKeys.FirstEntryPlayed, 0) != 0)
+        {
+            if (!hasTriggered)
+                SetupEnemyState(true);
+            yield break;
+        }
+
+        bool completed = false;
+        Action onCompleted = () => completed = true;
+        No40ConditionalDialogueRunner.OnFirstEntryDialogueCompleted += onCompleted;
+
+        try
+        {
+            while (!completed
+                && PlayerPrefs.GetInt(No40ConditionalDialogueRunner.PrefsKeys.FirstEntryPlayed, 0) == 0)
+            {
+                yield return null;
+            }
+        }
+        finally
+        {
+            No40ConditionalDialogueRunner.OnFirstEntryDialogueCompleted -= onCompleted;
+        }
+
+        if (!hasTriggered)
+            SetupEnemyState(true);
     }
 
     private void FitBlinkOverlayToScreen()
@@ -177,10 +226,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
     {
         if (isPresent)
         {
-            if (parrotObject != null) parrotObject.SetActive(false);
+            ApplyPreRetrySceneIsolation();
             SetTriggerVisible(true);
-
-            SetHideObjectsByTag(true);
             OnEnemyAppeared?.Invoke();
             PlayHeartbeatSound();
 
@@ -189,12 +236,22 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         }
     }
 
+    private void ApplyPreRetrySceneIsolation()
+    {
+        if (parrotObject != null)
+            parrotObject.SetActive(false);
+
+        SetHideObjectsByTag(true);
+        SetOtherSceneRootObjectsVisible(false);
+    }
+
     private void ShowParrotOnly()
     {
         if (parrotObject != null) parrotObject.SetActive(true);
         SetTriggerVisible(false);
 
         SetHideObjectsByTag(false);
+        SetOtherSceneRootObjectsVisible(true);
         StopHeartbeatSound();
     }
 
@@ -536,6 +593,67 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             if (obj != null)
                 obj.SetActive(!hide);
         }
+    }
+
+    private void SetOtherSceneRootObjectsVisible(bool visible)
+    {
+        if (!visible)
+        {
+            foreach (GameObject root in gameObject.scene.GetRootGameObjects())
+            {
+                if (root == null || !root.activeSelf || ShouldPreserveRootObject(root))
+                    continue;
+
+                root.SetActive(false);
+                if (!hiddenRootObjects.Contains(root))
+                    hiddenRootObjects.Add(root);
+            }
+
+            return;
+        }
+
+        for (int i = 0; i < hiddenRootObjects.Count; i++)
+        {
+            GameObject root = hiddenRootObjects[i];
+            if (root != null)
+                root.SetActive(true);
+        }
+
+        hiddenRootObjects.Clear();
+    }
+
+    private bool ShouldPreserveRootObject(GameObject root)
+    {
+        if (root == gameObject)
+            return true;
+
+        if (IsSayDialogRoot(root))
+            return true;
+
+        if (root.CompareTag(MainCanvasTag))
+            return true;
+
+        if (root.name == BackgroundImageObjectName)
+            return true;
+
+        if (root.name == No40UiHooksObjectName)
+            return true;
+
+        Camera activeCamera = Camera.main;
+        if (activeCamera != null && root == activeCamera.gameObject)
+            return true;
+
+        if (globalVolume != null && root == globalVolume.gameObject)
+            return true;
+
+        return root.GetComponent<UnityEngine.EventSystems.EventSystem>() != null;
+    }
+
+    private static bool IsSayDialogRoot(GameObject root)
+    {
+        return root.GetComponent<SayDialog>() != null
+            || root.name == "SayDialog"
+            || root.name == "SayDialogNotebook";
     }
 
     public void ChromaticOn()

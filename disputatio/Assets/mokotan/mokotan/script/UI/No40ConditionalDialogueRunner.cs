@@ -21,6 +21,8 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
 
     private const float DeathLineSceneDelaySeconds = 0.45f;
 
+    public static event System.Action OnFirstEntryDialogueCompleted;
+
     public static No40ConditionalDialogueRunner Instance { get; private set; }
 
     [Header("오디오")]
@@ -162,6 +164,7 @@ public sealed class No40ConditionalDialogueRunner : MonoBehaviour
             PlayerPrefs.Save();
         });
 
+        OnFirstEntryDialogueCompleted?.Invoke();
         _firstEntryRoutine = null;
     }
 
