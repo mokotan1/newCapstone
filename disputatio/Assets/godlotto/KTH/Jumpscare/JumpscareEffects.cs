@@ -221,8 +221,8 @@ public sealed class JumpscareEffects
             yield return new WaitForSeconds(blackScreenShakeDuration);
 
         yield return AnimateBlink(0.5f, 0f, 0f, 2.0f, _blinkDuration);
-        yield return new WaitForSeconds(_closedDuration);
         ShowJumpscareAnimatorFrameAtTopLayer(fourthFrameTime);
+        yield return new WaitForSeconds(_closedDuration);
         yield return AnimateBlink(0f, 0.5f, 2.0f, 0f, _blinkDuration);
 
         if (finalFrameHoldDuration > 0f)

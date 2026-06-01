@@ -388,9 +388,8 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             yield return new WaitForSeconds(blackScreenShakeDuration);
 
         yield return StartCoroutine(AnimateBlink(0.5f, 0f, 0f, 2.0f, blinkDuration));
-        yield return new WaitForSeconds(closedDuration);
-
         ShowJumpscareAnimatorFrameAtTopLayer(fourthFrameTime);
+        yield return new WaitForSeconds(closedDuration);
 
         yield return StartCoroutine(AnimateBlink(0f, 0.5f, 2.0f, 0f, blinkDuration));
 
