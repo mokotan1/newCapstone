@@ -1863,7 +1863,6 @@ GameObject:
   - component: {fileID: 684100760}
   - component: {fileID: 684100762}
   - component: {fileID: 684100763}
-  - component: {fileID: 684100765}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1884,11 +1883,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 401.54636, y: -47.938152}
+  scrollPos: {x: 452.56516, y: 56.78894}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 320
-  zoom: 0.97
+  zoom: 0.64000034
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1898,7 +1897,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 684100715}
   selectedCommands:
-  - {fileID: 684100728}
+  - {fileID: 684100763}
   variables: []
   description: 
   stepPause: 0
@@ -1972,7 +1971,6 @@ MonoBehaviour:
   - {fileID: 684100763}
   - {fileID: 684100720}
   - {fileID: 684100719}
-  - {fileID: 684100765}
   - {fileID: 684100725}
   - {fileID: 684100724}
   - {fileID: 684100728}
@@ -2582,63 +2580,18 @@ MonoBehaviour:
   indentLevel: 0
   description: 
   targetObject: {fileID: 1757817566}
-  targetComponentAssemblyName: AudioController, Assembly-CSharp, Version=0.0.0.0,
-    Culture=neutral, PublicKeyToken=null
+  targetComponentAssemblyName: AudioBridge, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+    PublicKeyToken=null
   targetComponentFullname: 'UnityEngine.Component[]'
-  targetComponentText: AudioController
-  targetMethod: PlaySFX
-  targetMethodText: 'PlaySFX (Int32): Void'
+  targetComponentText: AudioBridge
+  targetMethod: CallPlaySFX
+  targetMethodText: 'CallPlaySFX (Int32): Void'
   methodParameters:
   - objValue:
       typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
         PublicKeyToken=b77a5c561934e089
       typeFullname: System.Int32
-      intValue: 0
-      boolValue: 0
-      floatValue: 0
-      stringValue: 
-      colorValue: {r: 0, g: 0, b: 0, a: 0}
-      gameObjectValue: {fileID: 0}
-      materialValue: {fileID: 0}
-      objectValue: {fileID: 0}
-      spriteValue: {fileID: 0}
-      textureValue: {fileID: 0}
-      vector2Value: {x: 0, y: 0}
-      vector3Value: {x: 0, y: 0, z: 0}
-    variableKey: 
-  saveReturnValue: 0
-  returnValueVariableKey: 
-  returnValueType: System.Void
-  showInherited: 0
-  callMode: 0
---- !u!114 &684100765
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 165
-  indentLevel: 0
-  description: 
-  targetObject: {fileID: 1757817566}
-  targetComponentAssemblyName: AudioController, Assembly-CSharp, Version=0.0.0.0,
-    Culture=neutral, PublicKeyToken=null
-  targetComponentFullname: 'UnityEngine.Component[]'
-  targetComponentText: AudioController
-  targetMethod: PlaySFX
-  targetMethodText: 'PlaySFX (Int32): Void'
-  methodParameters:
-  - objValue:
-      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      typeFullname: System.Int32
-      intValue: 0
+      intValue: 2
       boolValue: 0
       floatValue: 0
       stringValue: 
@@ -5589,15 +5542,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1757817566}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc0b45dd64b2189468ae92fafca738fd, type: 3}
+  m_Script: {fileID: 11500000, guid: e4415380f17943c4a98ac50509ce718b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bgmAudioSource: {fileID: 0}
-  sfxAudioSource: {fileID: 0}
-  bgmList: []
-  sfxList:
-  - {fileID: 8300000, guid: 6522a13f0cdd5fb42a8b4901bcf91a64, type: 3}
-  delayBetweenSteps: 0.3
 --- !u!82 &1757817568
 AudioSource:
   m_ObjectHideFlags: 0
