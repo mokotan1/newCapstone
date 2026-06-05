@@ -134,9 +134,6 @@ GameObject:
   - component: {fileID: 545852026}
   - component: {fileID: 545852028}
   - component: {fileID: 545852036}
-  - component: {fileID: 545852045}
-  - component: {fileID: 545852046}
-  - component: {fileID: 545852048}
   - component: {fileID: 545852067}
   - component: {fileID: 545852068}
   - component: {fileID: 545852069}
@@ -169,6 +166,7 @@ GameObject:
   - component: {fileID: 545852098}
   - component: {fileID: 545852097}
   - component: {fileID: 545852096}
+  - component: {fileID: 545852099}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -189,11 +187,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 378.01544, y: 406.63086}
+  scrollPos: {x: 392.34494, y: 437.1283}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
-  blockViewHeight: 280
-  zoom: 0.75999975
+  blockViewHeight: 482
+  zoom: 0.7299998
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -203,7 +201,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 545852010}
   selectedCommands:
-  - {fileID: 545852075}
+  - {fileID: 545852099}
   variables: []
   description: 
   stepPause: 0
@@ -291,6 +289,7 @@ MonoBehaviour:
   - {fileID: 545852079}
   - {fileID: 545852097}
   - {fileID: 545852082}
+  - {fileID: 545852099}
   - {fileID: 545852083}
   - {fileID: 545852087}
   - {fileID: 545852086}
@@ -363,69 +362,6 @@ MonoBehaviour:
     floatRef: {fileID: 0}
     floatVal: 1
   durationOLD: 0
---- !u!114 &545852045
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545851995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d3d73aef2cfc4f51abf34ac00241f60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nodeRect:
-    serializedVersion: 2
-    x: 122.21574
-    y: -198.35017
-    width: 113.229996
-    height: 40
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  useCustomTint: 0
-  itemId: 38
-  blockName: BackSpace
-  description: 
-  eventHandler: {fileID: 545852048}
-  commandList:
-  - {fileID: 545852046}
-  suppressAllAutoSelections: 0
---- !u!114 &545852046
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545851995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 36
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 0}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  targetGameObjectOLD: {fileID: 0}
---- !u!114 &545852048
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545851995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10eaeba5e91be479e95d4fa48679f549, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 545852045}
-  suppressBlockAutoSelect: 0
-  targetButton: {fileID: 0}
 --- !u!114 &545852067
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -782,8 +718,7 @@ MonoBehaviour:
   overrideSayDialog: {fileID: 2032954892}
   speakerSide: 1
   speakerName: "\uC8FC\uC778\uACF5"
-  dialogueText: "(\uD55C\uC228\uC744 \uD479 \uC26C\uBA70 \uC218\uD654\uAE30\uB97C
-    \uB4E0\uB2E4) \"\uB124, \uD0D0\uC815 \uC0AC\uBB34\uC18C\uC785\uB2C8\uB2E4. \uACE0\uC591\uC774
+  dialogueText: " \"\uB124, \uD0D0\uC815 \uC0AC\uBB34\uC18C\uC785\uB2C8\uB2E4. \uACE0\uC591\uC774
     \uCC3E\uC544\uB2EC\uB77C\uB294 \uAC70\uBA74 \uB04A\uC73C\uC138\uC694. \uC9C0\uAE08
     \uAE30\uBD84\uC774 \uBCC4\uB85C...\""
   speakerSprite: {fileID: -8523673621895529037, guid: a3e7e98080ef00840bc28f87670000fc, type: 3}
@@ -867,12 +802,12 @@ MonoBehaviour:
   overrideSayDialog: {fileID: 2032954892}
   speakerSide: 1
   speakerName: "\uC8FC\uC778\uACF5"
-  dialogueText: "\uC8FC\uC778\uACF5: (\uC758\uC790\uB97C \uC090\uB531\uD558\uAC8C
-    \uAE30\uC6B8\uC774\uBA70) \"\uC800\uD0DD? \uC544\uB2C8, \uC774\uBD10\uC694 \uC120\uC0DD\uB2D8.
-    \uC694\uC998 \uC138\uC0C1\uC5D0 \uC9C0\uB3C4\uC5D0\uB3C4 \uC5C6\uB294 \uC800\uD0DD\uC774
-    \uC5B4\uB514 \uC788\uB2E4\uACE0 \uADF8\uB7FD\uB2C8\uAE4C? \uB0A8\uC758 \uC0AC\uC720\uC9C0
-    \uBB34\uB2E8 \uCE68\uC785\uD558\uB77C\uB294 \uC18C\uB9AC\uB85C \uB4E4\uB9AC\uB294\uB370,
-    \uC804\uC9C1 \uACBD\uCC30\uB85C\uC11C \uADF8\uB7F0 \uBD88\uBC95\uC801\uC778 \uC77C\uC740...\""
+  dialogueText: "\uC8FC\uC778\uACF5: \"\uC800\uD0DD? \uC544\uB2C8, \uC774\uBD10\uC694
+    \uC120\uC0DD\uB2D8. \uC694\uC998 \uC138\uC0C1\uC5D0 \uC9C0\uB3C4\uC5D0\uB3C4
+    \uC5C6\uB294 \uC800\uD0DD\uC774 \uC5B4\uB514 \uC788\uB2E4\uACE0 \uADF8\uB7FD\uB2C8\uAE4C?
+    \uB0A8\uC758 \uC0AC\uC720\uC9C0 \uBB34\uB2E8 \uCE68\uC785\uD558\uB77C\uB294 \uC18C\uB9AC\uB85C
+    \uB4E4\uB9AC\uB294\uB370, \uC804\uC9C1 \uACBD\uCC30\uB85C\uC11C \uADF8\uB7F0
+    \uBD88\uBC95\uC801\uC778 \uC77C\uC740...\""
   speakerSprite: {fileID: -8523673621895529037, guid: a3e7e98080ef00840bc28f87670000fc, type: 3}
   speakerOffset: {x: 0, y: 0}
   otherSprite: {fileID: 0}
@@ -898,9 +833,8 @@ MonoBehaviour:
   overrideSayDialog: {fileID: 2032954892}
   speakerSide: 1
   speakerName: "\uC8FC\uC778\uACF5"
-  dialogueText: "(\uB9D0\uC744 \uBA48\uCD98\uB2E4. \uC7A0\uC2DC \uC815\uC801) \"...\uC9C0\uAE08
-    \uB9D0\uC500\uD558\uC2E0 \uAE08\uC561, \uD30C\uC6B4\uB4DC \uB9DE\uC2B5\uB2C8\uAE4C?
-    0 \uD558\uB098 \uB354 \uBD99\uC774\uC2E0 \uAC70 \uC544\uB2C8\uACE0\uC694?\""
+  dialogueText: "\"...\uC9C0\uAE08 \uB9D0\uC500\uD558\uC2E0 \uAE08\uC561, \uD30C\uC6B4\uB4DC
+    \uB9DE\uC2B5\uB2C8\uAE4C? 0 \uD558\uB098 \uB354 \uBD99\uC774\uC2E0 \uAC70 \uC544\uB2C8\uACE0\uC694?\""
   speakerSprite: {fileID: -8523673621895529037, guid: a3e7e98080ef00840bc28f87670000fc, type: 3}
   speakerOffset: {x: 0, y: 0}
   otherSprite: {fileID: 0}
@@ -1006,8 +940,8 @@ MonoBehaviour:
   overrideSayDialog: {fileID: 2032954892}
   speakerSide: 0
   speakerName: "\uC870\uC218 "
-  dialogueText: "(\uBA54\uBAA8\uB97C \uBCF4\uBA70)\uD788\uC775?! \uBB34\uC2A8 \uC758\uB8B0\uC778\uB370
-    \uB3C8\uC744 \uC774\uB807\uAC8C \uC918\uC694? "
+  dialogueText: "\uD788\uC775?! \uBB34\uC2A8 \uC758\uB8B0\uC778\uB370 \uB3C8\uC744
+    \uC774\uB807\uAC8C \uC918\uC694? "
   speakerSprite: {fileID: -275937492963410528, guid: 5cd3270666a964444becb7abdd39c977, type: 3}
   speakerOffset: {x: 0, y: 0}
   otherSprite: {fileID: -8523673621895529037, guid: a3e7e98080ef00840bc28f87670000fc, type: 3}
@@ -1033,9 +967,8 @@ MonoBehaviour:
   overrideSayDialog: {fileID: 2032954892}
   speakerSide: 0
   speakerName: "\uC870\uC218 "
-  dialogueText: "(\uD65C\uAE30\uCC28\uAC8C \uC18C\uB9AC\uCE5C\uB2E4) \uB135!! \uB2F9\uC5F0\uD558\uC8E0.
-    \uAE08\uBC29 \uAC14\uB2E4 \uC62C\uAC8C\uC694~! (\uADF8\uB7EC\uACE0 \uBC14\uB85C
-    \uBB38\uC744 \uBC15\uCC28\uACE0 \uB098\uAC04\uB2E4.)"
+  dialogueText: "\uB135!! \uB2F9\uC5F0\uD558\uC8E0. \uAE08\uBC29 \uAC14\uB2E4 \uC62C\uAC8C\uC694~!
+    (\uADF8\uB7EC\uACE0 \uBC14\uB85C \uBB38\uC744 \uBC15\uCC28\uACE0 \uB098\uAC04\uB2E4.)"
   speakerSprite: {fileID: -275937492963410528, guid: 5cd3270666a964444becb7abdd39c977, type: 3}
   speakerOffset: {x: 0, y: 0}
   otherSprite: {fileID: -8523673621895529037, guid: a3e7e98080ef00840bc28f87670000fc, type: 3}
@@ -1254,6 +1187,32 @@ MonoBehaviour:
   itemId: 79
   indentLevel: 0
   sfxIndex: 4
+--- !u!114 &545852099
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545851995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5faf6ee47ee8c524eb700ecb221b5682, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 82
+  indentLevel: 0
+  setStandingDialogue: {fileID: 0}
+  overrideSayDialog: {fileID: 2032954892}
+  speakerSide: 0
+  speakerName: "\uC8FC\uC778\uACF5"
+  dialogueText: ...
+  speakerSprite: {fileID: 0}
+  speakerOffset: {x: 0, y: -50}
+  otherSprite: {fileID: 0}
+  otherOffset: {x: 0, y: -50}
+  font: {fileID: 0}
+  fontSize: 0
+  charsPerSecond: 0
 --- !u!1 &626087021
 GameObject:
   m_ObjectHideFlags: 0
