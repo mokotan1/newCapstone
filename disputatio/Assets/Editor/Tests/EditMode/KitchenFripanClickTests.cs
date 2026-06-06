@@ -38,6 +38,24 @@ public class KitchenFripanClickTests
         }
     }
 
+    [Test]
+    public void MainTagCanvas_UsesOverlayAnd1980ReferenceResolution()
+    {
+        string sceneText = File.ReadAllText(KitchenScenePath);
+        string canvasObject = FindLayeredGameObjectBlock(sceneText, "Canvas", 5);
+
+        string canvasFileId = FindComponentFileId(canvasObject, 1);
+        string scalerFileId = FindComponentFileId(canvasObject, 2);
+
+        string canvasComponent = FindObjectBlock(sceneText, "223", canvasFileId);
+        StringAssert.Contains("m_RenderMode: 0", canvasComponent);
+        StringAssert.Contains("m_Camera: {fileID: 0}", canvasComponent);
+
+        string scalerComponent = FindObjectBlock(sceneText, "114", scalerFileId);
+        StringAssert.Contains("m_UiScaleMode: 1", scalerComponent);
+        StringAssert.Contains("m_ReferenceResolution: {x: 1980, y: 1080}", scalerComponent);
+    }
+
     private static string KitchenScenePath
     {
         get
@@ -60,6 +78,39 @@ public class KitchenFripanClickTests
             RegexOptions.Multiline | RegexOptions.Singleline);
 
         Assert.IsTrue(match.Success, $"Could not find GameObject named {objectName}.");
+        return match.Value;
+    }
+
+    private static string FindLayeredGameObjectBlock(string sceneText, string objectName, int layer)
+    {
+        foreach (Match match in Regex.Matches(
+            sceneText,
+            $@"--- !u!1 &[0-9]+\r?\nGameObject:\r?\n(?:(?!^--- ).)*?m_Name: {Regex.Escape(objectName)}(?:(?!^--- ).)*",
+            RegexOptions.Multiline | RegexOptions.Singleline))
+        {
+            if (match.Value.Contains($"m_Layer: {layer}"))
+                return match.Value;
+        }
+
+        Assert.Fail($"Could not find GameObject named {objectName} on layer {layer}.");
+        return string.Empty;
+    }
+
+    private static string FindComponentFileId(string gameObjectBlock, int componentIndex)
+    {
+        MatchCollection matches = Regex.Matches(gameObjectBlock, @"- component: \{fileID: (?<id>[0-9]+)\}");
+        Assert.Greater(matches.Count, componentIndex, $"GameObject did not have component index {componentIndex}.");
+        return matches[componentIndex].Groups["id"].Value;
+    }
+
+    private static string FindObjectBlock(string sceneText, string unityType, string fileId)
+    {
+        Match match = Regex.Match(
+            sceneText,
+            $@"--- !u!{Regex.Escape(unityType)} &{Regex.Escape(fileId)}\r?\n(?:(?!^--- ).)*",
+            RegexOptions.Multiline | RegexOptions.Singleline);
+
+        Assert.IsTrue(match.Success, $"Could not find Unity object !u!{unityType} &{fileId}.");
         return match.Value;
     }
 
