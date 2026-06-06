@@ -691,6 +691,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &848590800 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 848590799}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &895573256
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,16 +1386,16 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2129203483}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 2129203625}
+        m_TargetAssemblyTypeName: CorridorEntranceController, Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: EnterMaidRoom
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   flowchart: {fileID: 2129203483}
@@ -1782,7 +1793,6 @@ GameObject:
   - component: {fileID: 2129203493}
   - component: {fileID: 2129203492}
   - component: {fileID: 2129203491}
-  - component: {fileID: 2129203490}
   - component: {fileID: 2129203500}
   - component: {fileID: 2129203501}
   - component: {fileID: 2129203504}
@@ -1843,6 +1853,7 @@ GameObject:
   - component: {fileID: 2129203622}
   - component: {fileID: 2129203623}
   - component: {fileID: 2129203624}
+  - component: {fileID: 2129203625}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1893,22 +1904,6 @@ MonoBehaviour:
   hideCommands: []
   luaEnvironment: {fileID: 0}
   luaBindingName: flowchart
---- !u!114 &2129203490
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e9f0a1b2c3d4e5f6071829384a5b6c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 2129203491}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1447098920}
-  waitFrames: 1
 --- !u!114 &2129203491
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1932,7 +1927,7 @@ MonoBehaviour:
   itemId: 1
   blockName: MaidRoom_Clicked
   description: 
-  eventHandler: {fileID: 2129203490}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 2129203517}
   - {fileID: 2129203516}
@@ -3249,7 +3244,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -4015,7 +4010,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -5060,7 +5055,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
   m_Name: 
@@ -6092,6 +6087,61 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &2129203625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e4f1a23c5d4e6f9a0b1c2d3e4f5a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 2129203483}
+  backNavigator: {fileID: 848590800}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: door
+    collider: {fileID: 1447098925}
+    clickable: {fileID: 1447098920}
+  routes:
+  - interactionId: door
+    fungusBlockName: MaidRoom_Clicked
+  - interactionId: unlock
+    fungusBlockName: EnterMaidRoom
+  blockOutcomes:
+  - blockName: GoMaidRoom_Yes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: MaidRoom
+    goBack: 0
+  - blockName: EnterYes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: MaidRoom
+    goBack: 0
+  - blockName: GoMadeRoom_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: EnterNo
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: selectYes
+    resetIsClicked: 0
+    loadScene: 0
+    sceneName: 
+    goBack: 1
+  - blockName: selectNo
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -15,6 +15,8 @@ namespace Godlotto.Interaction
         /// <summary>
         /// 블록 존재·실행 중 여부를 검사한 뒤 안전하게 <see cref="Flowchart.ExecuteBlock"/>을 호출합니다.
         /// </summary>
+        internal static System.Func<Flowchart, string, bool> ExecuteBlockHandlerForTests;
+
         public static bool ExecuteBlockSafely(Flowchart flowchart, string blockName)
         {
             if (flowchart == null)
@@ -22,6 +24,11 @@ namespace Godlotto.Interaction
                 GameLog.LogWarning("[FungusDialogueBridge] Flowchart가 null입니다.");
                 return false;
             }
+
+            EnsureFlowchartActive(flowchart);
+
+            if (ExecuteBlockHandlerForTests != null)
+                return ExecuteBlockHandlerForTests(flowchart, blockName);
 
             if (string.IsNullOrWhiteSpace(blockName))
             {
@@ -53,6 +60,13 @@ namespace Godlotto.Interaction
         internal static void ResetForTests()
         {
             EnableDebugLogging = false;
+            ExecuteBlockHandlerForTests = null;
+        }
+
+        static void EnsureFlowchartActive(Flowchart flowchart)
+        {
+            if (flowchart != null && !flowchart.gameObject.activeSelf)
+                flowchart.gameObject.SetActive(true);
         }
     }
 }

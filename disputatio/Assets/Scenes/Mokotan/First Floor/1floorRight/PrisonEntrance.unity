@@ -567,16 +567,16 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 687597760}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 687597935}
+        m_TargetAssemblyTypeName: CorridorEntranceController, Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: EnterPrison
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   flowchart: {fileID: 687597760}
@@ -729,7 +729,6 @@ GameObject:
   - component: {fileID: 687597765}
   - component: {fileID: 687597767}
   - component: {fileID: 687597766}
-  - component: {fileID: 687597768}
   - component: {fileID: 687597769}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
@@ -774,7 +773,6 @@ GameObject:
   - component: {fileID: 687597867}
   - component: {fileID: 687597871}
   - component: {fileID: 687597873}
-  - component: {fileID: 687597872}
   - component: {fileID: 687597875}
   - component: {fileID: 687597874}
   - component: {fileID: 687597878}
@@ -803,6 +801,7 @@ GameObject:
   - component: {fileID: 687597932}
   - component: {fileID: 687597933}
   - component: {fileID: 687597934}
+  - component: {fileID: 687597935}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -953,7 +952,7 @@ MonoBehaviour:
   itemId: 2
   blockName: BackSpace_Clicked
   description: 
-  eventHandler: {fileID: 687597768}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597780}
   - {fileID: 687597773}
@@ -1025,22 +1024,6 @@ MonoBehaviour:
   - {fileID: 687597788}
   - {fileID: 687597777}
   suppressAllAutoSelections: 0
---- !u!114 &687597768
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597765}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 0}
-  waitFrames: 1
 --- !u!114 &687597769
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1260,7 +1243,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -1747,7 +1730,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -2073,7 +2056,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -2629,7 +2612,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3023,22 +3006,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 683756488}
   waitFrames: 1
---- !u!114 &687597872
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597873}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1392584333}
-  waitFrames: 1
 --- !u!114 &687597873
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3062,7 +3029,7 @@ MonoBehaviour:
   itemId: 234
   blockName: Lock_Clicked
   description: 
-  eventHandler: {fileID: 687597872}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597875}
   - {fileID: 687597874}
@@ -5268,6 +5235,68 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &687597935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e4f1a23c5d4e6f9a0b1c2d3e4f5a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 687597760}
+  backNavigator: {fileID: 1566069545}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: lock
+    collider: {fileID: 1392584334}
+    clickable: {fileID: 1392584333}
+  routes:
+  - interactionId: lock
+    fungusBlockName: Lock_Clicked
+  - interactionId: back
+    fungusBlockName: BackSpace_Clicked
+  - interactionId: unlock
+    fungusBlockName: EnterPrison
+  blockOutcomes:
+  - blockName: StudyRoom
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: StudyRoom
+    goBack: 0
+  - blockName: Hall_RightCross
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: Hall_RightCross
+    goBack: 0
+  - blockName: GoPrison_Yes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: Prison
+    goBack: 0
+  - blockName: Enter_Yes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: Prison
+    goBack: 0
+  - blockName: GoPrison_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: Enter_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: SelectNo
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
 --- !u!1 &870305110
 GameObject:
   m_ObjectHideFlags: 0
@@ -5679,6 +5708,26 @@ PrefabInstance:
       propertyPath: m_text
       value: "<  \uB098\uAC00\uAE30\n"
       objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 687597935}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnInteraction
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: CorridorEntranceController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: back
+      objectReference: {fileID: 0}
     - target: {fileID: 8699768224628471583, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -5772,6 +5821,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &1566069545 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 1566069544}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1712371511
 GameObject:
   m_ObjectHideFlags: 0

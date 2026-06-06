@@ -904,8 +904,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -362872839
-  m_SortingLayer: -2
+  m_SortingLayerID: -1522851415
+  m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: 7791730141396396314, guid: d24748559cd436540bd9e6094f0a7b4e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1236,6 +1236,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &494456383 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 494456382}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &508029878
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1701,7 +1712,6 @@ GameObject:
   - component: {fileID: 687597790}
   - component: {fileID: 687597792}
   - component: {fileID: 687597794}
-  - component: {fileID: 687597796}
   - component: {fileID: 687597795}
   - component: {fileID: 687597793}
   - component: {fileID: 687597797}
@@ -1722,7 +1732,6 @@ GameObject:
   - component: {fileID: 687597822}
   - component: {fileID: 687597821}
   - component: {fileID: 687597820}
-  - component: {fileID: 687597823}
   - component: {fileID: 687597824}
   - component: {fileID: 687597827}
   - component: {fileID: 687597826}
@@ -1776,13 +1785,11 @@ GameObject:
   - component: {fileID: 687597880}
   - component: {fileID: 687597885}
   - component: {fileID: 687597891}
-  - component: {fileID: 687597890}
   - component: {fileID: 687597889}
   - component: {fileID: 687597887}
-  - component: {fileID: 687597888}
   - component: {fileID: 687597886}
-  - component: {fileID: 687597892}
   - component: {fileID: 687597893}
+  - component: {fileID: 687597894}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -3047,7 +3054,7 @@ MonoBehaviour:
   itemId: 160
   blockName: Bookcase_Clicked
   description: 
-  eventHandler: {fileID: 687597796}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597795}
   - {fileID: 687597793}
@@ -3297,22 +3304,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597796
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597794}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 380247555}
-  waitFrames: 1
 --- !u!114 &687597797
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3612,7 +3603,7 @@ MonoBehaviour:
   itemId: 176
   blockName: Book_Clicked
   description: 
-  eventHandler: {fileID: 687597892}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597808}
   - {fileID: 687597815}
@@ -3811,7 +3802,7 @@ MonoBehaviour:
   itemId: 187
   blockName: Safe_Clicked
   description: 
-  eventHandler: {fileID: 687597823}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597822}
   - {fileID: 687597821}
@@ -4254,22 +4245,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597823
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597819}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1601257164}
-  waitFrames: 1
 --- !u!114 &687597824
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7916,25 +7891,10 @@ MonoBehaviour:
   itemId: 359
   blockName: Button_Clicked
   description: 
-  eventHandler: {fileID: 687597888}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597886}
   suppressAllAutoSelections: 0
---- !u!114 &687597888
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10eaeba5e91be479e95d4fa48679f549, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597887}
-  suppressBlockAutoSelect: 0
-  targetButton: {fileID: 0}
 --- !u!114 &687597889
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7956,22 +7916,6 @@ MonoBehaviour:
     booleanRef: {fileID: 0}
     booleanVal: 1
   targetGameObjectOLD: {fileID: 0}
---- !u!114 &687597890
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597891}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1292051555}
-  waitFrames: 1
 --- !u!114 &687597891
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7995,26 +7939,10 @@ MonoBehaviour:
   itemId: 357
   blockName: Parrot_Clicked
   description: 
-  eventHandler: {fileID: 687597890}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597889}
   suppressAllAutoSelections: 0
---- !u!114 &687597892
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597803}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1458955814}
-  waitFrames: 1
 --- !u!114 &687597893
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -8029,6 +7957,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 300
   indentLevel: 0
+--- !u!114 &687597894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d4e5f6478990a1b2c3d4e5f6789012, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 687597760}
+  backNavigator: {fileID: 494456383}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: bookcase
+    collider: {fileID: 380247559}
+    clickable: {fileID: 380247555}
+  - interactionId: safe
+    collider: {fileID: 1601257168}
+    clickable: {fileID: 1601257164}
+  - interactionId: parrot
+    collider: {fileID: 1292051556}
+    clickable: {fileID: 1292051555}
+  routes:
+  - interactionId: bookcase
+    fungusBlockName: Bookcase_Clicked
+  - interactionId: safe
+    fungusBlockName: Safe_Clicked
+  - interactionId: book
+    fungusBlockName: Book_Clicked
+  - interactionId: parrot
+    fungusBlockName: Parrot_Clicked
+  - interactionId: button
+    fungusBlockName: Button_Clicked
+  blockOutcomes: []
 --- !u!1 &728395126
 GameObject:
   m_ObjectHideFlags: 0
@@ -9841,6 +9806,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!61 &1292051556 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 3549438756181190538, guid: d9c045861863bb646a0b303433b9820c, type: 3}
+  m_PrefabInstance: {fileID: 1292051554}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1335441932
 GameObject:
   m_ObjectHideFlags: 0
@@ -10445,6 +10415,7 @@ GameObject:
   - component: {fileID: 1458955813}
   - component: {fileID: 1458955812}
   - component: {fileID: 1458955814}
+  - component: {fileID: 1458955815}
   m_Layer: 0
   m_Name: "\uCC45\uC7A5 \uD655\uB300 (3)_0"
   m_TagString: Untagged
@@ -10517,7 +10488,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1458955810}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
   m_Name: 
@@ -10525,6 +10496,21 @@ MonoBehaviour:
   clickEnabled: 1
   hoverCursor: {fileID: 0}
   useEventSystem: 1
+--- !u!114 &1458955815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458955810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2c3d4e5f6478990a1b2c3d4e5f67890, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 687597894}
+  interactionId: book
+  clickable: {fileID: 1458955814}
 --- !u!1001 &1488779227
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11105,6 +11091,7 @@ GameObject:
   - component: {fileID: 1630553528}
   - component: {fileID: 1630553527}
   - component: {fileID: 1630553526}
+  - component: {fileID: 1630553529}
   m_Layer: 6
   m_Name: SetButton
   m_TagString: Untagged
@@ -11226,6 +11213,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1630553524}
   m_CullTransparentMesh: 1
+--- !u!114 &1630553529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630553524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2c3d4e5f6478990a1b2c3d4e5f67890, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 687597894}
+  interactionId: button
+  clickable: {fileID: 0}
 --- !u!1 &1661735215
 GameObject:
   m_ObjectHideFlags: 0
@@ -11483,6 +11485,11 @@ RectTransform:
 --- !u!1 &1728581067 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2985594566526904671, guid: c02bb81fb98599f4bad4bbdd01f2744b, type: 3}
+  m_PrefabInstance: {fileID: 1728581065}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1728581068 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5317114035237149699, guid: c02bb81fb98599f4bad4bbdd01f2744b, type: 3}
   m_PrefabInstance: {fileID: 1728581065}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1728581069 stripped

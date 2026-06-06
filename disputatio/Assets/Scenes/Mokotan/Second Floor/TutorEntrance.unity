@@ -1116,16 +1116,16 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2129203483}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 2129203645}
+        m_TargetAssemblyTypeName: CorridorEntranceController, Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: EnterTutorRoom
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   flowchart: {fileID: 2129203483}
@@ -1313,6 +1313,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2129203645}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnInteraction
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: CorridorEntranceController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: back
+      objectReference: {fileID: 0}
     - target: {fileID: 8699768224628471583, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1402,6 +1422,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &1270587813 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 1270587812}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1706370753
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1764,7 +1795,6 @@ GameObject:
   - component: {fileID: 2129203493}
   - component: {fileID: 2129203492}
   - component: {fileID: 2129203484}
-  - component: {fileID: 2129203487}
   - component: {fileID: 2129203496}
   - component: {fileID: 2129203497}
   - component: {fileID: 2129203495}
@@ -1813,7 +1843,6 @@ GameObject:
   - component: {fileID: 2129203619}
   - component: {fileID: 2129203618}
   - component: {fileID: 2129203617}
-  - component: {fileID: 2129203622}
   - component: {fileID: 2129203629}
   - component: {fileID: 2129203628}
   - component: {fileID: 2129203626}
@@ -1834,6 +1863,7 @@ GameObject:
   - component: {fileID: 2129203644}
   - component: {fileID: 2129203643}
   - component: {fileID: 2129203642}
+  - component: {fileID: 2129203645}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1908,7 +1938,7 @@ MonoBehaviour:
   itemId: 4
   blockName: TutorRoom_Clicked
   description: 
-  eventHandler: {fileID: 2129203487}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 2129203514}
   - {fileID: 2129203513}
@@ -1926,22 +1956,6 @@ MonoBehaviour:
   - {fileID: 2129203557}
   - {fileID: 2129203556}
   suppressAllAutoSelections: 0
---- !u!114 &2129203487
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 2129203484}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1256718513}
-  waitFrames: 1
 --- !u!114 &2129203492
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3950,7 +3964,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -4381,7 +4395,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -5055,7 +5069,7 @@ MonoBehaviour:
   itemId: 2
   blockName: BackSpace_Clicked
   description: 
-  eventHandler: {fileID: 2129203622}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 2129203621}
   - {fileID: 2129203620}
@@ -5536,22 +5550,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &2129203622
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 2129203616}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 0}
-  waitFrames: 1
 --- !u!114 &2129203623
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5808,7 +5806,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
   m_Name: 
@@ -6771,6 +6769,63 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &2129203645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e4f1a23c5d4e6f9a0b1c2d3e4f5a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 2129203483}
+  backNavigator: {fileID: 1270587813}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: door
+    collider: {fileID: 1256718517}
+    clickable: {fileID: 1256718513}
+  routes:
+  - interactionId: door
+    fungusBlockName: TutorRoom_Clicked
+  - interactionId: unlock
+    fungusBlockName: EnterTutorRoom
+  - interactionId: back
+    fungusBlockName: BackSpace_Clicked
+  blockOutcomes:
+  - blockName: Go_Yes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: TutorRoom
+    goBack: 0
+  - blockName: EnterYes
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: TutorRoom
+    goBack: 0
+  - blockName: Go_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: EnterNo
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: Select_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  - blockName: Select_Yes
+    resetIsClicked: 0
+    loadScene: 0
+    sceneName: 
+    goBack: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
