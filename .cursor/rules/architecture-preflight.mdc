@@ -1,0 +1,39 @@
+---
+description: 구현·리팩터·테스트·문서 동기화 전 docs/architecture.md 필수 선독
+alwaysApply: true
+---
+
+# 아키텍처 선독 (필수)
+
+이 저장소(`newCapstone`)에서 **코드·씬·API·설정을 바꾸거나 추가하는 모든 작업** 전에 아래를 수행한다.
+
+## 필수 파일
+
+- **경로**: `docs/architecture.md` (저장소 루트 기준)
+- **도구**: Read로 **전문 또는 해당 작업과 관련된 섹션**을 읽은 뒤에만 구현·패치·계획을 출력한다.
+
+## 적용 대상 (선독 후 진행)
+
+- Unity (`disputatio/`) C#·씬·프리팹·Fungus 연동
+- AI 백엔드 (`backend_ai/`) API·서비스·데이터
+- CI/배포 (`scripts/`, `.github/`, `deploy/`)
+- `docs/architecture.md` 자체 수정
+
+## 선독 시 확인할 것
+
+1. **§2 디렉터리 구조** — 새 파일을 넣을 올바른 폴더
+2. **§6 아키텍처 규칙** — `SceneNames`, `Godlotto.Interaction`, `SceneTransitionService` 등 기존 패턴
+3. **§7 확장 가이드** — 씬/API/모델 추가 절차
+
+## 예외
+
+- 사용자가 **아키텍처 문서 내용만** 묻고 코드 변경이 없을 때
+- `docs/architecture.md` **최초 작성** 세션(본 파일이 아직 없을 때)
+
+## 작업 후
+
+아키텍처에 영향을 주면 `docs/architecture.md`를 갱신하고, 불확실한 점은 **§8 미확인 사항**에 남긴다.
+
+## 스킬
+
+동일 워크플로는 프로젝트 스킬 `.cursor/skills/newcapstone-architecture/SKILL.md`를 따른다.

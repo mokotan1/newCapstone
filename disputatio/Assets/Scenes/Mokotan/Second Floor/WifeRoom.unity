@@ -2228,7 +2228,6 @@ GameObject:
   - component: {fileID: 687597791}
   - component: {fileID: 687597792}
   - component: {fileID: 687597793}
-  - component: {fileID: 687597795}
   - component: {fileID: 687597801}
   - component: {fileID: 687597800}
   - component: {fileID: 687597799}
@@ -2239,7 +2238,6 @@ GameObject:
   - component: {fileID: 687597803}
   - component: {fileID: 687597809}
   - component: {fileID: 687597808}
-  - component: {fileID: 687597810}
   - component: {fileID: 687597812}
   - component: {fileID: 687597815}
   - component: {fileID: 687597811}
@@ -2250,12 +2248,10 @@ GameObject:
   - component: {fileID: 687597823}
   - component: {fileID: 687597822}
   - component: {fileID: 687597821}
-  - component: {fileID: 687597825}
   - component: {fileID: 687597826}
   - component: {fileID: 687597827}
   - component: {fileID: 687597832}
   - component: {fileID: 687597831}
-  - component: {fileID: 687597833}
   - component: {fileID: 687597834}
   - component: {fileID: 687597836}
   - component: {fileID: 687597837}
@@ -2298,7 +2294,6 @@ GameObject:
   - component: {fileID: 687597930}
   - component: {fileID: 687597933}
   - component: {fileID: 687597935}
-  - component: {fileID: 687597936}
   - component: {fileID: 687597934}
   - component: {fileID: 687597937}
   - component: {fileID: 687597938}
@@ -2307,6 +2302,7 @@ GameObject:
   - component: {fileID: 687597942}
   - component: {fileID: 687597943}
   - component: {fileID: 687597944}
+  - component: {fileID: 687597945}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -2470,7 +2466,7 @@ MonoBehaviour:
   itemId: 2
   blockName: BackSpace_Clicked
   description: 
-  eventHandler: {fileID: 687597768}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597780}
   - {fileID: 687597773}
@@ -2515,7 +2511,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -3013,7 +3009,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb77d0ce495044f6e9feb91b31798e8c, type: 3}
   m_Name: 
@@ -3403,7 +3399,7 @@ MonoBehaviour:
   itemId: 160
   blockName: DressDoor_Clicked
   description: 
-  eventHandler: {fileID: 687597795}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597801}
   - {fileID: 687597800}
@@ -3412,22 +3408,6 @@ MonoBehaviour:
   - {fileID: 687597798}
   - {fileID: 687597797}
   suppressAllAutoSelections: 0
---- !u!114 &687597795
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597793}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1371129401}
-  waitFrames: 1
 --- !u!114 &687597796
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3904,7 +3884,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3939,7 +3919,7 @@ MonoBehaviour:
   itemId: 175
   blockName: Wallclock_Clicked
   description: 
-  eventHandler: {fileID: 687597810}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597809}
   - {fileID: 687597808}
@@ -4342,22 +4322,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597810
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597803}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 770858637}
-  waitFrames: 1
 --- !u!114 &687597811
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4627,7 +4591,7 @@ MonoBehaviour:
   itemId: 191
   blockName: Dressingtable_Clicked
   description: 
-  eventHandler: {fileID: 687597825}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597824}
   - {fileID: 687597823}
@@ -5076,22 +5040,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597825
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597819}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 2050913108}
-  waitFrames: 1
 --- !u!114 &687597826
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5267,7 +5215,7 @@ MonoBehaviour:
   itemId: 197
   blockName: Drawer_Clicked
   description: 
-  eventHandler: {fileID: 687597833}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597832}
   - {fileID: 687597831}
@@ -5672,22 +5620,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &687597833
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597827}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1574756336}
-  waitFrames: 1
 --- !u!114 &687597834
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -8968,27 +8900,11 @@ MonoBehaviour:
   itemId: 360
   blockName: Parrot_Clicked
   description: 
-  eventHandler: {fileID: 687597936}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597937}
   - {fileID: 687597934}
   suppressAllAutoSelections: 0
---- !u!114 &687597936
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 687597935}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 1741531716}
-  waitFrames: 1
 --- !u!114 &687597937
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -10070,6 +9986,72 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &687597945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a758745c59356104dad2c8b94180e1e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 687597760}
+  backNavigator: {fileID: 813944620}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: wallclock
+    collider: {fileID: 770858638}
+    clickable: {fileID: 770858637}
+  - interactionId: dress_door
+    collider: {fileID: 1371129405}
+    clickable: {fileID: 1371129401}
+  - interactionId: dressingtable
+    collider: {fileID: 2050913109}
+    clickable: {fileID: 2050913108}
+  - interactionId: drawer
+    collider: {fileID: 1574756337}
+    clickable: {fileID: 1574756336}
+  - interactionId: parrot
+    collider: {fileID: 1741531717}
+    clickable: {fileID: 1741531716}
+  routes:
+  - interactionId: wallclock
+    fungusBlockName: Wallclock_Clicked
+  - interactionId: dress_door
+    fungusBlockName: DressDoor_Clicked
+  - interactionId: dressingtable
+    fungusBlockName: Dressingtable_Clicked
+  - interactionId: drawer
+    fungusBlockName: Drawer_Clicked
+  - interactionId: down_drawer
+    fungusBlockName: DownDrawer_Clicked
+  - interactionId: parrot
+    fungusBlockName: Parrot_Clicked
+  - interactionId: unlock
+    fungusBlockName: UnlockSuccess
+  - interactionId: back
+    fungusBlockName: BackSpace_Clicked
+  blockOutcomes:
+  - blockName: Select_Yes
+    resetIsClicked: 0
+    loadScene: 0
+    sceneName: 
+    goBack: 1
+  - blockName: Select_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  panelCloses:
+  - panelCloseId: wallclock_backspace
+    panel: {fileID: 2123664267}
+  - panelCloseId: drawer_backspace
+    panel: {fileID: 1037648321}
+  - panelCloseId: lock_backspace
+    panel: {fileID: 1037648321}
 --- !u!1 &733653989
 GameObject:
   m_ObjectHideFlags: 0
@@ -10125,6 +10107,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1037648321}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 687597945}
+  panelCloseInteractionId: drawer_backspace
 --- !u!114 &733653992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10799,6 +10783,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 687597945}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnInteraction
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Godlotto.Interaction.WifeRoomPuzzleController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: back
+      objectReference: {fileID: 0}
     - target: {fileID: 8699768224628471583, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -10892,6 +10896,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &813944620 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 813944619}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &842898747
 GameObject:
   m_ObjectHideFlags: 0
@@ -11260,16 +11275,17 @@ MonoBehaviour:
   onUnlockSuccess:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 687597760}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 687597945}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.WifeRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: UnlockSuccess
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   onUnlockFail:
@@ -12706,6 +12722,8 @@ MonoBehaviour:
   targetPanel: {fileID: 2123664267}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 687597945}
+  panelCloseInteractionId: wallclock_backspace
 --- !u!114 &1544440898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13285,6 +13303,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3549438756181190538, guid: d9c045861863bb646a0b303433b9820c, type: 3}
+      propertyPath: m_IncludeLayers.m_Bits
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 3549438756181190538, guid: d9c045861863bb646a0b303433b9820c, type: 3}
+      propertyPath: m_LayerOverridePriority
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6699682605341254379, guid: d9c045861863bb646a0b303433b9820c, type: 3}
       propertyPath: m_Name
       value: Parret
@@ -13305,6 +13331,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!61 &1741531717 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 3549438756181190538, guid: d9c045861863bb646a0b303433b9820c, type: 3}
+  m_PrefabInstance: {fileID: 1741531715}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1788623771
 GameObject:
   m_ObjectHideFlags: 0

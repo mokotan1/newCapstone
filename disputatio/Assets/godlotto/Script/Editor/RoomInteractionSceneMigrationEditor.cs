@@ -16,6 +16,7 @@ public static class RoomInteractionSceneMigrationEditor
 {
     public const string RoomControllerTypeName = "Godlotto.Interaction.RoomInteractionController, Assembly-CSharp";
     public const string BedRoomControllerTypeName = "Godlotto.Interaction.BedRoomInteractionController, Assembly-CSharp";
+    public const string WifeRoomControllerTypeName = "Godlotto.Interaction.WifeRoomPuzzleController, Assembly-CSharp";
 
     public static void WriteRoutes(SerializedProperty routesProp, InteractionRouteSpec[] routes)
     {
