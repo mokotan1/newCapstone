@@ -120,6 +120,14 @@ namespace Godlotto.Interaction
             if (!outcomeByBlockName.TryGetValue(block.BlockName, out BlockOutcome outcome))
                 return;
 
+            ApplyBlockOutcome(block, outcome);
+        }
+
+        protected virtual void ApplyBlockOutcome(Block block, BlockOutcome outcome)
+        {
+            if (outcome.openPanel != null)
+                outcome.openPanel.SetActive(true);
+
             if (outcome.resetIsClicked)
                 ResetIsClicked();
 
@@ -304,6 +312,7 @@ namespace Godlotto.Interaction
     public class BlockOutcome
     {
         public string blockName;
+        public GameObject openPanel;
         public bool resetIsClicked;
         public bool loadScene;
         public string sceneName;
