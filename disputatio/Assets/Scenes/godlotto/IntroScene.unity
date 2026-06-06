@@ -1838,9 +1838,6 @@ GameObject:
   - component: {fileID: 684100715}
   - component: {fileID: 684100714}
   - component: {fileID: 684100720}
-  - component: {fileID: 684100719}
-  - component: {fileID: 684100725}
-  - component: {fileID: 684100724}
   - component: {fileID: 684100728}
   - component: {fileID: 684100729}
   - component: {fileID: 684100733}
@@ -1862,7 +1859,8 @@ GameObject:
   - component: {fileID: 684100761}
   - component: {fileID: 684100760}
   - component: {fileID: 684100762}
-  - component: {fileID: 684100763}
+  - component: {fileID: 684100764}
+  - component: {fileID: 684100765}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1883,11 +1881,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 452.56516, y: 56.78894}
+  scrollPos: {x: 517.58826, y: 92.90739}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 320
-  zoom: 0.64000034
+  zoom: 0.5500004
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -1897,7 +1895,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 684100715}
   selectedCommands:
-  - {fileID: 684100763}
+  - {fileID: 684100728}
   variables: []
   description: 
   stepPause: 0
@@ -1961,6 +1959,7 @@ MonoBehaviour:
   - {fileID: 684100754}
   - {fileID: 684100748}
   - {fileID: 684100761}
+  - {fileID: 684100764}
   - {fileID: 684100746}
   - {fileID: 684100758}
   - {fileID: 684100753}
@@ -1968,12 +1967,9 @@ MonoBehaviour:
   - {fileID: 684100744}
   - {fileID: 684100760}
   - {fileID: 684100762}
-  - {fileID: 684100763}
   - {fileID: 684100720}
-  - {fileID: 684100719}
-  - {fileID: 684100725}
-  - {fileID: 684100724}
   - {fileID: 684100728}
+  - {fileID: 684100765}
   - {fileID: 684100729}
   suppressAllAutoSelections: 0
 --- !u!4 &684100716
@@ -1991,23 +1987,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &684100719
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 4
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: StopMusic
-  delay: 0
 --- !u!114 &684100720
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2021,41 +2000,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: 3
-  indentLevel: 0
-  _duration:
-    floatRef: {fileID: 0}
-    floatVal: 1.5
-  durationOLD: 0
---- !u!114 &684100724
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 10
-  indentLevel: 0
-  targetObject: {fileID: 1757817566}
-  methodName: StopMusic
-  delay: 0
---- !u!114 &684100725
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 684100712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3315ad2ebb85443909a1203d56d9344e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 9
   indentLevel: 0
   _duration:
     floatRef: {fileID: 0}
@@ -2564,7 +2508,7 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
---- !u!114 &684100763
+--- !u!114 &684100764
 MonoBehaviour:
   m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2573,42 +2517,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 684100712}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 688e35811870d403f9e2b1ab2a699d98, type: 3}
+  m_Script: {fileID: 11500000, guid: 68938aac14bd4fb9a8a08b963d3fb14a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: 164
   indentLevel: 0
-  description: 
-  targetObject: {fileID: 1757817566}
-  targetComponentAssemblyName: AudioBridge, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-    PublicKeyToken=null
-  targetComponentFullname: 'UnityEngine.Component[]'
-  targetComponentText: AudioBridge
-  targetMethod: CallPlaySFX
-  targetMethodText: 'CallPlaySFX (Int32): Void'
-  methodParameters:
-  - objValue:
-      typeAssemblyname: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral,
-        PublicKeyToken=b77a5c561934e089
-      typeFullname: System.Int32
-      intValue: 2
-      boolValue: 0
-      floatValue: 0
-      stringValue: 
-      colorValue: {r: 0, g: 0, b: 0, a: 0}
-      gameObjectValue: {fileID: 0}
-      materialValue: {fileID: 0}
-      objectValue: {fileID: 0}
-      spriteValue: {fileID: 0}
-      textureValue: {fileID: 0}
-      vector2Value: {x: 0, y: 0}
-      vector3Value: {x: 0, y: 0, z: 0}
-    variableKey: 
-  saveReturnValue: 0
-  returnValueVariableKey: 
-  returnValueType: System.Void
-  showInherited: 0
-  callMode: 0
+  sfxIndex: 2
+--- !u!114 &684100765
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44f110c0b8504678ac99468b4a74f885, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 165
+  indentLevel: 0
+  sfxIndex: 2
+  stopAllSfx: 0
 --- !u!1 &756037667
 GameObject:
   m_ObjectHideFlags: 0
