@@ -97,6 +97,29 @@ public class MapPlayerLocationMarkerTests
     }
 
     [Test]
+    public void Refresh_UsesInspectorLocationOverride_WhenSceneMatches()
+    {
+        previousScene = SceneManager.GetActiveScene();
+        testScene = SceneManager.CreateScene(SceneNames.Kitchen);
+        SceneManager.SetActiveScene(testScene);
+
+        mapRoot = new GameObject("MapRoot");
+        var markerObject = new GameObject("PlayerLocationMarker_1F");
+        markerObject.transform.SetParent(mapRoot.transform, false);
+        RectTransform markerTransform = markerObject.AddComponent<RectTransform>();
+
+        MapPlayerLocationMarker marker = mapRoot.AddComponent<MapPlayerLocationMarker>();
+        SetPrivateField(marker, "markerLocations", new[]
+        {
+            new MapPlayerLocationMarker.SceneMarkerLocation(new[] { SceneNames.Kitchen }, 1, new Vector2(12f, 34f))
+        });
+
+        marker.Refresh();
+
+        Assert.AreEqual(new Vector2(12f, 34f), markerTransform.anchoredPosition);
+    }
+
+    [Test]
     public void ShouldBlockSceneLoad_ReturnsTrue_WhenTargetIsCurrentScene()
     {
         Assert.IsTrue(MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneNames.Kitchen, SceneNames.Kitchen));

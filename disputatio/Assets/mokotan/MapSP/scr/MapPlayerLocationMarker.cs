@@ -10,8 +10,41 @@ public class MapPlayerLocationMarker : MonoBehaviour
     [SerializeField] private GameObject floor2Object;
     [SerializeField] private bool activateCurrentFloor = true;
     [SerializeField] private ControlFloor controlFloor;
+    [SerializeField] private SceneMarkerLocation[] markerLocations = CreateDefaultMarkerLocations();
 
     private string lastSceneName;
+
+    [Serializable]
+    public class SceneMarkerLocation
+    {
+        [SerializeField] private string[] sceneNames;
+        [SerializeField] private int floor = 1;
+        [SerializeField] private Vector2 position;
+
+        public SceneMarkerLocation(string[] sceneNames, int floor, Vector2 position)
+        {
+            this.sceneNames = sceneNames;
+            this.floor = floor;
+            this.position = position;
+        }
+
+        public int Floor { get { return floor; } }
+        public Vector2 Position { get { return position; } }
+
+        public bool Matches(string sceneName)
+        {
+            if (sceneNames == null)
+                return false;
+
+            for (int i = 0; i < sceneNames.Length; i++)
+            {
+                if (string.Equals(sceneNames[i], sceneName, StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
+        }
+    }
 
     private struct MarkerLocation
     {
@@ -133,7 +166,7 @@ public class MapPlayerLocationMarker : MonoBehaviour
 
     public static bool TryGetLocationForScene(string sceneName, out int floor, out Vector2 position)
     {
-        if (TryGetLocation(sceneName, out MarkerLocation location))
+        if (TryGetDefaultLocation(sceneName, out MarkerLocation location))
         {
             floor = location.Floor;
             position = location.Position;
@@ -145,7 +178,61 @@ public class MapPlayerLocationMarker : MonoBehaviour
         return false;
     }
 
-    private static bool TryGetLocation(string sceneName, out MarkerLocation location)
+    private bool TryGetLocation(string sceneName, out MarkerLocation location)
+    {
+        SceneMarkerLocation[] locations = markerLocations;
+        if (locations != null)
+        {
+            for (int i = 0; i < locations.Length; i++)
+            {
+                SceneMarkerLocation markerLocation = locations[i];
+                if (markerLocation == null || !markerLocation.Matches(sceneName))
+                    continue;
+
+                location = new MarkerLocation(markerLocation.Floor, markerLocation.Position);
+                return true;
+            }
+        }
+
+        return TryGetDefaultLocation(sceneName, out location);
+    }
+
+    private void Reset()
+    {
+        markerLocations = CreateDefaultMarkerLocations();
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (markerLocations == null || markerLocations.Length == 0)
+            markerLocations = CreateDefaultMarkerLocations();
+    }
+#endif
+
+    private static SceneMarkerLocation[] CreateDefaultMarkerLocations()
+    {
+        return new[]
+        {
+            new SceneMarkerLocation(new[] { SceneNames.MainScene, "Hall_playerble", "Hall_animate" }, 1, Vector2.zero),
+            new SceneMarkerLocation(new[] { "Hall_Left", "Hall_Left2", "Hallway_Left", "Hallway_Left2" }, 1, new Vector2(-250f, 0f)),
+            new SceneMarkerLocation(new[] { SceneNames.Kitchen, "UtilityRoom" }, 1, new Vector2(-321f, 293.42548f)),
+            new SceneMarkerLocation(new[] { SceneNames.HallRight, "Hall_Right2", "Hall_RightCross", "Hallway_Right", "Hallway_Right2" }, 1, new Vector2(250f, 0f)),
+            new SceneMarkerLocation(new[] { SceneNames.StudyRoom, "StudyRoomCutScene" }, 1, new Vector2(339f, -129f)),
+            new SceneMarkerLocation(new[] { SceneNames.MaidRoom }, 1, new Vector2(347f, 342f)),
+            new SceneMarkerLocation(new[] { "2floorMainHall" }, 2, new Vector2(0f, -420f)),
+            new SceneMarkerLocation(new[] { "2floorLeft" }, 2, new Vector2(-288f, -250f)),
+            new SceneMarkerLocation(new[] { "2floorLeftCross", "2floorHallway_Left" }, 2, new Vector2(-288f, 105f)),
+            new SceneMarkerLocation(new[] { "2floorRight" }, 2, new Vector2(349f, -250f)),
+            new SceneMarkerLocation(new[] { "2floorRightCross", "2floorHallway_Right" }, 2, new Vector2(349f, 106f)),
+            new SceneMarkerLocation(new[] { "ChildEntrance", SceneNames.ChildRoom }, 2, new Vector2(-256f, 342f)),
+            new SceneMarkerLocation(new[] { "TutorEntrance", SceneNames.TutorRoom }, 2, new Vector2(-321f, -108f)),
+            new SceneMarkerLocation(new[] { "WifeEntrance", "DressingRoom", SceneNames.WifeRoom }, 2, new Vector2(339f, -129f)),
+            new SceneMarkerLocation(new[] { "BedEntrance", SceneNames.BedRoom }, 2, new Vector2(339f, 348f))
+        };
+    }
+
+    private static bool TryGetDefaultLocation(string sceneName, out MarkerLocation location)
     {
         switch (sceneName)
         {
