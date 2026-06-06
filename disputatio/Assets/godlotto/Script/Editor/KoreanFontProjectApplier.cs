@@ -8,11 +8,9 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 /// <summary>
-/// 프로젝트 씬·프리팹의 TMP 한글 폰트를 Nanum Gothic SDF로 통일하고,
-/// 텍스트 주변 단색 Image 배경을 투명 처리합니다.
+/// 프로젝트 씬·프리팹의 TMP 한글 폰트를 Nanum Gothic SDF로 통일합니다.
 /// </summary>
 public static class KoreanFontProjectApplier
 {
@@ -34,7 +32,6 @@ public static class KoreanFontProjectApplier
         public int AssetsProcessed;
         public int AssetsChanged;
         public int TmpComponentsUpdated;
-        public int BackgroundsCleared;
     }
 
     [MenuItem("Tools/Godlotto/Fonts/Apply NanumGothic To Project")]
@@ -46,7 +43,7 @@ public static class KoreanFontProjectApplier
             AssetDatabase.SaveAssets();
             Debug.Log(
                 $"[KoreanFontProjectApplier] Done: {result.AssetsChanged}/{result.AssetsProcessed} assets changed, "
-                + $"{result.TmpComponentsUpdated} TMP updated, {result.BackgroundsCleared} backgrounds cleared.");
+                + $"{result.TmpComponentsUpdated} TMP updated.");
         }
         catch (Exception ex)
         {
@@ -127,16 +124,14 @@ public static class KoreanFontProjectApplier
     {
         Scene scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
         int tmpUpdated = 0;
-        int backgrounds = 0;
 
         foreach (GameObject root in scene.GetRootGameObjects())
-            ApplyHierarchy(root, font, ref tmpUpdated, ref backgrounds);
+            ApplyHierarchy(root, font, ref tmpUpdated);
 
-        if (tmpUpdated == 0 && backgrounds == 0)
+        if (tmpUpdated == 0)
             return false;
 
         result.TmpComponentsUpdated += tmpUpdated;
-        result.BackgroundsCleared += backgrounds;
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         return true;
@@ -146,23 +141,21 @@ public static class KoreanFontProjectApplier
     {
         GameObject root = PrefabUtility.LoadPrefabContents(path);
         int tmpUpdated = 0;
-        int backgrounds = 0;
-        ApplyHierarchy(root, font, ref tmpUpdated, ref backgrounds);
+        ApplyHierarchy(root, font, ref tmpUpdated);
 
-        if (tmpUpdated == 0 && backgrounds == 0)
+        if (tmpUpdated == 0)
         {
             PrefabUtility.UnloadPrefabContents(root);
             return false;
         }
 
         result.TmpComponentsUpdated += tmpUpdated;
-        result.BackgroundsCleared += backgrounds;
         PrefabUtility.SaveAsPrefabAsset(root, path);
         PrefabUtility.UnloadPrefabContents(root);
         return true;
     }
 
-    static void ApplyHierarchy(GameObject root, TMP_FontAsset font, ref int tmpUpdated, ref int backgrounds)
+    static void ApplyHierarchy(GameObject root, TMP_FontAsset font, ref int tmpUpdated)
     {
         tmpUpdated += ReplaceAllTmpFontAssetReferences(root, font);
 
@@ -175,8 +168,6 @@ public static class KoreanFontProjectApplier
                 tmpUpdated++;
                 EditorUtility.SetDirty(tmp);
             }
-
-            backgrounds += ClearTextBackgrounds(tmp);
         }
     }
 
@@ -228,39 +219,6 @@ public static class KoreanFontProjectApplier
             return false;
 
         return path.IndexOf("NanumGothic", StringComparison.OrdinalIgnoreCase) < 0;
-    }
-
-    static int ClearTextBackgrounds(TMP_Text tmp)
-    {
-        int cleared = 0;
-        cleared += TryClearImage(tmp.GetComponent<Image>());
-
-        Transform background = tmp.transform.Find("Background");
-        if (background != null)
-            cleared += TryClearImage(background.GetComponent<Image>());
-
-        // GlassMenu 옵션: 루트 Image(버튼/패널 채우기)는 텍스트 없이 단독이므로 TMP 형제일 때만 처리
-        Transform parent = tmp.transform.parent;
-        if (parent != null)
-        {
-            Image parentImage = parent.GetComponent<Image>();
-            if (parentImage != null && parent.GetComponentInChildren<TMP_Text>(true) == tmp)
-                cleared += TryClearImage(parentImage);
-        }
-
-        return cleared;
-    }
-
-    static int TryClearImage(Image image)
-    {
-        if (image == null || image.color.a <= 0.001f)
-            return 0;
-
-        Color color = image.color;
-        color.a = 0f;
-        image.color = color;
-        EditorUtility.SetDirty(image);
-        return 1;
     }
 }
 #endif
