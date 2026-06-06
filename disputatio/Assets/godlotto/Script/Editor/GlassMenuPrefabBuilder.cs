@@ -1,50 +1,82 @@
 using System.IO;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 선택지 메뉴 다이얼로그 프리팹을 코드로 생성하는 에디터 도구.
-/// 옵션 버튼은 게임의 기존 버튼 견본 <c>MainMenuButtonB.prefab</c>을 그대로 재사용한다
-/// (스프라이트·폰트·색이 게임과 100% 일치). 패널 배경은 투명이라 버튼만 보인다.
+/// 다크 글래스 선택지 메뉴 프리팹(버튼 + 다이얼로그)을 코드로 생성하는 에디터 도구.
 /// 메뉴: Tools ▸ Godlotto ▸ Build Glass Menu Prefabs.
 /// </summary>
 public static class GlassMenuPrefabBuilder
 {
     const string Dir = "Assets/godlotto/Resources/Prefabs";
+    const string ButtonPath = Dir + "/GlassMenuOptionButton.prefab";
     const string DialogPath = Dir + "/GlassMenuDialog.prefab";
 
-    // 선택지 버튼 견본(게임 기존 버튼). 이 프리팹을 옵션 버튼으로 재사용한다.
-    const string OptionButtonPrefabPath = "Assets/godlotto/Prefab/MainMenuButtonB.prefab";
+    // 다크 글래스 팔레트
+    static readonly Color PanelFill = new Color(0f, 0f, 0f, 0.55f);
+    static readonly Color GlassFill = new Color(1f, 1f, 1f, 0.06f);
+    static readonly Color GoldLine = new Color32(212, 175, 110, 255);
+    static readonly Color LightText = new Color32(238, 242, 248, 255);
 
     [MenuItem("Tools/Godlotto/Build Glass Menu Prefabs")]
     public static void Build()
     {
-        var buttonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(OptionButtonPrefabPath);
-        if (buttonPrefab == null)
-        {
-            Debug.LogError("[GlassMenuPrefabBuilder] 옵션 버튼 견본을 찾을 수 없습니다: " + OptionButtonPrefabPath);
-            return;
-        }
-
-        var button = buttonPrefab.GetComponent<Button>();
-        if (button == null)
-        {
-            Debug.LogError("[GlassMenuPrefabBuilder] 견본 프리팹에 Button 컴포넌트가 없습니다: " + OptionButtonPrefabPath);
-            return;
-        }
-
         Directory.CreateDirectory(Dir);
         AssetDatabase.Refresh();
 
-        BuildDialogPrefab(button);
+        var buttonPrefab = BuildButtonPrefab();
+        BuildDialogPrefab(buttonPrefab);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[GlassMenuPrefabBuilder] 프리팹 생성 완료: " + DialogPath);
     }
 
-    static void BuildDialogPrefab(Button optionButton)
+    static GameObject BuildButtonPrefab()
+    {
+        var go = new GameObject("GlassMenuOptionButton",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(420f, 64f);
+
+        var img = go.GetComponent<Image>();
+        img.color = GlassFill;
+
+        var outline = go.AddComponent<Outline>();
+        outline.effectColor = new Color(GoldLine.r, GoldLine.g, GoldLine.b, 0.55f);
+        outline.effectDistance = new Vector2(1f, 1f);
+
+        var button = go.GetComponent<Button>();
+        var colors = button.colors;
+        colors.normalColor = GlassFill;
+        colors.highlightedColor = new Color(GoldLine.r, GoldLine.g, GoldLine.b, 0.20f);
+        colors.pressedColor = new Color(GoldLine.r, GoldLine.g, GoldLine.b, 0.34f);
+        colors.selectedColor = new Color(GoldLine.r, GoldLine.g, GoldLine.b, 0.20f);
+        colors.disabledColor = new Color(1f, 1f, 1f, 0.03f);
+        colors.fadeDuration = 0.12f;
+        button.colors = colors;
+
+        var labelGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+        labelGo.transform.SetParent(go.transform, false);
+        var labelRt = labelGo.GetComponent<RectTransform>();
+        labelRt.anchorMin = Vector2.zero;
+        labelRt.anchorMax = Vector2.one;
+        labelRt.offsetMin = new Vector2(20f, 0f);
+        labelRt.offsetMax = new Vector2(-20f, 0f);
+        var label = labelGo.GetComponent<TextMeshProUGUI>();
+        label.text = "Option";
+        label.color = LightText;
+        label.fontSize = 26f;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+
+        var saved = PrefabUtility.SaveAsPrefabAsset(go, ButtonPath);
+        Object.DestroyImmediate(go);
+        return saved;
+    }
+
+    static void BuildDialogPrefab(GameObject buttonPrefab)
     {
         // 루트: 자체 Canvas(자동 스폰 시 단독 렌더 가능)
         var root = new GameObject("GlassMenuDialog",
@@ -57,35 +89,39 @@ public static class GlassMenuPrefabBuilder
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
 
-        // 패널 = 위치를 잡고 버튼을 쌓는 컨테이너. 배경 이미지 없음(투명) → 견본 버튼만 보인다.
+        // 패널(위치 잡히는 다크 글래스 루트)
         var panel = new GameObject("Panel",
-            typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image),
+            typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
         panel.transform.SetParent(root.transform, false);
         var panelRt = panel.GetComponent<RectTransform>();
         panelRt.anchorMin = new Vector2(0.5f, 0f);
         panelRt.anchorMax = new Vector2(0.5f, 0f);
         panelRt.pivot = new Vector2(0.5f, 0f);
         panelRt.anchoredPosition = new Vector2(0f, 120f);
+        panel.GetComponent<Image>().color = PanelFill;
+
+        var panelOutline = panel.AddComponent<Outline>();
+        panelOutline.effectColor = new Color(GoldLine.r, GoldLine.g, GoldLine.b, 0.55f);
+        panelOutline.effectDistance = new Vector2(1f, 1f);
 
         var vlg = panel.GetComponent<VerticalLayoutGroup>();
-        vlg.spacing = 12f;
-        vlg.padding = new RectOffset(0, 0, 0, 0);
-        vlg.childAlignment = TextAnchor.LowerCenter;
-        // 견본 버튼의 고유 크기(420x92)를 유지하기 위해 레이아웃이 크기를 통제하지 않는다.
-        vlg.childControlWidth = false;
-        vlg.childControlHeight = false;
-        vlg.childForceExpandWidth = false;
+        vlg.spacing = 8f;
+        vlg.padding = new RectOffset(14, 14, 14, 14);
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
 
         var fitter = panel.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         // 컨테이너 = 패널 자신(버튼이 패널의 VerticalLayoutGroup에 쌓이도록)
         var dialog = root.GetComponent<GlassMenuDialog>();
         SetSerialized(dialog, "panelRoot", panelRt);
         SetSerialized(dialog, "optionContainer", panelRt);
-        SetSerialized(dialog, "optionButtonPrefab", optionButton);
+        SetSerialized(dialog, "optionButtonPrefab", buttonPrefab.GetComponent<Button>());
 
         PrefabUtility.SaveAsPrefabAsset(root, DialogPath);
         Object.DestroyImmediate(root);
