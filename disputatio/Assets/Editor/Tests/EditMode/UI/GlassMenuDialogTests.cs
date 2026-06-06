@@ -70,8 +70,8 @@ public class GlassMenuDialogTests
 
         dialog.Clear();
 
-        var container = (RectTransform)GetPrivate(dialog, "optionContainer");
-        Assert.AreEqual(0, container.childCount);
+        var spawned = (System.Collections.ICollection)GetPrivate(dialog, "spawnedButtons");
+        Assert.AreEqual(0, spawned.Count);
     }
 
     [Test]
