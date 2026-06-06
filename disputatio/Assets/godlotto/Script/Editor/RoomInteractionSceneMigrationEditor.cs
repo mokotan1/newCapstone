@@ -17,6 +17,9 @@ public static class RoomInteractionSceneMigrationEditor
     public const string RoomControllerTypeName = "Godlotto.Interaction.RoomInteractionController, Assembly-CSharp";
     public const string BedRoomControllerTypeName = "Godlotto.Interaction.BedRoomInteractionController, Assembly-CSharp";
     public const string WifeRoomControllerTypeName = "Godlotto.Interaction.WifeRoomPuzzleController, Assembly-CSharp";
+    public const string MaidRoomControllerTypeName = "Godlotto.Interaction.MaidRoomPuzzleController, Assembly-CSharp";
+    public const string StudyRoomControllerTypeName = "Godlotto.Interaction.StudyRoomPuzzleController, Assembly-CSharp";
+    public const string ChildRoomControllerTypeName = "Godlotto.Interaction.ChildRoomPuzzleController, Assembly-CSharp";
 
     public static void WriteRoutes(SerializedProperty routesProp, InteractionRouteSpec[] routes)
     {
@@ -37,6 +40,7 @@ public static class RoomInteractionSceneMigrationEditor
             BlockOutcomeSpec outcome = outcomes[i];
             SerializedProperty element = outcomesProp.GetArrayElementAtIndex(i);
             element.FindPropertyRelative("blockName").stringValue = outcome.BlockName;
+            element.FindPropertyRelative("openPanel").objectReferenceValue = outcome.OpenPanel;
             element.FindPropertyRelative("resetIsClicked").boolValue = outcome.ResetIsClicked;
             element.FindPropertyRelative("loadScene").boolValue = outcome.LoadScene;
             element.FindPropertyRelative("sceneName").stringValue = outcome.SceneName ?? string.Empty;
@@ -384,6 +388,25 @@ public static class RoomInteractionSceneMigrationEditor
         }
     }
 
+    public static void DisableSetActiveInBlocks(Flowchart flowchart, string[] blockNames)
+    {
+        if (blockNames == null || blockNames.Length == 0)
+            return;
+
+        var targets = new HashSet<string>(blockNames);
+        foreach (Command command in flowchart.GetComponents<Command>())
+        {
+            if (!IsLiveSceneObject(command, flowchart.gameObject.scene) || command.ParentBlock == null)
+                continue;
+            if (!targets.Contains(command.ParentBlock.BlockName))
+                continue;
+            if (command.GetType().Name != "SetActive")
+                continue;
+
+            SetComponentEnabled(command, false);
+        }
+    }
+
     public static void RewireRibbonBackButtons(
         UnityEngine.SceneManagement.Scene scene,
         RoomInteractionController controller,
@@ -662,6 +685,7 @@ public static class RoomInteractionSceneMigrationEditor
     public sealed class BlockOutcomeSpec
     {
         public string BlockName;
+        public GameObject OpenPanel;
         public bool ResetIsClicked;
         public bool LoadScene;
         public string SceneName;
