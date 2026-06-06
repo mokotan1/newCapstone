@@ -1,7 +1,9 @@
 # 다크 글래스 선택지 메뉴 — 사용 가이드 (기획자용)
 
-Fungus 기본 선택지 UI(`Menu` + `MenuDialog`)를 대체하는 다크 글래스 톤 선택지 메뉴.
+Fungus 기본 선택지 UI(`Menu` + `MenuDialog`)를 대체하는 선택지 메뉴.
 하나의 커맨드에서 **선택지 개수·문구·분기·위치**를 모두 지정한다.
+선택지 버튼은 게임의 기존 버튼 견본 `MainMenuButtonB.prefab`을 그대로 재사용해
+스프라이트·폰트·색이 게임과 100% 일치한다(패널 배경은 투명).
 
 ## 1. 최초 1회: 프리팹 생성
 
@@ -39,14 +41,16 @@ Unity 메뉴 `Tools ▸ Godlotto ▸ Build Glass Menu Prefabs` 실행.
 
 ## 4. 룩 변경
 
-팔레트는 `GlassMenuPrefabBuilder.cs` 상단 상수:
+선택지 버튼은 `Assets/godlotto/Prefab/MainMenuButtonB.prefab`을 재사용한다(빌더가
+`optionButtonPrefab`으로 연결). 따라서 **버튼 색·스프라이트·폰트를 바꾸려면
+MainMenuButtonB.prefab을 편집**하면 메뉴에도 그대로 반영된다.
 
-- 패널 채움: 검정 35% 알파
-- 보더: 골드 `#D4AF6E (212,175,110)`
-- 텍스트: `#EEF2F8 (238,242,248)`
+다른 버튼 견본을 쓰고 싶으면 `GlassMenuPrefabBuilder.cs`의
+`OptionButtonPrefabPath` 상수를 바꾸고 `Build Glass Menu Prefabs`를 재실행한다.
+(견본 프리팹은 `Button` + 자식 `TextMeshProUGUI` 구조여야 한다.)
 
-색/여백/폰트 크기를 바꾸려면 프리팹을 직접 편집하거나, 빌더 상수를 고치고
-`Build Glass Menu Prefabs` 를 재실행한다.
+패널 배경은 투명이라 버튼만 보인다. 배경이 필요하면 생성된
+`GlassMenuDialog.prefab`의 `Panel`에 Image를 추가한다.
 
 ## 5. 제약 / 알아둘 점
 
