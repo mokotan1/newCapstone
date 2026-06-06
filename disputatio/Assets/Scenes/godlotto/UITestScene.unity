@@ -183,8 +183,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uC911\uC559 \uD640"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -311,6 +311,10 @@ MonoBehaviour:
   slotPrefab: {fileID: 5978059533391442340, guid: 0e37c81f71df42441af6f33ddb63632a, type: 3}
   maxSlots: 8
   targetflowchart: {fileID: 0}
+  tooltipController: {fileID: 0}
+  guideController: {fileID: 0}
+  slotSpacing: {x: 50, y: 0}
+  cellSize: {x: 150, y: 150}
   pressTab: 0
 --- !u!1 &211998927
 GameObject:
@@ -672,6 +676,7 @@ MonoBehaviour:
   item: {fileID: 11400000, guid: b2c2083313879424db4b19919d7fbfec, type: 2}
   targetFlowchart: {fileID: 0}
   fungusVariableName: 
+  executeBlockName: 
 --- !u!61 &934853544
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1249,6 +1254,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1916393701}
     m_Modifications:
+    - target: {fileID: 1087019192695242789, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
     - target: {fileID: 2493690748687693286, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

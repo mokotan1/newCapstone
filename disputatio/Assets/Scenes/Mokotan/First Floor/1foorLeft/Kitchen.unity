@@ -670,13 +670,14 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: burner
@@ -806,16 +807,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Bottle_Clicked
+          m_StringArgument: bottle
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &284975160
@@ -831,7 +833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -934,12 +936,9 @@ GameObject:
   - component: {fileID: 290853913}
   - component: {fileID: 290853914}
   - component: {fileID: 290853915}
-  - component: {fileID: 290853921}
-  - component: {fileID: 290853920}
   - component: {fileID: 290853919}
   - component: {fileID: 290853918}
   - component: {fileID: 290853917}
-  - component: {fileID: 290853923}
   - component: {fileID: 290853925}
   - component: {fileID: 290853926}
   - component: {fileID: 290853924}
@@ -958,8 +957,6 @@ GameObject:
   - component: {fileID: 290853971}
   - component: {fileID: 290853970}
   - component: {fileID: 290853978}
-  - component: {fileID: 290853977}
-  - component: {fileID: 290853976}
   - component: {fileID: 290853975}
   - component: {fileID: 290853973}
   - component: {fileID: 290853972}
@@ -979,14 +976,10 @@ GameObject:
   - component: {fileID: 290854001}
   - component: {fileID: 290854005}
   - component: {fileID: 290854011}
-  - component: {fileID: 290854010}
   - component: {fileID: 290854007}
-  - component: {fileID: 290854006}
   - component: {fileID: 290854018}
   - component: {fileID: 290854017}
   - component: {fileID: 290854015}
-  - component: {fileID: 290854014}
-  - component: {fileID: 290854013}
   - component: {fileID: 290854020}
   - component: {fileID: 290854019}
   - component: {fileID: 290854022}
@@ -998,14 +991,10 @@ GameObject:
   - component: {fileID: 290854026}
   - component: {fileID: 290854025}
   - component: {fileID: 290854024}
-  - component: {fileID: 290854032}
-  - component: {fileID: 290854031}
   - component: {fileID: 290854033}
   - component: {fileID: 290854036}
   - component: {fileID: 290854041}
   - component: {fileID: 290854040}
-  - component: {fileID: 290854045}
-  - component: {fileID: 290854054}
   - component: {fileID: 290854053}
   - component: {fileID: 290854051}
   - component: {fileID: 290854050}
@@ -1024,25 +1013,20 @@ GameObject:
   - component: {fileID: 290854074}
   - component: {fileID: 290854073}
   - component: {fileID: 290854072}
-  - component: {fileID: 290854076}
   - component: {fileID: 290854077}
   - component: {fileID: 290854078}
   - component: {fileID: 290854079}
   - component: {fileID: 290854080}
-  - component: {fileID: 290854084}
   - component: {fileID: 290854083}
   - component: {fileID: 290854082}
   - component: {fileID: 290854081}
   - component: {fileID: 290854087}
-  - component: {fileID: 290854086}
-  - component: {fileID: 290854085}
   - component: {fileID: 290854091}
   - component: {fileID: 290854090}
   - component: {fileID: 290854092}
   - component: {fileID: 290854095}
   - component: {fileID: 290854093}
   - component: {fileID: 290854096}
-  - component: {fileID: 290854097}
   - component: {fileID: 290854098}
   - component: {fileID: 290854104}
   - component: {fileID: 290854107}
@@ -1082,8 +1066,6 @@ GameObject:
   - component: {fileID: 290854142}
   - component: {fileID: 290854147}
   - component: {fileID: 290854146}
-  - component: {fileID: 290854145}
-  - component: {fileID: 290854144}
   - component: {fileID: 290854143}
   - component: {fileID: 290854148}
   - component: {fileID: 290854149}
@@ -1229,8 +1211,22 @@ GameObject:
   - component: {fileID: 290854326}
   - component: {fileID: 290854325}
   - component: {fileID: 290854327}
-  - component: {fileID: 290854328}
   - component: {fileID: 290854329}
+  - component: {fileID: 290854330}
+  - component: {fileID: 290854337}
+  - component: {fileID: 290854336}
+  - component: {fileID: 290854335}
+  - component: {fileID: 290854334}
+  - component: {fileID: 290854333}
+  - component: {fileID: 290854332}
+  - component: {fileID: 290854331}
+  - component: {fileID: 290854338}
+  - component: {fileID: 290854344}
+  - component: {fileID: 290854343}
+  - component: {fileID: 290854342}
+  - component: {fileID: 290854341}
+  - component: {fileID: 290854340}
+  - component: {fileID: 290854339}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1251,7 +1247,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: -931.61053, y: -86.759056}
+  scrollPos: {x: -1625.5107, y: 233.9727}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
@@ -1263,8 +1259,9 @@ MonoBehaviour:
     width: 1114
     height: 859
   selectedBlocks:
-  - {fileID: 290854091}
-  selectedCommands: []
+  - {fileID: 290854017}
+  selectedCommands:
+  - {fileID: 290854334}
   variables:
   - {fileID: 290853934}
   - {fileID: 290854220}
@@ -1623,10 +1620,10 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 0}
   commandList:
-  - {fileID: 290854097}
-  - {fileID: 290853923}
+  - {fileID: 290854344}
+  - {fileID: 290854343}
   - {fileID: 290853901}
-  - {fileID: 290854006}
+  - {fileID: 290854342}
   - {fileID: 290854098}
   - {fileID: 290854252}
   - {fileID: 290854295}
@@ -1742,8 +1739,7 @@ MonoBehaviour:
   - {fileID: 290854109}
   - {fileID: 290853933}
   - {fileID: 290854208}
-  - {fileID: 290853921}
-  - {fileID: 290853920}
+  - {fileID: 290854337}
   - {fileID: 290854111}
   - {fileID: 290854110}
   - {fileID: 290854210}
@@ -1834,77 +1830,6 @@ MonoBehaviour:
   - {fileID: 290854268}
   - {fileID: 290853918}
   suppressAllAutoSelections: 0
---- !u!114 &290853920
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 36
-  indentLevel: 2
-  text: "\uADF8\uB9CC\uB454\uB2E4."
-  description: 
-  targetBlock: {fileID: 290853917}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290853921
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 35
-  indentLevel: 2
-  text: "\uC0B4\uD3B4\uBCF8\uB2E4."
-  description: 
-  targetBlock: {fileID: 290853919}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290853923
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 40
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1095702673}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290853924
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3886,8 +3811,7 @@ MonoBehaviour:
   - {fileID: 290854205}
   - {fileID: 290854056}
   - {fileID: 290854057}
-  - {fileID: 290853977}
-  - {fileID: 290853976}
+  - {fileID: 290854336}
   suppressAllAutoSelections: 0
 --- !u!114 &290853970
 MonoBehaviour:
@@ -4235,56 +4159,6 @@ MonoBehaviour:
   - {fileID: 290854206}
   - {fileID: 290854058}
   suppressAllAutoSelections: 0
---- !u!114 &290853976
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 87
-  indentLevel: 2
-  text: "\uC0AC\uC6A9\uD558\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290853973}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290853977
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 86
-  indentLevel: 2
-  text: "\uC0AC\uC6A9\uD55C\uB2E4"
-  description: 
-  targetBlock: {fileID: 290853975}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290853978
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4833,7 +4707,7 @@ MonoBehaviour:
   commandList:
   - {fileID: 290854063}
   - {fileID: 290854062}
-  - {fileID: 290854010}
+  - {fileID: 290854341}
   - {fileID: 290854294}
   - {fileID: 290854306}
   - {fileID: 290854305}
@@ -4843,27 +4717,6 @@ MonoBehaviour:
   - {fileID: 290854309}
   - {fileID: 290854311}
   suppressAllAutoSelections: 0
---- !u!114 &290854006
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 118
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1254764023}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290854007
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4879,27 +4732,6 @@ MonoBehaviour:
   scope: 2
   key: call_burner
   value: 0
---- !u!114 &290854010
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 115
-  indentLevel: 1
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1254764023}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290854011
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4916,56 +4748,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 480640596}
   waitFrames: 1
---- !u!114 &290854013
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 124
-  indentLevel: 2
-  text: "\uCF1C\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854019}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290854014
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 123
-  indentLevel: 2
-  text: "\uBD88\uC744 \uCF20\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854020}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854015
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5023,14 +4805,12 @@ MonoBehaviour:
   - {fileID: 290854128}
   - {fileID: 290854040}
   - {fileID: 290854215}
-  - {fileID: 290854054}
-  - {fileID: 290854045}
+  - {fileID: 290854335}
   - {fileID: 290854312}
   - {fileID: 290854036}
   - {fileID: 290854015}
   - {fileID: 290854214}
-  - {fileID: 290854014}
-  - {fileID: 290854013}
+  - {fileID: 290854334}
   - {fileID: 290854150}
   - {fileID: 290854149}
   - {fileID: 290854171}
@@ -5113,7 +4893,7 @@ MonoBehaviour:
   nodeRect:
     serializedVersion: 2
     x: 2406.968
-    y: -114.71837
+    y: -112.27934
     width: 129.63
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -5462,8 +5242,8 @@ MonoBehaviour:
   - {fileID: 290854025}
   - {fileID: 290854141}
   - {fileID: 290854140}
-  - {fileID: 290854076}
-  - {fileID: 290854328}
+  - {fileID: 290854340}
+  - {fileID: 290854339}
   - {fileID: 290854156}
   - {fileID: 290854329}
   - {fileID: 290854159}
@@ -5545,69 +5325,17 @@ MonoBehaviour:
   - {fileID: 290854142}
   - {fileID: 290854028}
   - {fileID: 290854133}
-  - {fileID: 290854032}
-  - {fileID: 290854031}
+  - {fileID: 290854333}
   - {fileID: 290854143}
   - {fileID: 290854147}
   - {fileID: 290854146}
-  - {fileID: 290854145}
-  - {fileID: 290854144}
+  - {fileID: 290854332}
   - {fileID: 290854165}
   - {fileID: 290854164}
   - {fileID: 290854166}
   - {fileID: 290854167}
   - {fileID: 290854168}
   suppressAllAutoSelections: 0
---- !u!114 &290854031
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 136
-  indentLevel: 4
-  text: "\uAD7D\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854026}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290854032
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 135
-  indentLevel: 4
-  text: "\uAD7D\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854027}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854033
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5927,31 +5655,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &290854045
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 152
-  indentLevel: 2
-  text: "\uB044\uC9C0 \uC54A\uB294\uB2E4\n"
-  description: 
-  targetBlock: {fileID: 290854050}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854048
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -6067,31 +5770,6 @@ MonoBehaviour:
   - {fileID: 290854122}
   - {fileID: 290854129}
   suppressAllAutoSelections: 0
---- !u!114 &290854054
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 153
-  indentLevel: 2
-  text: "\uBD88\uC744 \uB048\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854053}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854056
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -7842,27 +7520,6 @@ MonoBehaviour:
   scope: 2
   key: friFood
   value: 0
---- !u!114 &290854076
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 188
-  indentLevel: 1
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 192235978}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290854077
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -8342,7 +7999,7 @@ MonoBehaviour:
   itemId: 192
   blockName: parret
   description: 
-  eventHandler: {fileID: 290854084}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 290854082}
   - {fileID: 290854081}
@@ -8351,8 +8008,7 @@ MonoBehaviour:
   - {fileID: 290854243}
   - {fileID: 290854087}
   - {fileID: 290854242}
-  - {fileID: 290854086}
-  - {fileID: 290854085}
+  - {fileID: 290854331}
   suppressAllAutoSelections: 0
 --- !u!114 &290854081
 MonoBehaviour:
@@ -8776,72 +8432,6 @@ MonoBehaviour:
   stopVoiceover: 1
   waitForVO: 0
   setSayDialog: {fileID: 0}
---- !u!114 &290854084
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 290854080}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 192235979}
-  waitFrames: 1
---- !u!114 &290854085
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 198
-  indentLevel: 1
-  text: "\uC8FC\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854090}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290854086
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 197
-  indentLevel: 1
-  text: "\uC900\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854091}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854087
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -9261,27 +8851,6 @@ MonoBehaviour:
   targetObject: {fileID: 1675062676}
   methodName: TriggerAIResponseByFlag
   delay: 0.5
---- !u!114 &290854097
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 207
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1254764023}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290854098
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -10971,56 +10540,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &290854144
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 255
-  indentLevel: 4
-  text: "\uD655\uC778\uD558\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854026}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &290854145
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 254
-  indentLevel: 4
-  text: "\uD655\uC778\uD55C\uB2E4."
-  description: 
-  targetBlock: {fileID: 290854027}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &290854146
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -20744,30 +20263,9 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
---- !u!114 &290854328
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290853875}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 434
-  indentLevel: 1
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1254764023}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &290854329
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -20917,6 +20415,360 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
+--- !u!114 &290854330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e8914b2d4f6e9a1c5d8e3f7b2a04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 290853876}
+  backNavigator: {fileID: 0}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: door
+    collider: {fileID: 1481154581}
+    clickable: {fileID: 0}
+  - interactionId: door_to_hall
+    collider: {fileID: 559136592}
+    clickable: {fileID: 0}
+  - interactionId: trashbox
+    collider: {fileID: 594939767}
+    clickable: {fileID: 0}
+  - interactionId: refrigerator
+    collider: {fileID: 1660291349}
+    clickable: {fileID: 0}
+  - interactionId: sink
+    collider: {fileID: 1666975532}
+    clickable: {fileID: 0}
+  - interactionId: fripan
+    collider: {fileID: 15879520}
+    clickable: {fileID: 15879519}
+  - interactionId: parret
+    collider: {fileID: 192235980}
+    clickable: {fileID: 192235979}
+  routes:
+  - interactionId: door
+    fungusBlockName: Door_Clicked
+  - interactionId: door_to_hall
+    fungusBlockName: Door_toHall_Clicked
+  - interactionId: trashbox
+    fungusBlockName: TrashBox_Clicked
+  - interactionId: refrigerator
+    fungusBlockName: refrigeratorClicked
+  - interactionId: sink
+    fungusBlockName: Sink
+  - interactionId: bottle
+    fungusBlockName: Bottle_Clicked
+  - interactionId: fripan
+    fungusBlockName: fripan
+  - interactionId: parret
+    fungusBlockName: parret
+  - interactionId: burner
+    fungusBlockName: burner
+  - interactionId: faucet
+    fungusBlockName: Faucet
+  - interactionId: filled_bottle
+    fungusBlockName: FilledBottle
+  - interactionId: bottle_drag
+    fungusBlockName: Bottle_Dragged
+  - interactionId: food_drag
+    fungusBlockName: Food_Dragged
+  blockOutcomes: []
+  panelCloses: []
+  panelRegistry: {fileID: 290854338}
+--- !u!114 &290854331
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 442
+  indentLevel: 1
+  options:
+  - text: "\uC900\uB2E4."
+    targetBlock: {fileID: 290854091}
+    interactable: 1
+  - text: "\uC8FC\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 290854090}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854332
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 441
+  indentLevel: 4
+  options:
+  - text: "\uD655\uC778\uD55C\uB2E4."
+    targetBlock: {fileID: 290854027}
+    interactable: 1
+  - text: "\uD655\uC778\uD558\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 290854026}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854333
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 440
+  indentLevel: 4
+  options:
+  - text: "\uAD7D\uB294\uB2E4."
+    targetBlock: {fileID: 290854027}
+    interactable: 1
+  - text: "\uAD7D\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 290854026}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854334
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 439
+  indentLevel: 2
+  options:
+  - text: "\uBD88\uC744 \uCF20\uB2E4."
+    targetBlock: {fileID: 290854020}
+    interactable: 1
+  - text: "\uCF1C\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 290854019}
+    interactable: 1
+  anchor: 1
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854335
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 438
+  indentLevel: 2
+  options:
+  - text: "\uBD88\uC744 \uB048\uB2E4."
+    targetBlock: {fileID: 290854053}
+    interactable: 1
+  - text: "\uB044\uC9C0 \uC54A\uB294\uB2E4\n"
+    targetBlock: {fileID: 290854050}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854336
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 437
+  indentLevel: 2
+  options:
+  - text: "\uC0AC\uC6A9\uD55C\uB2E4"
+    targetBlock: {fileID: 290853975}
+    interactable: 1
+  - text: "\uC0AC\uC6A9\uD558\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 290853973}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854337
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 436
+  indentLevel: 2
+  options:
+  - text: "\uC0B4\uD3B4\uBCF8\uB2E4."
+    targetBlock: {fileID: 290853919}
+    interactable: 1
+  - text: "\uADF8\uB9CC\uB454\uB2E4."
+    targetBlock: {fileID: 290853917}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &290854338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc229fc49bd2ab44ada039a9ae3b6c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  burnerPanel: {fileID: 243801839}
+  fripanPanel: {fileID: 1254764023}
+  parrotPanel: {fileID: 192235978}
+  sinkPanel: {fileID: 1095702673}
+  bottlePanel: {fileID: 284975157}
+--- !u!114 &290854339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 448
+  indentLevel: 1
+  targetObject: {fileID: 290853875}
+  methodName: CloseFripanPanel
+  delay: 0
+--- !u!114 &290854340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 447
+  indentLevel: 1
+  targetObject: {fileID: 290853875}
+  methodName: OpenParrotPanel
+  delay: 0
+--- !u!114 &290854341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 446
+  indentLevel: 1
+  targetObject: {fileID: 290853875}
+  methodName: OpenFripanPanel
+  delay: 0
+--- !u!114 &290854342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 445
+  indentLevel: 0
+  targetObject: {fileID: 290853875}
+  methodName: CloseFripanPanel
+  delay: 0
+--- !u!114 &290854343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 444
+  indentLevel: 0
+  targetObject: {fileID: 290853875}
+  methodName: CloseSinkPanel
+  delay: 0
+--- !u!114 &290854344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290853875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a200dbd67304446a3019434503338a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 443
+  indentLevel: 0
+  targetObject: {fileID: 290853875}
+  methodName: CloseFripanPanel
+  delay: 0
 --- !u!1 &480640595
 GameObject:
   m_ObjectHideFlags: 0
@@ -21312,7 +21164,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 559136590}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0235fc39fc1c6894386995e3c0a9a673, type: 3}
   m_Name: 
@@ -21547,7 +21399,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 594939765}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0235fc39fc1c6894386995e3c0a9a673, type: 3}
   m_Name: 
@@ -21639,16 +21491,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Faucet
+          m_StringArgument: faucet
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &614617306
@@ -21940,8 +21793,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -22258,8 +22111,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -22623,7 +22476,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5785738948666955521, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_Color.a
-      value: 0.4392157
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7215913690222960345, guid: 85e6e64a71c3ff14596eb7976b05e3c5, type: 3}
       propertyPath: m_Name
@@ -22837,8 +22690,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1095702673}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
-  interactionController: {fileID: 0}
-  panelCloseInteractionId: 
+  interactionController: {fileID: 290854330}
+  panelCloseInteractionId: panel_backspace
 --- !u!114 &1083016965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22896,7 +22749,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -23126,16 +22979,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Faucet
+          m_StringArgument: faucet
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1151570410
@@ -23330,8 +23184,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1254764023}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
-  interactionController: {fileID: 0}
-  panelCloseInteractionId: 
+  interactionController: {fileID: 290854330}
+  panelCloseInteractionId: panel_backspace
 --- !u!114 &1166889646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23389,7 +23243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -23616,16 +23470,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: FilledBottle
+          m_StringArgument: filled_bottle
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &1233350396
@@ -23831,16 +23686,17 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Bottle_Dragged
+          m_StringArgument: bottle_drag
           m_BoolArgument: 0
         m_CallState: 2
   flowchart: {fileID: 290853876}
@@ -24390,7 +24246,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1481154579}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0235fc39fc1c6894386995e3c0a9a673, type: 3}
   m_Name: 
@@ -24570,16 +24426,17 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 290853876}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 290854330}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.KitchenInteractionController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Food_Dragged
+          m_StringArgument: food_drag
           m_BoolArgument: 0
         m_CallState: 2
   flowchart: {fileID: 290853876}
@@ -24858,7 +24715,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1660291347}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0235fc39fc1c6894386995e3c0a9a673, type: 3}
   m_Name: 
@@ -24961,7 +24818,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1666975526}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0235fc39fc1c6894386995e3c0a9a673, type: 3}
   m_Name: 
@@ -25528,8 +25385,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

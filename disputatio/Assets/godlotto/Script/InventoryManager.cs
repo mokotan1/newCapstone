@@ -80,7 +80,7 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
 
         animator = inventoryUI_Background.GetComponent<Animator>();
         EnsureInventoryRootActive(inventoryUI_Background);
-        NormalizeInventoryCanvasTransform(inventoryUI_Background.transform);
+        NormalizeInventoryCanvasTransform(inventoryUI_Background != null ? inventoryUI_Background.transform : null);
         SetInitialClosedState();
         if (guideController != null)
             guideController.BindInventoryRoot(inventoryUI_Background.transform);

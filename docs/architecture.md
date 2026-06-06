@@ -292,7 +292,9 @@ flowchart LR
 | `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
 | `MaidRoomPuzzleController` | MaidRoom 클릭 진입 (Phase R3-A, RoomInteractionController 확장) |
 | `StudyRoomPuzzleController` | StudyRoom UI·월드 클릭 (R4-A CardStack/Diary, R4-B Bible/BookCase + LoadScene outcome) |
-| `ChildRoomPuzzleController` | ChildRoom 월드/UI 클릭 진입 (R5-A Bedfloor/Drawer/Chest/Table/Parrot/Button, DrawerOpen/Close) |
+| `ChildRoomPuzzleController` | ChildRoom 클릭(R5-A), 인장 드롭(R5-B), allSealsComplete(R5-C) |
+| `KitchenInteractionController` | Kitchen 월드(R6-A)·UI(R6-B)·드롭(R6-C) 클릭·패널(R6-D) 조율 |
+| `KitchenPanelRegistry` | Kitchen 버너/프라이팬/앵무 패널 SetActive → Call Method (R6-D) |
 
 ### 백엔드
 
@@ -356,7 +358,8 @@ graph TB
 | 추가 대상 | 위치 | 네이밍 예 |
 |-----------|------|-----------|
 | 방 상호작용 | `godlotto/Script/Interaction/` | `*InteractionController`, `*PuzzleController` |
-| Fungus 커맨드 | `godlotto/Script/FungusCommands/` | 동사형 (`SetBloom`, `PlayRegisteredSfx`) |
+| Fungus 커맨드 | `godlotto/Script/FungusCommands/` | 동사형 (`SetBloom`, `PlayRegisteredSfx`); 선택지는 `GlassMenu` (`FungusCommands/Menu/`) |
+| Fungus Menu 마이그레이션 | `godlotto/Script/Editor/GlassMenuMigrator.cs` | `Tools/Godlotto/Migrate/Fungus Menu → Glass Menu` — 연속 `Fungus.Menu` → `GlassMenu.options`, `ClearMenu` 제거 |
 | 방별 AI | `mokotan/mokotan/script/AI/` | `{Room}Chatbot : BaseChatbot` |
 | 상수 | `godlotto/Script/Constants/` | `*Keys`, `SceneNames` |
 | 에디터 마이그레이션 | `godlotto/Script/Editor/` | `*SceneMigrator` |

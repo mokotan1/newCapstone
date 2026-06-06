@@ -482,12 +482,10 @@ GameObject:
   - component: {fileID: 687597765}
   - component: {fileID: 687597766}
   - component: {fileID: 687597768}
-  - component: {fileID: 687597769}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
-  - component: {fileID: 687597782}
   - component: {fileID: 687597783}
   - component: {fileID: 687597784}
   - component: {fileID: 687597786}
@@ -496,6 +494,7 @@ GameObject:
   - component: {fileID: 687597793}
   - component: {fileID: 687597794}
   - component: {fileID: 687597795}
+  - component: {fileID: 687597796}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -649,8 +648,7 @@ MonoBehaviour:
   - {fileID: 687597780}
   - {fileID: 687597773}
   - {fileID: 687597793}
-  - {fileID: 687597769}
-  - {fileID: 687597782}
+  - {fileID: 687597796}
   suppressAllAutoSelections: 0
 --- !u!114 &687597766
 MonoBehaviour:
@@ -698,31 +696,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 0}
   waitFrames: 1
---- !u!114 &687597769
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597766}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597773
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1160,31 +1133,6 @@ MonoBehaviour:
   commandList:
   - {fileID: 687597784}
   suppressAllAutoSelections: 0
---- !u!114 &687597782
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 18
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597781}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597783
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1621,6 +1569,30 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
+--- !u!114 &687597796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 241
+  indentLevel: 1
+  options:
+  - text: "\uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 687597766}
+    interactable: 1
+  - text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 687597781}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
 --- !u!1001 &798944594
 PrefabInstance:
   m_ObjectHideFlags: 0

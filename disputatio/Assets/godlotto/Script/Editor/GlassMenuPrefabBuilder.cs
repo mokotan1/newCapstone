@@ -1,4 +1,5 @@
 using System.IO;
+using Godlotto.Constants;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -15,9 +16,11 @@ public static class GlassMenuPrefabBuilder
     const string ButtonPath = Dir + "/GlassMenuOptionButton.prefab";
     const string DialogPath = Dir + "/GlassMenuDialog.prefab";
 
-    // 다크 글래스 팔레트
-    static readonly Color PanelFill = new Color(0f, 0f, 0f, 0.55f);   // 검은 반투명 패널
-    static readonly Color ButtonFill = new Color(0f, 0f, 0f, 0.45f);  // 검은 반투명 버튼
+    const string FontAssetPath = GameFontPaths.KoreanRegularSdf;
+
+    // 다크 글래스: 채우기는 투명, 금색 테두리·글로우만 유지
+    static readonly Color PanelFill = new Color(0f, 0f, 0f, 0f);
+    static readonly Color ButtonFill = new Color(0f, 0f, 0f, 0f);
     static readonly Color GoldLine = new Color32(212, 175, 110, 255); // 금색 테두리/글로우
     static readonly Color LightText = new Color32(238, 242, 248, 255);
 
@@ -38,10 +41,16 @@ public static class GlassMenuPrefabBuilder
     static GameObject BuildButtonPrefab()
     {
         // 루트: 검은 반투명 배경 + 금색 테두리 + Button
+        // 크기/비율은 기존 Fungus MenuDialog 버튼 기준(폭은 패널이 확장, 높이 100, 폰트 40).
         var go = new GameObject("GlassMenuOptionButton",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button),
+            typeof(LayoutElement));
         var rt = go.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(420f, 64f);
+        rt.sizeDelta = new Vector2(1300f, 100f);
+
+        // VerticalLayoutGroup가 높이를 통제하므로 LayoutElement로 기존과 동일한 높이(100)를 지정.
+        var layout = go.GetComponent<LayoutElement>();
+        layout.preferredHeight = 100f;
 
         var bg = go.GetComponent<Image>();
         bg.color = ButtonFill;
@@ -88,8 +97,13 @@ public static class GlassMenuPrefabBuilder
         var label = labelGo.GetComponent<TextMeshProUGUI>();
         label.text = "Option";
         label.color = LightText;
-        label.fontSize = 26f;
+        label.fontSize = 40f;
         label.alignment = TextAlignmentOptions.MidlineLeft;
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
+        if (font != null)
+            label.font = font;
+        else
+            Debug.LogWarning("[GlassMenuPrefabBuilder] 한글 폰트를 찾지 못했습니다(기본 폰트 사용): " + FontAssetPath);
 
         var saved = PrefabUtility.SaveAsPrefabAsset(go, ButtonPath);
         Object.DestroyImmediate(go);
@@ -102,12 +116,23 @@ public static class GlassMenuPrefabBuilder
         var root = new GameObject("GlassMenuDialog",
             typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster),
             typeof(GlassMenuDialog));
+        var rootRt = root.GetComponent<RectTransform>();
+        rootRt.localScale = Vector3.one;
+        rootRt.anchorMin = Vector2.zero;
+        rootRt.anchorMax = Vector2.one;
+        rootRt.sizeDelta = Vector2.zero;
+        rootRt.pivot = new Vector2(0.5f, 0.5f);
+
         var canvas = root.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 100;
+        // 기존 Fungus MenuDialog와 동일한 스케일러 설정(1600x1200, 높이 기준 매칭).
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.referenceResolution = new Vector2(1600f, 1200f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 1f; // 1 = 높이 기준
+        scaler.referencePixelsPerUnit = 32f;
 
         // 패널: 검은 반투명 + 금색 테두리
         var panel = new GameObject("Panel",
@@ -119,6 +144,7 @@ public static class GlassMenuPrefabBuilder
         panelRt.anchorMax = new Vector2(0.5f, 0f);
         panelRt.pivot = new Vector2(0.5f, 0f);
         panelRt.anchoredPosition = new Vector2(0f, 120f);
+        panelRt.sizeDelta = new Vector2(1300f, 0f); // 폭은 기존 버튼 폭(1300), 높이는 ContentSizeFitter가 결정
         panel.GetComponent<Image>().color = PanelFill;
 
         var panelOutline = panel.AddComponent<Outline>();

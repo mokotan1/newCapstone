@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public static class BackspaceUiSceneApplier
 {
     public const string SceneBackRootName = "SceneBackNavigator_Ribbon";
-    private const string KoreanFontAssetPath = "Assets/Font/JalnanGothic SDF.asset";
+    private const string KoreanFontAssetPath = Godlotto.Constants.GameFontPaths.KoreanRegularSdf;
     private const string CornerFoldSpritePath = BackspaceUiStyleCatalog.PrefabRoot + "/CornerFoldTriangle.png";
     private const string PendingRequestFileName = "BackspaceSceneApply.request";
     private static readonly string[] LegacySceneBackspaceObjectNames = { "Backspace" };

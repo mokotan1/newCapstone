@@ -372,8 +372,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -722,6 +722,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1269932659}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &216146197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -779,7 +781,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1679,8 +1681,6 @@ GameObject:
   - component: {fileID: 687597821}
   - component: {fileID: 687597820}
   - component: {fileID: 687597819}
-  - component: {fileID: 687597818}
-  - component: {fileID: 687597817}
   - component: {fileID: 687597822}
   - component: {fileID: 687597823}
   - component: {fileID: 687597827}
@@ -1718,6 +1718,7 @@ GameObject:
   - component: {fileID: 687597858}
   - component: {fileID: 687597859}
   - component: {fileID: 687597860}
+  - component: {fileID: 687597861}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -2943,59 +2944,8 @@ MonoBehaviour:
   - {fileID: 687597821}
   - {fileID: 687597820}
   - {fileID: 687597819}
-  - {fileID: 687597818}
-  - {fileID: 687597817}
+  - {fileID: 687597861}
   suppressAllAutoSelections: 0
---- !u!114 &687597817
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 141
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597828}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &687597818
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 168
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597823}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597819
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -6043,6 +5993,30 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
+--- !u!114 &687597861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 352
+  indentLevel: 1
+  options:
+  - text: "\uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 687597823}
+    interactable: 1
+  - text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 687597828}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
 --- !u!1 &701447467
 GameObject:
   m_ObjectHideFlags: 0
@@ -6531,8 +6505,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6737,6 +6711,8 @@ MonoBehaviour:
   targetPanel: {fileID: 2030195086}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1175173405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6794,7 +6770,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7286,6 +7262,8 @@ MonoBehaviour:
   targetPanel: {fileID: 629245014}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1304283427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7343,7 +7321,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7580,8 +7558,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

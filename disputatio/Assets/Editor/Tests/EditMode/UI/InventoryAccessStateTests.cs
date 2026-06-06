@@ -1,7 +1,29 @@
 using NUnit.Framework;
+using UnityEngine;
 
 public class InventoryAccessStateTests
 {
+    private const string UnlockedPrefsKey = "InventoryAccess.UnlockedAfterHallPlayableRetry";
+
+    [TearDown]
+    public void TearDown()
+    {
+        PlayerPrefs.DeleteKey(UnlockedPrefsKey);
+        PlayerPrefs.Save();
+    }
+
+    [Test]
+    public void ApplyCheckpointWithItems_UnlocksInventoryAccess()
+    {
+        ProgressSnapshotApplier.Apply(new CheckpointSaveData
+        {
+            resumeSceneName = SceneNames.HallPlayable,
+            itemIds = new[] { 1 }
+        });
+
+        Assert.IsTrue(InventoryAccessState.IsUnlocked);
+    }
+
     [Test]
     public void ShouldUnlockAfterRetry_ReturnsTrue_ForHallPlayableRetryAfterDeath()
     {

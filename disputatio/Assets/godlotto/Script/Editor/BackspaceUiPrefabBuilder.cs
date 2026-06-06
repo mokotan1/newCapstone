@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public static class BackspaceUiPrefabBuilder
 {
-    private const string KoreanFontAssetPath = "Assets/Font/JalnanGothic SDF.asset";
+    private const string KoreanFontAssetPath = Godlotto.Constants.GameFontPaths.KoreanRegularSdf;
     public const string SceneBackCanvasSortingLayerName = "Ui";
     public const float SceneBackCanvasPlaneDistance = 10f;
     public const int SceneBackCanvasSortingOrder = -10;

@@ -749,14 +749,12 @@ GameObject:
   - component: {fileID: 687597765}
   - component: {fileID: 687597767}
   - component: {fileID: 687597768}
-  - component: {fileID: 687597770}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
   - component: {fileID: 687597776}
   - component: {fileID: 687597777}
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
-  - component: {fileID: 687597782}
   - component: {fileID: 687597784}
   - component: {fileID: 687597786}
   - component: {fileID: 687597787}
@@ -790,6 +788,7 @@ GameObject:
   - component: {fileID: 687597815}
   - component: {fileID: 687597823}
   - component: {fileID: 687597824}
+  - component: {fileID: 687597825}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -947,8 +946,7 @@ MonoBehaviour:
   - {fileID: 687597780}
   - {fileID: 687597773}
   - {fileID: 687597787}
-  - {fileID: 687597770}
-  - {fileID: 687597782}
+  - {fileID: 687597825}
   suppressAllAutoSelections: 0
 --- !u!114 &687597767
 MonoBehaviour:
@@ -996,31 +994,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 1688083022}
   waitFrames: 1
---- !u!114 &687597770
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 6
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597767}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597773
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1497,31 +1470,6 @@ MonoBehaviour:
   commandList:
   - {fileID: 687597784}
   suppressAllAutoSelections: 0
---- !u!114 &687597782
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 18
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597781}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597784
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4212,6 +4160,30 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
+--- !u!114 &687597825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 348
+  indentLevel: 1
+  options:
+  - text: "\uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 687597767}
+    interactable: 1
+  - text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 687597781}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
 --- !u!1001 &768882123
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5250,6 +5222,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1115789463}
   executeBlockName: PanelBackspace
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1271892859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5307,7 +5281,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 1}
+  m_Color: {r: 0.78, g: 0.58, b: 0.29, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -5907,8 +5881,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

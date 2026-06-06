@@ -17,7 +17,7 @@ public static class StandingDialoguePrefabCreator
     /// <summary>Resources.Load("Prefabs/StandingDialogueCanvas") — GetStandingDialogue() 자동 생성용.</summary>
     const string ResourcesPrefabPath = "Assets/mokotan/mokotan/Resources/Prefabs/StandingDialogueCanvas.prefab";
     const string DialogSpritePath = "Assets/Fungus/Textures/DialogBoxSliced.png";
-    const string TmpFontPath = "Assets/Fungus/Thirdparty/TextMeshPro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+    const string TmpFontPath = Godlotto.Constants.GameFontPaths.KoreanRegularSdf;
 
     // SayDialog.prefab — Panel / NameText / StoryText (참조용 수치)
     const float SayDialogPanelWidth = 1500f;

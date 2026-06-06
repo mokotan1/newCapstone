@@ -6,16 +6,30 @@ using UnityEngine;
 public class KitchenFripanClickTests
 {
     [Test]
-    public void FripanClickable_IsConnectedToObjectClickedEvent()
+    public void FripanWorldClick_IsRoutedThroughKitchenInteractionController()
     {
         string sceneText = File.ReadAllText(KitchenScenePath);
         string fripanObject = FindGameObjectBlock(sceneText, "Fripan");
-        string clickableFileId = FindComponentBeforeCollider(fripanObject);
+        string colliderFileId = FindComponentFileId(fripanObject, 2);
+        string clickableFileId = FindComponentFileId(fripanObject, 3);
 
+        StringAssert.Contains("a7c3e8914b2d4f6e9a1c5d8e3f7b2a04", sceneText);
         StringAssert.Contains(
+            $"interactionId: fripan",
+            sceneText,
+            "KitchenInteractionController should register a fripan world click route.");
+        StringAssert.Contains(
+            $"collider: {{fileID: {colliderFileId}}}",
+            sceneText,
+            "Fripan collider should be bound on KitchenInteractionController.worldClicks.");
+        StringAssert.Contains(
+            $"clickable: {{fileID: {clickableFileId}}}",
+            sceneText,
+            "Fripan Clickable2D should be bound on KitchenInteractionController.worldClicks.");
+        StringAssert.DoesNotContain(
             $"clickableObject: {{fileID: {clickableFileId}}}",
             sceneText,
-            "Fripan has a Clickable2D component, but no Fungus ObjectClicked event listens to it.");
+            "Fripan should no longer use a direct Fungus ObjectClicked handler.");
     }
 
     [Test]
@@ -112,15 +126,5 @@ public class KitchenFripanClickTests
 
         Assert.IsTrue(match.Success, $"Could not find Unity object !u!{unityType} &{fileId}.");
         return match.Value;
-    }
-
-    private static string FindComponentBeforeCollider(string gameObjectBlock)
-    {
-        Match match = Regex.Match(
-            gameObjectBlock,
-            @"m_Component:\r?\n\s+- component: \{fileID: (?<transform>[0-9]+)\}\r?\n\s+- component: \{fileID: (?<sprite>[0-9]+)\}\r?\n\s+- component: \{fileID: (?<collider>[0-9]+)\}\r?\n\s+- component: \{fileID: (?<clickable>[0-9]+)\}");
-
-        Assert.IsTrue(match.Success, "Fripan does not have the expected Transform/SpriteRenderer/Collider2D/Clickable2D component layout.");
-        return match.Groups["clickable"].Value;
     }
 }

@@ -1805,8 +1805,6 @@ GameObject:
   - component: {fileID: 2129203538}
   - component: {fileID: 2129203539}
   - component: {fileID: 2129203558}
-  - component: {fileID: 2129203557}
-  - component: {fileID: 2129203556}
   - component: {fileID: 2129203555}
   - component: {fileID: 2129203560}
   - component: {fileID: 2129203561}
@@ -1814,8 +1812,6 @@ GameObject:
   - component: {fileID: 2129203566}
   - component: {fileID: 2129203565}
   - component: {fileID: 2129203564}
-  - component: {fileID: 2129203563}
-  - component: {fileID: 2129203562}
   - component: {fileID: 2129203568}
   - component: {fileID: 2129203572}
   - component: {fileID: 2129203570}
@@ -1841,8 +1837,6 @@ GameObject:
   - component: {fileID: 2129203621}
   - component: {fileID: 2129203620}
   - component: {fileID: 2129203619}
-  - component: {fileID: 2129203618}
-  - component: {fileID: 2129203617}
   - component: {fileID: 2129203629}
   - component: {fileID: 2129203628}
   - component: {fileID: 2129203626}
@@ -1864,6 +1858,9 @@ GameObject:
   - component: {fileID: 2129203643}
   - component: {fileID: 2129203642}
   - component: {fileID: 2129203645}
+  - component: {fileID: 2129203648}
+  - component: {fileID: 2129203647}
+  - component: {fileID: 2129203646}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -1953,8 +1950,7 @@ MonoBehaviour:
   - {fileID: 2129203538}
   - {fileID: 2129203558}
   - {fileID: 2129203632}
-  - {fileID: 2129203557}
-  - {fileID: 2129203556}
+  - {fileID: 2129203648}
   suppressAllAutoSelections: 0
 --- !u!114 &2129203492
 MonoBehaviour:
@@ -3166,56 +3162,6 @@ MonoBehaviour:
   - {fileID: 2129203560}
   - {fileID: 2129203578}
   suppressAllAutoSelections: 0
---- !u!114 &2129203556
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 142
-  indentLevel: 2
-  text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
-  description: 
-  targetBlock: {fileID: 2129203555}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &2129203557
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 141
-  indentLevel: 2
-  text: "\uB4E4\uC5B4\uAC04\uB2E4"
-  description: 
-  targetBlock: {fileID: 2129203607}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &2129203558
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3300,59 +3246,8 @@ MonoBehaviour:
   - {fileID: 2129203565}
   - {fileID: 2129203564}
   - {fileID: 2129203633}
-  - {fileID: 2129203563}
-  - {fileID: 2129203562}
+  - {fileID: 2129203647}
   suppressAllAutoSelections: 0
---- !u!114 &2129203562
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 164
-  indentLevel: 1
-  text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
-  description: 
-  targetBlock: {fileID: 2129203573}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &2129203563
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 163
-  indentLevel: 1
-  text: "\uB4E4\uC5B4\uAC04\uB2E4"
-  description: 
-  targetBlock: {fileID: 2129203568}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &2129203564
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5075,59 +4970,8 @@ MonoBehaviour:
   - {fileID: 2129203620}
   - {fileID: 2129203644}
   - {fileID: 2129203619}
-  - {fileID: 2129203618}
-  - {fileID: 2129203617}
+  - {fileID: 2129203646}
   suppressAllAutoSelections: 0
---- !u!114 &2129203617
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 217
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 2129203624}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &2129203618
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2129203482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 216
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 2129203629}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &2129203619
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -6797,35 +6641,114 @@ MonoBehaviour:
     fungusBlockName: BackSpace_Clicked
   blockOutcomes:
   - blockName: Go_Yes
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: TutorRoom
     goBack: 0
   - blockName: EnterYes
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: TutorRoom
     goBack: 0
   - blockName: Go_No
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
   - blockName: EnterNo
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
   - blockName: Select_No
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
   - blockName: Select_Yes
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 0
     sceneName: 
     goBack: 1
+  panelCloses: []
+--- !u!114 &2129203646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 369
+  indentLevel: 1
+  options:
+  - text: "\uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 2129203629}
+    interactable: 1
+  - text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 2129203624}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &2129203647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 368
+  indentLevel: 1
+  options:
+  - text: "\uB4E4\uC5B4\uAC04\uB2E4"
+    targetBlock: {fileID: 2129203568}
+    interactable: 1
+  - text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
+    targetBlock: {fileID: 2129203573}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &2129203648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129203482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 367
+  indentLevel: 2
+  options:
+  - text: "\uB4E4\uC5B4\uAC04\uB2E4"
+    targetBlock: {fileID: 2129203607}
+    interactable: 1
+  - text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
+    targetBlock: {fileID: 2129203555}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

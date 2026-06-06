@@ -180,8 +180,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uB2EB\uAE30  X"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
-  m_sharedMaterial: {fileID: -7514585115471538623, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -462,7 +462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.91, g: 0.81, b: 0.62, a: 0.96}
+  m_Color: {r: 0.91, g: 0.81, b: 0.62, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -538,6 +538,8 @@ MonoBehaviour:
   targetPanel: {fileID: 2985594566526904671}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!1001 &4045079085734209055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -650,6 +652,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 40045, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
+      propertyPath: m_GlobalFontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
     - target: {fileID: 40051, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_Layer
       value: 0
@@ -697,7 +703,7 @@ PrefabInstance:
     - target: {fileID: 40094, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 34d8dd68c71273049a43918fae18662a, type: 2}
+      objectReference: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
     - target: {fileID: 40094, guid: d1e2f3a4b5c6789012345678901234ef, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 1

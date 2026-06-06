@@ -20,6 +20,7 @@ public static class RoomInteractionSceneMigrationEditor
     public const string MaidRoomControllerTypeName = "Godlotto.Interaction.MaidRoomPuzzleController, Assembly-CSharp";
     public const string StudyRoomControllerTypeName = "Godlotto.Interaction.StudyRoomPuzzleController, Assembly-CSharp";
     public const string ChildRoomControllerTypeName = "Godlotto.Interaction.ChildRoomPuzzleController, Assembly-CSharp";
+    public const string KitchenControllerTypeName = "Godlotto.Interaction.KitchenInteractionController, Assembly-CSharp";
 
     public static void WriteRoutes(SerializedProperty routesProp, InteractionRouteSpec[] routes)
     {

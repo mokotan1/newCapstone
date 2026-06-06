@@ -9,6 +9,16 @@ using UnityEngine;
 [AddComponentMenu("Mokotan/UI/No40 Hall Entry Hook")]
 public sealed class No40HallPlayerbleEntryHook : MonoBehaviour
 {
+    private void OnEnable()
+    {
+        No40ConditionalDialogueRunner.OnFirstEntryDialogueCompleted += HandleFirstEntryDialogueCompleted;
+    }
+
+    private void OnDisable()
+    {
+        No40ConditionalDialogueRunner.OnFirstEntryDialogueCompleted -= HandleFirstEntryDialogueCompleted;
+    }
+
     [Header("No.40 — 첫 입성")]
     [SerializeField] private AudioClip doorSlamClip;
 
@@ -29,5 +39,13 @@ public sealed class No40HallPlayerbleEntryHook : MonoBehaviour
             bloodPathLineOverride,
             deathLineSayDialogPrefab);
         r.RegisterMansionHubVisitAndTryFirstEntry();
+
+        if (PlayerPrefs.GetInt(No40ConditionalDialogueRunner.PrefsKeys.FirstEntryPlayed, 0) == 1)
+            InventoryAccessState.Unlock();
+    }
+
+    private void HandleFirstEntryDialogueCompleted()
+    {
+        InventoryAccessState.Unlock();
     }
 }

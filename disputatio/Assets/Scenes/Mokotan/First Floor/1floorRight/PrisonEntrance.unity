@@ -729,14 +729,12 @@ GameObject:
   - component: {fileID: 687597765}
   - component: {fileID: 687597767}
   - component: {fileID: 687597766}
-  - component: {fileID: 687597769}
   - component: {fileID: 687597773}
   - component: {fileID: 687597774}
   - component: {fileID: 687597776}
   - component: {fileID: 687597777}
   - component: {fileID: 687597780}
   - component: {fileID: 687597781}
-  - component: {fileID: 687597782}
   - component: {fileID: 687597783}
   - component: {fileID: 687597784}
   - component: {fileID: 687597785}
@@ -744,7 +742,6 @@ GameObject:
   - component: {fileID: 687597788}
   - component: {fileID: 687597789}
   - component: {fileID: 687597816}
-  - component: {fileID: 687597817}
   - component: {fileID: 687597818}
   - component: {fileID: 687597833}
   - component: {fileID: 687597834}
@@ -757,8 +754,6 @@ GameObject:
   - component: {fileID: 687597843}
   - component: {fileID: 687597842}
   - component: {fileID: 687597846}
-  - component: {fileID: 687597845}
-  - component: {fileID: 687597844}
   - component: {fileID: 687597849}
   - component: {fileID: 687597853}
   - component: {fileID: 687597852}
@@ -783,8 +778,6 @@ GameObject:
   - component: {fileID: 687597913}
   - component: {fileID: 687597912}
   - component: {fileID: 687597911}
-  - component: {fileID: 687597910}
-  - component: {fileID: 687597909}
   - component: {fileID: 687597908}
   - component: {fileID: 687597921}
   - component: {fileID: 687597920}
@@ -802,6 +795,9 @@ GameObject:
   - component: {fileID: 687597933}
   - component: {fileID: 687597934}
   - component: {fileID: 687597935}
+  - component: {fileID: 687597938}
+  - component: {fileID: 687597937}
+  - component: {fileID: 687597936}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -958,9 +954,7 @@ MonoBehaviour:
   - {fileID: 687597773}
   - {fileID: 687597931}
   - {fileID: 687597816}
-  - {fileID: 687597769}
-  - {fileID: 687597817}
-  - {fileID: 687597782}
+  - {fileID: 687597938}
   suppressAllAutoSelections: 0
 --- !u!114 &687597766
 MonoBehaviour:
@@ -1024,31 +1018,6 @@ MonoBehaviour:
   - {fileID: 687597788}
   - {fileID: 687597777}
   suppressAllAutoSelections: 0
---- !u!114 &687597769
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 7
-  indentLevel: 1
-  text: "\uC11C\uC7AC\uB85C \uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597767}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597773
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1526,31 +1495,6 @@ MonoBehaviour:
   - {fileID: 687597784}
   - {fileID: 687597934}
   suppressAllAutoSelections: 0
---- !u!114 &687597782
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 18
-  indentLevel: 1
-  text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597781}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597783
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -1957,31 +1901,6 @@ MonoBehaviour:
   stopVoiceover: 1
   waitForVO: 0
   setSayDialog: {fileID: 0}
---- !u!114 &687597817
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 150
-  indentLevel: 1
-  text: "\uAC08\uB9BC\uAE38\uB85C \uB3CC\uC544\uAC04\uB2E4."
-  description: 
-  targetBlock: {fileID: 687597766}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597818
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -2495,59 +2414,8 @@ MonoBehaviour:
   - {fileID: 687597922}
   - {fileID: 687597846}
   - {fileID: 687597857}
-  - {fileID: 687597845}
-  - {fileID: 687597844}
+  - {fileID: 687597937}
   suppressAllAutoSelections: 0
---- !u!114 &687597844
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 180
-  indentLevel: 0
-  text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
-  description: 
-  targetBlock: {fileID: 687597854}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &687597845
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 179
-  indentLevel: 0
-  text: "\uB4E4\uC5B4\uAC04\uB2E4"
-  description: 
-  targetBlock: {fileID: 687597849}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597846
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3040,8 +2908,7 @@ MonoBehaviour:
   - {fileID: 687597913}
   - {fileID: 687597912}
   - {fileID: 687597911}
-  - {fileID: 687597910}
-  - {fileID: 687597909}
+  - {fileID: 687597936}
   suppressAllAutoSelections: 0
 --- !u!114 &687597874
 MonoBehaviour:
@@ -3669,56 +3536,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 251
   indentLevel: 0
---- !u!114 &687597909
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 250
-  indentLevel: 1
-  text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
-  description: 
-  targetBlock: {fileID: 687597839}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
---- !u!114 &687597910
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 841589fc622bc494aa5405f416fa1301, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 249
-  indentLevel: 1
-  text: "\uB4E4\uC5B4\uAC04\uB2E4"
-  description: 
-  targetBlock: {fileID: 687597834}
-  hideIfVisited: 0
-  interactable:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  setMenuDialog: {fileID: 0}
-  hideThisOption:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
 --- !u!114 &687597911
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -5263,40 +5080,123 @@ MonoBehaviour:
     fungusBlockName: EnterPrison
   blockOutcomes:
   - blockName: StudyRoom
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: StudyRoom
     goBack: 0
   - blockName: Hall_RightCross
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: Hall_RightCross
     goBack: 0
   - blockName: GoPrison_Yes
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: Prison
     goBack: 0
   - blockName: Enter_Yes
+    openPanel: {fileID: 0}
     resetIsClicked: 0
     loadScene: 1
     sceneName: Prison
     goBack: 0
   - blockName: GoPrison_No
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
   - blockName: Enter_No
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
   - blockName: SelectNo
+    openPanel: {fileID: 0}
     resetIsClicked: 1
     loadScene: 0
     sceneName: 
     goBack: 0
+  panelCloses: []
+--- !u!114 &687597936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 356
+  indentLevel: 1
+  options:
+  - text: "\uB4E4\uC5B4\uAC04\uB2E4"
+    targetBlock: {fileID: 687597834}
+    interactable: 1
+  - text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
+    targetBlock: {fileID: 687597839}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &687597937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 355
+  indentLevel: 0
+  options:
+  - text: "\uB4E4\uC5B4\uAC04\uB2E4"
+    targetBlock: {fileID: 687597849}
+    interactable: 1
+  - text: "\uB4E4\uC5B4\uAC00\uC9C0 \uC54A\uB294\uB2E4"
+    targetBlock: {fileID: 687597854}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
+--- !u!114 &687597938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5db66d3dc0dc34eb24c38fdde49f6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 354
+  indentLevel: 1
+  options:
+  - text: "\uC11C\uC7AC\uB85C \uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 687597767}
+    interactable: 1
+  - text: "\uAC08\uB9BC\uAE38\uB85C \uB3CC\uC544\uAC04\uB2E4."
+    targetBlock: {fileID: 687597766}
+    interactable: 1
+  - text: "\uB3CC\uC544\uAC00\uC9C0 \uC54A\uB294\uB2E4."
+    targetBlock: {fileID: 687597781}
+    interactable: 1
+  anchor: 7
+  menuOffset: {x: 0, y: 0}
+  setMenuDialog: {fileID: 0}
 --- !u!1 &870305110
 GameObject:
   m_ObjectHideFlags: 0

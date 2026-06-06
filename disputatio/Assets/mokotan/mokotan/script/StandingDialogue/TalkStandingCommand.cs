@@ -42,7 +42,7 @@ namespace Fungus
         [SerializeField] private Vector2 otherOffset = new Vector2(0f, -50f);
 
         [Header("타이포그래피")]
-        [Tooltip("대사 폰트. 비우면 프리팹 기본 폰트(JalnanGothic SDF) 유지.")]
+        [Tooltip("대사 폰트. 비우면 프리팹 기본 폰트(NanumGothic SDF) 유지.")]
         [SerializeField] private TMP_FontAsset font;
 
         [Tooltip("대사 글자 크기. 0이면 프리팹 기본값 유지.")]

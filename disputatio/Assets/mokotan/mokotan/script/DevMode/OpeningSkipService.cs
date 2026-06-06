@@ -13,6 +13,7 @@ public class OpeningSkipService : MonoBehaviour
             return;
         }
 
+        InventoryAccessState.Unlock();
         SceneManager.LoadScene(mainGameplaySceneName);
     }
 }

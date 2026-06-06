@@ -34,6 +34,10 @@ public class ChildRoomPuzzleControllerTests
             new InteractionRoute { interactionId = "button", fungusBlockName = "Button_Clicked" },
             new InteractionRoute { interactionId = "drawer_open", fungusBlockName = "DrawerOpen" },
             new InteractionRoute { interactionId = "drawer_close", fungusBlockName = "DrawerClose" },
+            new InteractionRoute { interactionId = "seal5", fungusBlockName = "Drag_seal5" },
+            new InteractionRoute { interactionId = "seal6", fungusBlockName = "Drag_seal6" },
+            new InteractionRoute { interactionId = "seal7", fungusBlockName = "Drag_seal7" },
+            new InteractionRoute { interactionId = "all_seals_complete", fungusBlockName = "allSealsComplete" },
         });
 
         RebuildLookupCaches(controller);
@@ -73,6 +77,10 @@ public class ChildRoomPuzzleControllerTests
     [TestCase("button", "Button_Clicked")]
     [TestCase("drawer_open", "DrawerOpen")]
     [TestCase("drawer_close", "DrawerClose")]
+    [TestCase("seal5", "Drag_seal5")]
+    [TestCase("seal6", "Drag_seal6")]
+    [TestCase("seal7", "Drag_seal7")]
+    [TestCase("all_seals_complete", "allSealsComplete")]
     public void OnInteraction_RouteId_ExecutesMappedBlock(string interactionId, string expectedBlock)
     {
         string executedBlock = null;

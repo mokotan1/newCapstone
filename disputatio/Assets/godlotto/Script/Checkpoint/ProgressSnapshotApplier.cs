@@ -55,8 +55,18 @@ public static class ProgressSnapshotApplier
 
     private static void ApplyInventory(CheckpointSaveData data)
     {
+        if (HasProgressInventorySnapshot(data))
+            InventoryAccessState.Unlock();
+
         InventoryManager inventory = InventoryManager.Instance;
         if (inventory != null)
             inventory.RestoreItemsByIds(data.itemIds);
+    }
+
+    private static bool HasProgressInventorySnapshot(CheckpointSaveData data)
+    {
+        return data != null
+               && data.itemIds != null
+               && data.itemIds.Length > 0;
     }
 }
