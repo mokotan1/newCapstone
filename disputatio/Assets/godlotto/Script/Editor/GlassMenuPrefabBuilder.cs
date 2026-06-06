@@ -24,6 +24,7 @@ public static class GlassMenuPrefabBuilder
     public static void Build()
     {
         Directory.CreateDirectory(Dir);
+        AssetDatabase.Refresh();
 
         var buttonPrefab = BuildButtonPrefab();
         BuildDialogPrefab(buttonPrefab);
