@@ -1143,6 +1143,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 687597894}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnInteraction
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Godlotto.Interaction.BedRoomInteractionController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5080065689507497260, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: back
+      objectReference: {fileID: 0}
     - target: {fileID: 8699768224628471583, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1457,6 +1477,8 @@ MonoBehaviour:
   targetPanel: {fileID: 895423974}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 687597894}
+  panelCloseInteractionId: bookpanel_backspace
 --- !u!114 &571814363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1950,7 +1972,7 @@ MonoBehaviour:
   itemId: 2
   blockName: BackSpace_Clicked
   description: 
-  eventHandler: {fileID: 687597768}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597780}
   - {fileID: 687597773}
@@ -1995,7 +2017,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -2198,7 +2220,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -2512,7 +2534,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb77d0ce495044f6e9feb91b31798e8c, type: 3}
   m_Name: 
@@ -7993,7 +8015,30 @@ MonoBehaviour:
     fungusBlockName: Parrot_Clicked
   - interactionId: button
     fungusBlockName: Button_Clicked
-  blockOutcomes: []
+  - interactionId: unlock
+    fungusBlockName: onUnlock
+  - interactionId: back
+    fungusBlockName: BackSpace_Clicked
+  blockOutcomes:
+  - blockName: Select_Yes
+    resetIsClicked: 0
+    loadScene: 0
+    sceneName: 
+    goBack: 1
+  - blockName: Select_No
+    resetIsClicked: 1
+    loadScene: 0
+    sceneName: 
+    goBack: 0
+  panelCloses:
+  - panelCloseId: bookpanel_backspace
+    panel: {fileID: 895423974}
+  - panelCloseId: panel_backspace
+    panel: {fileID: 1236498912}
+  - panelCloseId: panel_backspace
+    panel: {fileID: 552476937}
+  safePanel: {fileID: 1236498912}
+  safeItemEffect: {fileID: 892126686}
 --- !u!1 &728395126
 GameObject:
   m_ObjectHideFlags: 0
@@ -8133,6 +8178,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1236498912}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 687597894}
+  panelCloseInteractionId: panel_backspace
 --- !u!114 &733653992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9583,16 +9630,16 @@ MonoBehaviour:
   onUnlock:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 687597760}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 687597894}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.BedRoomInteractionController, Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: onUnlock
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   onStepCorrect:
@@ -10185,6 +10232,8 @@ MonoBehaviour:
   targetPanel: {fileID: 552476937}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 687597894}
+  panelCloseInteractionId: panel_backspace
 --- !u!114 &1418300023
 MonoBehaviour:
   m_ObjectHideFlags: 0

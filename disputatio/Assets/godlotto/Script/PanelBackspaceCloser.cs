@@ -1,4 +1,5 @@
 using Fungus;
+using Godlotto.Interaction;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -18,6 +19,12 @@ public class PanelBackspaceCloser : MonoBehaviour
     [Tooltip("비워 두면 현재 씬 Flowchart를 우선 찾고, 없으면 Variablemanager를 사용합니다.")]
     [SerializeField] private Flowchart targetFlowchart;
 
+    [Tooltip("설정 시 RoomInteractionController.OnClosePanel로 패널 닫기를 위임합니다.")]
+    [SerializeField] private RoomInteractionController interactionController;
+
+    [Tooltip("interactionController와 함께 사용. 예: bookpanel_backspace, panel_backspace")]
+    [SerializeField] private string panelCloseInteractionId;
+
     private Button button;
 
     private void Awake()
@@ -34,11 +41,12 @@ public class PanelBackspaceCloser : MonoBehaviour
 
     public void ClosePanel()
     {
-        GameObject panel = targetPanel != null
-            ? targetPanel
-            : transform.parent != null
-                ? transform.parent.gameObject
-                : null;
+        GameObject panel = ResolveTargetPanel();
+        if (interactionController != null && !string.IsNullOrWhiteSpace(panelCloseInteractionId))
+        {
+            interactionController.OnClosePanel(panelCloseInteractionId, panel);
+            return;
+        }
 
         if (panel != null)
             panel.SetActive(false);
@@ -48,6 +56,14 @@ public class PanelBackspaceCloser : MonoBehaviour
         Flowchart flowchart = ResolveFlowchart();
         ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
         DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+    }
+
+    private GameObject ResolveTargetPanel()
+    {
+        if (targetPanel != null)
+            return targetPanel;
+
+        return transform.parent != null ? transform.parent.gameObject : null;
     }
 
     private void ExecuteCloseBlock()

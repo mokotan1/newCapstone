@@ -18,10 +18,13 @@ namespace Godlotto.Interaction
         [SerializeField] WorldClickBinding[] worldClicks = Array.Empty<WorldClickBinding>();
         [SerializeField] InteractionRoute[] routes = Array.Empty<InteractionRoute>();
         [SerializeField] BlockOutcome[] blockOutcomes = Array.Empty<BlockOutcome>();
+        [SerializeField] PanelCloseBinding[] panelCloses = Array.Empty<PanelCloseBinding>();
 
         readonly Dictionary<string, string> blockNameByInteractionId = new Dictionary<string, string>();
         readonly Dictionary<string, BlockOutcome> outcomeByBlockName = new Dictionary<string, BlockOutcome>();
+        readonly Dictionary<string, GameObject> panelByCloseId = new Dictionary<string, GameObject>();
 
+        protected Flowchart Flowchart => flowchart;
         protected virtual string LogPrefix => "[RoomInteraction]";
 
         void Awake()
@@ -82,6 +85,31 @@ namespace Godlotto.Interaction
 
             if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, blockName))
                 LogIgnored($"Failed to execute block '{blockName}' for '{interactionId}'.");
+        }
+
+        /// <summary>패널 백스페이스 등에서 호출. 패널을 닫고 isClicked를 리셋합니다.</summary>
+        public void OnClosePanel(string panelCloseId, GameObject panelOverride = null)
+        {
+            if (string.IsNullOrWhiteSpace(panelCloseId))
+                return;
+
+            GameObject panel = panelOverride;
+            if (panel == null && !panelByCloseId.TryGetValue(panelCloseId, out panel))
+            {
+                LogIgnored($"Unknown panel close id '{panelCloseId}'.");
+                return;
+            }
+
+            if (panel != null)
+                panel.SetActive(false);
+
+            HandlePanelClosed(panelCloseId, panel);
+            ResetIsClicked();
+            DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+        }
+
+        protected virtual void HandlePanelClosed(string panelCloseId, GameObject closedPanel)
+        {
         }
 
         void OnBlockEnd(Block block)
@@ -148,6 +176,7 @@ namespace Godlotto.Interaction
         {
             blockNameByInteractionId.Clear();
             outcomeByBlockName.Clear();
+            panelByCloseId.Clear();
 
             foreach (InteractionRoute route in routes)
             {
@@ -164,6 +193,14 @@ namespace Godlotto.Interaction
                     continue;
 
                 outcomeByBlockName[outcome.blockName] = outcome;
+            }
+
+            foreach (PanelCloseBinding binding in panelCloses)
+            {
+                if (binding == null || string.IsNullOrWhiteSpace(binding.panelCloseId) || binding.panel == null)
+                    continue;
+
+                panelByCloseId[binding.panelCloseId] = binding.panel;
             }
         }
 
@@ -271,6 +308,13 @@ namespace Godlotto.Interaction
         public bool loadScene;
         public string sceneName;
         public bool goBack;
+    }
+
+    [Serializable]
+    public class PanelCloseBinding
+    {
+        public string panelCloseId;
+        public GameObject panel;
     }
 
     static class SceneManagerHelper
