@@ -28,6 +28,18 @@ public class StudyRoomPuzzleControllerTests
         {
             new InteractionRoute { interactionId = "cardstack", fungusBlockName = "CardStack_Clicked" },
             new InteractionRoute { interactionId = "diary", fungusBlockName = "Diary_Clicked" },
+            new InteractionRoute { interactionId = "bible", fungusBlockName = "Bible_Clicked" },
+            new InteractionRoute { interactionId = "bookcase1", fungusBlockName = "BookCase1_Clicked" },
+            new InteractionRoute { interactionId = "unlock", fungusBlockName = "UnlockSuccess" },
+        });
+        SetPrivateField(controller, "blockOutcomes", new[]
+        {
+            new BlockOutcome
+            {
+                blockName = "BookCase1_Clicked",
+                loadScene = true,
+                sceneName = "BookCase1",
+            },
         });
 
         RebuildLookupCaches(controller);
@@ -87,6 +99,69 @@ public class StudyRoomPuzzleControllerTests
         controller.OnInteraction("diary");
 
         Assert.AreEqual("Diary_Clicked", executedBlock);
+    }
+
+    [Test]
+    public void OnInteraction_BibleId_ExecutesMappedBlock()
+    {
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction("bible");
+
+        Assert.AreEqual("Bible_Clicked", executedBlock);
+    }
+
+    [Test]
+    public void OnInteraction_BookCase1Id_ExecutesMappedBlock()
+    {
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction("bookcase1");
+
+        Assert.AreEqual("BookCase1_Clicked", executedBlock);
+    }
+
+    [Test]
+    public void OnInteraction_UnlockId_ExecutesUnlockSuccessBlock()
+    {
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction("unlock");
+
+        Assert.AreEqual("UnlockSuccess", executedBlock);
+    }
+
+    [Test]
+    public void OnBlockEnd_BookCase1LoadOutcome_RequestsSceneLoad()
+    {
+        string requestedScene = null;
+        RoomInteractionController.SceneLoadHandlerForTests = sceneName =>
+        {
+            requestedScene = sceneName;
+            return true;
+        };
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "BookCase1_Clicked";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.AreEqual("BookCase1", requestedScene);
     }
 
     static void SetPrivateField(object target, string fieldName, object value)

@@ -37,7 +37,6 @@ public static class CorridorEntranceSceneMigrator
         "EnterBasement",
     };
 
-    [MenuItem("Tools/godlotto/Migrate Corridor Entrance Scenes")]
     public static void MigrateAllTargetScenes()
     {
         int changed = 0;
@@ -59,7 +58,6 @@ public static class CorridorEntranceSceneMigrator
         VerifyTargetScenes();
     }
 
-    [MenuItem("Tools/godlotto/Verify Corridor Entrance Migration")]
     public static void VerifyTargetScenes()
     {
         int violations = 0;

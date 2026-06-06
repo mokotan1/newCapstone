@@ -1527,6 +1527,8 @@ MonoBehaviour:
   targetPanel: {fileID: 93526756}
   executeBlockName: DiaryBackspace
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &413302058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1828,6 +1830,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &499077547 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 499077546}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &501179957
 GameObject:
   m_ObjectHideFlags: 0
@@ -2208,16 +2221,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 826082676}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 826082832}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.StudyRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: CardStack_Clicked
+          m_StringArgument: cardstack
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &766125403
@@ -2380,16 +2394,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 826082676}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 826082832}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.StudyRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Diary_Clicked
+          m_StringArgument: diary
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &788013714
@@ -2822,22 +2837,18 @@ GameObject:
   - component: {fileID: 826082675}
   - component: {fileID: 826082674}
   - component: {fileID: 826082678}
-  - component: {fileID: 826082679}
   - component: {fileID: 826082680}
   - component: {fileID: 826082681}
   - component: {fileID: 826082682}
   - component: {fileID: 826082702}
   - component: {fileID: 826082701}
   - component: {fileID: 826082700}
-  - component: {fileID: 826082699}
   - component: {fileID: 826082684}
   - component: {fileID: 826082685}
   - component: {fileID: 826082683}
-  - component: {fileID: 826082686}
   - component: {fileID: 826082698}
   - component: {fileID: 826082697}
   - component: {fileID: 826082696}
-  - component: {fileID: 826082695}
   - component: {fileID: 826082707}
   - component: {fileID: 826082709}
   - component: {fileID: 826082720}
@@ -2892,7 +2903,6 @@ GameObject:
   - component: {fileID: 826082803}
   - component: {fileID: 826082804}
   - component: {fileID: 826082805}
-  - component: {fileID: 826082806}
   - component: {fileID: 826082809}
   - component: {fileID: 826082808}
   - component: {fileID: 826082807}
@@ -2916,7 +2926,7 @@ GameObject:
   - component: {fileID: 826082830}
   - component: {fileID: 826082829}
   - component: {fileID: 826082828}
-  - component: {fileID: 826082831}
+  - component: {fileID: 826082832}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -3052,7 +3062,7 @@ MonoBehaviour:
   itemId: 1
   blockName: BookCase1_Clicked
   description: 
-  eventHandler: {fileID: 826082679}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082753}
   - {fileID: 826082754}
@@ -3061,22 +3071,6 @@ MonoBehaviour:
   - {fileID: 826082793}
   - {fileID: 826082681}
   suppressAllAutoSelections: 0
---- !u!114 &826082679
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082678}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 162022978}
-  waitFrames: 1
 --- !u!114 &826082680
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3104,7 +3098,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3143,7 +3137,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3178,7 +3172,7 @@ MonoBehaviour:
   itemId: 21
   blockName: BookCase3_Clicked
   description: 
-  eventHandler: {fileID: 826082686}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082757}
   - {fileID: 826082758}
@@ -3207,38 +3201,6 @@ MonoBehaviour:
   fadeColor: {r: 0, g: 0, b: 0, a: 1}
   fadeTexture: {fileID: 0}
   fadeTweenType: 4
---- !u!114 &826082686
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082684}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 209100459}
-  waitFrames: 1
---- !u!114 &826082695
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082698}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 2033069495}
-  waitFrames: 1
 --- !u!114 &826082696
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3246,7 +3208,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3301,7 +3263,7 @@ MonoBehaviour:
   itemId: 22
   blockName: BookCase4_Clicked
   description: 
-  eventHandler: {fileID: 826082695}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082759}
   - {fileID: 826082760}
@@ -3310,22 +3272,6 @@ MonoBehaviour:
   - {fileID: 826082799}
   - {fileID: 826082696}
   suppressAllAutoSelections: 0
---- !u!114 &826082699
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082702}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 313256481}
-  waitFrames: 1
 --- !u!114 &826082700
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3333,7 +3279,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d03ae0919f04264b018681ed534177, type: 3}
   m_Name: 
@@ -3388,7 +3334,7 @@ MonoBehaviour:
   itemId: 20
   blockName: BookCase2_Clicked
   description: 
-  eventHandler: {fileID: 826082699}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082755}
   - {fileID: 826082756}
@@ -3529,7 +3475,7 @@ MonoBehaviour:
   itemId: 42
   blockName: Diary_Clicked
   description: 
-  eventHandler: {fileID: 826082831}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082734}
   - {fileID: 826082733}
@@ -7069,28 +7015,12 @@ MonoBehaviour:
   itemId: 132
   blockName: Bible_Clicked
   description: 
-  eventHandler: {fileID: 826082806}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 826082809}
   - {fileID: 826082808}
   - {fileID: 826082807}
   suppressAllAutoSelections: 0
---- !u!114 &826082806
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826082673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082805}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 815386487}
-  waitFrames: 1
 --- !u!114 &826082807
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -8322,21 +8252,80 @@ MonoBehaviour:
   returnValueType: System.Void
   showInherited: 0
   callMode: 0
---- !u!114 &826082831
+--- !u!114 &826082832
 MonoBehaviour:
-  m_ObjectHideFlags: 2
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826082673}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10eaeba5e91be479e95d4fa48679f549, type: 3}
+  m_Script: {fileID: 11500000, guid: f1a2b3c4d5e6478990a1b2c3d4e5f678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentBlock: {fileID: 826082730}
-  suppressBlockAutoSelect: 0
-  targetButton: {fileID: 788013713}
+  flowchart: {fileID: 826082676}
+  backNavigator: {fileID: 499077547}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: bible
+    collider: {fileID: 815386488}
+    clickable: {fileID: 815386487}
+  - interactionId: bookcase1
+    collider: {fileID: 162022979}
+    clickable: {fileID: 162022978}
+  - interactionId: bookcase2
+    collider: {fileID: 313256482}
+    clickable: {fileID: 313256481}
+  - interactionId: bookcase3
+    collider: {fileID: 209100460}
+    clickable: {fileID: 209100459}
+  - interactionId: bookcase4
+    collider: {fileID: 2033069496}
+    clickable: {fileID: 2033069495}
+  routes:
+  - interactionId: cardstack
+    fungusBlockName: CardStack_Clicked
+  - interactionId: diary
+    fungusBlockName: Diary_Clicked
+  - interactionId: bible
+    fungusBlockName: Bible_Clicked
+  - interactionId: bookcase1
+    fungusBlockName: BookCase1_Clicked
+  - interactionId: bookcase2
+    fungusBlockName: BookCase2_Clicked
+  - interactionId: bookcase3
+    fungusBlockName: BookCase3_Clicked
+  - interactionId: bookcase4
+    fungusBlockName: BookCase4_Clicked
+  - interactionId: unlock
+    fungusBlockName: UnlockSuccess
+  blockOutcomes:
+  - blockName: BookCase1_Clicked
+    openPanel: {fileID: 0}
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: BookCase1
+    goBack: 0
+  - blockName: BookCase2_Clicked
+    openPanel: {fileID: 0}
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: BookCase2
+    goBack: 0
+  - blockName: BookCase3_Clicked
+    openPanel: {fileID: 0}
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: BookCase3
+    goBack: 0
+  - blockName: BookCase4_Clicked
+    openPanel: {fileID: 0}
+    resetIsClicked: 0
+    loadScene: 1
+    sceneName: BookCase4
+    goBack: 0
+  panelCloses: []
 --- !u!1 &828886283
 GameObject:
   m_ObjectHideFlags: 0
@@ -9593,6 +9582,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1745605190}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1138867810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11718,16 +11709,17 @@ MonoBehaviour:
   onUnlockSuccess:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 826082676}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 826082832}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.StudyRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: UnlockSuccess
+          m_StringArgument: unlock
           m_BoolArgument: 0
         m_CallState: 2
   onUnlockFail:
@@ -13436,6 +13428,8 @@ MonoBehaviour:
   targetPanel: {fileID: 421797633}
   executeBlockName: CardStackBackspace
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!1 &7700000211
 GameObject:
   m_ObjectHideFlags: 0

@@ -144,7 +144,7 @@ flowchart TD
 | 메커니즘 | 파일 | 용도 |
 |----------|------|------|
 | `SceneTransitionService.LoadSceneSafely` | `godlotto/Script/Interaction/SceneTransitionService.cs` | 중복 LoadScene 방지 (권장) |
-| `RoomInteractionController` BlockOutcome | `godlotto/Script/Interaction/RoomInteractionController.cs` | Fungus 블록 종료 후 loadScene / goBack |
+| `RoomInteractionController` BlockOutcome | `godlotto/Script/Interaction/RoomInteractionController.cs` | Fungus 블록 종료 후 `openPanel` / `resetIsClicked` / loadScene / goBack |
 | `BackNavigator.GoBack` | `godlotto/Script/BackNavigator.cs` | 고정 복귀 테이블 또는 `PrevScene` Fungus 변수 |
 | `SceneManager.LoadScene` (직접) | 여러 레거시·맵 UI | 점진적으로 Interaction 레이어로 이전 중 |
 
@@ -289,7 +289,10 @@ flowchart LR
 | `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` |
 | `AudioController` | BGM 등 (`SingletonMonoBehaviour`) |
 | `OpeningMentionController` | 오프닝 씬 Bell/Fence (Interaction 패턴 예시) |
-| `WifeRoomPuzzleController` | 방 전용 퍼즐 (RoomInteractionController 확장) |
+| `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
+| `MaidRoomPuzzleController` | MaidRoom 클릭 진입 (Phase R3-A, RoomInteractionController 확장) |
+| `StudyRoomPuzzleController` | StudyRoom UI·월드 클릭 (R4-A CardStack/Diary, R4-B Bible/BookCase + LoadScene outcome) |
+| `ChildRoomPuzzleController` | ChildRoom 월드/UI 클릭 진입 (R5-A Bedfloor/Drawer/Chest/Table/Parrot/Button, DrawerOpen/Close) |
 
 ### 백엔드
 

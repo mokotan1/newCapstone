@@ -2701,6 +2701,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc03961113fa349c09cb06ef2911013d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!61 &315115037 stripped
+BoxCollider2D:
+  m_CorrespondingSourceObject: {fileID: 3549438756181190538, guid: d9c045861863bb646a0b303433b9820c, type: 3}
+  m_PrefabInstance: {fileID: 315115035}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &316330117
 GameObject:
   m_ObjectHideFlags: 0
@@ -3368,16 +3373,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 687597760}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 687597937}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.ChildRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: DrawerClose
+          m_StringArgument: drawer_close
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &366108621
@@ -3596,6 +3602,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+--- !u!114 &494456383 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2923548534573927799, guid: d2f11b80ceba343498c450dc14f73603, type: 3}
+  m_PrefabInstance: {fileID: 494456382}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6880b8d376106de409738c120036449d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &497335773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4632,6 +4649,7 @@ GameObject:
   - component: {fileID: 687597935}
   - component: {fileID: 687597936}
   - component: {fileID: 687597934}
+  - component: {fileID: 687597937}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -7619,7 +7637,7 @@ MonoBehaviour:
   itemId: 140
   blockName: Chest_Clicked
   description: 
-  eventHandler: {fileID: 687597837}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597836}
   - {fileID: 687597835}
@@ -8048,7 +8066,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -8080,7 +8098,7 @@ MonoBehaviour:
   itemId: 203
   blockName: Table_Clicked
   description: 
-  eventHandler: {fileID: 687597842}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597841}
   - {fileID: 687597840}
@@ -8509,7 +8527,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -8525,7 +8543,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -8973,7 +8991,7 @@ MonoBehaviour:
   itemId: 204
   blockName: Drawer_Clicked
   description: 
-  eventHandler: {fileID: 687597843}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597846}
   - {fileID: 687597845}
@@ -9558,7 +9576,7 @@ MonoBehaviour:
   itemId: 225
   blockName: Bedfloor_Clicked
   description: 
-  eventHandler: {fileID: 687597868}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597867}
   - {fileID: 687597866}
@@ -9966,7 +9984,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -13576,7 +13594,7 @@ MonoBehaviour:
   itemId: 358
   blockName: Parrot_Clicked
   description: 
-  eventHandler: {fileID: 687597933}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597932}
   suppressAllAutoSelections: 0
@@ -13608,7 +13626,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -13661,7 +13679,7 @@ MonoBehaviour:
   itemId: 360
   blockName: Button_Clicked
   description: 
-  eventHandler: {fileID: 687597936}
+  eventHandler: {fileID: 0}
   commandList:
   - {fileID: 687597934}
   suppressAllAutoSelections: 0
@@ -13672,7 +13690,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 10eaeba5e91be479e95d4fa48679f549, type: 3}
   m_Name: 
@@ -13680,6 +13698,56 @@ MonoBehaviour:
   parentBlock: {fileID: 687597935}
   suppressBlockAutoSelect: 0
   targetButton: {fileID: 0}
+--- !u!114 &687597937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687597759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d07b609201854684da71170deff98274, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 687597760}
+  backNavigator: {fileID: 494456383}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: bedfloor
+    collider: {fileID: 21414012}
+    clickable: {fileID: 21414011}
+  - interactionId: drawer
+    collider: {fileID: 228601770}
+    clickable: {fileID: 228601769}
+  - interactionId: chest
+    collider: {fileID: 1886468188}
+    clickable: {fileID: 1886468187}
+  - interactionId: table
+    collider: {fileID: 2123574954}
+    clickable: {fileID: 2123574953}
+  - interactionId: parrot
+    collider: {fileID: 315115037}
+    clickable: {fileID: 315115036}
+  routes:
+  - interactionId: bedfloor
+    fungusBlockName: Bedfloor_Clicked
+  - interactionId: drawer
+    fungusBlockName: Drawer_Clicked
+  - interactionId: chest
+    fungusBlockName: Chest_Clicked
+  - interactionId: table
+    fungusBlockName: Table_Clicked
+  - interactionId: parrot
+    fungusBlockName: Parrot_Clicked
+  - interactionId: button
+    fungusBlockName: Button_Clicked
+  - interactionId: drawer_open
+    fungusBlockName: DrawerOpen
+  - interactionId: drawer_close
+    fungusBlockName: DrawerClose
+  blockOutcomes: []
+  panelCloses: []
 --- !u!4 &778968284 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 347107479100867354, guid: 608a557b15b667d498f88b5431cdb44f, type: 3}
@@ -14050,6 +14118,171 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!43 &863365473
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 11
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 108
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 60
+    localAABB:
+      m_Center: {x: 826.7735, y: -108.068146, z: 0}
+      m_Extent: {x: 970.86774, y: 552.58655, z: 0}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 0b000c000d000d0000000b0000001000110011000100000001001400150015000200010002001800190019000300020003001c001d001d000400030004002000210021000500040005002400250025000600050006002800290029000700060007002c002d002d000800070008003000310031000900080009003400350035000a0009000a003800390039000b000a000b000e000f0000001200130001001600170002001a001b0003001e001f0004002200230005002600270006002a002b0007002e002f000800320033000900360037000a003a003b00
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 60
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 1680
+    _typelessdata: f092e2c194ff784300000000000080bf00000000f8f8e14164c2a043f8f8e14164c2a04300000000000080bf0000000052ccbc42f2e7b64352ccbc42f2e7b64300000000000080bf00000000e0d1c5449ec1b143e0d1c5449ec1b14300000000000080bf000000006da2cb44443da1436da2cb44443da14300000000000080bf0000000044c9d1444cab794344c9d1444cab794300000000000080bf00000000d56ed2443ee823c4d56ed2443ee823c400000000000080bf00000000dd12e044e62925c4dd12e044e62925c400000000000080bf0000000085b4e0449abdda4385b4e0449abdda4300000000000080bf00000000b6910bc35a42de43b6910bc35a42de4300000000000080bf000000001d1810c322bd23c41d1810c322bd23c400000000000080bf0000000000b101c20a1122c400b101c20a1122c400000000000080bf00000000f092e2c194ff784300b101c20a1122c4000000000000000000000000f092e2c194ff7843f092e2c194ff784300000000000000000000000000b101c20a1122c400b101c20a1122c4000000000000803f00000000f092e2c194ff784300b101c20a1122c4000000000000404000000000f092e2c194ff7843f092e2c194ff7843000000000000000000000000f8f8e14164c2a043f8f8e14164c2a043000000000000000000000000f092e2c194ff7843f092e2c194ff7843000000000000803f00000000f8f8e14164c2a043f092e2c194ff7843000000000000404000000000f8f8e14164c2a043f8f8e14164c2a04300000000000000000000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000000000000000f8f8e14164c2a043f8f8e14164c2a043000000000000803f0000000052ccbc42f2e7b643f8f8e14164c2a04300000000000040400000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000000000000000e0d1c5449ec1b143e0d1c5449ec1b14300000000000000000000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000803f00000000e0d1c5449ec1b14352ccbc42f2e7b643000000000000404000000000e0d1c5449ec1b143e0d1c5449ec1b1430000000000000000000000006da2cb44443da1436da2cb44443da143000000000000000000000000e0d1c5449ec1b143e0d1c5449ec1b143000000000000803f000000006da2cb44443da143e0d1c5449ec1b1430000000000004040000000006da2cb44443da1436da2cb44443da14300000000000000000000000044c9d1444cab794344c9d1444cab79430000000000000000000000006da2cb44443da1436da2cb44443da143000000000000803f0000000044c9d1444cab79436da2cb44443da14300000000000040400000000044c9d1444cab794344c9d1444cab7943000000000000000000000000d56ed2443ee823c4d56ed2443ee823c400000000000000000000000044c9d1444cab794344c9d1444cab7943000000000000803f00000000d56ed2443ee823c444c9d1444cab7943000000000000404000000000d56ed2443ee823c4d56ed2443ee823c4000000000000000000000000dd12e044e62925c4dd12e044e62925c4000000000000000000000000d56ed2443ee823c4d56ed2443ee823c4000000000000803f00000000dd12e044e62925c4d56ed2443ee823c4000000000000404000000000dd12e044e62925c4dd12e044e62925c400000000000000000000000085b4e0449abdda4385b4e0449abdda43000000000000000000000000dd12e044e62925c4dd12e044e62925c4000000000000803f0000000085b4e0449abdda43dd12e044e62925c400000000000040400000000085b4e0449abdda4385b4e0449abdda43000000000000000000000000b6910bc35a42de43b6910bc35a42de4300000000000000000000000085b4e0449abdda4385b4e0449abdda43000000000000803f00000000b6910bc35a42de4385b4e0449abdda43000000000000404000000000b6910bc35a42de43b6910bc35a42de430000000000000000000000001d1810c322bd23c41d1810c322bd23c4000000000000000000000000b6910bc35a42de43b6910bc35a42de43000000000000803f000000001d1810c322bd23c4b6910bc35a42de430000000000004040000000001d1810c322bd23c41d1810c322bd23c400000000000000000000000000b101c20a1122c400b101c20a1122c40000000000000000000000001d1810c322bd23c41d1810c322bd23c4000000000000803f0000000000b101c20a1122c41d1810c322bd23c400000000000040400000000000b101c20a1122c4
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  'm_MeshMetrics[0]': 1
+  'm_MeshMetrics[1]': 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &884593037
 GameObject:
   m_ObjectHideFlags: 0
@@ -14549,6 +14782,8 @@ MonoBehaviour:
   targetPanel: {fileID: 336609492}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1075481225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16301,171 +16536,6 @@ MonoBehaviour:
           m_StringArgument: allSealsComplete
           m_BoolArgument: 0
         m_CallState: 2
---- !u!43 &1447172789
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 11
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 108
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 60
-    localAABB:
-      m_Center: {x: 826.7735, y: -108.068146, z: 0}
-      m_Extent: {x: 970.86774, y: 552.58655, z: 0}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 0b000c000d000d0000000b0000001000110011000100000001001400150015000200010002001800190019000300020003001c001d001d000400030004002000210021000500040005002400250025000600050006002800290029000700060007002c002d002d000800070008003000310031000900080009003400350035000a0009000a003800390039000b000a000b000e000f0000001200130001001600170002001a001b0003001e001f0004002200230005002600270006002a002b0007002e002f000800320033000900360037000a003a003b00
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 60
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 1680
-    _typelessdata: f092e2c194ff784300000000000080bf00000000f8f8e14164c2a043f8f8e14164c2a04300000000000080bf0000000052ccbc42f2e7b64352ccbc42f2e7b64300000000000080bf00000000e0d1c5449ec1b143e0d1c5449ec1b14300000000000080bf000000006da2cb44443da1436da2cb44443da14300000000000080bf0000000044c9d1444cab794344c9d1444cab794300000000000080bf00000000d56ed2443ee823c4d56ed2443ee823c400000000000080bf00000000dd12e044e62925c4dd12e044e62925c400000000000080bf0000000085b4e0449abdda4385b4e0449abdda4300000000000080bf00000000b6910bc35a42de43b6910bc35a42de4300000000000080bf000000001d1810c322bd23c41d1810c322bd23c400000000000080bf0000000000b101c20a1122c400b101c20a1122c400000000000080bf00000000f092e2c194ff784300b101c20a1122c4000000000000000000000000f092e2c194ff7843f092e2c194ff784300000000000000000000000000b101c20a1122c400b101c20a1122c4000000000000803f00000000f092e2c194ff784300b101c20a1122c4000000000000404000000000f092e2c194ff7843f092e2c194ff7843000000000000000000000000f8f8e14164c2a043f8f8e14164c2a043000000000000000000000000f092e2c194ff7843f092e2c194ff7843000000000000803f00000000f8f8e14164c2a043f092e2c194ff7843000000000000404000000000f8f8e14164c2a043f8f8e14164c2a04300000000000000000000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000000000000000f8f8e14164c2a043f8f8e14164c2a043000000000000803f0000000052ccbc42f2e7b643f8f8e14164c2a04300000000000040400000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000000000000000e0d1c5449ec1b143e0d1c5449ec1b14300000000000000000000000052ccbc42f2e7b64352ccbc42f2e7b643000000000000803f00000000e0d1c5449ec1b14352ccbc42f2e7b643000000000000404000000000e0d1c5449ec1b143e0d1c5449ec1b1430000000000000000000000006da2cb44443da1436da2cb44443da143000000000000000000000000e0d1c5449ec1b143e0d1c5449ec1b143000000000000803f000000006da2cb44443da143e0d1c5449ec1b1430000000000004040000000006da2cb44443da1436da2cb44443da14300000000000000000000000044c9d1444cab794344c9d1444cab79430000000000000000000000006da2cb44443da1436da2cb44443da143000000000000803f0000000044c9d1444cab79436da2cb44443da14300000000000040400000000044c9d1444cab794344c9d1444cab7943000000000000000000000000d56ed2443ee823c4d56ed2443ee823c400000000000000000000000044c9d1444cab794344c9d1444cab7943000000000000803f00000000d56ed2443ee823c444c9d1444cab7943000000000000404000000000d56ed2443ee823c4d56ed2443ee823c4000000000000000000000000dd12e044e62925c4dd12e044e62925c4000000000000000000000000d56ed2443ee823c4d56ed2443ee823c4000000000000803f00000000dd12e044e62925c4d56ed2443ee823c4000000000000404000000000dd12e044e62925c4dd12e044e62925c400000000000000000000000085b4e0449abdda4385b4e0449abdda43000000000000000000000000dd12e044e62925c4dd12e044e62925c4000000000000803f0000000085b4e0449abdda43dd12e044e62925c400000000000040400000000085b4e0449abdda4385b4e0449abdda43000000000000000000000000b6910bc35a42de43b6910bc35a42de4300000000000000000000000085b4e0449abdda4385b4e0449abdda43000000000000803f00000000b6910bc35a42de4385b4e0449abdda43000000000000404000000000b6910bc35a42de43b6910bc35a42de430000000000000000000000001d1810c322bd23c41d1810c322bd23c4000000000000000000000000b6910bc35a42de43b6910bc35a42de43000000000000803f000000001d1810c322bd23c4b6910bc35a42de430000000000004040000000001d1810c322bd23c41d1810c322bd23c400000000000000000000000000b101c20a1122c400b101c20a1122c40000000000000000000000001d1810c322bd23c41d1810c322bd23c4000000000000803f0000000000b101c20a1122c41d1810c322bd23c400000000000040400000000000b101c20a1122c4
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}
-  m_MeshUsageFlags: 0
-  m_CookingOptions: 30
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  'm_MeshMetrics[0]': 1
-  'm_MeshMetrics[1]': 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
 --- !u!1 &1493569016
 GameObject:
   m_ObjectHideFlags: 0
@@ -16521,6 +16591,8 @@ MonoBehaviour:
   targetPanel: {fileID: 1363582558}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1493569019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16913,6 +16985,8 @@ MonoBehaviour:
   targetPanel: {fileID: 313748900}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1544440898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17129,6 +17203,8 @@ MonoBehaviour:
   targetPanel: {fileID: 595167403}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1605524965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17434,7 +17510,7 @@ MonoBehaviour:
     rid: -2
   m_ShadowCastingSource: 1
   m_ShadowMesh:
-    m_Mesh: {fileID: 1447172789}
+    m_Mesh: {fileID: 863365473}
     m_LocalBounds:
       m_Center: {x: 826.77356, y: -108.068115, z: 0}
       m_Extent: {x: 970.86774, y: 552.58655, z: 0}
@@ -17749,6 +17825,8 @@ MonoBehaviour:
   targetPanel: {fileID: 378453754}
   executeBlockName: 
   targetFlowchart: {fileID: 0}
+  interactionController: {fileID: 0}
+  panelCloseInteractionId: 
 --- !u!114 &1862608184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18702,16 +18780,17 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 687597760}
-        m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus
-        m_MethodName: ExecuteBlock
+      - m_Target: {fileID: 687597937}
+        m_TargetAssemblyTypeName: Godlotto.Interaction.ChildRoomPuzzleController,
+          Assembly-CSharp
+        m_MethodName: OnInteraction
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: 
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: DrawerOpen
+          m_StringArgument: drawer_open
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2101294112

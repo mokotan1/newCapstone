@@ -112,7 +112,6 @@ public static class BedRoomSceneMigrator
         public string PanelCloseId;
     }
 
-    [MenuItem("Tools/godlotto/Migrate BedRoom Phase R1 Click Entry")]
     public static void MigrateBedRoomClickEntry()
     {
         try
@@ -131,7 +130,6 @@ public static class BedRoomSceneMigrator
         VerifyBedRoomClickMigration();
     }
 
-    [MenuItem("Tools/godlotto/Migrate BedRoom Phase R1-B Unlock Entry")]
     public static void MigrateBedRoomUnlockEntry()
     {
         try
@@ -150,7 +148,6 @@ public static class BedRoomSceneMigrator
         VerifyBedRoomUnlockMigration();
     }
 
-    [MenuItem("Tools/godlotto/Migrate BedRoom Phase R1-C Panel Backspace")]
     public static void MigrateBedRoomPanelBackspace()
     {
         try
@@ -169,7 +166,6 @@ public static class BedRoomSceneMigrator
         VerifyBedRoomPanelBackspaceMigration();
     }
 
-    [MenuItem("Tools/godlotto/Migrate BedRoom Phase R1-D Back Return")]
     public static void MigrateBedRoomBackReturn()
     {
         try
@@ -188,7 +184,6 @@ public static class BedRoomSceneMigrator
         VerifyBedRoomBackReturnMigration();
     }
 
-    [MenuItem("Tools/godlotto/Verify BedRoom Back Return Migration")]
     public static void VerifyBedRoomBackReturnMigration()
     {
         var scene = EditorSceneManager.OpenScene(BedRoomScenePath, OpenSceneMode.Single);
@@ -232,7 +227,6 @@ public static class BedRoomSceneMigrator
             Debug.LogError($"[BedRoomSceneMigrator] R1-D verification failed: {violations} issue(s).");
     }
 
-    [MenuItem("Tools/godlotto/Verify BedRoom Unlock Migration")]
     public static void VerifyBedRoomUnlockMigration()
     {
         var scene = EditorSceneManager.OpenScene(BedRoomScenePath, OpenSceneMode.Single);
@@ -268,7 +262,6 @@ public static class BedRoomSceneMigrator
             Debug.LogError($"[BedRoomSceneMigrator] R1-B verification failed: {violations} issue(s).");
     }
 
-    [MenuItem("Tools/godlotto/Verify BedRoom Click Migration")]
     public static void VerifyBedRoomClickMigration()
     {
         var scene = EditorSceneManager.OpenScene(BedRoomScenePath, OpenSceneMode.Single);
@@ -327,7 +320,6 @@ public static class BedRoomSceneMigrator
             Debug.LogError($"[BedRoomSceneMigrator] Verification failed: {violations} issue(s).");
     }
 
-    [MenuItem("Tools/godlotto/Verify BedRoom Panel Backspace Migration")]
     public static void VerifyBedRoomPanelBackspaceMigration()
     {
         var scene = EditorSceneManager.OpenScene(BedRoomScenePath, OpenSceneMode.Single);
