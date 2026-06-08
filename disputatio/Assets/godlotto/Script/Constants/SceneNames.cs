@@ -10,5 +10,6 @@ public static class SceneNames
     public const string WifeRoom = "WifeRoom";
     public const string BedRoom = "BedRoom";
     public const string HallPlayable = "Hall_playerble";
+    public const string HallAnimate = "Hall_animate";
     public const string HallRight = "Hall_Right";
 }

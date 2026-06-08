@@ -1,3 +1,5 @@
+using Fungus;
+
 namespace Godlotto.Interaction
 {
     /// <summary>
@@ -6,6 +8,33 @@ namespace Godlotto.Interaction
     /// </summary>
     public class CorridorEntranceController : RoomInteractionController
     {
+        const string HallAnimationEntryBlockName = "IsPlayedAnimation";
+
         protected override string LogPrefix => "[CorridorEntrance]";
+
+        protected override void ApplyBlockOutcome(Block block, BlockOutcome outcome)
+        {
+            if (ShouldSkipRepeatedHallAnimation(block, outcome))
+                return;
+
+            base.ApplyBlockOutcome(block, outcome);
+        }
+
+        static bool ShouldSkipRepeatedHallAnimation(Block block, BlockOutcome outcome)
+        {
+            return block != null
+                && outcome != null
+                && string.Equals(block.BlockName, HallAnimationEntryBlockName, System.StringComparison.Ordinal)
+                && outcome.loadScene
+                && string.Equals(outcome.sceneName, SceneNames.HallAnimate, System.StringComparison.Ordinal)
+                && IsHallPlayableContext()
+                && string.Equals(SceneTransitionService.PreviousSceneName, SceneNames.HallAnimate, System.StringComparison.Ordinal);
+        }
+
+        static bool IsHallPlayableContext()
+        {
+            return string.Equals(SceneManagerHelper.GetActiveSceneName(), SceneNames.HallPlayable, System.StringComparison.Ordinal)
+                || string.Equals(SceneTransitionService.LastLoadedSceneName, SceneNames.HallPlayable, System.StringComparison.Ordinal);
+        }
     }
 }

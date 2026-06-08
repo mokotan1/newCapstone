@@ -46,6 +46,12 @@ public class CorridorEntranceControllerTests
                 blockName = "Select_Yes",
                 goBack = true,
             },
+            new BlockOutcome
+            {
+                blockName = "IsPlayedAnimation",
+                loadScene = true,
+                sceneName = SceneNames.HallAnimate,
+            },
         });
 
         RebuildLookupCaches(controller);
@@ -106,6 +112,25 @@ public class CorridorEntranceControllerTests
         controller.InvokeBlockEndForTests(block);
 
         Assert.AreEqual(SceneNames.BedRoom, requestedScene);
+    }
+
+    [Test]
+    public void OnBlockEnd_HallAnimationAfterReturningFromHallAnimation_DoesNotRequestSceneLoad()
+    {
+        string requestedScene = null;
+        SceneTransitionService.SetLoadedScenesForTests(SceneNames.HallAnimate, SceneNames.HallPlayable);
+        RoomInteractionController.SceneLoadHandlerForTests = sceneName =>
+        {
+            requestedScene = sceneName;
+            return true;
+        };
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "IsPlayedAnimation";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsNull(requestedScene);
     }
 
     [Test]
