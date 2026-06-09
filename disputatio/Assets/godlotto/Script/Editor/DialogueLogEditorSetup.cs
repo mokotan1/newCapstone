@@ -9,13 +9,14 @@ using UnityEngine.UI;
 
 /// <summary>
 /// <c>disputatio/docs/dialogue-log-editor-setup.md</c> 사양대로
-/// DialogueLogEntry 프리팹, IntroScene 패널, SayDialogGothic 로그 버튼을 구성한다.
+/// DialogueLogEntry 프리팹, IntroScene 패널, SayDialog 로그 버튼을 구성한다.
 /// </summary>
 public static class DialogueLogEditorSetup
 {
     const string IntroScenePath = "Assets/Scenes/godlotto/IntroScene.unity";
     const string EntryPrefabPath = "Assets/godlotto/Prefab/DialogueLogEntry.prefab";
     const string SayDialogGothicPath = "Assets/godlotto/Prefab/SayDialogGothic.prefab";
+    const string SayDialogNotebookPath = "Assets/godlotto/Prefab/SayDialogNotebook.prefab";
     public const string ManagerObjectName = "DialogueLogManager";
     const string LogButtonName = "LogButton";
 
@@ -30,11 +31,21 @@ public static class DialogueLogEditorSetup
     {
         GameObject entryPrefab = EnsureEntryPrefab();
         SetupIntroScene(entryPrefab);
-        SetupSayDialogLogButton();
+        SetupSayDialogLogButton(SayDialogGothicPath);
+        SetupSayDialogLogButton(SayDialogNotebookPath);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[DialogueLogEditorSetup] 대사 로그 에디터 연동을 완료했습니다.");
+    }
+
+    [MenuItem("Tools/Godlotto/Setup Dialogue Log Button (SayDialogNotebook)")]
+    public static void ApplySayDialogNotebookLogButton()
+    {
+        SetupSayDialogLogButton(SayDialogNotebookPath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[DialogueLogEditorSetup] SayDialogNotebook 로그 버튼을 적용했습니다.");
     }
 
     static GameObject EnsureEntryPrefab()
@@ -179,26 +190,27 @@ public static class DialogueLogEditorSetup
         return logPanel;
     }
 
-    static void SetupSayDialogLogButton()
+    static void SetupSayDialogLogButton(string prefabPath)
     {
-        var prefabRoot = PrefabUtility.LoadPrefabContents(SayDialogGothicPath);
+        var prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
         try
         {
             Transform panel = FindDeepChild(prefabRoot.transform, "Panel");
             if (panel == null)
             {
-                Debug.LogError("[DialogueLogEditorSetup] SayDialogGothic에서 Panel을 찾을 수 없습니다.");
+                Debug.LogError($"[DialogueLogEditorSetup] {prefabPath}에서 Panel을 찾을 수 없습니다.");
                 return;
             }
 
-            Transform existing = panel.Find(LogButtonName);
+            // 47e7f967 수동 YAML은 StoryText 하위에 LogButton을 둔 경우가 있어 직속 Find만으로는 누락된다.
+            Transform existing = FindDeepChild(prefabRoot.transform, LogButtonName);
             if (existing != null)
                 Object.DestroyImmediate(existing.gameObject);
 
             var logButton = CreateButton(panel, LogButtonName, "로그", new Vector2(1f, 0f), new Vector2(-130f, 38f), new Vector2(77f, 77f));
             logButton.AddComponent<DialogueLogButton>();
 
-            PrefabUtility.SaveAsPrefabAsset(prefabRoot, SayDialogGothicPath);
+            PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
         }
         finally
         {
@@ -299,26 +311,6 @@ public static class DialogueLogEditorSetup
         if (!string.IsNullOrEmpty(parent) && !AssetDatabase.IsValidFolder(parent))
             EnsureDirectory(parent);
         AssetDatabase.CreateFolder(parent, leaf);
-    }
-}
-
-/// <summary>Unity 에디터가 열려 있을 때 신규 스크립트 컴파일 후 1회 자동 적용.</summary>
-[InitializeOnLoad]
-static class DialogueLogEditorSetupBootstrap
-{
-    static DialogueLogEditorSetupBootstrap()
-    {
-        EditorApplication.delayCall += TryApplyIfMissing;
-    }
-
-    static void TryApplyIfMissing()
-    {
-        if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
-            return;
-        if (GameObject.Find(DialogueLogEditorSetup.ManagerObjectName) != null)
-            return;
-
-        DialogueLogEditorSetup.ApplyAll();
     }
 }
 #endif

@@ -34,6 +34,11 @@ alwaysApply: true
 
 아키텍처에 영향을 주면 `docs/architecture.md`를 갱신하고, 불확실한 점은 **§8 미확인 사항**에 남긴다.
 
+`disputatio/` C#·씬·프리팹을 바꿨다면 **완료 응답 전**에
+`.cursor/rules/unity-verification-postflight.mdc`의 unity-cli 사후 검증(compile,
+console, EditMode `--filter`)을 실행한다. 구문 검사만으로 완료 처리하지 않는다.
+
 ## 스킬
 
 동일 워크플로는 프로젝트 스킬 `.cursor/skills/newcapstone-architecture/SKILL.md`를 따른다.
+Unity 자동화·검증은 `.cursor/skills/newcapstone-unity-automation/SKILL.md`를 따른다.

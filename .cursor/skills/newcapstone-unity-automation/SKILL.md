@@ -86,6 +86,49 @@ Prefer Unity MCP for interactive editor inspection:
 - Do not hardcode API keys or private server secrets. Use existing config and
   environment variable patterns.
 
+## Mandatory postflight (에이전트 필수)
+
+Cursor 규칙 `.cursor/rules/unity-verification-postflight.mdc`를 따른다.
+**코드·씬·프리팹 변경 후** 완료 응답 전에 아래를 실행한다. `CSharpSyntaxChecker`만으로는 부족하다.
+
+### CLI 경로 (Windows)
+
+```powershell
+# PATH 없을 때
+& "$env:LOCALAPPDATA\unity-cli\unity-cli.exe" --project disputatio status
+```
+
+### 검증 순서
+
+```bash
+unity-cli --project disputatio status
+unity-cli --project disputatio editor refresh --compile    # C# 변경 시
+unity-cli --project disputatio console --type error,warning --lines 80
+unity-cli --project disputatio test --mode EditMode --filter <TestClassName>
+```
+
+`--filter`는 **테스트 클래스 전체 이름** (예: `BedRoomInteractionControllerTests`).
+부분 문자열·정규식·`|` 조합은 동작하지 않는다.
+
+### Interaction 하네스 필터
+
+| 변경 | `--filter` |
+|------|------------|
+| BedRoom | `BedRoomInteractionControllerTests` |
+| CorridorEntrance | `CorridorEntranceControllerTests` |
+| Kitchen | `KitchenInteractionControllerTests` |
+| OpeningMention | `OpeningMentionControllerTests` |
+| ChildRoom | `ChildRoomPuzzleControllerTests` |
+| MaidRoom | `MaidRoomPuzzleControllerTests` |
+| StudyRoom | `StudyRoomPuzzleControllerTests` |
+| WifeRoom | `WifeRoomPuzzleControllerTests` |
+| InventoryGuide | `InventoryGuideControllerTests` |
+| `Interaction/` 공통 타입 | 위 8개 Interaction 테스트 **각각** 실행 |
+
+신규 Controller는 대응 `*Tests`를 `Assets/Editor/Tests/EditMode/`에 추가한 뒤 그 클래스로 `--filter`한다.
+
+Unity MCP(`validate_script`, `read_console`)는 **보조**. MCP 실패 + `status` ready이면 CLI만으로 계속 검증한다.
+
 ## Standard workflow
 
 1. Read `docs/architecture.md` and map the task to the documented folder.
@@ -98,13 +141,7 @@ Prefer Unity MCP for interactive editor inspection:
 3. If `unity-cli` is unavailable, say so and fall back to Unity MCP or explain
    that the Unity Editor must be opened/imported first.
 4. Make the smallest scoped code or asset change.
-5. Verify with the narrowest useful command:
-
-   ```bash
-   unity-cli --project disputatio test --mode EditMode
-   unity-cli --project disputatio console --type error,warning --lines 80
-   ```
-
+5. Run **Mandatory postflight** (위 절) — 전체 EditMode 대신 **좁은 `--filter`** 우선.
 6. For scene/prefab/asset changes, reserialize only changed assets when
    possible:
 
@@ -112,8 +149,8 @@ Prefer Unity MCP for interactive editor inspection:
    unity-cli --project disputatio reserialize Assets/Scenes/Mokotan/Opening_Office.unity
    ```
 
-7. Summarize what changed, which verification ran, and any remaining Unity
-   Editor steps.
+7. Summarize what changed, **which commands ran and pass/fail counts**, and any
+   remaining Unity Editor steps.
 
 ## Useful focused commands
 

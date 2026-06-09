@@ -37,6 +37,22 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     private readonly List<DialogInput> disabledInputs = new List<DialogInput>();
     private bool isOpen;
 
+    public bool IsOpen => isOpen;
+
+    /// <summary>
+    /// EditMode 테스트에서 DontDestroyOnLoad 직후 static Instance가 비는 경우를 보정한다.
+    /// </summary>
+    internal static void EnsureInstanceForTests(DialogueLogPanel panel)
+    {
+        if (panel != null && Instance != panel)
+            Instance = panel;
+    }
+
+    /// <summary>
+    /// 로그가 Escape로 닫힌 같은 프레임에 설정 패널 Escape 토글이 이어지지 않도록 한다.
+    /// </summary>
+    internal bool SuppressOtherModalEscapeHandling { get; private set; }
+
     protected override void OnSingletonAwake()
     {
         if (logPanel != null)
@@ -63,14 +79,22 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
             return;
         }
 
-        if (Input.GetKeyDown(logHotkey))
+        if (Input.GetKeyDown(logHotkey) && !ModalGamePause.IsSettingsOpen)
         {
             Toggle();
             return;
         }
 
         if (isOpen && Input.GetKeyDown(KeyCode.Escape))
+        {
+            SuppressOtherModalEscapeHandling = true;
             Close();
+        }
+    }
+
+    private void LateUpdate()
+    {
+        SuppressOtherModalEscapeHandling = false;
     }
 
     // ---------------------------------------------------------------------
@@ -86,21 +110,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         if (sayDialog == null)
             return;
 
-        string text = sayDialog.StoryText;
-        if (string.IsNullOrWhiteSpace(text))
-            return;
-
-        string speaker = sayDialog.NameText;
-
-        // End가 중복 발생하거나 같은 줄이 재출력되는 경우 직전 항목과 동일하면 skip.
-        if (entries.Count > 0)
-        {
-            var last = entries[entries.Count - 1];
-            if (last.Speaker == speaker && last.Text == text)
-                return;
-        }
-
-        entries.Add(new DialogueLogEntry(speaker, text));
+        DialogueLogLogic.TryAppend(entries, sayDialog.NameText, sayDialog.StoryText);
     }
 
     // ---------------------------------------------------------------------
@@ -108,13 +118,16 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     // ---------------------------------------------------------------------
     public void Toggle()
     {
+        if (!isOpen && ModalGamePause.IsSettingsOpen)
+            return;
+
         if (isOpen) Close();
         else Open();
     }
 
     public void Open()
     {
-        if (isOpen || logPanel == null)
+        if (isOpen || logPanel == null || ModalGamePause.IsSettingsOpen)
             return;
 
         isOpen = true;
@@ -139,8 +152,9 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
             logPanel.SetActive(false);
 
         RestoreDialogueAdvance();
-        SettingPanelWorldInputBlocker.End();
-        Time.timeScale = 1f;
+        if (ModalGamePause.ShouldEndWorldInputBlocker())
+            SettingPanelWorldInputBlocker.End();
+        Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();
     }
 
     // ---------------------------------------------------------------------
@@ -161,15 +175,8 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
             go.SetActive(true);
             var label = go.GetComponentInChildren<TMP_Text>(true);
             if (label != null)
-                label.text = FormatEntry(entry);
+                label.text = DialogueLogLogic.FormatEntry(entry);
         }
-    }
-
-    private static string FormatEntry(DialogueLogEntry entry)
-    {
-        return string.IsNullOrEmpty(entry.Speaker)
-            ? entry.Text
-            : $"<b>{entry.Speaker}</b>\n{entry.Text}";
     }
 
     private IEnumerator ScrollToBottomNextFrame()

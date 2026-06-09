@@ -1,0 +1,128 @@
+---
+description: disputatio Unity C#·씬·테스트 변경 후 unity-cli 사후 검증 필수 (하네스 루틴)
+globs: disputatio/Assets/**/*.cs,disputatio/Assets/**/*.unity,disputatio/Assets/**/*.prefab
+alwaysApply: false
+---
+
+# Unity 사후 검증 (postflight) — 필수
+
+`disputatio/` 아래 **C#·씬·프리팹을 바꾸거나 추가**한 뒤, **완료·커밋 권고·PR 준비** 전에 아래를 **반드시** 수행한다.
+
+`CSharpSyntaxChecker`만으로는 **Unity 컴파일·EditMode 하네스 검증을 대체할 수 없다.**
+
+스킬 `.cursor/skills/newcapstone-unity-automation/SKILL.md`와 함께 따른다.
+
+## 1. unity-cli 실행 경로
+
+Windows에서 `unity-cli`가 PATH에 없을 수 있다. Shell에서 **항상** 아래 중 하나로 실행한다.
+
+```powershell
+# PATH에 있으면
+unity-cli --project disputatio status
+
+# 없으면 (기본 설치 위치)
+& "$env:LOCALAPPDATA\unity-cli\unity-cli.exe" --project disputatio status
+```
+
+이후 명령도 동일한 실행 파일을 사용한다. 아래 예시는 `unity-cli`로 표기한다.
+
+## 2. 필수 절차 (코드 변경 후)
+
+순서를 지킨다. Unity가 `ready`일 때 **검증 없이 완료 처리하지 않는다.**
+
+1. **연결 확인**
+
+   ```bash
+   unity-cli --project disputatio status
+   ```
+
+2. **C# 변경 시 컴파일**
+
+   ```bash
+   unity-cli --project disputatio editor refresh --compile
+   ```
+
+3. **콘솔 에러·경고**
+
+   ```bash
+   unity-cli --project disputatio console --type error,warning --lines 80
+   ```
+
+   본인 변경으로 생긴 **새 error**가 있으면 해소 후 다시 확인한다.
+
+4. **EditMode 테스트 (가장 좁은 필터)**
+
+   `--filter`는 **클래스 전체 이름**이어야 한다 (부분 문자열·`|` 불가).
+
+   ```bash
+   unity-cli --project disputatio test --mode EditMode --filter <TestClassName>
+   ```
+
+5. **씬·프리팹 직접 수정 시** (YAML 편집 포함)
+
+   ```bash
+   unity-cli --project disputatio reserialize <Assets/...경로>
+   unity-cli --project disputatio console --type error --lines 40
+   ```
+
+6. **응답에 포함**: 실행한 명령, 통과/실패 수, 남은 Unity Editor 수동 단계.
+
+## 3. 하네스 테스트 필터 매핑
+
+변경 파일 → **우선 실행할** `--filter` (해당 `*Tests` 클래스가 있을 때).
+
+| 변경 영역 | `--filter` |
+|-----------|------------|
+| `Interaction/BedRoom*` | `BedRoomInteractionControllerTests` |
+| `Interaction/CorridorEntrance*` | `CorridorEntranceControllerTests` |
+| `Interaction/Kitchen*` | `KitchenInteractionControllerTests` |
+| `OpeningMention*` | `OpeningMentionControllerTests` |
+| `Interaction/ChildRoom*` | `ChildRoomPuzzleControllerTests` |
+| `Interaction/MaidRoom*` | `MaidRoomPuzzleControllerTests` |
+| `Interaction/StudyRoom*` | `StudyRoomPuzzleControllerTests` |
+| `Interaction/WifeRoom*` | `WifeRoomPuzzleControllerTests` |
+| `InventoryGuide*` | `InventoryGuideControllerTests` |
+| `Interaction/RoomInteractionController` 등 **공통 Interaction** | 아래 §4 Interaction 스위트 전부 |
+| 신규 Controller·Migrator | 대응 `*Tests` 추가 후 그 클래스 `--filter` |
+
+매핑에 없는 C# 변경: 같은 폴더·네임스페이스의 기존 `Assets/Editor/Tests/EditMode/**/*Tests.cs`를 찾아 `--filter`에 쓴다. 없으면 **최소 EditMode 테스트를 추가**한 뒤 실행한다.
+
+## 4. Interaction 공통 레이어 변경 시
+
+`Assets/godlotto/Script/Interaction/`의 공유 타입(`RoomInteractionController`, `FungusDialogueBridge`, `SceneTransitionService`, `InteractionInputGate` 등)을 바꾸면 **아래 8개 클래스를 각각** 실행한다.
+
+```
+BedRoomInteractionControllerTests
+CorridorEntranceControllerTests
+KitchenInteractionControllerTests
+OpeningMentionControllerTests
+ChildRoomPuzzleControllerTests
+MaidRoomPuzzleControllerTests
+StudyRoomPuzzleControllerTests
+WifeRoomPuzzleControllerTests
+```
+
+하나라도 실패하면 완료 처리하지 않는다 (기존 스위트 실패와 구분해 보고).
+
+## 5. Unity MCP와의 관계
+
+- **기본 검증 루프**: `unity-cli` (위 2~4절).
+- **보조**: `user-unityMCP`의 `validate_script` / `read_console` / `run_tests` — MCP가 연결된 경우 **추가로** 사용 가능.
+- MCP만 실패하고 `unity-cli status`가 `ready`이면 **unity-cli로 계속** 검증한다.
+- **둘 다 불가** (`no Unity instances`, CLI 미설치): 검증을 생략하지 말고 사용자에게 Unity Editor 열기·커넥터 import·CLI 설치를 안내하고, **블로커로 명시**한다.
+
+## 6. 완료 게이트 (체크리스트)
+
+다음을 만족하기 전 **"완료", "수정됨", "커밋 가능"**이라고 말하지 않는다.
+
+- [ ] `unity-cli status` 실행 (또는 불가 사유 기록)
+- [ ] C# 변경 시 `editor refresh --compile` + `console`
+- [ ] 해당 `--filter` EditMode 테스트 통과 (또는 신규 테스트 추가 후 통과)
+- [ ] Interaction 공통 변경 시 §4 스위트 실행
+- [ ] 실패 시: 원인·재현 명령·미해결 항목을 응답에 적음
+
+## 7. 예외
+
+- **질문만** 하고 코드·에셋을 바꾸지 않은 경우
+- 사용자가 **검증 생략**을 명시한 경우
+- `docs/architecture.md` **내용만** 읽는 경우

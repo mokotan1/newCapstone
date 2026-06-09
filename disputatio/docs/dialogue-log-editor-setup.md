@@ -4,6 +4,16 @@
 > 이 문서만 보고 에디터 작업을 완료할 수 있도록 모든 경로·계층·설정값을 명시한다.
 > **C# 스크립트는 절대 수정하지 말 것.** 에디터(씬/프리팹/인스펙터) 작업만 한다.
 
+## 에디터 자동 구성 (수동만)
+
+씬·프리팹 연동은 **컴파일/도메인 리로드 시 자동 실행되지 않는다.** (의도치 않은 IntroScene 전환·저장 방지)
+
+Unity 메뉴에서 아래를 **직접** 실행한다:
+
+**`Tools ▸ Godlotto ▸ Setup Dialogue Log (Editor Guide)`**
+
+이 메뉴가 `DialogueLogEntry` 프리팹 생성, `IntroScene`에 `DialogueLogManager` 배치, `SayDialogGothic` 로그 버튼을 한 번에 적용한다.
+
 ---
 
 ## 0. 사전 상태 (이미 완료됨 — 건드리지 말 것)
