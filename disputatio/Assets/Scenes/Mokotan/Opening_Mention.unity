@@ -4420,7 +4420,55 @@ PrefabInstance:
   m_Modification:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075556280346330958, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214592117430195878, guid: c3d4e5f6789012345678901234abcdef, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4437,7 +4485,6 @@ GameObject:
   - component: {fileID: 1313011452}
   - component: {fileID: 1313011451}
   - component: {fileID: 1313011468}
-  - component: {fileID: 1313011467}
   - component: {fileID: 1313011465}
   - component: {fileID: 1313011471}
   - component: {fileID: 1313011470}
@@ -4491,11 +4538,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 222.4183, y: 423.4728}
+  scrollPos: {x: 121.84166, y: 517.7255}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 280
-  zoom: 0.83525
+  zoom: 0.6552502
   scrollViewRect:
     serializedVersion: 2
     x: -343
@@ -4517,26 +4564,6 @@ MonoBehaviour:
   hideCommands: []
   luaEnvironment: {fileID: 0}
   luaBindingName: flowchart
---- !u!114 &2100731001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1313011441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7f3c2e1b9044d6e8f5a2c3d4e5f6789, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  flowchart: {fileID: 1313011451}
-  fenceCollider: {fileID: 110518006}
-  fenceClickable: {fileID: 110518005}
-  enableFenceInteraction: 1
-  bellBlockName: Bell_Clicked
-  fenceBlockName: Fance_Clicked
-  openSceneName: Opening_Mention _open
-  enableDebugLogging: 0
 --- !u!4 &1313011452
 Transform:
   m_ObjectHideFlags: 0
@@ -4579,22 +4606,6 @@ MonoBehaviour:
   stopVoiceover: 1
   waitForVO: 0
   setSayDialog: {fileID: 0}
---- !u!114 &1313011467
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1313011441}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentBlock: {fileID: 1313011468}
-  suppressBlockAutoSelect: 0
-  clickableObject: {fileID: 110518005}
-  waitFrames: 1
 --- !u!114 &1313011468
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4609,8 +4620,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 367.23163
-    y: 77.714165
+    x: 365.98978
+    y: 75.23046
     width: 131.28
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
@@ -4825,7 +4836,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeRect:
     serializedVersion: 2
-    x: 208.62523
+    x: 211.01973
     y: 49.625137
     width: 117.66
     height: 40
@@ -9796,6 +9807,26 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &2100731001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313011441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7f3c2e1b9044d6e8f5a2c3d4e5f6789, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 1313011451}
+  fenceCollider: {fileID: 110518006}
+  fenceClickable: {fileID: 110518005}
+  enableFenceInteraction: 1
+  bellBlockName: Bell_Clicked
+  fenceBlockName: Fance_Clicked
+  openSceneName: Opening_Mention _open
+  enableDebugLogging: 0
 --- !u!1 &2129862305
 GameObject:
   m_ObjectHideFlags: 0
