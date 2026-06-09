@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
+using Mokotan.StandingDialogue;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,7 @@ public class DialogueLogTests
     {
         Time.timeScale = 1f;
         SettingPanelWorldInputBlocker.End();
+        StandingDialogueManager.ActiveStandingDialogue = null;
         DestroyAll<DialogueLogPanel>();
 
         for (int i = createdObjects.Count - 1; i >= 0; i--)
@@ -337,6 +339,33 @@ public class DialogueLogTests
         DialogueLogButton button = CreateLogButton();
 
         Assert.DoesNotThrow(() => button.Toggle());
+    }
+
+    [Test]
+    public void SayDialogSnapshot_RestoresStandingCharacterLayout_AfterCanvasRebuild()
+    {
+        var root = Track(new GameObject("StandingRoot"));
+        var leftSlot = Track(new GameObject("LeftSlot", typeof(RectTransform)));
+        leftSlot.transform.SetParent(root.transform, false);
+
+        var leftCharGo = Track(new GameObject("LeftChar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)));
+        leftCharGo.transform.SetParent(leftSlot.transform, false);
+        var leftChar = leftCharGo.GetComponent<Image>();
+        var leftRect = leftChar.rectTransform;
+        leftRect.anchorMin = Vector2.zero;
+        leftRect.anchorMax = Vector2.one;
+        leftRect.anchoredPosition = new Vector2(0f, -300f);
+
+        StandingDialogueManager standing = root.AddComponent<StandingDialogueManager>();
+        SetPrivateField(standing, "leftCharImage", leftChar);
+        StandingDialogueManager.ActiveStandingDialogue = standing;
+
+        DialogueLogSayDialogSnapshot snapshot = DialogueLogSayDialogSnapshot.Capture();
+        leftRect.anchoredPosition = Vector2.zero;
+
+        snapshot.Restore();
+
+        Assert.AreEqual(new Vector2(0f, -300f), leftRect.anchoredPosition);
     }
 
     private DialogueLogPanel CreatePanel(out GameObject logPanelRoot)

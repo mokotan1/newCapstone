@@ -44,6 +44,16 @@ public static class DialogueLogEditorSetup
         Debug.Log("[DialogueLogEditorSetup] SayDialogNotebook 로그 버튼을 적용했습니다.");
     }
 
+    [MenuItem("Tools/Godlotto/Setup Dialogue Log Button (Ghost, Both SayDialogs)")]
+    public static void ApplyGhostLogButtonsToSayDialogs()
+    {
+        SetupSayDialogLogButton(SayDialogGothicPath);
+        SetupSayDialogLogButton(SayDialogNotebookPath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[DialogueLogEditorSetup] SayDialog Gothic·Notebook에 ghost LogButton을 적용했습니다.");
+    }
+
     public static void ApplyStyle(DialogueLogVisualStyle style)
     {
         GameObject entryPrefab = EnsureEntryPrefab(style);

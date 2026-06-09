@@ -1,51 +1,87 @@
 using Fungus;
+using Mokotan.StandingDialogue;
 using UnityEngine;
 
 /// <summary>
-/// 로그 패널 열기 전 Active SayDialog UI 상태를 저장하고 닫을 때 복원한다.
-/// 캐릭터 일러스트 sibling/레이아웃이 대사창 위로 올라오는 현상을 방지한다.
+/// 로그 패널 열기 전 Active SayDialog·StandingDialogue UI 상태를 저장하고 닫을 때 복원한다.
+/// Canvas.ForceUpdateCanvases()가 스탠딩 캐릭터 anchoredPosition을 되돌려 대사창 위로 겹치는 현상을 방지한다.
 /// </summary>
 internal struct DialogueLogSayDialogSnapshot
 {
+    struct RectLayoutSnapshot
+    {
+        RectTransform rect;
+        int siblingIndex;
+        bool active;
+        Vector2 anchorMin;
+        Vector2 anchorMax;
+        Vector2 offsetMin;
+        Vector2 offsetMax;
+        Vector2 sizeDelta;
+        Vector2 anchoredPosition;
+
+        public static RectLayoutSnapshot From(RectTransform source)
+        {
+            if (source == null)
+                return default;
+
+            return new RectLayoutSnapshot
+            {
+                rect = source,
+                siblingIndex = source.GetSiblingIndex(),
+                active = source.gameObject.activeSelf,
+                anchorMin = source.anchorMin,
+                anchorMax = source.anchorMax,
+                offsetMin = source.offsetMin,
+                offsetMax = source.offsetMax,
+                sizeDelta = source.sizeDelta,
+                anchoredPosition = source.anchoredPosition,
+            };
+        }
+
+        public void Apply()
+        {
+            if (rect == null)
+                return;
+
+            rect.gameObject.SetActive(active);
+            rect.SetSiblingIndex(siblingIndex);
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = offsetMin;
+            rect.offsetMax = offsetMax;
+            rect.sizeDelta = sizeDelta;
+            rect.anchoredPosition = anchoredPosition;
+        }
+    }
+
     SayDialog sayDialog;
-    RectTransform storyTextRect;
-    RectTransform characterRect;
-    int storyTextSiblingIndex;
-    int characterSiblingIndex;
-    bool characterActive;
-    Vector2 storyOffsetMin;
-    Vector2 storyOffsetMax;
-    Vector2 storyAnchorMin;
-    Vector2 storyAnchorMax;
-    Vector2 storySizeDelta;
-    Vector2 storyAnchoredPosition;
+    RectLayoutSnapshot storyTextLayout;
+    RectLayoutSnapshot sayDialogCharacterLayout;
+    RectLayoutSnapshot leftCharacterLayout;
+    RectLayoutSnapshot rightCharacterLayout;
+    RectLayoutSnapshot leftSlotLayout;
+    RectLayoutSnapshot rightSlotLayout;
 
     public static DialogueLogSayDialogSnapshot Capture()
     {
         var snapshot = new DialogueLogSayDialogSnapshot();
         snapshot.sayDialog = SayDialog.ActiveSayDialog;
-        if (snapshot.sayDialog == null)
-            return snapshot;
-
-        snapshot.storyTextRect = snapshot.sayDialog.StoryTextRectTrans;
-        var characterImage = snapshot.sayDialog.CharacterImage;
-        snapshot.characterRect = characterImage != null ? characterImage.rectTransform : null;
-
-        if (snapshot.storyTextRect != null)
+        if (snapshot.sayDialog != null)
         {
-            snapshot.storyTextSiblingIndex = snapshot.storyTextRect.GetSiblingIndex();
-            snapshot.storyOffsetMin = snapshot.storyTextRect.offsetMin;
-            snapshot.storyOffsetMax = snapshot.storyTextRect.offsetMax;
-            snapshot.storyAnchorMin = snapshot.storyTextRect.anchorMin;
-            snapshot.storyAnchorMax = snapshot.storyTextRect.anchorMax;
-            snapshot.storySizeDelta = snapshot.storyTextRect.sizeDelta;
-            snapshot.storyAnchoredPosition = snapshot.storyTextRect.anchoredPosition;
+            snapshot.storyTextLayout = RectLayoutSnapshot.From(snapshot.sayDialog.StoryTextRectTrans);
+            var characterImage = snapshot.sayDialog.CharacterImage;
+            snapshot.sayDialogCharacterLayout = RectLayoutSnapshot.From(
+                characterImage != null ? characterImage.rectTransform : null);
         }
 
-        if (snapshot.characterRect != null)
+        StandingDialogueManager standing = StandingDialogueManager.Instance;
+        if (standing != null)
         {
-            snapshot.characterSiblingIndex = snapshot.characterRect.GetSiblingIndex();
-            snapshot.characterActive = snapshot.characterRect.gameObject.activeSelf;
+            snapshot.leftCharacterLayout = RectLayoutSnapshot.From(standing.LeftCharacterRect);
+            snapshot.rightCharacterLayout = RectLayoutSnapshot.From(standing.RightCharacterRect);
+            snapshot.leftSlotLayout = RectLayoutSnapshot.From(standing.LeftSlotRect);
+            snapshot.rightSlotLayout = RectLayoutSnapshot.From(standing.RightSlotRect);
         }
 
         return snapshot;
@@ -53,26 +89,18 @@ internal struct DialogueLogSayDialogSnapshot
 
     public void Restore()
     {
-        if (sayDialog == null)
-            return;
-
-        if (characterRect != null)
-        {
-            characterRect.gameObject.SetActive(characterActive);
-            characterRect.SetSiblingIndex(characterSiblingIndex);
-        }
-
-        if (storyTextRect != null)
-        {
-            storyTextRect.SetSiblingIndex(storyTextSiblingIndex);
-            storyTextRect.anchorMin = storyAnchorMin;
-            storyTextRect.anchorMax = storyAnchorMax;
-            storyTextRect.offsetMin = storyOffsetMin;
-            storyTextRect.offsetMax = storyOffsetMax;
-            storyTextRect.sizeDelta = storySizeDelta;
-            storyTextRect.anchoredPosition = storyAnchoredPosition;
-        }
-
+        ApplyLayouts();
         Canvas.ForceUpdateCanvases();
+        ApplyLayouts();
+    }
+
+    void ApplyLayouts()
+    {
+        leftSlotLayout.Apply();
+        rightSlotLayout.Apply();
+        leftCharacterLayout.Apply();
+        rightCharacterLayout.Apply();
+        sayDialogCharacterLayout.Apply();
+        storyTextLayout.Apply();
     }
 }

@@ -368,6 +368,18 @@ namespace Mokotan.StandingDialogue
         private Image GetCharImage(Side side) =>
             side == Side.Left ? leftCharImage : rightCharImage;
 
+        internal RectTransform LeftCharacterRect =>
+            leftCharImage != null ? leftCharImage.rectTransform : null;
+
+        internal RectTransform RightCharacterRect =>
+            rightCharImage != null ? rightCharImage.rectTransform : null;
+
+        internal RectTransform LeftSlotRect =>
+            leftCharImage != null ? leftCharImage.transform.parent as RectTransform : null;
+
+        internal RectTransform RightSlotRect =>
+            rightCharImage != null ? rightCharImage.transform.parent as RectTransform : null;
+
         private static void ApplyOffset(Image img, Vector2 offset)
         {
             img.rectTransform.anchoredPosition =
