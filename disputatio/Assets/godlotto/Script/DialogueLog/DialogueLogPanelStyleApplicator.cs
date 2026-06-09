@@ -16,10 +16,10 @@ public static class DialogueLogPanelStyleApplicator
         var spec = DialogueLogStyleSpec.FindStyle(style.ToString());
 
         ApplyBackground(panelRoot, palette, style);
-        ApplyLabel(panelRoot, "TitleText", ResolveTitleText(style, spec), palette.TitleColor, spec);
+        ApplyLabel(panelRoot, "TitleText", ResolveTitleText(style, spec), palette.TitleColor, style, spec);
         ApplyImage(panelRoot, "TitleRule", palette.TitleUnderline);
-        ApplyLabel(panelRoot, "CloseButton/Text", "X", palette.CloseButtonColor, spec, isClose: true);
-        ApplyScrollSpacing(panelRoot, style, spec);
+        ApplyLabel(panelRoot, "CloseButton/Text", "X", palette.CloseButtonColor, style, spec, isClose: true);
+        ApplyScrollArea(panelRoot, style, spec);
     }
 
     static string ResolveTitleText(DialogueLogVisualStyle style, DialogueLogStyleSpec.StyleEntry spec)
@@ -58,6 +58,7 @@ public static class DialogueLogPanelStyleApplicator
         string path,
         string text,
         Color color,
+        DialogueLogVisualStyle style,
         DialogueLogStyleSpec.StyleEntry spec,
         bool isClose = false)
     {
@@ -72,16 +73,14 @@ public static class DialogueLogPanelStyleApplicator
         label.text = text;
         label.color = color;
 
-        if (spec?.typography == null)
-            return;
-
-        if (!isClose)
+        if (isClose)
         {
-            if (spec.typography.titleFontSize > 0f)
-                label.fontSize = spec.typography.titleFontSize;
-            if (spec.typography.titleCharacterSpacing != 0f)
-                label.characterSpacing = spec.typography.titleCharacterSpacing;
+            label.enableAutoSizing = false;
+            label.fontSize = 20f;
+            return;
         }
+
+        DialogueLogTypography.ApplyTitle(label, style);
     }
 
     static void ApplyImage(GameObject root, string path, Color color)
@@ -95,27 +94,27 @@ public static class DialogueLogPanelStyleApplicator
             image.color = color;
     }
 
-    static void ApplyScrollSpacing(GameObject panelRoot, DialogueLogVisualStyle style, DialogueLogStyleSpec.StyleEntry spec)
+    static void ApplyScrollArea(GameObject panelRoot, DialogueLogVisualStyle style, DialogueLogStyleSpec.StyleEntry spec)
     {
-        Transform scroll = panelRoot.transform.Find("Scroll View/Viewport/Content");
-        if (scroll == null)
+        Transform scrollRoot = panelRoot.transform.Find("Scroll View");
+        if (scrollRoot == null)
             return;
 
-        var layout = scroll.GetComponent<VerticalLayoutGroup>();
+        ApplyScrollViewportInsets(scrollRoot as RectTransform, style, spec);
+
+        Transform content = scrollRoot.Find("Viewport/Content");
+        if (content == null)
+            return;
+
+        var layout = content.GetComponent<VerticalLayoutGroup>();
         if (layout == null)
             return;
 
-        float spacing = style switch
-        {
-            DialogueLogVisualStyle.ParchmentCodex => 0f,
-            DialogueLogVisualStyle.DarkConfession => 18f,
-            _ => 12f,
-        };
-
-        if (spec?.entry != null && spec.entry.spacing > 0f)
-            spacing = spec.entry.spacing;
-
-        layout.spacing = spacing;
+        layout.spacing = ResolveScrollEntrySpacing(style, spec);
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
 
         if (spec?.scroll != null)
         {
@@ -124,6 +123,53 @@ public static class DialogueLogPanelStyleApplicator
                 Mathf.RoundToInt(spec.scroll.paddingRight),
                 Mathf.RoundToInt(spec.scroll.paddingTop),
                 Mathf.RoundToInt(spec.scroll.paddingBottom));
+        }
+        else
+        {
+            layout.padding = style switch
+            {
+                DialogueLogVisualStyle.ParchmentCodex => new RectOffset(12, 12, 20, 16),
+                DialogueLogVisualStyle.DarkConfession => new RectOffset(8, 8, 24, 16),
+                _ => new RectOffset(8, 8, 16, 12),
+            };
+        }
+    }
+
+    static float ResolveScrollEntrySpacing(DialogueLogVisualStyle style, DialogueLogStyleSpec.StyleEntry spec)
+    {
+        if (spec?.scroll != null && spec.scroll.spacing > 0f)
+            return spec.scroll.spacing;
+
+        return style switch
+        {
+            DialogueLogVisualStyle.ParchmentCodex => 28f,
+            DialogueLogVisualStyle.DarkConfession => 36f,
+            _ => 20f,
+        };
+    }
+
+    static void ApplyScrollViewportInsets(RectTransform scrollRect, DialogueLogVisualStyle style, DialogueLogStyleSpec.StyleEntry spec)
+    {
+        if (scrollRect == null)
+            return;
+
+        if (spec?.scroll != null)
+        {
+            scrollRect.offsetMin = new Vector2(spec.scroll.insetLeft, spec.scroll.insetBottom);
+            scrollRect.offsetMax = new Vector2(-spec.scroll.insetRight, -spec.scroll.insetTop);
+            return;
+        }
+
+        switch (style)
+        {
+            case DialogueLogVisualStyle.ParchmentCodex:
+                scrollRect.offsetMin = new Vector2(22f, 22f);
+                scrollRect.offsetMax = new Vector2(-22f, -104f);
+                break;
+            case DialogueLogVisualStyle.DarkConfession:
+                scrollRect.offsetMin = new Vector2(34f, 30f);
+                scrollRect.offsetMax = new Vector2(-34f, -108f);
+                break;
         }
     }
 }

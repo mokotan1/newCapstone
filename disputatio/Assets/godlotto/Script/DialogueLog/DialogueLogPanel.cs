@@ -262,7 +262,10 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
             var label = go.GetComponentInChildren<TMP_Text>(true);
             if (label != null)
+            {
                 label.text = DialogueLogLogic.FormatEntry(entry);
+                DialogueLogTypography.ApplyBody(label, visualStyle);
+            }
         }
     }
 

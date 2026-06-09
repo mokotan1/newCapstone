@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 미니멀 고스트 LogButton hover 처리: 밑줄 표시·아이콘·캡션 강조색 전환.
-/// 스펙: docs/dialogue-log-button-03-ghost.spec.json underline.visibleStates = ["hover"]
+/// 밑줄을 SetActive로 토글하면 VerticalLayoutGroup 레이아웃이 바뀌어 hitbox가 흔들리므로
+/// CanvasGroup alpha만 변경한다.
 /// </summary>
 public class DialogueLogGhostButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -15,6 +16,8 @@ public class DialogueLogGhostButtonHover : MonoBehaviour, IPointerEnterHandler, 
     [SerializeField] Color idleColor;
     [SerializeField] Color hoverColor;
 
+    CanvasGroup underlineCanvasGroup;
+
     public void Initialize(GameObject underlineRoot, Graphic icon, TMP_Text captionLabel, Color idle, Color hover)
     {
         underline = underlineRoot;
@@ -22,10 +25,15 @@ public class DialogueLogGhostButtonHover : MonoBehaviour, IPointerEnterHandler, 
         caption = captionLabel;
         idleColor = idle;
         hoverColor = hover;
+        EnsureUnderlineLayoutStable();
         ApplyIdleState();
     }
 
-    void OnEnable() => ApplyIdleState();
+    void OnEnable()
+    {
+        EnsureUnderlineLayoutStable();
+        ApplyIdleState();
+    }
 
     public void OnPointerEnter(PointerEventData eventData) => ApplyHoverState();
 
@@ -33,16 +41,34 @@ public class DialogueLogGhostButtonHover : MonoBehaviour, IPointerEnterHandler, 
 
     void ApplyHoverState()
     {
-        if (underline != null)
-            underline.SetActive(true);
+        SetUnderlineVisible(true);
         ApplyColor(hoverColor);
     }
 
     void ApplyIdleState()
     {
-        if (underline != null)
-            underline.SetActive(false);
+        SetUnderlineVisible(false);
         ApplyColor(idleColor);
+    }
+
+    void EnsureUnderlineLayoutStable()
+    {
+        if (underline == null)
+            return;
+
+        if (!underline.activeSelf)
+            underline.SetActive(true);
+
+        underlineCanvasGroup = underline.GetComponent<CanvasGroup>();
+        if (underlineCanvasGroup == null)
+            underlineCanvasGroup = underline.AddComponent<CanvasGroup>();
+    }
+
+    void SetUnderlineVisible(bool visible)
+    {
+        EnsureUnderlineLayoutStable();
+        if (underlineCanvasGroup != null)
+            underlineCanvasGroup.alpha = visible ? 1f : 0f;
     }
 
     void ApplyColor(Color color)

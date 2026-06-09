@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Mokotan.StandingDialogue;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -339,6 +340,78 @@ public class DialogueLogTests
         DialogueLogButton button = CreateLogButton();
 
         Assert.DoesNotThrow(() => button.Toggle());
+    }
+
+    [Test]
+    public void GhostButtonHover_KeepsUnderlineActive_WhenIdle()
+    {
+        var buttonRoot = Track(new GameObject("LogButton", typeof(RectTransform)));
+        var underline = Track(new GameObject("Underline", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image)));
+        underline.transform.SetParent(buttonRoot.transform, false);
+
+        var hover = buttonRoot.AddComponent<DialogueLogGhostButtonHover>();
+        hover.Initialize(underline, null, null, Color.white, Color.yellow);
+
+        Assert.IsTrue(underline.activeSelf);
+        Assert.AreEqual(0f, underline.GetComponent<CanvasGroup>().alpha);
+    }
+
+    [Test]
+    public void Typography_BodyUsesReadableClampRange()
+    {
+        DialogueLogStyleSpec.ClearCacheForTests();
+        var labelGo = Track(new GameObject("Body", typeof(TextMeshProUGUI)));
+        var label = labelGo.GetComponent<TextMeshProUGUI>();
+
+        DialogueLogTypography.ApplyBody(label, DialogueLogVisualStyle.ParchmentCodex);
+
+        Assert.GreaterOrEqual(label.fontSizeMax, DialogueLogTypography.BodyFontMax);
+        Assert.GreaterOrEqual(label.fontSizeMin, DialogueLogTypography.BodyFontMin);
+        Assert.GreaterOrEqual(label.lineSpacing, 16f);
+        Assert.IsTrue(label.enableAutoSizing);
+    }
+
+    [Test]
+    public void Typography_SpeakerIsSmallerThanBody()
+    {
+        DialogueLogStyleSpec.ClearCacheForTests();
+        var speakerGo = Track(new GameObject("Speaker", typeof(TextMeshProUGUI)));
+        var bodyGo = Track(new GameObject("Body", typeof(TextMeshProUGUI)));
+        var speaker = speakerGo.GetComponent<TextMeshProUGUI>();
+        var body = bodyGo.GetComponent<TextMeshProUGUI>();
+
+        DialogueLogTypography.ApplyEntryTypography(DialogueLogVisualStyle.ParchmentCodex, speaker, body);
+
+        Assert.Less(speaker.fontSizeMax, body.fontSizeMax);
+    }
+
+    [Test]
+    public void EntryView_Bind_AppliesLargeBodyTypography()
+    {
+        DialogueLogStyleSpec.ClearCacheForTests();
+
+        var root = Track(new GameObject("Entry", typeof(RectTransform), typeof(LayoutElement), typeof(VerticalLayoutGroup), typeof(DialogueLogEntryView)));
+        var speaker = Track(new GameObject("Speaker", typeof(RectTransform), typeof(TextMeshProUGUI)));
+        var body = Track(new GameObject("Body", typeof(RectTransform), typeof(TextMeshProUGUI)));
+        speaker.transform.SetParent(root.transform, false);
+        body.transform.SetParent(root.transform, false);
+
+        var entryView = root.GetComponent<DialogueLogEntryView>();
+        SetPrivateField(entryView, "style", DialogueLogVisualStyle.ParchmentCodex);
+        SetPrivateField(entryView, "speakerLabel", speaker.GetComponent<TextMeshProUGUI>());
+        SetPrivateField(entryView, "bodyLabel", body.GetComponent<TextMeshProUGUI>());
+
+        entryView.Bind(new DialogueLogEntry("Alice", "긴 대사 본문 테스트"), DialogueLogStylePalette.ParchmentCodex);
+
+        var bodyLabel = body.GetComponent<TextMeshProUGUI>();
+        Assert.GreaterOrEqual(bodyLabel.fontSizeMax, DialogueLogTypography.BodyFontMax);
+        Assert.AreEqual("긴 대사 본문 테스트", bodyLabel.text);
+    }
+
+    [Test]
+    public void GodlottoDialogInput_IsPointerOverLogButton_ReturnsFalse_WithoutPointer()
+    {
+        Assert.IsFalse(GodlottoDialogInput.IsPointerOverDialogueLogButton());
     }
 
     [Test]

@@ -59,6 +59,14 @@ public class DialogueLogEntryView : MonoBehaviour
             bodyLabel.fontStyle = isNarration ? FontStyles.Italic : FontStyles.Normal;
         }
 
+        DialogueLogTypography.ApplyEntryTypography(style, speakerLabel, bodyLabel);
+        DialogueLogTypography.ApplyEntryLayout(
+            transform as RectTransform,
+            style,
+            speakerLabel,
+            bodyLabel,
+            entrySeparator);
+
         if (entrySeparator != null)
             entrySeparator.color = palette.EntrySeparator;
     }

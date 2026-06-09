@@ -71,7 +71,9 @@ public static class DialogueLogStyleSpec
         public float speakerFontSize;
         public float speakerCharacterSpacing;
         public float bodyFontSize;
+        public float bodyFontSizeMin;
         public float bodyLineSpacing;
+        public float bodyLineHeightRatio;
     }
 
     static StylesDocument cachedDocument;

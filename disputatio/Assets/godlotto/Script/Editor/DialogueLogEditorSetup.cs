@@ -97,7 +97,11 @@ public static class DialogueLogEditorSetup
 
         var label = labelGo.GetComponent<TextMeshProUGUI>();
         label.text = "<b>화자</b>\n대사 본문";
-        label.fontSize = 22f;
+        label.fontSize = DialogueLogTypography.BodyFontMax;
+        label.enableAutoSizing = true;
+        label.fontSizeMin = DialogueLogTypography.BodyFontMin;
+        label.fontSizeMax = DialogueLogTypography.BodyFontMax;
+        label.lineSpacing = 10f;
         label.color = palette.BodyColor;
         label.alignment = TextAlignmentOptions.TopLeft;
         label.textWrappingMode = TextWrappingModes.Normal;
@@ -106,7 +110,7 @@ public static class DialogueLogEditorSetup
         ApplyKoreanFont(label);
 
         var layout = root.GetComponent<LayoutElement>();
-        layout.minHeight = 48f;
+        layout.minHeight = 96f;
         layout.flexibleWidth = 1f;
 
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, EntryPrefabLegacyPath);
@@ -141,36 +145,43 @@ public static class DialogueLogEditorSetup
         vertical.childControlHeight = true;
         vertical.childForceExpandWidth = true;
         vertical.childForceExpandHeight = false;
-        vertical.spacing = 2f;
-        vertical.padding = new RectOffset(0, 0, 8, 8);
+        vertical.spacing = 6f;
+        vertical.padding = new RectOffset(0, 0, 12, 12);
 
         var layout = root.GetComponent<LayoutElement>();
-        layout.minHeight = 56f;
+        layout.minHeight = 128f;
         layout.flexibleWidth = 1f;
 
         var speakerRoot = new GameObject("SpeakerRow", typeof(RectTransform), typeof(LayoutElement));
         speakerRoot.transform.SetParent(root.transform, false);
         var speakerLayout = speakerRoot.AddComponent<LayoutElement>();
-        speakerLayout.minHeight = 24f;
+        speakerLayout.minHeight = 52f;
         speakerLayout.flexibleWidth = 1f;
 
         var speakerLabel = CreateLabel(
             speakerRoot.transform,
             "SpeakerText",
             DialogueLogLogic.FormatSpeakerLine("Chester", DialogueLogVisualStyle.ParchmentCodex),
-            22f,
+            48f,
             palette.SpeakerColor);
         speakerLabel.fontStyle = FontStyles.Bold;
         speakerLabel.characterSpacing = 2f;
         speakerLabel.richText = true;
+        speakerLabel.enableAutoSizing = true;
+        speakerLabel.fontSizeMin = DialogueLogTypography.BodyFontMin;
+        speakerLabel.fontSizeMax = 48f;
         SetStretch(speakerLabel.rectTransform);
 
         var bodyLabel = CreateLabel(
             root.transform,
             "BodyText",
             "대사 본문이 여기에 표시됩니다.",
-            21f,
+            DialogueLogTypography.BodyFontMax,
             palette.BodyColor);
+        bodyLabel.lineSpacing = 10f;
+        bodyLabel.enableAutoSizing = true;
+        bodyLabel.fontSizeMin = DialogueLogTypography.BodyFontMin;
+        bodyLabel.fontSizeMax = DialogueLogTypography.BodyFontMax;
         bodyLabel.margin = new Vector4(0f, 0f, 0f, 0f);
         var bodyLayout = bodyLabel.gameObject.AddComponent<LayoutElement>();
         bodyLayout.flexibleWidth = 1f;
@@ -222,7 +233,7 @@ public static class DialogueLogEditorSetup
         vertical.padding = new RectOffset(0, 0, 0, 0);
 
         var layout = root.GetComponent<LayoutElement>();
-        layout.minHeight = 64f;
+        layout.minHeight = 140f;
         layout.flexibleWidth = 1f;
 
         var speakerRoot = new GameObject("SpeakerRow", typeof(RectTransform), typeof(LayoutElement));
@@ -238,22 +249,24 @@ public static class DialogueLogEditorSetup
         speakerRowLayout.padding = new RectOffset(0, 0, 0, 0);
 
         var speakerRowElement = speakerRoot.GetComponent<LayoutElement>();
-        speakerRowElement.minHeight = 22f;
-        speakerRowElement.preferredHeight = 22f;
+        speakerRowElement.minHeight = 50f;
+        speakerRowElement.preferredHeight = 50f;
         speakerRowElement.flexibleWidth = 1f;
 
         var speakerLabel = CreateLabel(
             speakerRoot.transform,
             "SpeakerText",
             DialogueLogLogic.FormatSpeakerLine("Chester", DialogueLogVisualStyle.DarkConfession),
-            18f,
+            46f,
             palette.SpeakerColor);
         speakerLabel.characterSpacing = 3f;
-        speakerLabel.enableAutoSizing = false;
+        speakerLabel.enableAutoSizing = true;
+        speakerLabel.fontSizeMin = DialogueLogTypography.BodyFontMin;
+        speakerLabel.fontSizeMax = 46f;
         speakerLabel.overflowMode = TextOverflowModes.Overflow;
         var speakerTextLayout = speakerLabel.gameObject.AddComponent<LayoutElement>();
         speakerTextLayout.minWidth = 48f;
-        speakerTextLayout.preferredHeight = 22f;
+        speakerTextLayout.preferredHeight = 50f;
         speakerTextLayout.flexibleWidth = 0f;
 
         var speakerLineGo = CreateImage(speakerRoot.transform, "SpeakerLine", palette.TitleUnderline);
@@ -269,11 +282,14 @@ public static class DialogueLogEditorSetup
             root.transform,
             "BodyText",
             "대사 본문이 여기에 표시됩니다.",
-            22f,
+            DialogueLogTypography.BodyFontMax,
             palette.BodyColor);
-        bodyLabel.lineSpacing = 4f;
+        bodyLabel.lineSpacing = 12f;
+        bodyLabel.enableAutoSizing = true;
+        bodyLabel.fontSizeMin = DialogueLogTypography.BodyFontMin;
+        bodyLabel.fontSizeMax = DialogueLogTypography.BodyFontMax;
         var bodyLayout = bodyLabel.gameObject.AddComponent<LayoutElement>();
-        bodyLayout.minHeight = 28f;
+        bodyLayout.minHeight = 64f;
         bodyLayout.flexibleWidth = 1f;
 
         var entryView = root.GetComponent<DialogueLogEntryView>();
@@ -679,6 +695,7 @@ public static class DialogueLogEditorSetup
         var background = buttonGo.GetComponent<Image>();
         background.color = new Color(0f, 0f, 0f, 0f);
         background.raycastTarget = true;
+        background.raycastPadding = new Vector4(12f, 12f, 12f, 12f);
 
         var button = buttonGo.GetComponent<Button>();
         button.targetGraphic = background;
@@ -697,7 +714,6 @@ public static class DialogueLogEditorSetup
         Graphic iconGraphic = CreateGhostLogIcon(buttonGo.transform, spec);
         TextMeshProUGUI caption = CreateGhostLogCaption(buttonGo.transform, spec);
         GameObject underline = CreateGhostLogUnderline(buttonGo.transform, spec);
-        underline.SetActive(false);
 
         var hover = buttonGo.AddComponent<DialogueLogGhostButtonHover>();
         hover.Initialize(underline, iconGraphic, caption, spec.foregroundIdle, spec.accent);
@@ -768,6 +784,9 @@ public static class DialogueLogEditorSetup
 
         var underlineImage = underlineGo.GetComponent<Image>();
         underlineImage.raycastTarget = false;
+
+        var underlineGroup = underlineGo.AddComponent<CanvasGroup>();
+        underlineGroup.alpha = 0f;
 
         var layout = underlineGo.AddComponent<LayoutElement>();
         layout.minHeight = spec.underlineHeight;
