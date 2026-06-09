@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>대사 로그 UI 견본 5종 — disputatio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@400;500;700&family=Gugi&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #3a2c1a;
+    --sepia-bg: #0f0d0b;
+    --amber: #c7953b;
+    --amber-soft: #e3c178;
+    --cream: #e6dcc8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #17120d;
+    color: #cdbfa6;
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+  }
+  .page-head { max-width: 1200px; margin: 0 auto 48px; text-align: center; }
+  .page-head h1 {
+    font-family: "Noto Serif KR", serif; font-weight: 900;
+    color: #e8d8b6; font-size: 30px; letter-spacing: 2px; margin-bottom: 10px;
+  }
+  .page-head p { color: #8a7c64; font-size: 14px; }
+  .grid {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 40px;
+  }
+  .mock {
+    background: #1d1812; border: 1px solid #2e2619; border-radius: 14px;
+    padding: 22px; display: flex; flex-direction: column;
+  }
+  .mock > .label {
+    font-family: "Noto Serif KR", serif; color: #e8d8b6; font-size: 18px;
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .mock > .desc { color: #897a61; font-size: 12.5px; margin-bottom: 16px; min-height: 34px; }
+
+  /* rgba 색상표 */
+  .spec { margin-top: 14px; border-top: 1px solid #2e2619; padding-top: 12px; }
+  .spec .spec-h { font-size: 11px; letter-spacing: 1px; color: #897a61; margin-bottom: 8px; text-transform: uppercase; }
+  .spec ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+  .spec li { font-family: "Courier New", monospace; font-size: 11px; color: #b3a488; white-space: nowrap; }
+  .spec .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 7px;
+    vertical-align: middle; border: 1px solid rgba(255,255,255,0.18);
+    background-image: linear-gradient(45deg,#555 25%,transparent 0),linear-gradient(-45deg,#555 25%,transparent 0),
+      linear-gradient(45deg,transparent 75%,#555 0),linear-gradient(-45deg,transparent 75%,#555 0);
+    background-size: 8px 8px; background-position: 0 0,0 4px,4px -4px,-4px 0; }
+  .spec .sw i { display: block; width: 100%; height: 100%; }
+  .spec .role { color: #7e7059; }
+
+  /* shared "game screen" frame: a dimmed game scene behind the log panel */
+  .screen {
+    position: relative; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 30% 20%, #3a2e22 0%, #1a140d 55%, #0a0806 100%);
+  }
+  .screen::before {
+    /* faint scene props suggestion */
+    content: ""; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 26px),
+      radial-gradient(60% 50% at 75% 80%, rgba(120,80,40,0.25), transparent 70%);
+  }
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+  .panel { position: absolute; }
+
+  /* ============ ① PARCHMENT CODEX ============ */
+  .p1 .panel {
+    inset: 10% 9%;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.06), rgba(60,40,20,0.10)),
+      #e8dcc0;
+    box-shadow: 0 0 0 3px #6b4f2a, 0 0 0 5px #d8c79f, 0 18px 40px rgba(0,0,0,0.6);
+    border-radius: 4px; padding: 18px 22px; color: var(--ink);
+    font-family: "Gowun Batang", serif; display: flex; flex-direction: column;
+  }
+  .p1 .ttl {
+    text-align: center; font-weight: 700; letter-spacing: 8px; font-size: 17px;
+    color: #5a3d1c; border-bottom: 1.5px solid #b79a63; padding-bottom: 10px; margin-bottom: 12px;
+  }
+  .p1 .ttl span { color: #a07a3a; }
+  .p1 .x { position: absolute; top: 14px; right: 18px; color: #8a6a38; font-size: 16px; }
+  .p1 .feed { overflow: auto; padding-right: 6px; }
+  .p1 .e { padding: 8px 0; border-bottom: 1px dotted #bfa473; }
+  .p1 .e:last-child { border-bottom: none; }
+  .p1 .sp { font-weight: 700; color: #7a4a1e; font-size: 14px; letter-spacing: 1px; }
+  .p1 .sp::before { content: "❧ "; color: #b07c34; }
+  .p1 .tx { font-size: 13.5px; color: #3a2c1a; margin-top: 2px; }
+  .p1 .narr { font-style: italic; color: #6b5a40; font-size: 13px; }
+
+  /* ============ ② CHAT BUBBLES ============ */
+  .p2 .panel {
+    inset: 8% 7%; background: rgba(18,15,11,0.94); backdrop-filter: blur(2px);
+    border: 1px solid #3a2f20; border-radius: 12px; padding: 14px; display: flex; flex-direction: column;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+  }
+  .p2 .ttl { text-align: center; color: var(--amber-soft); font-family: "Noto Serif KR", serif;
+    font-size: 14px; letter-spacing: 4px; padding-bottom: 10px; border-bottom: 1px solid #2e2619; margin-bottom: 10px; }
+  .p2 .x { position: absolute; top: 12px; right: 16px; color: #8a7350; font-size: 14px; }
+  .p2 .feed { display: flex; flex-direction: column; gap: 10px; overflow: auto; padding-right: 4px; }
+  .p2 .row { display: flex; gap: 8px; align-items: flex-end; max-width: 78%; }
+  .p2 .row.me { align-self: flex-end; flex-direction: row-reverse; }
+  .p2 .ava { width: 26px; height: 26px; border-radius: 50%; flex: 0 0 26px;
+    display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #1a140d; }
+  .p2 .ava.c { background: #c7953b; }
+  .p2 .ava.m { background: #5fa39a; }
+  .p2 .b { padding: 8px 11px; border-radius: 12px; font-size: 13px; }
+  .p2 .name { font-size: 10.5px; color: #9a8a6c; margin-bottom: 2px; }
+  .p2 .row:not(.me) .b { background: #2c241a; color: var(--cream); border-bottom-left-radius: 3px; }
+  .p2 .row.me .b { background: #5a3f1c; color: #f0e4ca; border-bottom-right-radius: 3px; }
+  .p2 .narr { align-self: center; color: #8a7c64; font-size: 11.5px; font-style: italic; padding: 2px 0; }
+
+  /* ============ ③ LEDGER (2-column) ============ */
+  .p3 .panel {
+    inset: 9% 7%; background: #161208; border: 1px solid #36301e; border-radius: 6px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .p3 .ttl { color: var(--amber-soft); font-family: "Noto Serif KR", serif; font-size: 13px;
+    letter-spacing: 5px; padding: 10px 14px; border-bottom: 1px solid #36301e; }
+  .p3 .x { position: absolute; top: 9px; right: 14px; color: #8a7350; font-size: 14px; }
+  .p3 .feed { overflow: auto; }
+  .p3 .e { display: grid; grid-template-columns: 92px 1fr; border-bottom: 1px solid #271f12; }
+  .p3 .e:nth-child(even) { background: rgba(255,255,255,0.018); }
+  .p3 .sp { text-align: right; padding: 9px 10px; color: var(--amber);
+    font-size: 11.5px; font-weight: 600; letter-spacing: 1px; border-right: 1px solid #36301e;
+    text-transform: uppercase; }
+  .p3 .tx { padding: 9px 12px; color: var(--cream); font-size: 13px; }
+  .p3 .e.narr .tx { color: #9a8a6c; font-style: italic; }
+
+  /* ============ ④ CARD STACK ============ */
+  .p4 .panel {
+    inset: 8% 7%; background: rgba(20,16,11,0.95); border: 1px solid #322819; border-radius: 12px;
+    padding: 14px; display: flex; flex-direction: column; box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+  }
+  .p4 .ttl { text-align: center; color: var(--amber-soft); font-family: "Noto Serif KR", serif;
+    letter-spacing: 6px; font-size: 14px; margin-bottom: 12px; }
+  .p4 .x { position: absolute; top: 12px; right: 16px; color: #8a7350; font-size: 14px; }
+  .p4 .feed { display: flex; flex-direction: column; gap: 10px; overflow: auto; padding-right: 4px; }
+  .p4 .card { background: #251d13; border-radius: 9px; padding: 10px 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4); border-left: 3px solid #c7953b; }
+  .p4 .card.me { border-left-color: #5fa39a; }
+  .p4 .card.narr { border-left-color: #6b6052; }
+  .p4 .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 2px 9px; border-radius: 20px; margin-bottom: 6px; }
+  .p4 .card .chip { background: rgba(199,149,59,0.18); color: #e3c178; }
+  .p4 .card.me .chip { background: rgba(95,163,154,0.18); color: #8fd0c6; }
+  .p4 .card.narr .chip { background: rgba(150,140,120,0.16); color: #b0a48e; }
+  .p4 .tx { font-size: 13px; color: var(--cream); }
+  .p4 .card.narr .tx { color: #a89a82; font-style: italic; }
+
+  /* ============ ⑤ MINIMAL DARK / HORROR ============ */
+  .p5 .panel {
+    inset: 0; background: linear-gradient(180deg, #0a0908 0%, #0d0b09 100%);
+    padding: 30px 34px; display: flex; flex-direction: column;
+  }
+  .p5 .ttl { letter-spacing: 14px; font-size: 13px; color: #6e6356;
+    font-family: "Noto Serif KR", serif; margin-bottom: 22px; }
+  .p5 .x { position: absolute; top: 26px; right: 32px; color: #5a5044; font-size: 16px; letter-spacing: 0; }
+  .p5 .feed { display: flex; flex-direction: column; gap: 18px; overflow: auto; }
+  .p5 .sp { font-size: 11px; letter-spacing: 3px; color: #b8473a; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+  .p5 .sp::after { content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(184,71,58,0.5), transparent); }
+  .p5 .tx { color: #c8bca8; font-size: 14px; }
+  .p5 .e.narr .tx { color: #7d7160; font-style: italic; }
+
+  .legend { max-width: 1200px; margin: 50px auto 0; padding: 22px 26px;
+    background: #1d1812; border: 1px solid #2e2619; border-radius: 12px; font-size: 13.5px; }
+  .legend h2 { font-family: "Noto Serif KR", serif; color: #e8d8b6; font-size: 16px; margin-bottom: 12px; }
+  .legend li { margin: 5px 0; color: #b3a488; }
+  .legend b { color: #e3c178; }
+  .feed::-webkit-scrollbar { width: 7px; }
+  .feed::-webkit-scrollbar-thumb { background: rgba(199,149,59,0.3); border-radius: 4px; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>대사 로그 UI 견본 5종</h1>
+    <p>disputatio · 어두운 세피아 / 종교 미스터리 테마 · 동일 대사 샘플로 비교</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ① PARCHMENT CODEX -->
+    <div class="mock p1">
+      <div class="label">① 양피지 고문서 — Parchment Codex</div>
+      <div class="desc">세피아를 정통 고문서로. 세계관 몰입 최우선. 점선 괘선·세리프 화자명.</div>
+      <div class="screen">
+        <div class="dim"></div>
+        <div class="panel">
+          <div class="x">✕</div>
+          <div class="ttl"><span>❧</span> 대 사 기 록 <span>❧</span></div>
+          <div class="feed">
+            <div class="e"><div class="sp">Chester</div><div class="tx">이 봉인은 함부로 건드리는 게 아니야. 대가가 따르거든.</div></div>
+            <div class="e"><div class="narr">낡은 종이 냄새가 코를 찔렀다. 잉크는 아직 마르지 않은 듯했다.</div></div>
+            <div class="e"><div class="sp">Chester</div><div class="tx">그 책장 뒤를 봐. 답은 늘 가장 가까운 어둠에 숨지.</div></div>
+            <div class="e"><div class="sp">나</div><div class="tx">…아직은 때가 아니야.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-h">rgba 색상값</div>
+        <ul>
+          <li><span class="sw"><i style="background:rgba(232,220,192,1)"></i></span><span class="role">양피지 배경</span> rgba(232,220,192,1)</li>
+          <li><span class="sw"><i style="background:rgba(58,44,26,1)"></i></span><span class="role">본문 잉크</span> rgba(58,44,26,1)</li>
+          <li><span class="sw"><i style="background:rgba(122,74,30,1)"></i></span><span class="role">화자명</span> rgba(122,74,30,1)</li>
+          <li><span class="sw"><i style="background:rgba(176,124,52,1)"></i></span><span class="role">장식 ❧</span> rgba(176,124,52,1)</li>
+          <li><span class="sw"><i style="background:rgba(90,61,28,1)"></i></span><span class="role">제목</span> rgba(90,61,28,1)</li>
+          <li><span class="sw"><i style="background:rgba(183,154,99,1)"></i></span><span class="role">제목 밑줄</span> rgba(183,154,99,1)</li>
+          <li><span class="sw"><i style="background:rgba(191,164,115,1)"></i></span><span class="role">항목 괘선</span> rgba(191,164,115,1)</li>
+          <li><span class="sw"><i style="background:rgba(107,90,64,1)"></i></span><span class="role">나레이션</span> rgba(107,90,64,1)</li>
+          <li><span class="sw"><i style="background:rgba(216,199,159,1)"></i></span><span class="role">안쪽 테두리</span> rgba(216,199,159,1)</li>
+          <li><span class="sw"><i style="background:rgba(107,79,42,1)"></i></span><span class="role">바깥 테두리</span> rgba(107,79,42,1)</li>
+          <li><span class="sw"><i style="background:rgba(138,106,56,1)"></i></span><span class="role">닫기 ✕</span> rgba(138,106,56,1)</li>
+          <li><span class="sw"><i style="background:rgba(0,0,0,0.55)"></i></span><span class="role">딤 배경</span> rgba(0,0,0,0.55)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ② CHAT BUBBLES -->
+    <div class="mock p2">
+      <div class="label">② 메신저 말풍선 — Chat Bubbles</div>
+      <div class="desc">가독성·현대성 우선. 화자별 좌우 정렬 + 초상 아이콘. 나레이션은 중앙.</div>
+      <div class="screen">
+        <div class="dim"></div>
+        <div class="panel">
+          <div class="x">✕</div>
+          <div class="ttl">대 화 기 록</div>
+          <div class="feed">
+            <div class="row"><div class="ava c">C</div><div><div class="name">Chester</div><div class="b">이 봉인은 함부로 건드리는 게 아니야. 대가가 따르거든.</div></div></div>
+            <div class="narr">— 낡은 종이 냄새가 코를 찔렀다 —</div>
+            <div class="row"><div class="ava c">C</div><div><div class="name">Chester</div><div class="b">그 책장 뒤를 봐.</div></div></div>
+            <div class="row me"><div class="ava m">나</div><div><div class="b">…아직은 때가 아니야.</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-h">rgba 색상값</div>
+        <ul>
+          <li><span class="sw"><i style="background:rgba(18,15,11,0.94)"></i></span><span class="role">패널 배경</span> rgba(18,15,11,0.94)</li>
+          <li><span class="sw"><i style="background:rgba(58,47,32,1)"></i></span><span class="role">패널 테두리</span> rgba(58,47,32,1)</li>
+          <li><span class="sw"><i style="background:rgba(227,193,120,1)"></i></span><span class="role">제목</span> rgba(227,193,120,1)</li>
+          <li><span class="sw"><i style="background:rgba(46,38,25,1)"></i></span><span class="role">제목 밑줄</span> rgba(46,38,25,1)</li>
+          <li><span class="sw"><i style="background:rgba(199,149,59,1)"></i></span><span class="role">초상 Chester</span> rgba(199,149,59,1)</li>
+          <li><span class="sw"><i style="background:rgba(95,163,154,1)"></i></span><span class="role">초상 나</span> rgba(95,163,154,1)</li>
+          <li><span class="sw"><i style="background:rgba(26,20,13,1)"></i></span><span class="role">초상 글자</span> rgba(26,20,13,1)</li>
+          <li><span class="sw"><i style="background:rgba(154,138,108,1)"></i></span><span class="role">이름표</span> rgba(154,138,108,1)</li>
+          <li><span class="sw"><i style="background:rgba(44,36,26,1)"></i></span><span class="role">상대 말풍선</span> rgba(44,36,26,1)</li>
+          <li><span class="sw"><i style="background:rgba(230,220,200,1)"></i></span><span class="role">상대 글자</span> rgba(230,220,200,1)</li>
+          <li><span class="sw"><i style="background:rgba(90,63,28,1)"></i></span><span class="role">내 말풍선</span> rgba(90,63,28,1)</li>
+          <li><span class="sw"><i style="background:rgba(240,228,202,1)"></i></span><span class="role">내 글자</span> rgba(240,228,202,1)</li>
+          <li><span class="sw"><i style="background:rgba(138,124,100,1)"></i></span><span class="role">나레이션</span> rgba(138,124,100,1)</li>
+          <li><span class="sw"><i style="background:rgba(138,115,80,1)"></i></span><span class="role">닫기 ✕</span> rgba(138,115,80,1)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ③ LEDGER -->
+    <div class="mock p3">
+      <div class="label">③ 심문 대장 — 2-Column Ledger</div>
+      <div class="desc">화자 고정폭 좌측 열 + 대사 우측 열. 정보 밀도 최고, 긴 대화 스캔에 강함.</div>
+      <div class="screen">
+        <div class="dim"></div>
+        <div class="panel">
+          <div class="x">✕</div>
+          <div class="ttl">기 록 부</div>
+          <div class="feed">
+            <div class="e"><div class="sp">Chester</div><div class="tx">이 봉인은 함부로 건드리는 게 아니야. 대가가 따르거든.</div></div>
+            <div class="e narr"><div class="sp">—</div><div class="tx">낡은 종이 냄새가 코를 찔렀다.</div></div>
+            <div class="e"><div class="sp">Chester</div><div class="tx">그 책장 뒤를 봐. 답은 늘 가장 가까운 어둠에 숨지.</div></div>
+            <div class="e"><div class="sp">나</div><div class="tx">…아직은 때가 아니야.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-h">rgba 색상값</div>
+        <ul>
+          <li><span class="sw"><i style="background:rgba(22,18,8,1)"></i></span><span class="role">패널 배경</span> rgba(22,18,8,1)</li>
+          <li><span class="sw"><i style="background:rgba(54,48,30,1)"></i></span><span class="role">테두리/구분선</span> rgba(54,48,30,1)</li>
+          <li><span class="sw"><i style="background:rgba(227,193,120,1)"></i></span><span class="role">제목</span> rgba(227,193,120,1)</li>
+          <li><span class="sw"><i style="background:rgba(39,31,18,1)"></i></span><span class="role">행 구분선</span> rgba(39,31,18,1)</li>
+          <li><span class="sw"><i style="background:rgba(255,255,255,0.018)"></i></span><span class="role">짝수행 틴트</span> rgba(255,255,255,0.018)</li>
+          <li><span class="sw"><i style="background:rgba(199,149,59,1)"></i></span><span class="role">화자(앰버)</span> rgba(199,149,59,1)</li>
+          <li><span class="sw"><i style="background:rgba(230,220,200,1)"></i></span><span class="role">본문</span> rgba(230,220,200,1)</li>
+          <li><span class="sw"><i style="background:rgba(154,138,108,1)"></i></span><span class="role">나레이션</span> rgba(154,138,108,1)</li>
+          <li><span class="sw"><i style="background:rgba(138,115,80,1)"></i></span><span class="role">닫기 ✕</span> rgba(138,115,80,1)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ④ CARD STACK -->
+    <div class="mock p4">
+      <div class="label">④ 카드 스택 — Card Stack</div>
+      <div class="desc">각 대사를 독립 카드로. 화자별 색상 칩 + 좌측 강조선. 현재 구조 마이그레이션 최소.</div>
+      <div class="screen">
+        <div class="dim"></div>
+        <div class="panel">
+          <div class="x">✕</div>
+          <div class="ttl">로 그</div>
+          <div class="feed">
+            <div class="card"><span class="chip">CHESTER</span><div class="tx">이 봉인은 함부로 건드리는 게 아니야. 대가가 따르거든.</div></div>
+            <div class="card narr"><span class="chip">나레이션</span><div class="tx">낡은 종이 냄새가 코를 찔렀다.</div></div>
+            <div class="card"><span class="chip">CHESTER</span><div class="tx">그 책장 뒤를 봐.</div></div>
+            <div class="card me"><span class="chip">나</span><div class="tx">…아직은 때가 아니야.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-h">rgba 색상값</div>
+        <ul>
+          <li><span class="sw"><i style="background:rgba(20,16,11,0.95)"></i></span><span class="role">패널 배경</span> rgba(20,16,11,0.95)</li>
+          <li><span class="sw"><i style="background:rgba(50,40,25,1)"></i></span><span class="role">패널 테두리</span> rgba(50,40,25,1)</li>
+          <li><span class="sw"><i style="background:rgba(227,193,120,1)"></i></span><span class="role">제목</span> rgba(227,193,120,1)</li>
+          <li><span class="sw"><i style="background:rgba(37,29,19,1)"></i></span><span class="role">카드 배경</span> rgba(37,29,19,1)</li>
+          <li><span class="sw"><i style="background:rgba(0,0,0,0.4)"></i></span><span class="role">카드 그림자</span> rgba(0,0,0,0.4)</li>
+          <li><span class="sw"><i style="background:rgba(199,149,59,1)"></i></span><span class="role">강조선 Chester</span> rgba(199,149,59,1)</li>
+          <li><span class="sw"><i style="background:rgba(95,163,154,1)"></i></span><span class="role">강조선 나</span> rgba(95,163,154,1)</li>
+          <li><span class="sw"><i style="background:rgba(107,96,82,1)"></i></span><span class="role">강조선 나레이션</span> rgba(107,96,82,1)</li>
+          <li><span class="sw"><i style="background:rgba(199,149,59,0.18)"></i></span><span class="role">칩 배경(C)</span> rgba(199,149,59,0.18)</li>
+          <li><span class="sw"><i style="background:rgba(227,193,120,1)"></i></span><span class="role">칩 글자(C)</span> rgba(227,193,120,1)</li>
+          <li><span class="sw"><i style="background:rgba(95,163,154,0.18)"></i></span><span class="role">칩 배경(나)</span> rgba(95,163,154,0.18)</li>
+          <li><span class="sw"><i style="background:rgba(143,208,198,1)"></i></span><span class="role">칩 글자(나)</span> rgba(143,208,198,1)</li>
+          <li><span class="sw"><i style="background:rgba(150,140,120,0.16)"></i></span><span class="role">칩 배경(나레)</span> rgba(150,140,120,0.16)</li>
+          <li><span class="sw"><i style="background:rgba(176,164,142,1)"></i></span><span class="role">칩 글자(나레)</span> rgba(176,164,142,1)</li>
+          <li><span class="sw"><i style="background:rgba(230,220,200,1)"></i></span><span class="role">본문</span> rgba(230,220,200,1)</li>
+          <li><span class="sw"><i style="background:rgba(168,154,130,1)"></i></span><span class="role">나레이션 본문</span> rgba(168,154,130,1)</li>
+          <li><span class="sw"><i style="background:rgba(138,115,80,1)"></i></span><span class="role">닫기 ✕</span> rgba(138,115,80,1)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ⑤ MINIMAL DARK -->
+    <div class="mock p5">
+      <div class="label">⑤ 어둠 속 고백록 — Minimal Dark / Horror</div>
+      <div class="desc">거의 검은 패널 + 핏빛 강조 하나. 큰 여백. 잠스케어·봉인 모티프와 가장 잘 맞음.</div>
+      <div class="screen">
+        <div class="panel">
+          <div class="x">✕</div>
+          <div class="ttl">L O G</div>
+          <div class="feed">
+            <div class="e"><div class="sp">Chester</div><div class="tx">이 봉인은 함부로 건드리는 게 아니야. 대가가 따르거든.</div></div>
+            <div class="e narr"><div class="tx">낡은 종이 냄새가 코를 찔렀다.</div></div>
+            <div class="e"><div class="sp">Me</div><div class="tx">…아직은 때가 아니야.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-h">rgba 색상값</div>
+        <ul>
+          <li><span class="sw"><i style="background:rgba(10,9,8,1)"></i></span><span class="role">패널 위</span> rgba(10,9,8,1)</li>
+          <li><span class="sw"><i style="background:rgba(13,11,9,1)"></i></span><span class="role">패널 아래</span> rgba(13,11,9,1)</li>
+          <li><span class="sw"><i style="background:rgba(110,99,86,1)"></i></span><span class="role">제목</span> rgba(110,99,86,1)</li>
+          <li><span class="sw"><i style="background:rgba(184,71,58,1)"></i></span><span class="role">화자(핏빛)</span> rgba(184,71,58,1)</li>
+          <li><span class="sw"><i style="background:rgba(184,71,58,0.5)"></i></span><span class="role">화자 밑줄</span> rgba(184,71,58,0.5)</li>
+          <li><span class="sw"><i style="background:rgba(200,188,168,1)"></i></span><span class="role">본문</span> rgba(200,188,168,1)</li>
+          <li><span class="sw"><i style="background:rgba(125,113,96,1)"></i></span><span class="role">나레이션</span> rgba(125,113,96,1)</li>
+          <li><span class="sw"><i style="background:rgba(90,80,68,1)"></i></span><span class="role">닫기 ✕</span> rgba(90,80,68,1)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>선택 가이드</h2>
+    <ul>
+      <li><b>세계관 몰입</b> 중시 → ① 양피지 / ⑤ 어둠 속 고백록</li>
+      <li><b>가독성·현대성</b> 중시 → ② 말풍선 / ④ 카드 스택</li>
+      <li><b>긴 대화 스캔성</b> 중시 → ③ 심문 대장</li>
+      <li><b>구현 난이도</b>: ④ 카드 ≈ ③ 대장 (항목 프리팹 교체) &lt; ① 양피지 (텍스처) &lt; ② 말풍선 (화자 좌우·초상 로직 추가)</li>
+    </ul>
+  </div>
+</body>
+</html>

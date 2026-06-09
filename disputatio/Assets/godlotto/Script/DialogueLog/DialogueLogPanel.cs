@@ -173,6 +173,14 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         {
             GameObject go = Instantiate(entryPrefab, content);
             go.SetActive(true);
+
+            var entryView = go.GetComponent<DialogueLogEntryView>();
+            if (entryView != null)
+            {
+                entryView.Bind(entry);
+                continue;
+            }
+
             var label = go.GetComponentInChildren<TMP_Text>(true);
             if (label != null)
                 label.text = DialogueLogLogic.FormatEntry(entry);
