@@ -95,6 +95,26 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
             quickRestartService.TriggerRestart();
     }
 
+    public void RequestGrantAllItems()
+    {
+        if (IsDeveloperModeEnabled)
+            DeveloperModeItemGrantService.GrantAllItems();
+    }
+
+    public DeveloperModeItemSelectionGrantResult RequestGrantSelectedItem(Item item, int quantity)
+    {
+        if (!IsDeveloperModeEnabled)
+        {
+            return new DeveloperModeItemSelectionGrantResult
+            {
+                WasBlockedByDevMode = true,
+                FailureReason = "개발자 모드가 꺼져 있습니다.",
+            };
+        }
+
+        return DeveloperModeItemGrantService.GrantSelectedItem(item, quantity);
+    }
+
     private void SetDeveloperModeEnabled(bool enabled)
     {
         IsDeveloperModeEnabled = enabled;

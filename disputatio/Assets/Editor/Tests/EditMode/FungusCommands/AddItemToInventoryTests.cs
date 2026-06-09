@@ -3,25 +3,19 @@ using UnityEngine;
 
 public class AddItemToInventoryTests
 {
-    private Item CreateTestItem(int id, string name)
+    [TearDown]
+    public void TearDown()
     {
-        var item = ScriptableObject.CreateInstance<Item>();
-        item.itemId = id;
-        item.itemName = name;
-        return item;
+        ItemRegistry.ResetCacheForTest();
     }
 
     [Test]
     public void FindItemById_ReturnsItem_WhenIdExists()
     {
-        Item bottle = CreateTestItem(1, "Bottle");
-
         Item found = AddItemToInventory.FindItemById(1);
 
         Assert.IsNotNull(found);
         Assert.AreEqual("Bottle", found.itemName);
-
-        Object.DestroyImmediate(bottle);
     }
 
     [Test]
@@ -33,18 +27,15 @@ public class AddItemToInventoryTests
     }
 
     [Test]
-    public void FindItemById_ReturnsCorrectItem_WhenMultipleExist()
+    public void FindItemById_ReturnsRegistryItem_ForDistinctIds()
     {
-        Item a = CreateTestItem(5, "ItemA");
-        Item b = CreateTestItem(10, "ItemB");
+        Item holyGrail = AddItemToInventory.FindItemById(5);
+        Item bedRoomKey = AddItemToInventory.FindItemById(10);
 
-        Item found = AddItemToInventory.FindItemById(10);
-
-        Assert.IsNotNull(found);
-        Assert.AreEqual("ItemB", found.itemName);
-
-        Object.DestroyImmediate(a);
-        Object.DestroyImmediate(b);
+        Assert.IsNotNull(holyGrail);
+        Assert.AreEqual("HolyGrail", holyGrail.itemName);
+        Assert.IsNotNull(bedRoomKey);
+        Assert.AreEqual("BedRoomKey", bedRoomKey.itemName);
     }
 
     [Test]

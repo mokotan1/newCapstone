@@ -60,7 +60,6 @@ public class AddItemToInventory : Command
     /// </summary>
     public static Item FindItemById(int id)
     {
-        Item[] allItems = Resources.FindObjectsOfTypeAll<Item>();
-        return System.Array.Find(allItems, x => x.itemId == id);
+        return ItemLookup.FindById(id);
     }
 }
