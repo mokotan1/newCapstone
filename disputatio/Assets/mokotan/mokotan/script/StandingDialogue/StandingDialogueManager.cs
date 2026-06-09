@@ -92,12 +92,30 @@ namespace Mokotan.StandingDialogue
                 _defaultFontSize = dialogueTextField.fontSize;
                 _defaultFont     = dialogueTextField.font;
             }
+
+            ApplyIntroBackdrop(visible: false);
+        }
+
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         private void OnDestroy()
         {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             ActiveStandingDialogues.Remove(this);
             if (ActiveStandingDialogue == this) ActiveStandingDialogue = null;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            ApplyIntroBackdrop(visible: gameObject.activeSelf);
         }
 
         public static StandingDialogueManager GetStandingDialogue()
@@ -354,7 +372,7 @@ namespace Mokotan.StandingDialogue
             if (characterDimBackdrop == null) return;
 
             bool useBackdrop = visible &&
-                IntroStandingDialogueOffsetPolicy.UsesFixedOffset(
+                IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(
                     SceneManager.GetActiveScene().name);
 
             characterDimBackdrop.gameObject.SetActive(useBackdrop);
