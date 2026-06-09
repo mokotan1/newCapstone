@@ -70,29 +70,34 @@ public static class StandingDialoguePrefabCreator
         canvasGroup.blocksRaycasts = true;
         canvasGroup.interactable = true;
 
+        Image characterDimBackdrop = CreateUiImage("CharacterDimBackdrop", root.transform, uiSprite, preserveAspect: false);
+        characterDimBackdrop.raycastTarget = false;
+        characterDimBackdrop.color = new Color(0f, 0f, 0f, IntroStandingDialogueOffsetPolicy.BackdropAlpha);
+        characterDimBackdrop.gameObject.SetActive(false);
+
         var leftSlot = CreateUiChild("LeftSlot", root.transform);
         StretchLeftHalf(leftSlot.GetComponent<RectTransform>());
+
+        Image leftOverlay = CreateUiImage("LeftOverlay", leftSlot.transform, uiSprite, preserveAspect: false);
+        leftOverlay.raycastTarget = false;
+        leftOverlay.color = new Color(0f, 0f, 0f, 0f);
 
         Image leftChar = CreateUiImage("LeftCharImage", leftSlot.transform, uiSprite, preserveAspect: true);
         leftChar.raycastTarget = false;
         SetImageAlpha(leftChar, 0f);
         leftChar.gameObject.SetActive(false);
 
-        Image leftOverlay = CreateUiImage("LeftOverlay", leftSlot.transform, uiSprite, preserveAspect: false);
-        leftOverlay.raycastTarget = false;
-        leftOverlay.color = new Color(0f, 0f, 0f, 0f);
-
         var rightSlot = CreateUiChild("RightSlot", root.transform);
         StretchRightHalf(rightSlot.GetComponent<RectTransform>());
+
+        Image rightOverlay = CreateUiImage("RightOverlay", rightSlot.transform, uiSprite, preserveAspect: false);
+        rightOverlay.raycastTarget = false;
+        rightOverlay.color = new Color(0f, 0f, 0f, 0f);
 
         Image rightChar = CreateUiImage("RightCharImage", rightSlot.transform, uiSprite, preserveAspect: true);
         rightChar.raycastTarget = false;
         SetImageAlpha(rightChar, 0f);
         rightChar.gameObject.SetActive(false);
-
-        Image rightOverlay = CreateUiImage("RightOverlay", rightSlot.transform, uiSprite, preserveAspect: false);
-        rightOverlay.raycastTarget = false;
-        rightOverlay.color = new Color(0f, 0f, 0f, 0f);
 
         // DialogueBox = SayDialog "Panel" (동일 RectTransform·배경)
         var dialogueBox = CreateUiChild("DialogueBox", root.transform);
@@ -158,8 +163,7 @@ public static class StandingDialoguePrefabCreator
         var so = new SerializedObject(mgr);
         so.FindProperty("leftCharImage").objectReferenceValue = leftChar;
         so.FindProperty("rightCharImage").objectReferenceValue = rightChar;
-        so.FindProperty("leftOverlay").objectReferenceValue = leftOverlay;
-        so.FindProperty("rightOverlay").objectReferenceValue = rightOverlay;
+        so.FindProperty("characterDimBackdrop").objectReferenceValue = characterDimBackdrop;
         so.FindProperty("dialogueBox").objectReferenceValue = dialogueBox;
         so.FindProperty("nameText").objectReferenceValue = nameText;
         so.FindProperty("dialogueTextField").objectReferenceValue = dialogueText;

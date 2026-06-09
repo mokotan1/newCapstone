@@ -10,6 +10,8 @@ namespace Godlotto.Interaction
     {
         static bool transitionPending;
         static string pendingSceneName = string.Empty;
+        static string lastLoadedSceneName = string.Empty;
+        static string previousSceneName = string.Empty;
 
         /// <summary>에디터/개발 빌드에서 전환 시도/차단 로그.</summary>
         public static bool EnableDebugLogging { get; set; }
@@ -17,6 +19,10 @@ namespace Godlotto.Interaction
         public static bool IsTransitionPending => transitionPending;
 
         public static string PendingSceneName => pendingSceneName;
+
+        public static string LastLoadedSceneName => lastLoadedSceneName;
+
+        public static string PreviousSceneName => previousSceneName;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         static void Initialize()
@@ -60,6 +66,8 @@ namespace Godlotto.Interaction
 
         static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            previousSceneName = lastLoadedSceneName;
+            lastLoadedSceneName = scene.name;
             ResetState();
         }
 
@@ -75,9 +83,17 @@ namespace Godlotto.Interaction
             pendingSceneName = pending ? sceneName ?? string.Empty : string.Empty;
         }
 
+        internal static void SetLoadedScenesForTests(string previousScene, string lastLoadedScene = "")
+        {
+            previousSceneName = previousScene ?? string.Empty;
+            lastLoadedSceneName = lastLoadedScene ?? string.Empty;
+        }
+
         internal static void ResetForTests()
         {
             EnableDebugLogging = false;
+            previousSceneName = string.Empty;
+            lastLoadedSceneName = string.Empty;
             ResetState();
         }
     }

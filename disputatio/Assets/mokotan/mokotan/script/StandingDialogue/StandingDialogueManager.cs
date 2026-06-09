@@ -1,9 +1,12 @@
 // Prefab 구조:
 // Canvas (StandingDialogueCanvas) — Screen Space Overlay, Sort Order 10
 //   CanvasGroup
+//   ├── CharacterDimBackdrop (인트로 씬 전용, Raycast Off)
 //   ├── LeftSlot
+//   │     ├── LeftOverlay (비활성/투명, 슬롯별 예비)
 //   │     └── LeftCharImage (Image, Preserve Aspect: true)
 //   ├── RightSlot
+//   │     ├── RightOverlay (비활성/투명, 슬롯별 예비)
 //   │     └── RightCharImage (Image, Preserve Aspect: true)
 //   └── DialogueBox (하단 중앙)
 //         ├── NameText (TMP)
@@ -14,6 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Mokotan.StandingDialogue
@@ -62,6 +66,7 @@ namespace Mokotan.StandingDialogue
 
         [SerializeField] private Image    leftCharImage;
         [SerializeField] private Image    rightCharImage;
+        [SerializeField] private Image    characterDimBackdrop;
         [SerializeField] private GameObject dialogueBox;
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text dialogueTextField;
@@ -309,6 +314,7 @@ namespace Mokotan.StandingDialogue
             if (dialogueBox != null) dialogueBox.SetActive(false);
             ResetSlot(leftCharImage);
             ResetSlot(rightCharImage);
+            ApplyIntroBackdrop(visible: false);
             _fadeAllRoutine = null;
         }
 
@@ -340,6 +346,23 @@ namespace Mokotan.StandingDialogue
         {
             if (!gameObject.activeSelf) gameObject.SetActive(true);
             if (canvasGroup != null && canvasGroup.alpha < 1f) canvasGroup.alpha = 1f;
+            ApplyIntroBackdrop(visible: true);
+        }
+
+        private void ApplyIntroBackdrop(bool visible)
+        {
+            if (characterDimBackdrop == null) return;
+
+            bool useBackdrop = visible &&
+                IntroStandingDialogueOffsetPolicy.UsesFixedOffset(
+                    SceneManager.GetActiveScene().name);
+
+            characterDimBackdrop.gameObject.SetActive(useBackdrop);
+            if (!useBackdrop) return;
+
+            characterDimBackdrop.raycastTarget = false;
+            characterDimBackdrop.color = new Color(
+                0f, 0f, 0f, IntroStandingDialogueOffsetPolicy.BackdropAlpha);
         }
 
         private Image GetCharImage(Side side) =>
@@ -347,7 +370,8 @@ namespace Mokotan.StandingDialogue
 
         private static void ApplyOffset(Image img, Vector2 offset)
         {
-            img.rectTransform.anchoredPosition = offset;
+            img.rectTransform.anchoredPosition =
+                IntroStandingDialogueOffsetPolicy.ResolveForActiveScene(offset);
         }
     }
 }
