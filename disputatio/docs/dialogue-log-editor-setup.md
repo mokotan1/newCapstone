@@ -4,6 +4,28 @@
 > 이 문서만 보고 에디터 작업을 완료할 수 있도록 모든 경로·계층·설정값을 명시한다.
 > **C# 스크립트는 절대 수정하지 말 것.** 에디터(씬/프리팹/인스펙터) 작업만 한다.
 
+## 에디터 자동 구성 (수동만)
+
+씬·프리팹 연동은 **컴파일/도메인 리로드 시 자동 실행되지 않는다.** (의도치 않은 IntroScene 전환·저장 방지)
+
+Unity 메뉴에서 아래를 **직접** 실행한다:
+
+| 메뉴 | 스타일 | entryPrefab | 패널 |
+|------|--------|-------------|------|
+| **`Tools ▸ Godlotto ▸ Setup Dialogue Log (Editor Guide)`** | ① Parchment Codex (기본) | `DialogueLogEntry_Parchment.prefab` | inset 10%/9% 양피지 |
+| **`Tools ▸ Godlotto ▸ Setup Dialogue Log ▸ Parchment Codex (①)`** | ① | 동일 | 동일 |
+| **`Tools ▸ Godlotto ▸ Setup Dialogue Log ▸ Legacy Notebook`** | 기존 다크 | `DialogueLogEntry.prefab` | 전체 화면 다크 |
+| **`Tools ▸ Godlotto ▸ Setup Dialogue Log ▸ Dark Confession (⑤)`** | ⑤ | `DialogueLogEntry_DarkConfession.prefab` | 전체 화면 다크 |
+
+공통 C# 헬퍼 (①·⑤ 구현 재사용):
+
+- `DialogueLogVisualStyle` — 스타일 enum
+- `DialogueLogStylePalette` — mockups.html rgba 팔레트 (`ParchmentCodex`, `DarkConfession`)
+- `DialogueLogEntryView` — 화자/본문/구분선 분리 바인딩
+- `DialogueLogLogic.IsNarration`, `FormatSpeakerLine`, `FormatSpeakerRichText` — 포맷 헬퍼
+
+`DialogueLogPanel`은 `entryPrefab`에 `DialogueLogEntryView`가 있으면 구조화 렌더링, 없으면 기존 단일 TMP + `FormatEntry`로 폴백한다.
+
 ---
 
 ## 0. 사전 상태 (이미 완료됨 — 건드리지 말 것)
@@ -28,18 +50,28 @@
 ## 1. `DialogueLogPanel.cs` 의 인스펙터 필드 (연결 대상)
 
 ```
-[Header("UI")]
-GameObject  logPanel          // 로그 전체 패널 루트 (닫혀있을 때 비활성)
-ScrollRect  scrollRect        // 스크롤 영역. content에 Vertical Layout Group 권장
-GameObject  entryPrefab       // 항목 1줄 프리팹 (루트/자식에 TMP_Text 필수)
+[Header("Visual Style")]
+DialogueLogVisualStyle visualStyle   // ParchmentCodex / DarkConfession / LegacyNotebook
+
+[Header("Style Layers")]
+DialogueLogStyleLayer parchmentLayer       // panelRoot + scrollRect + entryPrefab
+DialogueLogStyleLayer darkConfessionLayer
+DialogueLogStyleLayer legacyLayer
+
+[Header("UI (legacy fallback)")]
+GameObject  logPanel          // 레이어 미설정 시 폴백 패널 루트
+ScrollRect  scrollRect
+GameObject  entryPrefab
 
 [Header("입력")]
-KeyCode     logHotkey = L     // 기본값 그대로 두면 됨
+KeyCode     logHotkey = L
 
 [Header("캔버스 정렬 (SayDialog 위로)")]
-string  canvasSortingLayerName = "Setting"   // 기본값 유효 (Sorting Layer에 존재함)
-int     canvasSortingOrder    = 60           // 설정 패널(50)보다 위
+string  canvasSortingLayerName = "Setting"
+int     canvasSortingOrder    = 60
 ```
+
+스타일 JSON: `docs/dialogue-log-styles.json` (HTML mockup과 별도 Unity 스펙)
 
 > 항목 텍스트는 코드가 자동으로 `<b>이름</b>\n본문` 형태(리치 텍스트)로 채운다.
 > 따라서 **entryPrefab의 TMP_Text는 Rich Text가 켜져 있어야 한다(기본 켜짐).**
@@ -78,12 +110,27 @@ DialogueLogManager                (빈 GameObject)
 `DialogueLogManager`(또는 Canvas) 오브젝트에 **`DialogueLogPanel` 컴포넌트**를 부착한다.
 
 ### entryPrefab (항목 1줄 프리팹)
-- 위치 예: `Assets/godlotto/Prefab/DialogueLogEntry.prefab`
-- 구성: 루트(RectTransform) + **`TMP_Text`**
-  - Font Asset: **`Assets/Font/NanumGothic SDF`** (프로젝트 전역 폰트와 통일)
+
+**① Parchment Codex** (`DialogueLogEntry_Parchment.prefab`):
+
+- 루트: `LayoutElement` + `DialogueLogEntryView` + `VerticalLayoutGroup`
+- `SpeakerRow/SpeakerText` — 화자(❧ 장식, 굵게)
+- `BodyText` — 본문(나레이션은 italic)
+- `Separator` — 항목 하단 얇은 구분선
+
+**⑤ Dark Confession** (`DialogueLogEntry_DarkConfession.prefab`):
+
+- 루트: `LayoutElement` + `DialogueLogEntryView` + `VerticalLayoutGroup`
+- `SpeakerRow` — `HorizontalLayoutGroup`: `SpeakerText`(대문자·핏빛) + `SpeakerLine`(가로 1px, rgba 184,71,58,0.5)
+- `BodyText` — 본문(나레이션은 italic, 화자 행 숨김)
+- Content `VerticalLayoutGroup.spacing` = 18 (항목 간 넓은 간격)
+
+**Legacy** (`DialogueLogEntry.prefab`):
+
+- 루트(RectTransform) + **`TMP_Text`**
+  - Font Asset: **`Assets/Font/NanumGothic SDF`**
   - Enable **Auto Size** 끄고 적당한 폰트 크기, **Wrapping: Enabled**
-  - 가로폭은 Content의 Layout이 잡아주므로, 프리팹엔 **Layout Element(Preferred Height 비움/Min Height 정도)** 만 둬도 됨
-- 이 프리팹을 `DialogueLogPanel.entryPrefab`에 드래그.
+  - Rich Text 켜짐 — `FormatEntry`가 `<b>이름</b>\n본문` 채움
 
 ---
 

@@ -42,6 +42,8 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
     private ResolutionAudioSettings _resolutionAudio;
     private bool isPanelOpen = false;
 
+    public bool IsOpen => isPanelOpen;
+
     private float playTime = 0f;
     private bool isCounting = true;
 
@@ -73,7 +75,7 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
         if (isCounting)
             playTime += Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !ShouldIgnoreEscapeToggle())
             ToggleSettingPanel();
 
         if (!isPanelOpen) return;
@@ -109,6 +111,9 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     public void ToggleSettingPanel()
     {
+        if (!isPanelOpen && ModalGamePause.IsDialogueLogOpen)
+            return;
+
         isPanelOpen = !isPanelOpen;
         settingPanel.SetActive(isPanelOpen);
 
@@ -127,9 +132,22 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
         }
         else
         {
-            SettingPanelWorldInputBlocker.End();
-            Time.timeScale = 1f;
+            if (ModalGamePause.ShouldEndWorldInputBlocker())
+                SettingPanelWorldInputBlocker.End();
+            Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();
         }
+    }
+
+    static bool ShouldIgnoreEscapeToggle()
+    {
+        var log = DialogueLogPanel.Instance;
+        if (log == null)
+            return false;
+
+        if (log.SuppressOtherModalEscapeHandling)
+            return true;
+
+        return log.IsOpen;
     }
 
     void EnsureSettingsCanvasSortsAboveSayDialog()

@@ -24,6 +24,23 @@ public sealed class IntroStandingDialogueOffsetPolicyTests
     }
 
     [Test]
+    public void UsesDimBackdrop_ReturnsTrue_OnlyForOpeningDialogueScenes()
+    {
+        Assert.IsTrue(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(SceneNames.IntroScene));
+        Assert.IsTrue(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(SceneNames.OpeningOffice));
+    }
+
+    [Test]
+    public void UsesDimBackdrop_ReturnsFalse_ForMansionAndGameplayScenes()
+    {
+        Assert.IsFalse(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(SceneNames.OpeningMention));
+        Assert.IsFalse(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(SceneNames.OpeningMentionOpen));
+        Assert.IsFalse(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(SceneNames.HallPlayable));
+        Assert.IsFalse(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(null));
+        Assert.IsFalse(IntroStandingDialogueOffsetPolicy.UsesDimBackdrop(""));
+    }
+
+    [Test]
     public void ResolveForScene_ReturnsFixedOffset_InIntroScene()
     {
         var configured = new Vector2(120f, -50f);

@@ -54,7 +54,8 @@ public static class StandingDialoguePrefabCreator
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.pixelPerfect = true;
         canvas.overrideSorting = true;
-        canvas.sortingOrder = 10;
+        canvas.sortingLayerName = "SayDialog";
+        canvas.sortingOrder = 5;
 
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

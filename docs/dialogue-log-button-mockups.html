@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>로그 버튼 디자인 견본 5종 — disputatio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans KR", sans-serif; background: #17120d; color: #cdbfa6;
+    line-height: 1.6; padding: 40px 24px 80px;
+  }
+  .page-head { max-width: 1200px; margin: 0 auto 48px; text-align: center; }
+  .page-head h1 { font-family: "Noto Serif KR", serif; font-weight: 900; color: #e8d8b6;
+    font-size: 30px; letter-spacing: 2px; margin-bottom: 10px; }
+  .page-head p { color: #8a7c64; font-size: 14px; }
+
+  .grid { max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 40px; }
+  .mock { background: #1d1812; border: 1px solid #2e2619; border-radius: 14px; padding: 22px; }
+  .mock > .label { font-family: "Noto Serif KR", serif; color: #e8d8b6; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .mock > .desc { color: #897a61; font-size: 12.5px; margin-bottom: 16px; min-height: 34px; }
+
+  /* dialogue-bar context: where the button actually sits (SayDialog bottom-right) */
+  .stage {
+    position: relative; height: 150px; border-radius: 8px; overflow: hidden;
+    background:
+      linear-gradient(180deg, rgba(20,16,11,0) 0%, rgba(14,11,8,0.85) 55%, rgba(10,8,6,0.96) 100%),
+      radial-gradient(120% 90% at 30% 0%, #3a2e22 0%, #1a140d 60%, #0a0806 100%);
+  }
+  .saybar {
+    position: absolute; left: 12px; right: 12px; bottom: 12px; height: 78px;
+    background: rgba(18,15,11,0.92); border: 1px solid #38301f; border-radius: 8px;
+    padding: 12px 16px; color: #cabda3;
+  }
+  .saybar .nm { color: #e3c178; font-family: "Noto Serif KR", serif; font-size: 13px; }
+  .saybar .ln { color: #b6a884; font-size: 12.5px; margin-top: 4px; }
+  .btn-slot { position: absolute; right: 26px; bottom: 22px; }
+
+  /* zoomed idle/hover pair */
+  .pair { display: flex; gap: 28px; align-items: center; margin-top: 16px;
+    padding: 18px; background: #14110c; border-radius: 8px; }
+  .pair .cell { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .pair .cap { font-size: 11px; color: #7e7059; letter-spacing: 1px; }
+
+  /* ============ shared icon sizing ============ */
+  .ic { display: block; }
+
+  /* ============ ① WAX SEAL ============ */
+  .b1 {
+    width: 64px; height: 64px; border-radius: 50%; position: relative; cursor: pointer;
+    background: radial-gradient(60% 60% at 38% 32%, #c79042 0%, #a8702e 45%, #7c4e20 100%);
+    box-shadow: inset 0 2px 3px rgba(255,222,160,0.45), inset 0 -3px 6px rgba(0,0,0,0.5),
+      0 0 0 2px #5a3c1c, 0 4px 10px rgba(0,0,0,0.55);
+    display: grid; place-items: center; transition: .15s;
+  }
+  .b1 svg { fill: none; stroke: #f5e4c4; stroke-width: 2; }
+  .b1.hover, .b1:hover {
+    background: radial-gradient(60% 60% at 38% 32%, #e0aa55 0%, #c0883a 45%, #8c5a26 100%);
+    box-shadow: inset 0 2px 3px rgba(255,232,180,0.55), inset 0 -3px 6px rgba(0,0,0,0.45),
+      0 0 0 2px #6b4a24, 0 0 16px rgba(227,168,80,0.55), 0 4px 12px rgba(0,0,0,0.6);
+  }
+
+  /* ============ ② PARCHMENT BOOKMARK TAB ============ */
+  .b2 {
+    width: 58px; height: 72px; position: relative; cursor: pointer;
+    background: linear-gradient(180deg, #e2d2b0 0%, #d3bf95 100%);
+    border: 1px solid #967846; border-bottom: none; border-radius: 5px 5px 0 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5); transition: .15s;
+  }
+  .b2 svg { stroke: #4a341c; fill: none; stroke-width: 1.8; }
+  .b2 .t { font-family: "Gowun Batang", serif; color: #4a341c; font-size: 13px; font-weight: 700; }
+  .b2.hover, .b2:hover { transform: translateY(-3px); background: linear-gradient(180deg, #efe0bf 0%, #ddc99e 100%); }
+
+  /* ============ ③ MINIMAL GHOST ICON ============ */
+  .b3 {
+    background: none; border: none; cursor: pointer; opacity: 0.62;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; transition: .15s;
+  }
+  .b3 svg { stroke: #d6be96; fill: none; stroke-width: 1.8; }
+  .b3 .t { color: #d6be96; font-size: 12px; letter-spacing: 2px; }
+  .b3 .t::after { content: ""; display: block; height: 1px; background: #e7c978; width: 0; margin: 2px auto 0; transition: .15s; }
+  .b3.hover, .b3:hover { opacity: 1; }
+  .b3.hover svg, .b3:hover svg { stroke: #e7c978; }
+  .b3.hover .t, .b3:hover .t { color: #e7c978; }
+  .b3.hover .t::after, .b3:hover .t::after { width: 100%; }
+
+  /* ============ ④ ENGRAVED METAL PLATE ============ */
+  .b4 {
+    width: 64px; height: 64px; border-radius: 12px; cursor: pointer; position: relative;
+    background: linear-gradient(160deg, #2e2922 0%, #211c16 55%, #18140f 100%);
+    box-shadow: inset 0 1px 0 rgba(180,162,124,0.35), inset 0 -2px 4px rgba(0,0,0,0.6),
+      0 0 0 1px #4a3f2a, 0 4px 9px rgba(0,0,0,0.55);
+    display: grid; place-items: center; transition: .15s;
+  }
+  .b4 svg { stroke: #a89468; fill: none; stroke-width: 1.8;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,0.7)) drop-shadow(0 -1px 0 rgba(200,180,130,0.18)); }
+  .b4.hover, .b4:hover {
+    box-shadow: inset 0 1px 0 rgba(200,180,130,0.45), inset 0 -2px 4px rgba(0,0,0,0.55),
+      0 0 0 1px #8a6a32, 0 0 14px rgba(150,110,50,0.45), 0 4px 11px rgba(0,0,0,0.6);
+  }
+  .b4.hover svg, .b4:hover svg { stroke: #d8b96e; }
+
+  /* ============ ⑤ AMBER PILL ============ */
+  .b5 {
+    height: 44px; padding: 0 18px; border: none; border-radius: 24px; cursor: pointer;
+    background: linear-gradient(180deg, #d3a04a 0%, #c7953b 50%, #ad7f2f 100%);
+    box-shadow: inset 0 1px 0 rgba(255,232,180,0.55), 0 4px 10px rgba(0,0,0,0.45);
+    display: flex; align-items: center; gap: 9px; transition: .15s;
+  }
+  .b5 svg { stroke: #22180c; fill: none; stroke-width: 2; }
+  .b5 .t { color: #22180c; font-weight: 700; font-size: 15px; letter-spacing: 1px; }
+  .b5.hover, .b5:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(180deg, #e6b358 0%, #d6a443 50%, #bd8d33 100%);
+    box-shadow: inset 0 1px 0 rgba(255,238,196,0.65), 0 0 16px rgba(199,149,59,0.5), 0 6px 13px rgba(0,0,0,0.5);
+  }
+
+  /* rgba spec table */
+  .spec { margin-top: 16px; border-top: 1px solid #2e2619; padding-top: 12px; }
+  .spec .spec-h { font-size: 11px; letter-spacing: 1px; color: #897a61; margin-bottom: 8px; text-transform: uppercase; }
+  .spec ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+  .spec li { font-family: "Courier New", monospace; font-size: 11px; color: #b3a488; white-space: nowrap; }
+  .spec .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 7px;
+    vertical-align: middle; border: 1px solid rgba(255,255,255,0.18);
+    background-image: linear-gradient(45deg,#555 25%,transparent 0),linear-gradient(-45deg,#555 25%,transparent 0),
+      linear-gradient(45deg,transparent 75%,#555 0),linear-gradient(-45deg,transparent 75%,#555 0);
+    background-size: 8px 8px; background-position: 0 0,0 4px,4px -4px,-4px 0; }
+  .spec .sw i { display: block; width: 100%; height: 100%; border-radius: 1px; }
+  .spec .role { color: #7e7059; }
+
+  .legend { max-width: 1200px; margin: 50px auto 0; padding: 22px 26px;
+    background: #1d1812; border: 1px solid #2e2619; border-radius: 12px; font-size: 13.5px; }
+  .legend h2 { font-family: "Noto Serif KR", serif; color: #e8d8b6; font-size: 16px; margin-bottom: 12px; }
+  .legend li { margin: 5px 0; color: #b3a488; list-style-position: inside; }
+  .legend b { color: #e3c178; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>로그 버튼 디자인 견본 5종</h1>
+    <p>현재: SayDialog 우하단 77×77 정사각 · 앰버 rgba(199,148,74,1) · 크림 “로그” · 대화창 맥락에서 idle/hover 비교</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- ① WAX SEAL -->
+    <div class="mock">
+      <div class="label">① 밀랍 인장 — Wax Seal</div>
+      <div class="desc">원형 인장. 양각 엠보싱 + 펼친 책 아이콘. 세계관(봉인·고문서) 몰입 최우선.</div>
+      <div class="stage">
+        <div class="saybar"><div class="nm">Chester</div><div class="ln">이 봉인은 함부로 건드리는 게 아니야…</div></div>
+        <div class="btn-slot">
+          <div class="b1"><svg class="ic" width="26" height="26" viewBox="0 0 24 24"><path d="M12 5c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V5c-2-1.5-5-1.5-7 0z"/><path d="M12 5v14"/></svg></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell"><div class="b1"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 5c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V5c-2-1.5-5-1.5-7 0z"/><path d="M12 5v14"/></svg></div><div class="cap">idle</div></div>
+        <div class="cell"><div class="b1 hover"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 5c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V5c-2-1.5-5-1.5-7 0z"/><path d="M12 5v14"/></svg></div><div class="cap">hover</div></div>
+      </div>
+      <div class="spec"><div class="spec-h">rgba 색상값</div><ul>
+        <li><span class="sw"><i style="background:rgba(199,144,66,1)"></i></span><span class="role">면 하이라이트</span> rgba(199,144,66,1)</li>
+        <li><span class="sw"><i style="background:rgba(168,112,46,1)"></i></span><span class="role">면 중간</span> rgba(168,112,46,1)</li>
+        <li><span class="sw"><i style="background:rgba(124,78,32,1)"></i></span><span class="role">면 가장자리</span> rgba(124,78,32,1)</li>
+        <li><span class="sw"><i style="background:rgba(90,60,28,1)"></i></span><span class="role">테두리 링</span> rgba(90,60,28,1)</li>
+        <li><span class="sw"><i style="background:rgba(245,228,196,1)"></i></span><span class="role">아이콘</span> rgba(245,228,196,1)</li>
+        <li><span class="sw"><i style="background:rgba(255,222,160,0.45)"></i></span><span class="role">상단 양각</span> rgba(255,222,160,0.45)</li>
+        <li><span class="sw"><i style="background:rgba(0,0,0,0.5)"></i></span><span class="role">하단 음각</span> rgba(0,0,0,0.5)</li>
+        <li><span class="sw"><i style="background:rgba(227,168,80,0.55)"></i></span><span class="role">hover 글로우</span> rgba(227,168,80,0.55)</li>
+      </ul></div>
+    </div>
+
+    <!-- ② PARCHMENT BOOKMARK TAB -->
+    <div class="mock">
+      <div class="label">② 양피지 책갈피 탭 — Bookmark Tab</div>
+      <div class="desc">아래 끝이 리본처럼 갈라진 종이 탭. “로그” 잉크 글자. 책/기록 메타포가 가장 직관적.</div>
+      <div class="stage">
+        <div class="saybar"><div class="nm">Chester</div><div class="ln">이 봉인은 함부로 건드리는 게 아니야…</div></div>
+        <div class="btn-slot">
+          <div class="b2"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14l-7-3-8 3V4z"/></svg><span class="t">로그</span></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell"><div class="b2"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14l-7-3-8 3V4z"/></svg><span class="t">로그</span></div><div class="cap">idle</div></div>
+        <div class="cell"><div class="b2 hover"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14l-7-3-8 3V4z"/></svg><span class="t">로그</span></div><div class="cap">hover</div></div>
+      </div>
+      <div class="spec"><div class="spec-h">rgba 색상값</div><ul>
+        <li><span class="sw"><i style="background:rgba(226,210,176,1)"></i></span><span class="role">탭 위</span> rgba(226,210,176,1)</li>
+        <li><span class="sw"><i style="background:rgba(211,191,149,1)"></i></span><span class="role">탭 아래</span> rgba(211,191,149,1)</li>
+        <li><span class="sw"><i style="background:rgba(150,120,70,1)"></i></span><span class="role">테두리</span> rgba(150,120,70,1)</li>
+        <li><span class="sw"><i style="background:rgba(74,52,28,1)"></i></span><span class="role">아이콘·글자</span> rgba(74,52,28,1)</li>
+        <li><span class="sw"><i style="background:rgba(239,224,191,1)"></i></span><span class="role">hover 위</span> rgba(239,224,191,1)</li>
+        <li><span class="sw"><i style="background:rgba(221,201,158,1)"></i></span><span class="role">hover 아래</span> rgba(221,201,158,1)</li>
+        <li><span class="sw"><i style="background:rgba(0,0,0,0.5)"></i></span><span class="role">그림자</span> rgba(0,0,0,0.5)</li>
+      </ul></div>
+    </div>
+
+    <!-- ③ MINIMAL GHOST ICON -->
+    <div class="mock">
+      <div class="label">③ 미니멀 고스트 — Ghost Icon</div>
+      <div class="desc">테두리 없이 아이콘+“로그” 캡션만. idle 반투명 → hover 시 또렷·밑줄. 대화창을 안 가림.</div>
+      <div class="stage">
+        <div class="saybar"><div class="nm">Chester</div><div class="ln">이 봉인은 함부로 건드리는 게 아니야…</div></div>
+        <div class="btn-slot">
+          <div class="b3"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="3.2"/><path d="M18 15.4v1.6l1 .8"/></svg><span class="t">로그</span></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell"><div class="b3"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="3.2"/><path d="M18 15.4v1.6l1 .8"/></svg><span class="t">로그</span></div><div class="cap">idle</div></div>
+        <div class="cell"><div class="b3 hover"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="3.2"/><path d="M18 15.4v1.6l1 .8"/></svg><span class="t">로그</span></div><div class="cap">hover</div></div>
+      </div>
+      <div class="spec"><div class="spec-h">rgba 색상값</div><ul>
+        <li><span class="sw"><i style="background:rgba(214,190,150,0.62)"></i></span><span class="role">idle 아이콘·글자</span> rgba(214,190,150,0.62)</li>
+        <li><span class="sw"><i style="background:rgba(231,201,120,1)"></i></span><span class="role">hover 아이콘·글자</span> rgba(231,201,120,1)</li>
+        <li><span class="sw"><i style="background:rgba(231,201,120,1)"></i></span><span class="role">hover 밑줄</span> rgba(231,201,120,1)</li>
+      </ul></div>
+    </div>
+
+    <!-- ④ ENGRAVED METAL PLATE -->
+    <div class="mock">
+      <div class="label">④ 음각 금속 명판 — Engraved Plate</div>
+      <div class="desc">검은 건메탈 명판에 아이콘을 음각. 상단 베벨 + 앰버 림. 무겁고 호러 톤에 잘 맞음.</div>
+      <div class="stage">
+        <div class="saybar"><div class="nm">Chester</div><div class="ln">이 봉인은 함부로 건드리는 게 아니야…</div></div>
+        <div class="btn-slot">
+          <div class="b4"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M5 7h14M5 11h14M5 15h9"/><path d="M16 18l2.5-2.5L21 18l-2.5 2.5z"/></svg></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell"><div class="b4"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M5 7h14M5 11h14M5 15h9"/><path d="M16 18l2.5-2.5L21 18l-2.5 2.5z"/></svg></div><div class="cap">idle</div></div>
+        <div class="cell"><div class="b4 hover"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M5 7h14M5 11h14M5 15h9"/><path d="M16 18l2.5-2.5L21 18l-2.5 2.5z"/></svg></div><div class="cap">hover</div></div>
+      </div>
+      <div class="spec"><div class="spec-h">rgba 색상값</div><ul>
+        <li><span class="sw"><i style="background:rgba(46,41,34,1)"></i></span><span class="role">명판 위</span> rgba(46,41,34,1)</li>
+        <li><span class="sw"><i style="background:rgba(24,20,15,1)"></i></span><span class="role">명판 아래</span> rgba(24,20,15,1)</li>
+        <li><span class="sw"><i style="background:rgba(74,63,42,1)"></i></span><span class="role">외곽 림</span> rgba(74,63,42,1)</li>
+        <li><span class="sw"><i style="background:rgba(180,162,124,0.35)"></i></span><span class="role">상단 베벨</span> rgba(180,162,124,0.35)</li>
+        <li><span class="sw"><i style="background:rgba(168,148,104,1)"></i></span><span class="role">아이콘</span> rgba(168,148,104,1)</li>
+        <li><span class="sw"><i style="background:rgba(216,185,110,1)"></i></span><span class="role">hover 아이콘</span> rgba(216,185,110,1)</li>
+        <li><span class="sw"><i style="background:rgba(138,106,50,1)"></i></span><span class="role">hover 림</span> rgba(138,106,50,1)</li>
+        <li><span class="sw"><i style="background:rgba(150,110,50,0.45)"></i></span><span class="role">hover 글로우</span> rgba(150,110,50,0.45)</li>
+      </ul></div>
+    </div>
+
+    <!-- ⑤ AMBER PILL -->
+    <div class="mock">
+      <div class="label">⑤ 호박 알약 — Amber Pill</div>
+      <div class="desc">아이콘+“로그” 가로 배치 알약형. 상단 하이라이트로 입체감, hover 시 글로우+살짝 뜸. 가장 현대적·범용 게임 UI.</div>
+      <div class="stage">
+        <div class="saybar"><div class="nm">Chester</div><div class="ln">이 봉인은 함부로 건드리는 게 아니야…</div></div>
+        <div class="btn-slot">
+          <div class="b5"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span class="t">로그</span></div>
+        </div>
+      </div>
+      <div class="pair">
+        <div class="cell"><div class="b5"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span class="t">로그</span></div><div class="cap">idle</div></div>
+        <div class="cell"><div class="b5 hover"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span class="t">로그</span></div><div class="cap">hover</div></div>
+      </div>
+      <div class="spec"><div class="spec-h">rgba 색상값</div><ul>
+        <li><span class="sw"><i style="background:rgba(211,160,74,1)"></i></span><span class="role">알약 위</span> rgba(211,160,74,1)</li>
+        <li><span class="sw"><i style="background:rgba(199,149,59,1)"></i></span><span class="role">알약 중간</span> rgba(199,149,59,1)</li>
+        <li><span class="sw"><i style="background:rgba(173,127,47,1)"></i></span><span class="role">알약 아래</span> rgba(173,127,47,1)</li>
+        <li><span class="sw"><i style="background:rgba(255,232,180,0.55)"></i></span><span class="role">상단 하이라이트</span> rgba(255,232,180,0.55)</li>
+        <li><span class="sw"><i style="background:rgba(34,24,12,1)"></i></span><span class="role">아이콘·글자</span> rgba(34,24,12,1)</li>
+        <li><span class="sw"><i style="background:rgba(230,179,88,1)"></i></span><span class="role">hover 위</span> rgba(230,179,88,1)</li>
+        <li><span class="sw"><i style="background:rgba(199,149,59,0.5)"></i></span><span class="role">hover 글로우</span> rgba(199,149,59,0.5)</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h2>선택 가이드</h2>
+    <ul>
+      <li><b>세계관 몰입</b> 중시 → ① 밀랍 인장 / ② 양피지 탭</li>
+      <li><b>의미 직관성(기록·책)</b> 중시 → ② 양피지 탭 / ⑤ 알약(아이콘+글자)</li>
+      <li><b>대화창 안 가림·미니멀</b> 중시 → ③ 고스트</li>
+      <li><b>호러·무게감</b> 중시 → ④ 음각 명판 / ① 인장</li>
+      <li><b>현재 구조 호환</b>: 현재는 77×77 정사각. ①·④는 정사각 그대로 교체 최소, ⑤는 가로 알약이라 슬롯 폭 조정 필요, ②는 clip-path 형태라 스프라이트(이미지) 권장</li>
+    </ul>
+    <p style="margin-top:10px;color:#7e7059;font-size:12px;">※ Unity 적용 시 rgba(0~255) → <code>new Color(r/255, g/255, b/255, a)</code>. 글로우·베벨은 <code>Shadow</code>/<code>Outline</code> 컴포넌트 또는 스프라이트로 구현.</p>
+  </div>
+</body>
+</html>

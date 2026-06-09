@@ -24,8 +24,18 @@ namespace Mokotan.StandingDialogue
             SceneNames.OpeningMentionOpen,
         };
 
+        /// <summary>캐릭터 강조용 전체 화면 dim. 오프닝 대화 씬에만 적용.</summary>
+        private static readonly HashSet<string> DimBackdropScenes = new HashSet<string>(StringComparer.Ordinal)
+        {
+            SceneNames.IntroScene,
+            SceneNames.OpeningOffice,
+        };
+
         public static bool UsesFixedOffset(string sceneName) =>
             !string.IsNullOrEmpty(sceneName) && IntroScenes.Contains(sceneName);
+
+        public static bool UsesDimBackdrop(string sceneName) =>
+            !string.IsNullOrEmpty(sceneName) && DimBackdropScenes.Contains(sceneName);
 
         public static Vector2 ResolveForScene(Vector2 configuredOffset, string sceneName) =>
             UsesFixedOffset(sceneName) ? FixedOffset : configuredOffset;
