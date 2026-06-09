@@ -1,29 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
 using Fungus;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// 대사 로그(백로그) 기능. Fungus 패키지를 수정하지 않고
 /// <see cref="WriterSignals.OnWriterState"/> 이벤트를 구독해 진행된 대사를
 /// 세션 메모리에 누적하고, 버튼/단축키로 스크롤 패널을 띄운다.
-///
-/// 설계는 <c>InGameSettingsPanel</c>의 모달 패널 패턴을 그대로 따른다
-/// (싱글톤·씬 유지·입력 차단·캔버스 정렬·timeScale 정지).
 /// </summary>
 public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 {
     protected override bool PersistAcrossScenes => true;
 
-    [Header("UI")]
-    [Tooltip("로그 전체를 담는 패널 루트. 닫혀 있을 때 비활성.")]
+    [Header("Visual Style")]
+    [SerializeField] DialogueLogVisualStyle visualStyle = DialogueLogVisualStyle.ParchmentCodex;
+
+    [Header("Style Layers")]
+    [SerializeField] DialogueLogStyleLayer parchmentLayer;
+    [SerializeField] DialogueLogStyleLayer darkConfessionLayer;
+    [SerializeField] DialogueLogStyleLayer legacyLayer;
+
+    [Header("UI (legacy fallback)")]
+    [Tooltip("스타일 레이어가 비어 있을 때 사용하는 패널 루트.")]
     [SerializeField] private GameObject logPanel;
-    [Tooltip("대사 항목들이 쌓이는 ScrollRect. Content에 Vertical Layout Group 권장.")]
+    [Tooltip("스타일 레이어가 비어 있을 때 사용하는 ScrollRect.")]
     [SerializeField] private ScrollRect scrollRect;
-    [Tooltip("항목 1줄 프리팹. 루트 또는 자식에 TMP_Text가 있어야 한다.")]
+    [Tooltip("스타일 레이어가 비어 있을 때 사용하는 항목 프리팹.")]
     [SerializeField] private GameObject entryPrefab;
 
     [Header("입력")]
@@ -33,11 +41,17 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     [SerializeField] private string canvasSortingLayerName = "Setting";
     [SerializeField] private int canvasSortingOrder = 60;
 
-    private readonly List<DialogueLogEntry> entries = new List<DialogueLogEntry>();
-    private readonly List<DialogInput> disabledInputs = new List<DialogInput>();
-    private bool isOpen;
+    readonly List<DialogueLogEntry> entries = new List<DialogueLogEntry>();
+    readonly List<DialogInput> disabledInputs = new List<DialogInput>();
+    DialogueLogSayDialogSnapshot sayDialogSnapshot;
+    bool isOpen;
+
+    GameObject activePanelRoot;
+    ScrollRect activeScrollRect;
+    GameObject activeEntryPrefab;
 
     public bool IsOpen => isOpen;
+    public DialogueLogVisualStyle VisualStyle => visualStyle;
 
     /// <summary>
     /// EditMode 테스트에서 DontDestroyOnLoad 직후 static Instance가 비는 경우를 보정한다.
@@ -55,8 +69,9 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
     protected override void OnSingletonAwake()
     {
-        if (logPanel != null)
-            logPanel.SetActive(false);
+        ApplyVisualStyle();
+        if (activePanelRoot != null)
+            activePanelRoot.SetActive(false);
         isOpen = false;
     }
 
@@ -70,9 +85,18 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         WriterSignals.OnWriterState -= HandleWriterState;
     }
 
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            return;
+
+        ApplyVisualStyle();
+    }
+#endif
+
     private void Update()
     {
-        // 메인 메뉴에서는 로그를 띄우지 않는다(설정 패널과 동일 가드).
         if (SceneManager.GetActiveScene().name == SceneNames.MainMenu)
         {
             if (isOpen) Close();
@@ -97,15 +121,11 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         SuppressOtherModalEscapeHandling = false;
     }
 
-    // ---------------------------------------------------------------------
-    // 기록: Fungus 대사 1줄이 끝나는 시점(End)에 화자/본문을 캡처
-    // ---------------------------------------------------------------------
     private void HandleWriterState(Writer writer, WriterState writerState)
     {
         if (writerState != WriterState.End || writer == null)
             return;
 
-        // Writer와 SayDialog는 동일 GameObject에 위치한다(SayDialog.cs:121).
         var sayDialog = writer.GetComponent<SayDialog>();
         if (sayDialog == null)
             return;
@@ -113,9 +133,6 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         DialogueLogLogic.TryAppend(entries, sayDialog.NameText, sayDialog.StoryText);
     }
 
-    // ---------------------------------------------------------------------
-    // 패널 토글 (InGameSettingsPanel.ToggleSettingPanel 미러링)
-    // ---------------------------------------------------------------------
     public void Toggle()
     {
         if (!isOpen && ModalGamePause.IsSettingsOpen)
@@ -127,16 +144,20 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
     public void Open()
     {
-        if (isOpen || logPanel == null || ModalGamePause.IsSettingsOpen)
+        ResolveActiveLayer();
+        if (isOpen || activePanelRoot == null || ModalGamePause.IsSettingsOpen)
             return;
 
+        ApplyVisualStyle();
+        sayDialogSnapshot = DialogueLogSayDialogSnapshot.Capture();
+
         isOpen = true;
-        logPanel.SetActive(true);
+        activePanelRoot.SetActive(true);
 
         BuildContent();
         EnsureCanvasSortsAboveSayDialog();
         BlockDialogueAdvance();
-        SettingPanelWorldInputBlocker.Begin(logPanel);
+        SettingPanelWorldInputBlocker.Begin(activePanelRoot);
         Time.timeScale = 0f;
 
         StartCoroutine(ScrollToBottomNextFrame());
@@ -148,36 +169,94 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
             return;
 
         isOpen = false;
-        if (logPanel != null)
-            logPanel.SetActive(false);
+        if (activePanelRoot != null)
+            activePanelRoot.SetActive(false);
 
         RestoreDialogueAdvance();
+        sayDialogSnapshot.Restore();
+        sayDialogSnapshot = default;
+
         if (ModalGamePause.ShouldEndWorldInputBlocker())
             SettingPanelWorldInputBlocker.End();
         Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();
     }
 
-    // ---------------------------------------------------------------------
-    // 콘텐츠 렌더링
-    // ---------------------------------------------------------------------
-    private void BuildContent()
+    /// <summary>
+    /// 인스펙터 드롭다운 변경 시 활성 스타일 레이어·팔레트를 갱신한다.
+    /// Play 중 변경해도 다음 Open() 또는 에디터 OnValidate에서 반영된다.
+    /// </summary>
+    public void ApplyVisualStyle()
     {
-        if (scrollRect == null || scrollRect.content == null || entryPrefab == null)
+        ResolveActiveLayer();
+        SetLayerActive(parchmentLayer, visualStyle == DialogueLogVisualStyle.ParchmentCodex);
+        SetLayerActive(darkConfessionLayer, visualStyle == DialogueLogVisualStyle.DarkConfession);
+        SetLayerActive(legacyLayer, visualStyle == DialogueLogVisualStyle.LegacyNotebook);
+
+        if (activePanelRoot != null)
+            DialogueLogPanelStyleApplicator.Apply(activePanelRoot, visualStyle);
+    }
+
+    static void SetLayerActive(DialogueLogStyleLayer layer, bool active)
+    {
+        if (layer?.panelRoot == null)
             return;
 
-        Transform content = scrollRect.content;
+        layer.panelRoot.SetActive(active);
+    }
+
+    internal DialogueLogStyleLayer ResolveLayer(DialogueLogVisualStyle style) =>
+        style switch
+        {
+            DialogueLogVisualStyle.ParchmentCodex => parchmentLayer,
+            DialogueLogVisualStyle.DarkConfession => darkConfessionLayer,
+            _ => legacyLayer,
+        };
+
+    internal GameObject ResolveEntryPrefab(DialogueLogVisualStyle style)
+    {
+        var layer = ResolveLayer(style);
+        if (layer != null && layer.entryPrefab != null)
+            return layer.entryPrefab;
+
+        return entryPrefab;
+    }
+
+    void ResolveActiveLayer()
+    {
+        var layer = ResolveLayer(visualStyle);
+        if (layer != null && layer.IsConfigured)
+        {
+            activePanelRoot = layer.panelRoot;
+            activeScrollRect = layer.scrollRect;
+            activeEntryPrefab = layer.entryPrefab;
+            return;
+        }
+
+        activePanelRoot = logPanel;
+        activeScrollRect = scrollRect;
+        activeEntryPrefab = entryPrefab;
+    }
+
+    void BuildContent()
+    {
+        if (activeScrollRect == null || activeScrollRect.content == null || activeEntryPrefab == null)
+            return;
+
+        Transform content = activeScrollRect.content;
         for (int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
 
+        var palette = DialogueLogStylePalette.ForStyle(visualStyle);
+
         foreach (DialogueLogEntry entry in entries)
         {
-            GameObject go = Instantiate(entryPrefab, content);
+            GameObject go = Instantiate(activeEntryPrefab, content);
             go.SetActive(true);
 
             var entryView = go.GetComponent<DialogueLogEntryView>();
             if (entryView != null)
             {
-                entryView.Bind(entry);
+                entryView.Bind(entry, palette);
                 continue;
             }
 
@@ -187,20 +266,16 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         }
     }
 
-    private IEnumerator ScrollToBottomNextFrame()
+    IEnumerator ScrollToBottomNextFrame()
     {
-        // timeScale=0 에서도 동작하도록 프레임 단위 대기.
         yield return null;
-        if (scrollRect == null)
+        if (activeScrollRect == null)
             yield break;
         Canvas.ForceUpdateCanvases();
-        scrollRect.verticalNormalizedPosition = 0f;
+        activeScrollRect.verticalNormalizedPosition = 0f;
     }
 
-    // ---------------------------------------------------------------------
-    // 대사 진행 차단 / 복원 (씬 유지 싱글톤이므로 런타임에 탐색)
-    // ---------------------------------------------------------------------
-    private void BlockDialogueAdvance()
+    void BlockDialogueAdvance()
     {
         disabledInputs.Clear();
         var inputs = FindObjectsByType<DialogInput>(FindObjectsSortMode.None);
@@ -214,7 +289,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         }
     }
 
-    private void RestoreDialogueAdvance()
+    void RestoreDialogueAdvance()
     {
         foreach (DialogInput input in disabledInputs)
         {
@@ -224,13 +299,13 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         disabledInputs.Clear();
     }
 
-    private void EnsureCanvasSortsAboveSayDialog()
+    void EnsureCanvasSortsAboveSayDialog()
     {
-        if (logPanel == null)
+        if (activePanelRoot == null)
             return;
-        Canvas canvas = logPanel.GetComponentInParent<Canvas>();
+        Canvas canvas = activePanelRoot.GetComponentInParent<Canvas>();
         if (canvas == null)
-            canvas = logPanel.GetComponent<Canvas>();
+            canvas = activePanelRoot.GetComponent<Canvas>();
         if (canvas == null)
             return;
         canvas.overrideSorting = true;

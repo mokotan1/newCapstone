@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u2767 Chester"
+  m_text: '> Chester'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4280175226
+    rgba: 4294967295
   m_fontColor: {r: 0.47843137, g: 0.2901961, b: 0.11764706, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -87,7 +87,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
+  m_TextStyleHashCode: 0
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -170,7 +170,7 @@ RectTransform:
   m_Father: {fileID: 4684693475688194056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -211,7 +211,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4279905338
+    rgba: 4294967295
   m_fontColor: {r: 0.22745098, g: 0.17254902, b: 0.101960786, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -224,7 +224,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
+  m_TextStyleHashCode: 0
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -369,6 +369,7 @@ MonoBehaviour:
   style: 1
   speakerRoot: {fileID: 6288819001562928104}
   speakerLabel: {fileID: 4288351590342957318}
+  speakerLine: {fileID: 0}
   bodyLabel: {fileID: 9048773012939086561}
   entrySeparator: {fileID: 3744188774019735812}
 --- !u!114 &3516687111225211327
@@ -430,10 +431,10 @@ RectTransform:
   - {fileID: 4110897906862288564}
   m_Father: {fileID: 4684693475688194056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4821410204077039983
 MonoBehaviour:
@@ -508,10 +509,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4684693475688194056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1924480159445126350
 CanvasRenderer:

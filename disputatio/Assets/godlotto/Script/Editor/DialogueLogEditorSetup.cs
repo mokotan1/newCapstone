@@ -19,6 +19,7 @@ public static class DialogueLogEditorSetup
     const string EntryPrefabDarkConfessionPath = "Assets/godlotto/Prefab/DialogueLogEntry_DarkConfession.prefab";
     const string SayDialogGothicPath = "Assets/godlotto/Prefab/SayDialogGothic.prefab";
     const string SayDialogNotebookPath = "Assets/godlotto/Prefab/SayDialogNotebook.prefab";
+    const string HistoryIconPath = "Assets/Fungus/Textures/HistoryIcon.png";
     public const string ManagerObjectName = "DialogueLogManager";
     const string LogButtonName = "LogButton";
 
@@ -290,7 +291,7 @@ public static class DialogueLogEditorSetup
         Image speakerLine = null)
     {
         var serialized = new SerializedObject(entryView);
-        serialized.FindProperty("style").enumValueIndex = (int)style;
+        serialized.FindProperty("style").enumValueIndex = DialogueLogVisualStyleIndex.ToEnumValueIndex(style);
         serialized.FindProperty("speakerRoot").objectReferenceValue = speakerRoot;
         serialized.FindProperty("speakerLabel").objectReferenceValue = speakerLabel;
         serialized.FindProperty("speakerLine").objectReferenceValue = speakerLine;
@@ -311,32 +312,63 @@ public static class DialogueLogEditorSetup
         Undo.RegisterCreatedObjectUndo(manager, "Create DialogueLogManager");
 
         var canvasRoot = CreateCanvasRoot(manager.transform);
-        GameObject closeButton;
-        ScrollRect scrollRect;
-        GameObject logPanel = style switch
-        {
-            DialogueLogVisualStyle.ParchmentCodex => CreateParchmentLogPanel(canvasRoot.transform, out scrollRect, out closeButton),
-            DialogueLogVisualStyle.DarkConfession => CreateDarkConfessionLogPanel(canvasRoot.transform, out scrollRect, out closeButton),
-            _ => CreateLegacyLogPanel(canvasRoot.transform, out scrollRect, out closeButton),
-        };
+
+        var parchmentPrefab = EnsureParchmentEntryPrefab(forceRebuild: false);
+        var darkPrefab = EnsureDarkConfessionEntryPrefab(forceRebuild: false);
+        var legacyPrefab = EnsureLegacyEntryPrefab();
+
+        ScrollRect parchmentScroll;
+        ScrollRect darkScroll;
+        ScrollRect legacyScroll;
+        GameObject parchmentClose;
+        GameObject darkClose;
+        GameObject legacyClose;
+
+        GameObject parchmentPanel = CreateParchmentLogPanel(canvasRoot.transform, out parchmentScroll, out parchmentClose);
+        GameObject darkPanel = CreateDarkConfessionLogPanel(canvasRoot.transform, out darkScroll, out darkClose);
+        GameObject legacyPanel = CreateLegacyLogPanel(canvasRoot.transform, out legacyScroll, out legacyClose);
+
+        parchmentPanel.name = "LogPanel_Parchment";
+        darkPanel.name = "LogPanel_DarkConfession";
+        legacyPanel.name = "LogPanel_Legacy";
+
+        parchmentClose.AddComponent<DialogueLogButton>();
+        darkClose.AddComponent<DialogueLogButton>();
+        legacyClose.AddComponent<DialogueLogButton>();
+
+        parchmentPanel.SetActive(style == DialogueLogVisualStyle.ParchmentCodex);
+        darkPanel.SetActive(style == DialogueLogVisualStyle.DarkConfession);
+        legacyPanel.SetActive(style == DialogueLogVisualStyle.LegacyNotebook);
 
         var panelComponent = manager.AddComponent<DialogueLogPanel>();
 
         var serialized = new SerializedObject(panelComponent);
-        serialized.FindProperty("logPanel").objectReferenceValue = logPanel;
-        serialized.FindProperty("scrollRect").objectReferenceValue = scrollRect;
+        serialized.FindProperty("visualStyle").enumValueIndex = DialogueLogVisualStyleIndex.ToEnumValueIndex(style);
+        serialized.FindProperty("logPanel").objectReferenceValue = parchmentPanel;
+        serialized.FindProperty("scrollRect").objectReferenceValue = parchmentScroll;
         serialized.FindProperty("entryPrefab").objectReferenceValue = entryPrefab;
+
+        WireStyleLayer(serialized.FindProperty("parchmentLayer"), parchmentPanel, parchmentScroll, parchmentPrefab);
+        WireStyleLayer(serialized.FindProperty("darkConfessionLayer"), darkPanel, darkScroll, darkPrefab);
+        WireStyleLayer(serialized.FindProperty("legacyLayer"), legacyPanel, legacyScroll, legacyPrefab);
+
         serialized.FindProperty("logHotkey").enumValueIndex = (int)KeyCode.L;
         serialized.FindProperty("canvasSortingLayerName").stringValue = "Setting";
         serialized.FindProperty("canvasSortingOrder").intValue = 60;
         serialized.ApplyModifiedPropertiesWithoutUndo();
 
-        closeButton.AddComponent<DialogueLogButton>();
-        logPanel.SetActive(false);
+        panelComponent.ApplyVisualStyle();
 
         EditorUtility.SetDirty(manager);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
+    }
+
+    static void WireStyleLayer(SerializedProperty layerProperty, GameObject panel, ScrollRect scroll, GameObject entry)
+    {
+        layerProperty.FindPropertyRelative("panelRoot").objectReferenceValue = panel;
+        layerProperty.FindPropertyRelative("scrollRect").objectReferenceValue = scroll;
+        layerProperty.FindPropertyRelative("entryPrefab").objectReferenceValue = entry;
     }
 
     static GameObject CreateCanvasRoot(Transform parent)
@@ -439,7 +471,7 @@ public static class DialogueLogEditorSetup
         var title = CreateLabel(
             parchment.transform,
             "TitleText",
-            $"{DialogueLogLogic.ParchmentSpeakerOrnament} 대 사 기 록 {DialogueLogLogic.ParchmentSpeakerOrnament}",
+            DialogueLogLogic.ParchmentTitleText,
             26f,
             palette.TitleColor);
         title.fontStyle = FontStyles.Bold;
@@ -583,6 +615,9 @@ public static class DialogueLogEditorSetup
 
     static void SetupSayDialogLogButton(string prefabPath)
     {
+        // 스펙 원본: docs/dialogue-log-button-03-ghost.spec.json (id: log-button-03-ghost)
+        DialogueLogButtonSpec.GhostButtonSpec spec = DialogueLogButtonSpec.Load();
+
         var prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
         try
         {
@@ -597,16 +632,7 @@ public static class DialogueLogEditorSetup
             if (existing != null)
                 Object.DestroyImmediate(existing.gameObject);
 
-            var palette = DialogueLogStylePalette.LegacyNotebook;
-            var logButton = CreateButton(
-                panel,
-                LogButtonName,
-                "로그",
-                palette.CloseButtonColor,
-                new Vector2(1f, 0f),
-                new Vector2(-130f, 38f),
-                new Vector2(77f, 77f));
-            logButton.AddComponent<DialogueLogButton>();
+            CreateGhostLogButton(panel, spec);
 
             PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
         }
@@ -614,6 +640,132 @@ public static class DialogueLogEditorSetup
         {
             PrefabUtility.UnloadPrefabContents(prefabRoot);
         }
+    }
+
+    /// <summary>
+    /// log-button-03-ghost 스펙 기반 미니멀 고스트 LogButton.
+    /// LogButton → Icon / Caption / Underline (VerticalLayoutGroup)
+    /// </summary>
+    static GameObject CreateGhostLogButton(Transform parent, DialogueLogButtonSpec.GhostButtonSpec spec)
+    {
+        string buttonName = string.IsNullOrEmpty(spec.buttonName) ? LogButtonName : spec.buttonName;
+        var buttonGo = new GameObject(
+            buttonName,
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image),
+            typeof(Button),
+            typeof(VerticalLayoutGroup));
+
+        buttonGo.transform.SetParent(parent, false);
+
+        var rect = buttonGo.GetComponent<RectTransform>();
+        rect.anchorMin = spec.anchorMin;
+        rect.anchorMax = spec.anchorMin;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = spec.anchoredPosition;
+        rect.sizeDelta = spec.recommendedHitArea;
+
+        var background = buttonGo.GetComponent<Image>();
+        background.color = new Color(0f, 0f, 0f, 0f);
+        background.raycastTarget = true;
+
+        var button = buttonGo.GetComponent<Button>();
+        button.targetGraphic = background;
+        button.transition = Selectable.Transition.ColorTint;
+        button.colors = spec.colorBlock.ToUnityColorBlock();
+
+        var vertical = buttonGo.GetComponent<VerticalLayoutGroup>();
+        vertical.childAlignment = TextAnchor.MiddleCenter;
+        vertical.childControlWidth = true;
+        vertical.childControlHeight = true;
+        vertical.childForceExpandWidth = false;
+        vertical.childForceExpandHeight = false;
+        vertical.spacing = spec.layoutSpacing;
+        vertical.padding = new RectOffset(0, 0, 0, 0);
+
+        Graphic iconGraphic = CreateGhostLogIcon(buttonGo.transform, spec);
+        TextMeshProUGUI caption = CreateGhostLogCaption(buttonGo.transform, spec);
+        GameObject underline = CreateGhostLogUnderline(buttonGo.transform, spec);
+        underline.SetActive(false);
+
+        var hover = buttonGo.AddComponent<DialogueLogGhostButtonHover>();
+        hover.Initialize(underline, iconGraphic, caption, spec.foregroundIdle, spec.accent);
+
+        buttonGo.AddComponent<DialogueLogButton>();
+        return buttonGo;
+    }
+
+    static Graphic CreateGhostLogIcon(Transform parent, DialogueLogButtonSpec.GhostButtonSpec spec)
+    {
+        Sprite historySprite = AssetDatabase.LoadAssetAtPath<Sprite>(HistoryIconPath);
+        if (historySprite != null)
+        {
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(parent, false);
+
+            var iconRect = iconGo.GetComponent<RectTransform>();
+            iconRect.sizeDelta = spec.iconRenderSize;
+
+            var iconImage = iconGo.GetComponent<Image>();
+            iconImage.sprite = historySprite;
+            iconImage.color = spec.foregroundIdle;
+            iconImage.raycastTarget = false;
+            iconImage.preserveAspect = true;
+
+            var layout = iconGo.AddComponent<LayoutElement>();
+            layout.preferredWidth = spec.iconRenderSize.x;
+            layout.preferredHeight = spec.iconRenderSize.y;
+            layout.flexibleWidth = 0f;
+            layout.flexibleHeight = 0f;
+            return iconImage;
+        }
+
+        var iconLabel = CreateLabel(parent, "Icon", "\u2261", 20f, spec.foregroundIdle);
+        iconLabel.alignment = TextAlignmentOptions.Center;
+        iconLabel.characterSpacing = 0f;
+        iconLabel.raycastTarget = false;
+        var iconLabelRect = iconLabel.rectTransform;
+        iconLabelRect.sizeDelta = spec.iconRenderSize;
+
+        var textLayout = iconLabel.gameObject.AddComponent<LayoutElement>();
+        textLayout.preferredWidth = spec.iconRenderSize.x;
+        textLayout.preferredHeight = spec.iconRenderSize.y;
+        textLayout.flexibleWidth = 0f;
+        textLayout.flexibleHeight = 0f;
+        return iconLabel;
+    }
+
+    static TextMeshProUGUI CreateGhostLogCaption(Transform parent, DialogueLogButtonSpec.GhostButtonSpec spec)
+    {
+        var caption = CreateLabel(parent, "Caption", spec.captionText, spec.captionFontSize, spec.foregroundIdle);
+        caption.alignment = TextAlignmentOptions.Center;
+        caption.characterSpacing = spec.captionLetterSpacing;
+        caption.enableAutoSizing = false;
+        caption.raycastTarget = false;
+
+        var layout = caption.gameObject.AddComponent<LayoutElement>();
+        layout.preferredHeight = spec.captionFontSize + 4f;
+        layout.flexibleWidth = 1f;
+        return caption;
+    }
+
+    static GameObject CreateGhostLogUnderline(Transform parent, DialogueLogButtonSpec.GhostButtonSpec spec)
+    {
+        var underlineGo = CreateImage(parent, "Underline", spec.accent);
+        var underlineRect = underlineGo.GetComponent<RectTransform>();
+        underlineRect.sizeDelta = new Vector2(spec.recommendedHitArea.x * 0.7f, spec.underlineHeight);
+
+        var underlineImage = underlineGo.GetComponent<Image>();
+        underlineImage.raycastTarget = false;
+
+        var layout = underlineGo.AddComponent<LayoutElement>();
+        layout.minHeight = spec.underlineHeight;
+        layout.preferredHeight = spec.underlineHeight;
+        layout.preferredWidth = spec.recommendedHitArea.x * 0.7f;
+        layout.flexibleWidth = 0f;
+
+        return underlineGo;
     }
 
     static GameObject CreateImage(Transform parent, string name, Color color)
@@ -701,7 +853,7 @@ public static class DialogueLogEditorSetup
         colors.pressedColor = new Color(0.78f, 0.67f, 0.48f, 1f);
         button.colors = colors;
 
-        var label = CreateLabel(buttonGo.transform, "Text", "\u2715", 22f, labelColor);
+        var label = CreateLabel(buttonGo.transform, "Text", "X", 20f, labelColor);
         var labelRect = label.GetComponent<RectTransform>();
         SetStretch(labelRect);
         label.alignment = TextAlignmentOptions.Center;

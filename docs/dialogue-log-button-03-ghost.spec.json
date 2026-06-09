@@ -1,0 +1,115 @@
+{
+  "$schema": "https://capstone.local/schemas/ui-button-spec.v1.json",
+  "specVersion": "1.0",
+  "id": "log-button-03-ghost",
+  "name": "Minimal Ghost Icon",
+  "nameKo": "미니멀 고스트",
+  "target": {
+    "engine": "Unity",
+    "uiSystem": "uGUI",
+    "applyVia": "DialogueLogEditorSetup.SetupSayDialogLogButton",
+    "buttonName": "LogButton",
+    "anchorOnSayDialog": "Panel 우하단",
+    "replaces": {
+      "current": { "shape": "square", "size": [77, 77], "background": "rgba(199,148,74,1)", "label": "로그" }
+    }
+  },
+
+  "container": {
+    "layout": "vertical",
+    "childAlignment": "center",
+    "spacing": 4,
+    "padding": [0, 0, 0, 0],
+    "background": null,
+    "border": null,
+    "raycastTarget": true,
+    "transitionSeconds": 0.15,
+    "transitionProps": ["opacity", "color"]
+  },
+
+  "states": {
+    "idle": { "opacity": 0.62 },
+    "hover": { "opacity": 1.0 },
+    "pressed": { "opacity": 1.0, "scale": 0.96 }
+  },
+
+  "icon": {
+    "type": "svgVector",
+    "viewBox": [0, 0, 24, 24],
+    "renderSize": [24, 24],
+    "fill": "none",
+    "strokeWidth": 1.8,
+    "strokeLinecap": "round",
+    "strokeColorByState": { "idle": "color.fg", "hover": "color.accent" },
+    "paths": [
+      { "role": "lines", "d": "M4 7h16M4 12h16M4 17h10" },
+      { "role": "clockFace", "d": "M14.8 17 a3.2 3.2 0 1 0 6.4 0 a3.2 3.2 0 1 0 -6.4 0", "circle": { "cx": 18, "cy": 17, "r": 3.2 } },
+      { "role": "clockHands", "d": "M18 15.4v1.6l1 .8" }
+    ],
+    "unityNote": "Vector 형태. Unity에선 28~32px PNG/SVG 스프라이트로 임포트하거나 TMP Sprite로 대체."
+  },
+
+  "caption": {
+    "text": "로그",
+    "font": "GameFontPaths.KoreanRegularSdf",
+    "fontSize": 12,
+    "fontStyle": "regular",
+    "letterSpacing": 2,
+    "alignment": "center",
+    "colorByState": { "idle": "color.fg", "hover": "color.accent" }
+  },
+
+  "underline": {
+    "visibleStates": ["hover"],
+    "height": 1,
+    "color": "color.accent",
+    "width": { "idle": "0%", "hover": "100%" },
+    "marginTop": 2,
+    "animation": "growFromCenter",
+    "unityNote": "hover에서만 표시. Image 1px + width 트윈 또는 hover 시 SetActive."
+  },
+
+  "colors": {
+    "color.fg": {
+      "role": "아이콘·캡션 (idle 기준색)",
+      "hex": "#D6BE96",
+      "rgba255": [214, 190, 150, 0.62],
+      "rgbaCss": "rgba(214,190,150,0.62)",
+      "unityColor": [0.839, 0.745, 0.588, 0.62]
+    },
+    "color.fgOpaque": {
+      "role": "아이콘·캡션 기준색(불투명, 알파만 분리 적용 시)",
+      "hex": "#D6BE96",
+      "rgba255": [214, 190, 150, 1.0],
+      "rgbaCss": "rgba(214,190,150,1)",
+      "unityColor": [0.839, 0.745, 0.588, 1.0]
+    },
+    "color.accent": {
+      "role": "hover 강조색 (아이콘·캡션·밑줄)",
+      "hex": "#E7C978",
+      "rgba255": [231, 201, 120, 1.0],
+      "rgbaCss": "rgba(231,201,120,1)",
+      "unityColor": [0.906, 0.788, 0.471, 1.0]
+    }
+  },
+
+  "interaction": {
+    "onClick": "DialogueLogPanel.Instance.Toggle()",
+    "hotkeyEquivalent": "KeyCode.L",
+    "unityButtonTransition": "ColorTint",
+    "unityColorBlock": {
+      "normalColor": [0.839, 0.745, 0.588, 0.62],
+      "highlightedColor": [0.906, 0.788, 0.471, 1.0],
+      "pressedColor": [0.906, 0.788, 0.471, 1.0],
+      "selectedColor": [0.839, 0.745, 0.588, 0.62],
+      "disabledColor": [0.839, 0.745, 0.588, 0.25],
+      "colorMultiplier": 1.0,
+      "fadeDuration": 0.15
+    }
+  },
+
+  "layoutHints": {
+    "note": "투명 배경이므로 클릭 영역 확보를 위해 컨테이너에 raycastTarget=true인 투명 Image 권장.",
+    "recommendedHitArea": [56, 56]
+  }
+}

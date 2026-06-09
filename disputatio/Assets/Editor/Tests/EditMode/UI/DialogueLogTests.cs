@@ -110,6 +110,113 @@ public class DialogueLogTests
         Assert.AreEqual(0, entries.Count);
     }
 
+    [Test]
+    public void FormatSpeakerLine_Parchment_UsesSafeAsciiPrefix()
+    {
+        string line = DialogueLogLogic.FormatSpeakerLine("Chester", DialogueLogVisualStyle.ParchmentCodex);
+
+        Assert.AreEqual("> Chester", line);
+        Assert.IsFalse(DialogueLogLogic.ContainsRiskyOrnamentCharacters(line));
+    }
+
+    [Test]
+    public void FormatPanelTitle_Parchment_DoesNotUseRiskyUnicodeOrnaments()
+    {
+        string title = DialogueLogLogic.FormatPanelTitle(DialogueLogVisualStyle.ParchmentCodex);
+
+        Assert.AreEqual(DialogueLogLogic.ParchmentTitleText, title);
+        Assert.IsFalse(DialogueLogLogic.ContainsRiskyOrnamentCharacters(title));
+        Assert.IsFalse(DialogueLogLogic.ContainsRiskyOrnamentCharacters(
+            DialogueLogLogic.FormatSpeakerRichText("Chester", DialogueLogVisualStyle.ParchmentCodex)));
+    }
+
+    [Test]
+    public void FormatPanelTitle_DarkConfession_MatchesMockupTitle()
+    {
+        Assert.AreEqual("L O G", DialogueLogLogic.FormatPanelTitle(DialogueLogVisualStyle.DarkConfession));
+    }
+
+    [Test]
+    public void ResolveEntryPrefab_SelectsConfiguredStyleLayerPrefab()
+    {
+        DialogueLogPanel panel = CreatePanelWithStyleLayers(out _);
+
+        var parchment = new GameObject("ParchmentEntry");
+        var dark = new GameObject("DarkEntry");
+        var legacy = new GameObject("LegacyEntry");
+        createdObjects.Add(parchment);
+        createdObjects.Add(dark);
+        createdObjects.Add(legacy);
+
+        var parchmentLayer = new DialogueLogStyleLayer
+        {
+            panelRoot = Track(new GameObject("ParchmentPanel")),
+            scrollRect = CreateScrollRect(),
+            entryPrefab = parchment,
+        };
+        var darkLayer = new DialogueLogStyleLayer
+        {
+            panelRoot = Track(new GameObject("DarkPanel")),
+            scrollRect = CreateScrollRect(),
+            entryPrefab = dark,
+        };
+        var legacyLayer = new DialogueLogStyleLayer
+        {
+            panelRoot = Track(new GameObject("LegacyPanel")),
+            scrollRect = CreateScrollRect(),
+            entryPrefab = legacy,
+        };
+
+        SetPrivateField(panel, "parchmentLayer", parchmentLayer);
+        SetPrivateField(panel, "darkConfessionLayer", darkLayer);
+        SetPrivateField(panel, "legacyLayer", legacyLayer);
+
+        SetPrivateField(panel, "visualStyle", DialogueLogVisualStyle.ParchmentCodex);
+        Assert.AreSame(parchment, panel.ResolveEntryPrefab(DialogueLogVisualStyle.ParchmentCodex));
+
+        SetPrivateField(panel, "visualStyle", DialogueLogVisualStyle.DarkConfession);
+        Assert.AreSame(dark, panel.ResolveEntryPrefab(DialogueLogVisualStyle.DarkConfession));
+
+        SetPrivateField(panel, "visualStyle", DialogueLogVisualStyle.LegacyNotebook);
+        Assert.AreSame(legacy, panel.ResolveEntryPrefab(DialogueLogVisualStyle.LegacyNotebook));
+    }
+
+    [Test]
+    public void ApplyVisualStyle_ActivatesOnlySelectedLayerRoot()
+    {
+        DialogueLogPanel panel = CreatePanelWithStyleLayers(out _);
+
+        var parchmentRoot = Track(new GameObject("ParchmentPanel"));
+        var darkRoot = Track(new GameObject("DarkPanel"));
+        var legacyRoot = Track(new GameObject("LegacyPanel"));
+
+        SetPrivateField(panel, "parchmentLayer", new DialogueLogStyleLayer
+        {
+            panelRoot = parchmentRoot,
+            scrollRect = CreateScrollRect(),
+            entryPrefab = Track(new GameObject("ParchmentEntry")),
+        });
+        SetPrivateField(panel, "darkConfessionLayer", new DialogueLogStyleLayer
+        {
+            panelRoot = darkRoot,
+            scrollRect = CreateScrollRect(),
+            entryPrefab = Track(new GameObject("DarkEntry")),
+        });
+        SetPrivateField(panel, "legacyLayer", new DialogueLogStyleLayer
+        {
+            panelRoot = legacyRoot,
+            scrollRect = CreateScrollRect(),
+            entryPrefab = Track(new GameObject("LegacyEntry")),
+        });
+
+        SetPrivateField(panel, "visualStyle", DialogueLogVisualStyle.DarkConfession);
+        panel.ApplyVisualStyle();
+
+        Assert.IsFalse(parchmentRoot.activeSelf);
+        Assert.IsTrue(darkRoot.activeSelf);
+        Assert.IsFalse(legacyRoot.activeSelf);
+    }
+
     // ---------------------------------------------------------------
     //  DialogueLogPanel open/close
     // ---------------------------------------------------------------
@@ -174,6 +281,37 @@ public class DialogueLogTests
     }
 
     // ---------------------------------------------------------------
+    //  DialogueLogButtonSpec
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void GhostButtonSpec_LoadsEmbeddedDefaults_WhenJsonMissing()
+    {
+        DialogueLogButtonSpec.ClearCacheForTests();
+        DialogueLogButtonSpec.GhostButtonSpec spec = DialogueLogButtonSpec.Load("docs/nonexistent-ghost-button.spec.json");
+
+        Assert.AreEqual(DialogueLogButtonSpec.SpecId, spec.id);
+        Assert.AreEqual("LogButton", spec.buttonName);
+        Assert.AreEqual(new Vector2(56f, 56f), spec.recommendedHitArea);
+        Assert.AreEqual("로그", spec.captionText);
+        Assert.AreEqual(12f, spec.captionFontSize);
+        Assert.AreEqual(new Color(0.839f, 0.745f, 0.588f, 0.62f), spec.foregroundIdle);
+        Assert.AreEqual(new Color(0.906f, 0.788f, 0.471f, 1f), spec.accent);
+    }
+
+    [Test]
+    public void GhostButtonSpec_LoadsProjectJson_WhenPresent()
+    {
+        DialogueLogButtonSpec.ClearCacheForTests();
+        DialogueLogButtonSpec.GhostButtonSpec spec = DialogueLogButtonSpec.Load();
+
+        Assert.AreEqual(DialogueLogButtonSpec.SpecId, spec.id);
+        Assert.AreEqual(new Vector2(24f, 24f), spec.iconRenderSize);
+        Assert.AreEqual(4f, spec.layoutSpacing);
+        Assert.AreEqual(0.15f, spec.colorBlock.fadeDuration);
+    }
+
+    // ---------------------------------------------------------------
     //  DialogueLogButton
     // ---------------------------------------------------------------
 
@@ -203,6 +341,13 @@ public class DialogueLogTests
 
     private DialogueLogPanel CreatePanel(out GameObject logPanelRoot)
     {
+        DialogueLogPanel panel = CreatePanelWithStyleLayers(out logPanelRoot);
+        SetPrivateField(panel, "logPanel", logPanelRoot);
+        return panel;
+    }
+
+    private DialogueLogPanel CreatePanelWithStyleLayers(out GameObject logPanelRoot)
+    {
         var root = Track(new GameObject("DialogueLogPanelRoot"));
         logPanelRoot = Track(new GameObject("LogPanel"));
         logPanelRoot.transform.SetParent(root.transform);
@@ -210,8 +355,13 @@ public class DialogueLogTests
 
         DialogueLogPanel panel = root.AddComponent<DialogueLogPanel>();
         DialogueLogPanel.EnsureInstanceForTests(panel);
-        SetPrivateField(panel, "logPanel", logPanelRoot);
         return panel;
+    }
+
+    private ScrollRect CreateScrollRect()
+    {
+        var scrollRoot = Track(DefaultControls.CreateScrollView(new DefaultControls.Resources()));
+        return scrollRoot.GetComponent<ScrollRect>();
     }
 
     private DialogueLogButton CreateLogButton()

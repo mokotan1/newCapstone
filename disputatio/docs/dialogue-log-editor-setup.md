@@ -50,18 +50,28 @@ Unity 메뉴에서 아래를 **직접** 실행한다:
 ## 1. `DialogueLogPanel.cs` 의 인스펙터 필드 (연결 대상)
 
 ```
-[Header("UI")]
-GameObject  logPanel          // 로그 전체 패널 루트 (닫혀있을 때 비활성)
-ScrollRect  scrollRect        // 스크롤 영역. content에 Vertical Layout Group 권장
-GameObject  entryPrefab       // 항목 1줄 프리팹 (루트/자식에 TMP_Text 필수)
+[Header("Visual Style")]
+DialogueLogVisualStyle visualStyle   // ParchmentCodex / DarkConfession / LegacyNotebook
+
+[Header("Style Layers")]
+DialogueLogStyleLayer parchmentLayer       // panelRoot + scrollRect + entryPrefab
+DialogueLogStyleLayer darkConfessionLayer
+DialogueLogStyleLayer legacyLayer
+
+[Header("UI (legacy fallback)")]
+GameObject  logPanel          // 레이어 미설정 시 폴백 패널 루트
+ScrollRect  scrollRect
+GameObject  entryPrefab
 
 [Header("입력")]
-KeyCode     logHotkey = L     // 기본값 그대로 두면 됨
+KeyCode     logHotkey = L
 
 [Header("캔버스 정렬 (SayDialog 위로)")]
-string  canvasSortingLayerName = "Setting"   // 기본값 유효 (Sorting Layer에 존재함)
-int     canvasSortingOrder    = 60           // 설정 패널(50)보다 위
+string  canvasSortingLayerName = "Setting"
+int     canvasSortingOrder    = 60
 ```
+
+스타일 JSON: `docs/dialogue-log-styles.json` (HTML mockup과 별도 Unity 스펙)
 
 > 항목 텍스트는 코드가 자동으로 `<b>이름</b>\n본문` 형태(리치 텍스트)로 채운다.
 > 따라서 **entryPrefab의 TMP_Text는 Rich Text가 켜져 있어야 한다(기본 켜짐).**
