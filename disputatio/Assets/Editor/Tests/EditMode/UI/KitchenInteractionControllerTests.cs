@@ -27,6 +27,9 @@ public class KitchenInteractionControllerTests
         controller = root.AddComponent<KitchenInteractionController>();
 
         puzzleState.SetFlowchartForTests(flowchart);
+        AddBooleanVariable(flowchart, FungusVariableKeys.BottleClicked, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.FaucetClicked, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
         SetPrivateField(controller, "flowchart", flowchart);
         SetPrivateField(controller, "puzzleState", puzzleState);
         SetPrivateField(controller, "routes", KitchenSceneMigrationSpecs.AllInteractionRoutes()
@@ -43,6 +46,7 @@ public class KitchenInteractionControllerTests
     [TearDown]
     public void TearDown()
     {
+        InventorySlot.draggedItem = null;
         RoomInteractionController.ResetStateForTests();
         FungusDialogueBridge.ResetForTests();
         foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
@@ -69,6 +73,15 @@ public class KitchenInteractionControllerTests
     [TestCaseSource(nameof(AllMigrationRouteCases))]
     public void OnInteraction_RouteId_ExecutesMappedBlock(string interactionId, string expectedBlock)
     {
+        if (interactionId == KitchenSinkInteractionGate.BottleDragInteractionId)
+        {
+            puzzleState.SetSinkFlagsForTests(
+                hasBottle: true,
+                bottleClicked: false,
+                faucetClicked: false,
+                bottleDragged: false);
+        }
+
         string executedBlock = null;
         FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
         {
@@ -109,6 +122,12 @@ public class KitchenInteractionControllerTests
             executedBlock = blockName;
             return true;
         };
+
+        SetPrivateField(controller, "blockOutcomes", new[]
+        {
+            new BlockOutcome { blockName = KitchenSinkInteractionGate.BottleDraggedBlockName },
+        });
+        RebuildLookupCaches(controller);
 
         controller.OnInteraction("bottle_drag");
         controller.InvokeBlockEndForTests(CreateBlock(flowchart, KitchenSinkInteractionGate.BottleDraggedBlockName));
@@ -197,9 +216,14 @@ public class KitchenInteractionControllerTests
 
     static void SetPrivateField(object target, string fieldName, object value)
     {
-        typeof(RoomInteractionController)
-            .GetField(fieldName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-            ?.SetValue(target, value);
+        var field = target.GetType().GetField(
+            fieldName,
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?? typeof(RoomInteractionController).GetField(
+                fieldName,
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+        field?.SetValue(target, value);
     }
 
     static void RebuildLookupCaches(RoomInteractionController target)
@@ -214,5 +238,13 @@ public class KitchenInteractionControllerTests
         var block = targetFlowchart.gameObject.AddComponent<Block>();
         block.BlockName = blockName;
         return block;
+    }
+
+    static void AddBooleanVariable(Flowchart target, string key, bool value)
+    {
+        var variable = target.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Value = value;
+        target.Variables.Add(variable);
     }
 }

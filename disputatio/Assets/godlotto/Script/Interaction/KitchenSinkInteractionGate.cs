@@ -24,9 +24,18 @@ namespace Godlotto.Interaction
                 return true;
 
             if (interactionId == BottleDragInteractionId)
-                return state.HasBottle && !state.BottleDragged;
+                return PlayerHasBottle(state) && !state.BottleDragged;
 
             return true;
+        }
+
+        internal static bool PlayerHasBottle(KitchenPuzzleState state)
+        {
+            if (state != null && state.HasBottle)
+                return true;
+
+            return InventorySlot.draggedItem != null
+                && InventorySlot.draggedItem.itemName == "Bottle";
         }
     }
 }

@@ -26,7 +26,11 @@ namespace Godlotto.Interaction
 
         public void CloseParrotPanel() => SetActiveSafe(parrotPanel, false);
 
-        public void OpenSinkPanel() => SetActiveSafe(sinkPanel, true);
+        public void OpenSinkPanel()
+        {
+            SetActiveSafe(sinkPanel, true);
+            NormalizePanelCanvas(sinkPanel);
+        }
 
         public void CloseSinkPanel() => SetActiveSafe(sinkPanel, false);
 
@@ -56,6 +60,14 @@ namespace Godlotto.Interaction
         {
             if (panel != null)
                 panel.SetActive(active);
+        }
+
+        static void NormalizePanelCanvas(GameObject panel)
+        {
+            if (panel == null)
+                return;
+
+            InventoryManager.NormalizeInventoryCanvasTransform(panel.transform);
         }
     }
 }

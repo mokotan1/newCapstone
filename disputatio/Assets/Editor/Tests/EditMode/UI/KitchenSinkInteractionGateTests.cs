@@ -25,6 +25,7 @@ public class KitchenSinkInteractionGateTests
     [Test]
     public void ShouldExecuteFungusBlock_BottleDrag_BlockedWhenNoBottleOrAlreadyDragged()
     {
+        InventorySlot.draggedItem = null;
         state.SetSinkFlagsForTests(hasBottle: false, bottleClicked: false, faucetClicked: false, bottleDragged: false);
         Assert.IsFalse(KitchenSinkInteractionGate.ShouldExecuteFungusBlock("bottle_drag", state));
 
@@ -33,6 +34,20 @@ public class KitchenSinkInteractionGateTests
 
         state.SetSinkFlagsForTests(hasBottle: true, bottleClicked: false, faucetClicked: false, bottleDragged: false);
         Assert.IsTrue(KitchenSinkInteractionGate.ShouldExecuteFungusBlock("bottle_drag", state));
+    }
+
+    [Test]
+    public void ShouldExecuteFungusBlock_BottleDrag_AllowsWhenDraggedBottleEvenIfHasBottleFlagStale()
+    {
+        var bottle = ScriptableObject.CreateInstance<Item>();
+        bottle.itemName = "Bottle";
+        InventorySlot.draggedItem = bottle;
+
+        state.SetSinkFlagsForTests(hasBottle: false, bottleClicked: false, faucetClicked: false, bottleDragged: false);
+        Assert.IsTrue(KitchenSinkInteractionGate.ShouldExecuteFungusBlock("bottle_drag", state));
+
+        InventorySlot.draggedItem = null;
+        Object.DestroyImmediate(bottle);
     }
 
     [TestCase("sink")]

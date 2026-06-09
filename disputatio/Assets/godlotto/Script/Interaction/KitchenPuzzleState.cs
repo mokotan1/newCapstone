@@ -62,6 +62,8 @@ namespace Godlotto.Interaction
                     break;
                 case KitchenSinkInteractionGate.BottleDraggedBlockName:
                     SetBottleDragged(true);
+                    SetBottleClicked(true);
+                    RemoveBottleFromInventoryIfPresent();
                     break;
             }
         }
@@ -101,6 +103,28 @@ namespace Godlotto.Interaction
         }
 
         internal void SetFlowchartForTests(Flowchart target) => flowchart = target;
+
+        static void RemoveBottleFromInventoryIfPresent()
+        {
+            if (InventoryManager.instance == null)
+                return;
+
+            Item bottle = InventorySlot.draggedItem;
+            if (bottle == null)
+            {
+                foreach (Item item in InventoryManager.instance.Items)
+                {
+                    if (item != null && item.itemName == "Bottle")
+                    {
+                        bottle = item;
+                        break;
+                    }
+                }
+            }
+
+            if (bottle != null)
+                InventoryManager.instance.RemoveItem(bottle);
+        }
 
         internal void SetSinkFlagsForTests(bool hasBottle, bool bottleClicked, bool faucetClicked, bool bottleDragged)
         {

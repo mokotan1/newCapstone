@@ -17,6 +17,9 @@ public class KitchenPuzzleStateTests
         flowchart = root.AddComponent<Flowchart>();
         state = root.AddComponent<KitchenPuzzleState>();
         state.SetFlowchartForTests(flowchart);
+        AddBooleanVariable(flowchart, FungusVariableKeys.BottleClicked, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.FaucetClicked, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
     }
 
     [TearDown]
@@ -54,7 +57,9 @@ public class KitchenPuzzleStateTests
 
         state.ApplyBlockCompletion(KitchenSinkInteractionGate.BottleDraggedBlockName);
         Assert.IsTrue(state.BottleDragged);
+        Assert.IsTrue(state.BottleClicked);
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleDragged));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleClicked));
     }
 
     [Test]
@@ -67,5 +72,13 @@ public class KitchenPuzzleStateTests
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleClicked));
         Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.FaucetClicked));
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleDragged));
+    }
+
+    static void AddBooleanVariable(Flowchart target, string key, bool value)
+    {
+        var variable = target.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Value = value;
+        target.Variables.Add(variable);
     }
 }

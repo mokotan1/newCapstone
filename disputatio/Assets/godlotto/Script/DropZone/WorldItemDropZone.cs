@@ -135,6 +135,12 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData eventData)
     {
+        if (InventorySlot.TraceDrag)
+        {
+            string itemName = InventorySlot.draggedItem != null ? InventorySlot.draggedItem.itemName : "null";
+            GameLog.Log($"[WorldItemDropZone] OnDrop zone={name} item={itemName}");
+        }
+
         TryApplyDroppedItem(InventorySlot.draggedItem);
         InventorySlot.ClearDragState();
     }
@@ -167,11 +173,20 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
         SaveRoomUnlockCheckpointIfKnown(checkpointUnlockKey);
         WorldSpriteDepthSorter2D.SortActiveSceneSprites();
 
-        if (InventoryManager.instance != null)
+        if (!DefersInventoryRemovalToInteraction(requiredItem) && InventoryManager.instance != null)
             InventoryManager.instance.RemoveItem(requiredItem);
 
         ApplyDropZoneCompletedVisuals();
         return true;
+    }
+
+    /// <summary>
+    /// 주방 싱크 병 드롭은 Fungus <c>Bottle_Dragged</c> 완료 시 인벤토리에서 제거합니다.
+    /// 게이트 차단 시 아이템이 먼저 사라지는 회귀를 막습니다.
+    /// </summary>
+    static bool DefersInventoryRemovalToInteraction(Item item)
+    {
+        return item != null && item.itemName == "Bottle";
     }
 
     private static void SaveRoomUnlockCheckpointIfKnown(string unlockKey)
