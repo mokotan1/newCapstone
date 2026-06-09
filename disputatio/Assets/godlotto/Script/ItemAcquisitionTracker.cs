@@ -84,11 +84,12 @@ public static class ItemAcquisitionTracker
     /// <summary>프로젝트에 로드된 모든 Item SO에서 id -> 표시명 캐시를 채웁니다.</summary>
     public static void WarmupDisplayNameCache()
     {
-        var allItems = Resources.FindObjectsOfTypeAll<Item>();
-        for (int i = 0; i < allItems.Length; i++)
+        var allItems = ItemLookup.GetAllItems();
+        for (int i = 0; i < allItems.Count; i++)
         {
-            if (allItems[i] != null)
-                CacheDisplayName(allItems[i].itemId, allItems[i].itemName);
+            Item item = allItems[i];
+            if (item != null)
+                CacheDisplayName(item.itemId, item.itemName);
         }
     }
 

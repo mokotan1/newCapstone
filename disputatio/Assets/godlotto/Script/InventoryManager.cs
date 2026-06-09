@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Fungus;
@@ -125,26 +124,52 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
 
     public void AddItem(Item item)
     {
-        if (item == null)
+        TryAddItemInternal(item, respectSlotLimit: true);
+    }
+
+    /// <summary>개발자 모드 전용: 슬롯 한도를 무시하고 아이템을 추가합니다.</summary>
+    internal bool TryAddItemForDeveloperMode(Item item)
+    {
+        if (!Debug.isDebugBuild || !DeveloperModeController.IsDeveloperModeEnabled)
+            return false;
+
+        return TryAddItemInternal(item, respectSlotLimit: false);
+    }
+
+    /// <summary>개발자 모드 전용: UI 슬롯 수를 최소 <paramref name="minimumSlots"/>까지 늘립니다.</summary>
+    internal void EnsureDeveloperSlotCapacity(int minimumSlots)
+    {
+        if (!Debug.isDebugBuild || !DeveloperModeController.IsDeveloperModeEnabled)
             return;
+
+        int target = Mathf.Clamp(minimumSlots, slots.Count, DeveloperModeItemGrantService.MaxDeveloperInventorySlots);
+        while (slots.Count < target)
+            CreateSingleSlot();
+    }
+
+    private bool TryAddItemInternal(Item item, bool respectSlotLimit)
+    {
+        if (item == null)
+            return false;
 
         if (items.Contains(item))
         {
             GameLog.Log($"[InventoryManager] {item.itemName}은(는) 이미 인벤토리에 있습니다. 중복 추가 무시.");
-            return;
+            return false;
         }
 
         if (ResolveFlowchart() != null)
             ItemAcquisitionTracker.MarkAcquired(targetflowchart, item);
 
-        if (items.Count >= maxSlots)
+        if (respectSlotLimit && items.Count >= maxSlots)
         {
             GameLog.Log($"인벤토리가 가득 찼습니다! {item.itemName}을(를) 더 이상 추가할 수 없습니다.");
-            return;
+            return false;
         }
 
         items.Add(item);
         UpdateUI();
+        return true;
     }
 
     public void RemoveItem(Item item)
@@ -168,10 +193,9 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
 
         if (itemIds != null)
         {
-            Item[] allItems = Resources.FindObjectsOfTypeAll<Item>();
             foreach (int itemId in itemIds)
             {
-                Item found = allItems.FirstOrDefault(x => x != null && x.itemId == itemId);
+                Item found = ItemLookup.FindById(itemId);
                 if (found != null && !items.Contains(found))
                     items.Add(found);
                 else if (found == null)
@@ -237,20 +261,26 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         }
 
         for (int i = 0; i < maxSlots; i++)
+            CreateSingleSlot();
+    }
+
+    private void CreateSingleSlot()
+    {
+        if (slotPrefab == null || slotsHolder == null)
+            return;
+
+        GameObject slotGO = Instantiate(slotPrefab, slotsHolder);
+        var slot = slotGO.GetComponent<InventorySlot>()
+                   ?? slotGO.GetComponentInChildren<InventorySlot>();
+        if (slot != null)
         {
-            GameObject slotGO = Instantiate(slotPrefab, slotsHolder);
-            var slot = slotGO.GetComponent<InventorySlot>()
-                       ?? slotGO.GetComponentInChildren<InventorySlot>();
-            if (slot != null)
-            {
-                slots.Add(slot);
-            }
-            else
-            {
-                GameLog.LogWarning($"[{nameof(InventoryManager)}] slotPrefab({slotPrefab.name})에 InventorySlot 컴포넌트가 없습니다. " +
-                                   $"프리팹 경로를 확인해 주세요.");
-            }
+            slots.Add(slot);
+            return;
         }
+
+        GameLog.LogWarning($"[{nameof(InventoryManager)}] slotPrefab({slotPrefab.name})에 InventorySlot 컴포넌트가 없습니다. " +
+                           $"프리팹 경로를 확인해 주세요.");
+        Destroy(slotGO);
     }
 
     private void UpdateUI()
@@ -298,12 +328,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
 
         if (!string.IsNullOrEmpty(raw))
         {
-            Item[] allItems = Resources.FindObjectsOfTypeAll<Item>();
             foreach (string idStr in raw.Split(','))
             {
                 if (int.TryParse(idStr, out int id))
                 {
-                    Item found = System.Array.Find(allItems, x => x.itemId == id);
+                    Item found = ItemLookup.FindById(id);
                     if (found != null)
                         items.Add(found);
                     else
