@@ -75,7 +75,21 @@ WorldItemDropZone / InventorySlot (드롭·열쇠)
 ### 2.1 Kitchen.unity (30 blocks, risk 115) — 최고 위험
 
 **추천 Controller:** `KitchenInteractionController`  
-**보조 상태:** `KitchenPuzzleState` (ScriptableObject 또는 serializable POCO)
+**보조 상태:** `KitchenPuzzleState` (Flowchart GameObject 컴포넌트, Fungus bool 미러)
+
+#### R6-E 1차 이관 (2026-06-09) — 싱크/병/수도꼭지/드롭
+
+| 상태 변수 | Fungus SetVariable/If (enabled) | C# 책임 (신규) | Fungus 유지 |
+|-----------|----------------------------------|----------------|-------------|
+| `GetBottle` | `Bottle_Clicked` If, `Sink`/`LookUp_Sink` 분기 | **읽기만** (`KitchenPuzzleState.HasBottle`) | 냉장고·복도 체인 SetVariable |
+| `BottleClicked` | `Faucet` If, `Bottle_Clicked` SetVariable | 게이트 미러 + 블록 종료 시 `SetBottleClicked` | Say/패널 분기 |
+| `FaucetClicked` | `FilledBottle` If, `Faucet` SetVariable | 게이트 미러 + `Faucet` 종료 시 `SetFaucetClicked` | `addKey` Call 등 연출 |
+| `BottleDragged` | `Bottle_Dragged` SetVariable, `LookUp_Sink` If | **게이트** (`bottle_drag` 중복 차단) + 종료 시 `SetBottleDragged` | 패널 SetActive 등 |
+| `isClicked` / `isTalking` | UI 잠금 전역 | 미이관 (기존 `ClickInteractionCleanup`) | 전역 잠금 |
+
+**코드:** `KitchenPuzzleState`, `KitchenSinkInteractionGate`, `KitchenInteractionController` 오버라이드.  
+**씬:** `Kitchen.unity` Flowchart에 `KitchenPuzzleState` 배선.  
+**마이그레이터:** `Tools/Godlotto/Migrate/Kitchen R6-E Sink Puzzle State`
 
 #### 블록 목록 (감사 기준)
 

@@ -49,9 +49,14 @@ namespace Godlotto.Interaction
             BlockSignals.OnBlockEnd -= OnBlockEnd;
         }
 
+        protected virtual bool ShouldProcessWorldClickAt(Vector2 screenPosition) => true;
+
         void Update()
         {
             if (!TryGetPrimaryPressAndScreenPoint(out Vector2 screenPosition))
+                return;
+
+            if (!ShouldProcessWorldClickAt(screenPosition))
                 return;
 
             for (int i = 0; i < worldClicks.Length; i++)
@@ -69,7 +74,7 @@ namespace Godlotto.Interaction
         }
 
         /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
-        public void OnInteraction(string interactionId)
+        public virtual void OnInteraction(string interactionId)
         {
             if (string.IsNullOrWhiteSpace(interactionId))
                 return;
@@ -83,8 +88,24 @@ namespace Godlotto.Interaction
             if (!SceneInteractionController.TryInteract(interactionId))
                 return;
 
+            if (!ShouldExecuteInteraction(interactionId, blockName))
+            {
+                LogIgnored($"Gate blocked '{interactionId}' -> '{blockName}'.");
+                return;
+            }
+
+            PrepareInteractionExecution(interactionId, blockName);
+
             if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, blockName))
                 LogIgnored($"Failed to execute block '{blockName}' for '{interactionId}'.");
+        }
+
+        /// <summary>씬별 퍼즐 상태에 따라 Fungus 블록 실행 여부를 결정합니다.</summary>
+        protected virtual bool ShouldExecuteInteraction(string interactionId, string blockName) => true;
+
+        /// <summary>ExecuteBlock 직전에 Fungus 변수 미러 등 씬별 준비를 수행합니다.</summary>
+        protected virtual void PrepareInteractionExecution(string interactionId, string blockName)
+        {
         }
 
         /// <summary>패널 백스페이스 등에서 호출. 패널을 닫고 isClicked를 리셋합니다.</summary>
@@ -121,6 +142,12 @@ namespace Godlotto.Interaction
                 return;
 
             ApplyBlockOutcome(block, outcome);
+            OnInteractionBlockCompleted(block.BlockName);
+        }
+
+        /// <summary>블록 종료 후 씬별 퍼즐 상태를 갱신합니다.</summary>
+        protected virtual void OnInteractionBlockCompleted(string blockName)
+        {
         }
 
         protected virtual void ApplyBlockOutcome(Block block, BlockOutcome outcome)

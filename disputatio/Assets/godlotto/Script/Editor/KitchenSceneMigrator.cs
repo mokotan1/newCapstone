@@ -18,6 +18,7 @@ public static class KitchenSceneMigrator
         new() { InteractionId = "trashbox", GameObjectName = "TrashBox" },
         new() { InteractionId = "refrigerator", GameObjectName = "refrigerator" },
         new() { InteractionId = "sink", GameObjectName = "Sink" },
+        new() { InteractionId = "burner", GameObjectName = "Burner" },
         new() { InteractionId = "fripan", GameObjectName = "Fripan" },
         new() { InteractionId = "parret", GameObjectName = "Parret" },
     };
@@ -30,6 +31,7 @@ public static class KitchenSceneMigrator
         new() { InteractionId = "refrigerator", BlockName = "refrigeratorClicked" },
         new() { InteractionId = "sink", BlockName = "Sink" },
         new() { InteractionId = "bottle", BlockName = "Bottle_Clicked" },
+        new() { InteractionId = "burner", BlockName = "burner" },
         new() { InteractionId = "fripan", BlockName = "fripan" },
         new() { InteractionId = "parret", BlockName = "parret" },
     };
@@ -88,6 +90,16 @@ public static class KitchenSceneMigrator
     {
         new() { PanelName = "firpan_Panel", PanelCloseId = PanelBackspaceCloseId },
         new() { PanelName = "Sink_Pannel", PanelCloseId = PanelBackspaceCloseId },
+    };
+
+    /// <summary>
+    /// Kitchen 씬에 BackspaceCornerFold가 없는 패널. 닫기는 상위 패널 backspace + CloseAllPanels 또는 Fungus Call Method로 처리.
+    /// </summary>
+    static readonly (string PanelName, string Reason)[] PanelBackspaceExcluded =
+    {
+        ("burner", "firpan_Panel 자식 UI. 전용 닫기 버튼 없음 → fripan backspace + CloseAllPanels."),
+        ("Parret", "월드 스프라이트 오버레이. 닫기 버튼 없음 → Fungus Call Method CloseParrotPanel."),
+        ("Bottle", "Sink_Pannel 자식 UI. 전용 닫기 버튼 없음 → Sink backspace + CloseAllPanels."),
     };
 
     static readonly string[] DisconnectObjectClickedBlockNames = { "parret" };
@@ -751,6 +763,7 @@ public static class KitchenSceneMigrator
         {
             violations += VerifyPanelRegistryWired(flowchart, controller);
             violations += VerifyPanelBackspaceClosers(scene, controller);
+            VerifyPanelBackspaceExclusions(scene);
         }
 
         violations += CountEnabledPanelSetActiveCommands(flowchart);
@@ -944,7 +957,7 @@ public static class KitchenSceneMigrator
         }
 
         var registrySo = new SerializedObject(registry);
-        foreach (string fieldName in new[] { "burnerPanel", "fripanPanel", "parrotPanel" })
+        foreach (string fieldName in new[] { "burnerPanel", "fripanPanel", "parrotPanel", "sinkPanel", "bottlePanel" })
         {
             if (registrySo.FindProperty(fieldName).objectReferenceValue == null)
             {
@@ -954,6 +967,33 @@ public static class KitchenSceneMigrator
         }
 
         return violations;
+    }
+
+    static void VerifyPanelBackspaceExclusions(UnityEngine.SceneManagement.Scene scene)
+    {
+        foreach ((string panelName, string reason) in PanelBackspaceExcluded)
+        {
+            GameObject panel = RoomInteractionSceneMigrationEditor.FindGameObjectInScene(scene, panelName);
+            if (panel == null)
+            {
+                Debug.LogWarning(
+                    $"[KitchenSceneMigrator] R6-D: excluded panel '{panelName}' not found in scene.");
+                continue;
+            }
+
+            PanelBackspaceCloser closer = panel.GetComponentsInChildren<PanelBackspaceCloser>(true)
+                .FirstOrDefault();
+            if (closer != null)
+            {
+                Debug.LogError(
+                    $"[KitchenSceneMigrator] R6-D: '{panelName}' is marked backspace-excluded but has PanelBackspaceCloser.",
+                    closer);
+                continue;
+            }
+
+            Debug.Log(
+                $"[KitchenSceneMigrator] R6-D: '{panelName}' has no backspace button (expected). {reason}");
+        }
     }
 
     static int VerifyPanelBackspaceClosers(
@@ -1027,5 +1067,209 @@ public static class KitchenSceneMigrator
         }
 
         return violations;
+    }
+
+    [MenuItem("Tools/Godlotto/Migrate/Kitchen R6-E Sink Puzzle State")]
+    public static void MigrateKitchenSinkPuzzleState()
+    {
+        try
+        {
+            if (MigrateSinkPuzzleStateScene())
+            {
+                AssetDatabase.SaveAssets();
+                Debug.Log("[KitchenSceneMigrator] Kitchen Phase R6-E sink puzzle state migration complete.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[KitchenSceneMigrator] R6-E migration failed: {ex.Message}\n{ex.StackTrace}");
+        }
+
+        VerifyKitchenSinkPuzzleStateMigration();
+    }
+
+    [MenuItem("Tools/Godlotto/Migrate/Kitchen R6-E Verify Sink Puzzle State")]
+    public static void VerifyKitchenSinkPuzzleStateMigration()
+    {
+        var scene = EditorSceneManager.OpenScene(KitchenScenePath, OpenSceneMode.Single);
+        int violations = VerifySinkPuzzleState(scene);
+
+        if (violations == 0)
+            Debug.Log("[KitchenSceneMigrator] R6-E verification passed: KitchenPuzzleState wired on Flowchart.");
+        else
+            Debug.LogError($"[KitchenSceneMigrator] R6-E verification failed: {violations} issue(s).");
+    }
+
+    static bool MigrateSinkPuzzleStateScene()
+    {
+        var scene = EditorSceneManager.OpenScene(KitchenScenePath, OpenSceneMode.Single);
+        Flowchart flowchart = RoomInteractionSceneMigrationEditor
+            .FindSceneComponents<Flowchart>(scene)
+            .FirstOrDefault(fc => fc.GetComponents<Block>().Length > 0);
+
+        if (flowchart == null)
+        {
+            Debug.LogError("[KitchenSceneMigrator] R6-E: Flowchart not found.");
+            return false;
+        }
+
+        var controller = flowchart.GetComponent<KitchenInteractionController>();
+        if (controller == null)
+        {
+            Debug.LogError("[KitchenSceneMigrator] R6-E: KitchenInteractionController missing. Run R6-A first.");
+            return false;
+        }
+
+        KitchenPuzzleState puzzleState = flowchart.GetComponent<KitchenPuzzleState>();
+        if (puzzleState == null)
+            puzzleState = flowchart.gameObject.AddComponent<KitchenPuzzleState>();
+
+        var puzzleSo = new SerializedObject(puzzleState);
+        puzzleSo.FindProperty("flowchart").objectReferenceValue = flowchart;
+        puzzleSo.ApplyModifiedPropertiesWithoutUndo();
+
+        var controllerSo = new SerializedObject(controller);
+        controllerSo.FindProperty("puzzleState").objectReferenceValue = puzzleState;
+        controllerSo.ApplyModifiedPropertiesWithoutUndo();
+
+        EditorUtility.SetDirty(flowchart.gameObject);
+        EditorUtility.SetDirty(puzzleState);
+        EditorUtility.SetDirty(controller);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        return true;
+    }
+
+    static int VerifySinkPuzzleState(UnityEngine.SceneManagement.Scene scene)
+    {
+        int violations = 0;
+        Flowchart flowchart = RoomInteractionSceneMigrationEditor
+            .FindSceneComponents<Flowchart>(scene)
+            .FirstOrDefault(fc => fc.GetComponents<Block>().Length > 0);
+
+        if (flowchart == null)
+        {
+            Debug.LogError("[KitchenSceneMigrator] R6-E: Flowchart not found.");
+            return 1;
+        }
+
+        var controller = flowchart.GetComponent<KitchenInteractionController>();
+        if (controller == null)
+        {
+            violations++;
+            Debug.LogError("[KitchenSceneMigrator] R6-E: KitchenInteractionController missing.");
+            return violations;
+        }
+
+        KitchenPuzzleState puzzleState = flowchart.GetComponent<KitchenPuzzleState>();
+        if (puzzleState == null)
+        {
+            violations++;
+            Debug.LogError("[KitchenSceneMigrator] R6-E: KitchenPuzzleState missing on Flowchart.");
+        }
+
+        var controllerSo = new SerializedObject(controller);
+        if (controllerSo.FindProperty("puzzleState").objectReferenceValue == null)
+        {
+            violations++;
+            Debug.LogError("[KitchenSceneMigrator] R6-E: KitchenInteractionController.puzzleState is not wired.");
+        }
+
+        return violations;
+    }
+}
+
+/// <summary>
+/// Kitchen R6-A/B/C EditMode static test와 마이그레이터 검증이 공유하는 기대값.
+/// </summary>
+public static class KitchenSceneMigrationSpecs
+{
+    public const string InteractionControllerScriptGuid = "a7c3e8914b2d4f6e9a1c5d8e3f7b2a04";
+    public const string PuzzleStateScriptGuid = "7f2e8b9c1d4a5e6f807192a3b4c5d6e7";
+    public const string FungusClickTriggerScriptGuid = "0235fc39fc1c6894386995e3c0a9a673";
+    public const string WorldItemDropZoneScriptGuid = "f12114e92cf93ff4e869374048581b4f";
+
+    public static readonly string[] MigratedFungusBlockNames =
+    {
+        "Door_Clicked",
+        "Door_toHall_Clicked",
+        "TrashBox_Clicked",
+        "refrigeratorClicked",
+        "Sink",
+        "burner",
+        "fripan",
+        "parret",
+        "Faucet",
+        "FilledBottle",
+        "Bottle_Clicked",
+        "Bottle_Dragged",
+        "Food_Dragged",
+    };
+
+    public static readonly (string InteractionId, string BlockName)[] ClickRoutes =
+    {
+        ("door", "Door_Clicked"),
+        ("door_to_hall", "Door_toHall_Clicked"),
+        ("trashbox", "TrashBox_Clicked"),
+        ("refrigerator", "refrigeratorClicked"),
+        ("sink", "Sink"),
+        ("bottle", "Bottle_Clicked"),
+        ("burner", "burner"),
+        ("fripan", "fripan"),
+        ("parret", "parret"),
+    };
+
+    public static readonly (string InteractionId, string BlockName)[] UiClickRoutes =
+    {
+        ("burner", "burner"),
+        ("faucet", "Faucet"),
+        ("filled_bottle", "FilledBottle"),
+        ("bottle", "Bottle_Clicked"),
+    };
+
+    public static readonly (string InteractionId, string BlockName)[] DropRoutes =
+    {
+        ("bottle_drag", "Bottle_Dragged"),
+        ("food_drag", "Food_Dragged"),
+    };
+
+    public static readonly string[] WorldClickInteractionIds =
+    {
+        "door",
+        "door_to_hall",
+        "trashbox",
+        "refrigerator",
+        "sink",
+        "burner",
+        "fripan",
+        "parret",
+    };
+
+    public static readonly (string DropZoneObjectName, string InteractionId)[] DropZoneUnlockRoutes =
+    {
+        ("SinkDropzone", "bottle_drag"),
+        ("BurnerDropzone", "food_drag"),
+    };
+
+    public static readonly string[] FungusClickTriggerBlockNames =
+    {
+        "Door_Clicked",
+        "Door_toHall_Clicked",
+        "TrashBox_Clicked",
+        "refrigeratorClicked",
+        "Sink",
+    };
+
+    public static (string InteractionId, string BlockName)[] AllInteractionRoutes()
+    {
+        var merged = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach ((string interactionId, string blockName) in ClickRoutes)
+            merged[interactionId] = blockName;
+        foreach ((string interactionId, string blockName) in UiClickRoutes)
+            merged[interactionId] = blockName;
+        foreach ((string interactionId, string blockName) in DropRoutes)
+            merged[interactionId] = blockName;
+
+        return merged.Select(pair => (pair.Key, pair.Value)).ToArray();
     }
 }

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
@@ -8,7 +10,7 @@ public class KitchenFripanClickTests
     [Test]
     public void FripanWorldClick_IsRoutedThroughKitchenInteractionController()
     {
-        string sceneText = File.ReadAllText(KitchenScenePath);
+        string sceneText = ReadKitchenSceneText();
         string fripanObject = FindGameObjectBlock(sceneText, "Fripan");
         string colliderFileId = FindComponentFileId(fripanObject, 2);
         string clickableFileId = FindComponentFileId(fripanObject, 3);
@@ -33,9 +35,31 @@ public class KitchenFripanClickTests
     }
 
     [Test]
+    public void BurnerWorldClick_IsRoutedThroughKitchenInteractionController()
+    {
+        string sceneText = ReadKitchenSceneText();
+        string burnerObject = FindGameObjectBlock(sceneText, "Burner");
+        string colliderFileId = FindComponentFileId(burnerObject, 2);
+        string clickableFileId = FindComponentFileId(burnerObject, 3);
+
+        StringAssert.Contains(
+            $"interactionId: burner",
+            sceneText,
+            "KitchenInteractionController should register a burner world click route.");
+        StringAssert.Contains(
+            $"collider: {{fileID: {colliderFileId}}}",
+            sceneText,
+            "Burner collider should be bound on KitchenInteractionController.worldClicks.");
+        StringAssert.Contains(
+            $"clickable: {{fileID: {clickableFileId}}}",
+            sceneText,
+            "Burner Clickable2D should be bound on KitchenInteractionController.worldClicks.");
+    }
+
+    [Test]
     public void BurnerAndFripanSetInteractableTargets_DoNotContainMissingReferences()
     {
-        string sceneText = File.ReadAllText(KitchenScenePath);
+        string sceneText = ReadKitchenSceneText();
         foreach (Match match in Regex.Matches(sceneText, @"targetObjects:\r?\n(?<items>(?:  - \{fileID: [0-9]+\}\r?\n)+)"))
         {
             string items = match.Groups["items"].Value;
@@ -55,7 +79,7 @@ public class KitchenFripanClickTests
     [Test]
     public void MainTagCanvas_UsesOverlayAnd1980ReferenceResolution()
     {
-        string sceneText = File.ReadAllText(KitchenScenePath);
+        string sceneText = ReadKitchenSceneText();
         string canvasObject = FindLayeredGameObjectBlock(sceneText, "Canvas", 5);
 
         string canvasFileId = FindComponentFileId(canvasObject, 1);
@@ -68,6 +92,203 @@ public class KitchenFripanClickTests
         string scalerComponent = FindObjectBlock(sceneText, "114", scalerFileId);
         StringAssert.Contains("m_UiScaleMode: 1", scalerComponent);
         StringAssert.Contains("m_ReferenceResolution: {x: 1980, y: 1080}", scalerComponent);
+    }
+
+    [Test]
+    public void MigratedFungusBlocks_AreNotCalledByUnityEventExecuteBlock()
+    {
+        string sceneText = ReadKitchenSceneText();
+
+        foreach (string blockName in KitchenSceneMigrationSpecs.MigratedFungusBlockNames)
+        {
+            Assert.IsFalse(
+                UnityEventCallsExecuteBlock(sceneText, blockName),
+                $"Kitchen scene still wires ExecuteBlock('{blockName}') on a Button or drop-zone onUnlock.");
+        }
+    }
+
+    [Test]
+    public void FungusClickTriggers_ForMigratedBlocks_AreDisabled()
+    {
+        string sceneText = ReadKitchenSceneText();
+
+        foreach (string blockName in KitchenSceneMigrationSpecs.MigratedFungusBlockNames)
+            AssertFungusClickTriggerDisabledWhenPresent(sceneText, blockName);
+    }
+
+    [Test]
+    public void KitchenInteractionController_Routes_AllMigrationTargets()
+    {
+        string sceneText = ReadKitchenSceneText();
+        string controllerBlock = FindInteractionControllerBlock(sceneText);
+        var foundRoutes = ParseInteractionRoutes(controllerBlock);
+
+        foreach ((string interactionId, string blockName) in KitchenSceneMigrationSpecs.AllInteractionRoutes())
+        {
+            Assert.IsTrue(
+                foundRoutes.TryGetValue(interactionId, out string actualBlock),
+                $"KitchenInteractionController.routes is missing '{interactionId}'.");
+            Assert.AreEqual(
+                blockName,
+                actualBlock,
+                $"Route '{interactionId}' should map to '{blockName}'.");
+        }
+    }
+
+    [Test]
+    public void KitchenInteractionController_WorldClicks_CoverWorldClickTargets()
+    {
+        string sceneText = ReadKitchenSceneText();
+        string controllerBlock = FindInteractionControllerBlock(sceneText);
+        var foundIds = ParseWorldClickInteractionIds(controllerBlock);
+
+        foreach (string interactionId in KitchenSceneMigrationSpecs.WorldClickInteractionIds)
+        {
+            Assert.IsTrue(
+                foundIds.Contains(interactionId),
+                $"KitchenInteractionController.worldClicks is missing '{interactionId}'.");
+        }
+    }
+
+    [Test]
+    public void SinkDropzone_OnUnlock_CallsKitchenInteractionController()
+    {
+        AssertDropZoneUnlockRoutesToController("SinkDropzone", "bottle_drag");
+    }
+
+    [Test]
+    public void BurnerDropzone_OnUnlock_CallsKitchenInteractionController()
+    {
+        AssertDropZoneUnlockRoutesToController("BurnerDropzone", "food_drag");
+    }
+
+    [Test]
+    public void UiClickRoutes_CallOnInteractionWithExpectedIds()
+    {
+        string sceneText = ReadKitchenSceneText();
+        var seen = new HashSet<string>(System.StringComparer.Ordinal);
+
+        foreach ((string interactionId, _) in KitchenSceneMigrationSpecs.UiClickRoutes)
+        {
+            if (!seen.Add(interactionId))
+                continue;
+
+            Assert.IsTrue(
+                Regex.IsMatch(
+                    sceneText,
+                    $@"m_MethodName: OnInteraction\r?\n\s*m_Mode:[\s\S]*?m_StringArgument: {Regex.Escape(interactionId)}",
+                    RegexOptions.Multiline),
+                $"Kitchen UI should wire OnInteraction('{interactionId}').");
+        }
+    }
+
+    static void AssertDropZoneUnlockRoutesToController(string dropZoneName, string interactionId)
+    {
+        string sceneText = ReadKitchenSceneText();
+        string dropZoneComponent = FindMonoBehaviourOnGameObject(
+            sceneText,
+            dropZoneName,
+            KitchenSceneMigrationSpecs.WorldItemDropZoneScriptGuid);
+
+        StringAssert.Contains("m_MethodName: OnInteraction", dropZoneComponent);
+        StringAssert.Contains($"m_StringArgument: {interactionId}", dropZoneComponent);
+        StringAssert.Contains(
+            RoomInteractionSceneMigrationEditor.KitchenControllerTypeName,
+            dropZoneComponent);
+        StringAssert.DoesNotContain("m_MethodName: ExecuteBlock", dropZoneComponent);
+    }
+
+    static string ReadKitchenSceneText() => File.ReadAllText(KitchenScenePath);
+
+    static bool UnityEventCallsExecuteBlock(string sceneText, string blockName)
+    {
+        return Regex.IsMatch(
+            sceneText,
+            $@"m_MethodName: ExecuteBlock[\s\S]*?m_StringArgument: {Regex.Escape(blockName)}",
+            RegexOptions.Multiline);
+    }
+
+    static void AssertFungusClickTriggerDisabledWhenPresent(string sceneText, string blockName)
+    {
+        string pattern =
+            $@"--- !u!114 &[0-9]+\r?\nMonoBehaviour:\r?\n[\s\S]*?guid: {KitchenSceneMigrationSpecs.FungusClickTriggerScriptGuid}[\s\S]*?blockToExecute: {Regex.Escape(blockName)}[\s\S]*?(?=--- !u!)";
+
+        Match match = Regex.Match(sceneText, pattern, RegexOptions.Multiline);
+        if (!match.Success)
+            return;
+
+        StringAssert.Contains(
+            "m_Enabled: 0",
+            match.Value,
+            $"FungusClickTrigger for '{blockName}' must stay disabled after R6-A migration.");
+    }
+
+    static string FindInteractionControllerBlock(string sceneText)
+    {
+        Match match = Regex.Match(
+            sceneText,
+            $@"--- !u!114 &[0-9]+\r?\nMonoBehaviour:\r?\n[\s\S]*?guid: {KitchenSceneMigrationSpecs.InteractionControllerScriptGuid}[\s\S]*?(?=--- !u!)",
+            RegexOptions.Multiline);
+
+        Assert.IsTrue(match.Success, "KitchenInteractionController MonoBehaviour block not found.");
+        return match.Value;
+    }
+
+    static Dictionary<string, string> ParseInteractionRoutes(string controllerBlock)
+    {
+        var routes = new Dictionary<string, string>(System.StringComparer.Ordinal);
+        foreach (Match match in Regex.Matches(
+            controllerBlock,
+            @"interactionId: (?<id>[a-z_]+)\r?\n\s*fungusBlockName: (?<block>[A-Za-z0-9_]+)",
+            RegexOptions.Multiline))
+        {
+            routes[match.Groups["id"].Value] = match.Groups["block"].Value;
+        }
+
+        return routes;
+    }
+
+    static HashSet<string> ParseWorldClickInteractionIds(string controllerBlock)
+    {
+        var ids = new HashSet<string>(System.StringComparer.Ordinal);
+        int worldClicksIndex = controllerBlock.IndexOf("worldClicks:", System.StringComparison.Ordinal);
+        int routesIndex = controllerBlock.IndexOf("routes:", System.StringComparison.Ordinal);
+        Assert.Greater(worldClicksIndex, -1);
+        Assert.Greater(routesIndex, worldClicksIndex);
+
+        string worldClicksSection = controllerBlock.Substring(worldClicksIndex, routesIndex - worldClicksIndex);
+        foreach (Match match in Regex.Matches(
+            worldClicksSection,
+            @"interactionId: (?<id>[a-z_]+)",
+            RegexOptions.Multiline))
+        {
+            ids.Add(match.Groups["id"].Value);
+        }
+
+        return ids;
+    }
+
+    static string FindMonoBehaviourOnGameObject(string sceneText, string gameObjectName, string scriptGuid)
+    {
+        string gameObjectBlock = FindGameObjectBlock(sceneText, gameObjectName);
+        string gameObjectFileId = Regex.Match(gameObjectBlock, @"--- !u!1 &(?<id>[0-9]+)").Groups["id"].Value;
+
+        foreach (Match match in Regex.Matches(
+            sceneText,
+            @"--- !u!114 &(?<cid>[0-9]+)\r?\nMonoBehaviour:\r?\n(?:(?!^--- ).)*",
+            RegexOptions.Multiline))
+        {
+            string block = match.Value;
+            if (!block.Contains($"m_GameObject: {{fileID: {gameObjectFileId}}}"))
+                continue;
+            if (!block.Contains($"guid: {scriptGuid}"))
+                continue;
+
+            return block;
+        }
+
+        Assert.Fail($"Could not find MonoBehaviour guid '{scriptGuid}' on GameObject '{gameObjectName}'.");
+        return string.Empty;
     }
 
     private static string KitchenScenePath

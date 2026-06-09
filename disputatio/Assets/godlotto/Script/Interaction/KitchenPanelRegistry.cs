@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Godlotto.Interaction
@@ -41,6 +42,15 @@ namespace Godlotto.Interaction
             CloseSinkPanel();
             CloseBottlePanel();
         }
+
+        internal IReadOnlyList<GameObject> GetAllPanels() => new[]
+        {
+            burnerPanel,
+            fripanPanel,
+            parrotPanel,
+            sinkPanel,
+            bottlePanel,
+        };
 
         static void SetActiveSafe(GameObject panel, bool active)
         {

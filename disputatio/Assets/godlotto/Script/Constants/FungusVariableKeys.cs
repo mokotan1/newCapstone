@@ -13,4 +13,10 @@ public static class FungusVariableKeys
     public const string CorrectAnswerCount = "CorrectAnswerCount";
     public const string DevModeEnabled = "DevModeEnabled";
     public const string InventoryItemIds = "InventoryItemIds";
+
+    // Kitchen sink/bottle puzzle (global bool, Kitchen Flowchart + Variablemanager)
+    public const string GetBottle = "GetBottle";
+    public const string BottleClicked = "BottleClicked";
+    public const string FaucetClicked = "FaucetClicked";
+    public const string BottleDragged = "BottleDragged";
 }
