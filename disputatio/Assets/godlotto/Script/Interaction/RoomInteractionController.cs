@@ -27,7 +27,7 @@ namespace Godlotto.Interaction
         protected Flowchart Flowchart => flowchart;
         protected virtual string LogPrefix => "[RoomInteraction]";
 
-        void Awake()
+        protected virtual void Awake()
         {
             BuildLookupCaches();
 
@@ -76,6 +76,8 @@ namespace Godlotto.Interaction
         /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
         public virtual void OnInteraction(string interactionId)
         {
+            Debug.LogError($"[RoomInteraction] OnInteraction entered: '{interactionId}'");
+
             if (string.IsNullOrWhiteSpace(interactionId))
                 return;
 
@@ -85,8 +87,19 @@ namespace Godlotto.Interaction
                 return;
             }
 
-            if (!SceneInteractionController.TryInteract(interactionId))
-                return;
+            Debug.LogError($"[RoomInteraction] Route mapped: '{interactionId}' -> '{blockName}'");
+
+            if (ShouldUseSceneInteractionGate(interactionId, blockName))
+            {
+                if (!SceneInteractionController.TryInteract(interactionId))
+                    return;
+
+                Debug.LogError($"[RoomInteraction] SceneInteractionController passed: '{interactionId}'");
+            }
+            else
+            {
+                Debug.LogError($"[RoomInteraction] SceneInteractionController bypassed: '{interactionId}'");
+            }
 
             if (!ShouldExecuteInteraction(interactionId, blockName))
             {
@@ -94,10 +107,20 @@ namespace Godlotto.Interaction
                 return;
             }
 
+            Debug.LogError($"[RoomInteraction] ShouldExecuteInteraction passed: '{interactionId}' -> '{blockName}'");
+
             PrepareInteractionExecution(interactionId, blockName);
+
+            Debug.LogError($"[RoomInteraction] ExecuteBlockSafely calling: '{blockName}' for '{interactionId}'");
 
             if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, blockName))
                 LogIgnored($"Failed to execute block '{blockName}' for '{interactionId}'.");
+        }
+
+        /// <summary>SceneInteractionController(Fungus 대사/메뉴 차단) 적용 여부. UI 드롭 등은 씬별로 우회.</summary>
+        protected virtual bool ShouldUseSceneInteractionGate(string interactionId, string blockName)
+        {
+            return true;
         }
 
         /// <summary>씬별 퍼즐 상태에 따라 Fungus 블록 실행 여부를 결정합니다.</summary>
@@ -138,10 +161,9 @@ namespace Godlotto.Interaction
             if (block == null || flowchart == null || block.GetFlowchart() != flowchart)
                 return;
 
-            if (!outcomeByBlockName.TryGetValue(block.BlockName, out BlockOutcome outcome))
-                return;
+            if (outcomeByBlockName.TryGetValue(block.BlockName, out BlockOutcome outcome))
+                ApplyBlockOutcome(block, outcome);
 
-            ApplyBlockOutcome(block, outcome);
             OnInteractionBlockCompleted(block.BlockName);
         }
 

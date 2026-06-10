@@ -20,8 +20,10 @@ namespace Godlotto.Interaction
 
         protected override string LogPrefix => "[Kitchen]";
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             if (puzzleState == null)
                 puzzleState = GetComponent<KitchenPuzzleState>();
         }
@@ -32,6 +34,12 @@ namespace Godlotto.Interaction
 
             if (applyExecuteUiRaycastPolicy)
                 KitchenFlowchartExecuteUiRaycastPolicy.Apply(this);
+        }
+
+        protected override bool ShouldUseSceneInteractionGate(string interactionId, string blockName)
+        {
+            return interactionId != KitchenSinkInteractionGate.BottleDragInteractionId
+                && interactionId != "food_drag";
         }
 
         protected override bool ShouldExecuteInteraction(string interactionId, string blockName)

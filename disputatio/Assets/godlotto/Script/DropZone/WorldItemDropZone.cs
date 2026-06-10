@@ -173,10 +173,14 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
         SaveRoomUnlockCheckpointIfKnown(checkpointUnlockKey);
         WorldSpriteDepthSorter2D.SortActiveSceneSprites();
 
-        if (!DefersInventoryRemovalToInteraction(requiredItem) && InventoryManager.instance != null)
+        bool defersToInteraction = DefersInventoryRemovalToInteraction(requiredItem);
+
+        if (!defersToInteraction && InventoryManager.instance != null)
             InventoryManager.instance.RemoveItem(requiredItem);
 
-        ApplyDropZoneCompletedVisuals();
+        if (!defersToInteraction)
+            ApplyDropZoneCompletedVisuals();
+
         return true;
     }
 

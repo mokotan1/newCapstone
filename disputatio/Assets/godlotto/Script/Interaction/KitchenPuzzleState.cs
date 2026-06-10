@@ -61,6 +61,7 @@ namespace Godlotto.Interaction
                     SetFaucetClicked(true);
                     break;
                 case KitchenSinkInteractionGate.BottleDraggedBlockName:
+                    GameLog.Log("[KitchenPuzzleState] Bottle_Dragged completion applied");
                     SetBottleDragged(true);
                     SetBottleClicked(true);
                     RemoveBottleFromInventoryIfPresent();
