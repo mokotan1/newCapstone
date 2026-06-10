@@ -91,6 +91,32 @@ public class DialogueLogTests
     }
 
     [Test]
+    public void TryAppend_SkipsDuplicateEvenWhenNotLastEntry()
+    {
+        var entries = new List<DialogueLogEntry>
+        {
+            new DialogueLogEntry("Alice", "Same line."),
+            new DialogueLogEntry("Bob", "Other line."),
+        };
+
+        Assert.IsFalse(DialogueLogLogic.TryAppend(entries, "Alice", "Same line."));
+        Assert.AreEqual(2, entries.Count);
+    }
+
+    [Test]
+    public void ContainsDuplicate_NormalizesNullSpeakerAndText()
+    {
+        var entries = new List<DialogueLogEntry>
+        {
+            new DialogueLogEntry(null, "Narration."),
+            new DialogueLogEntry("Bob", "Line two."),
+        };
+
+        Assert.IsTrue(DialogueLogLogic.ContainsDuplicate(entries, string.Empty, "Narration."));
+        Assert.IsFalse(DialogueLogLogic.ContainsDuplicate(entries, null, "Line two."));
+    }
+
+    [Test]
     public void TryAppend_AllowsDifferentTextOrSpeaker()
     {
         var entries = new List<DialogueLogEntry>
