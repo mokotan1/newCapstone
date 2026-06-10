@@ -32,6 +32,8 @@ public class OpeningMentionControllerTests
     public void TearDown()
     {
         OpeningMentionController.ResetStateForTests();
+        foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
+            Object.DestroyImmediate(runner.gameObject);
         if (root != null)
             Object.DestroyImmediate(root);
     }
@@ -101,5 +103,30 @@ public class OpeningMentionControllerTests
 
         Assert.IsFalse(controller.IsBellSequenceActiveForTests);
         Assert.IsFalse(InteractionInputGate.IsBlocked);
+    }
+
+    [Test]
+    public void OnBlockEnd_BellBlock_ResetsIsClickedAndPreservesWindowClicked()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
+        AddBooleanVariable(flowchart, FungusVariableKeys.WindowClicked, true);
+        controller.SimulateBellSequenceStartForTests();
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "Bell_Clicked";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
+    }
+
+    static void AddBooleanVariable(Flowchart target, string key, bool value)
+    {
+        BooleanVariable variable = target.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Scope = VariableScope.Public;
+        variable.Value = value;
+        target.Variables.Add(variable);
     }
 }

@@ -40,6 +40,7 @@ namespace Godlotto.Interaction
             if (fc == null)
                 return;
 
+            MirrorBool(fc, FungusVariableKeys.GetBottle, HasBottle);
             MirrorBool(fc, FungusVariableKeys.BottleClicked, BottleClicked);
             MirrorBool(fc, FungusVariableKeys.FaucetClicked, FaucetClicked);
             MirrorBool(fc, FungusVariableKeys.BottleDragged, BottleDragged);

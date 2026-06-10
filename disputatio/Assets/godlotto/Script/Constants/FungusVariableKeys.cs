@@ -14,6 +14,13 @@ public static class FungusVariableKeys
     public const string DevModeEnabled = "DevModeEnabled";
     public const string InventoryItemIds = "InventoryItemIds";
 
+    // Item acquisition flags mirrored by ItemPickup and developer item grants.
+    public const string GetFood = "GetFood";
+    public const string GetFilterCard = "GetFilterCard";
+    public const string HaveMaidKey = "HaveMaidKey";
+    public const string HaveBasementKey = "HaveBasementKey";
+    public const string HasBible = "HasBible";
+
     // Kitchen sink/bottle puzzle (global bool, Kitchen Flowchart + Variablemanager)
     public const string GetBottle = "GetBottle";
     public const string BottleClicked = "BottleClicked";

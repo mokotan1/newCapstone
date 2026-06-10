@@ -17,6 +17,7 @@ public class KitchenPuzzleStateTests
         flowchart = root.AddComponent<Flowchart>();
         state = root.AddComponent<KitchenPuzzleState>();
         state.SetFlowchartForTests(flowchart);
+        AddBooleanVariable(flowchart, FungusVariableKeys.GetBottle, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.FaucetClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
@@ -63,12 +64,13 @@ public class KitchenPuzzleStateTests
     }
 
     [Test]
-    public void MirrorSinkFlagsToFlowchart_SyncsKitchenOwnedFlags()
+    public void MirrorSinkFlagsToFlowchart_SyncsSinkFlagsIncludingBottleOwnership()
     {
         state.SetSinkFlagsForTests(hasBottle: true, bottleClicked: true, faucetClicked: false, bottleDragged: true);
 
         state.MirrorSinkFlagsToFlowchart(flowchart);
 
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.GetBottle));
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleClicked));
         Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.FaucetClicked));
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleDragged));

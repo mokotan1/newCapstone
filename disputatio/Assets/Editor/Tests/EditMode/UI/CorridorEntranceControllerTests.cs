@@ -62,6 +62,8 @@ public class CorridorEntranceControllerTests
     {
         RoomInteractionController.ResetStateForTests();
         FungusDialogueBridge.ResetForTests();
+        foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
+            Object.DestroyImmediate(runner.gameObject);
         if (root != null)
             Object.DestroyImmediate(root);
     }
@@ -147,6 +149,63 @@ public class CorridorEntranceControllerTests
         Assert.IsTrue(goBackCalled);
     }
 
+    [Test]
+    public void OnBlockEnd_LoadOutcome_ResetsIsClicked()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
+        RoomInteractionController.SceneLoadHandlerForTests = _ => true;
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "Go_Yes";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+    }
+
+    [Test]
+    public void OnBlockEnd_GoBackOutcome_ResetsIsClicked()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
+        RoomInteractionController.GoBackHandlerForTests = () => { };
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "Select_Yes";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+    }
+
+    [Test]
+    public void OnBlockEnd_LoadOutcome_WhenSceneLoadBlocked_ResetsIsClicked()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
+        SceneTransitionService.SetTransitionPendingForTests(true, SceneNames.BedRoom);
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "Go_Yes";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+    }
+
+    [Test]
+    public void OnClosePanel_ResetsIsClickedAndPreservesWindowClicked()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
+        AddBooleanVariable(flowchart, FungusVariableKeys.WindowClicked, true);
+        var panel = new GameObject("Panel");
+        panel.SetActive(true);
+
+        controller.OnClosePanel("panel_backspace", panel);
+
+        Assert.IsFalse(panel.activeSelf);
+        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
+    }
+
     static void SetPrivateField(object target, string fieldName, object value)
     {
         for (var type = target.GetType(); type != null; type = type.BaseType)
@@ -173,5 +232,14 @@ public class CorridorEntranceControllerTests
                     | System.Reflection.BindingFlags.NonPublic
                     | System.Reflection.BindingFlags.DeclaredOnly)
             ?.Invoke(target, null);
+    }
+
+    static void AddBooleanVariable(Flowchart target, string key, bool value)
+    {
+        BooleanVariable variable = target.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Scope = VariableScope.Public;
+        variable.Value = value;
+        target.Variables.Add(variable);
     }
 }

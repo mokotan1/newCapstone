@@ -121,13 +121,16 @@ public class OpeningMentionController : MonoBehaviour
 
     void RequestOpenSceneTransition()
     {
+        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+
         if (SceneLoadHandlerForTests != null)
         {
             SceneLoadHandlerForTests(openSceneName);
             return;
         }
 
-        SceneTransitionService.LoadSceneSafely(openSceneName);
+        if (!SceneTransitionService.LoadSceneSafely(openSceneName))
+            DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
     }
 
     void EndBellSequence()
@@ -139,6 +142,7 @@ public class OpeningMentionController : MonoBehaviour
         InteractionInputGate.Unblock(BellSequenceGateReason);
         InteractionLock.ForceUnlock();
         ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+        DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
     }
 
     bool GetIsCall()

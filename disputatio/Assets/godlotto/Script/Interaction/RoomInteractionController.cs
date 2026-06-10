@@ -181,10 +181,19 @@ namespace Godlotto.Interaction
                 ResetIsClicked();
 
             if (outcome.goBack)
+            {
+                ResetIsClicked();
+                DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
                 RequestGoBack();
+                return;
+            }
 
             if (outcome.loadScene && !string.IsNullOrWhiteSpace(outcome.sceneName))
-                RequestSceneTransition(outcome.sceneName);
+            {
+                ResetIsClicked();
+                if (!RequestSceneTransition(outcome.sceneName))
+                    DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+            }
         }
 
         void ResetIsClicked()
@@ -210,7 +219,6 @@ namespace Godlotto.Interaction
             if (BackNavigator.TryResolveFixedReturnScene(sceneName, out string fixedReturn)
                 && !string.IsNullOrWhiteSpace(fixedReturn))
             {
-                ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
                 SceneTransitionService.LoadSceneSafely(fixedReturn);
                 return;
             }
@@ -218,15 +226,15 @@ namespace Godlotto.Interaction
             GameLog.LogWarning($"{LogPrefix} GoBack requested but no BackNavigator or fixed route was found.");
         }
 
-        void RequestSceneTransition(string sceneName)
+        bool RequestSceneTransition(string sceneName)
         {
             if (SceneLoadHandlerForTests != null)
             {
                 SceneLoadHandlerForTests(sceneName);
-                return;
+                return true;
             }
 
-            SceneTransitionService.LoadSceneSafely(sceneName);
+            return SceneTransitionService.LoadSceneSafely(sceneName);
         }
 
         void BuildLookupCaches()

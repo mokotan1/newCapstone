@@ -17,10 +17,14 @@ public static class ItemAcquisitionTracker
 
     private static readonly Dictionary<int, string> DisplayNames = new Dictionary<int, string>();
 
-    private static readonly LegacyMapping[] LegacyBoolMappings =
+    private static readonly AcquisitionBoolMapping[] AcquisitionBoolMappings =
     {
-        new LegacyMapping("GetBottle", 1),
-        new LegacyMapping("HasBible", 19),
+        new AcquisitionBoolMapping(FungusVariableKeys.GetBottle, 1),
+        new AcquisitionBoolMapping(FungusVariableKeys.GetFood, 2),
+        new AcquisitionBoolMapping(FungusVariableKeys.GetFilterCard, 4),
+        new AcquisitionBoolMapping(FungusVariableKeys.HaveMaidKey, 8),
+        new AcquisitionBoolMapping(FungusVariableKeys.HaveBasementKey, 12),
+        new AcquisitionBoolMapping(FungusVariableKeys.HasBible, 19),
     };
 
     #region Public API
@@ -39,6 +43,7 @@ public static class ItemAcquisitionTracker
 
         CacheDisplayName(item.itemId, item.itemName);
         SetBit(flowchart, item.itemId);
+        SetLinkedAcquisitionBool(flowchart, item.itemId);
     }
 
     /// <summary>해당 아이템이 한 번이라도 습득되었는지 확인합니다.</summary>
@@ -99,9 +104,9 @@ public static class ItemAcquisitionTracker
         if (flowchart == null)
             return;
 
-        for (int i = 0; i < LegacyBoolMappings.Length; i++)
+        for (int i = 0; i < AcquisitionBoolMappings.Length; i++)
         {
-            var m = LegacyBoolMappings[i];
+            var m = AcquisitionBoolMappings[i];
             if (flowchart.GetBooleanVariable(m.BoolKey))
                 SetBit(flowchart, m.ItemId);
         }
@@ -129,6 +134,16 @@ public static class ItemAcquisitionTracker
             flowchart.SetIntegerVariable(FungusVariableKey, updated);
     }
 
+    private static void SetLinkedAcquisitionBool(Flowchart flowchart, int itemId)
+    {
+        for (int i = 0; i < AcquisitionBoolMappings.Length; i++)
+        {
+            var m = AcquisitionBoolMappings[i];
+            if (m.ItemId == itemId)
+                flowchart.SetBooleanVariable(m.BoolKey, true);
+        }
+    }
+
     private static void CacheDisplayName(int itemId, string displayName)
     {
         if (IsValidId(itemId) && !string.IsNullOrEmpty(displayName))
@@ -139,12 +154,12 @@ public static class ItemAcquisitionTracker
 
     #region Legacy Migration Types
 
-    private readonly struct LegacyMapping
+    private readonly struct AcquisitionBoolMapping
     {
         public readonly string BoolKey;
         public readonly int ItemId;
 
-        public LegacyMapping(string boolKey, int itemId)
+        public AcquisitionBoolMapping(string boolKey, int itemId)
         {
             BoolKey = boolKey;
             ItemId = itemId;

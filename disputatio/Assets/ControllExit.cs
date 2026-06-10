@@ -34,12 +34,12 @@ public class ControllExit : MonoBehaviour
             penel.transform.SetParent(originalParent, false);
         }
 
-        // 3. 기존 Fungus 로직 처리
-        if (flowchart != null)
+        // 3. 패널 닫기 경계: 연타 시 toggle이 isClicked를 다시 true로 만들지 않도록 명시 reset
+        Flowchart targetFlowchart = flowchart != null ? flowchart : FlowchartLocator.Find();
+        if (targetFlowchart != null)
         {
-            bool isClicked = flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked);
-            isClicked = !isClicked;
-            flowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, isClicked);
+            ClickInteractionCleanup.ResetAfterUiBoundary(targetFlowchart, resetWindowClicked: false);
+            DeferredClickCleanup.Run(targetFlowchart, resetWindowClicked: false);
         }
     }
 }
