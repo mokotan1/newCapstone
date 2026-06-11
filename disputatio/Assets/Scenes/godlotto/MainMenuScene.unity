@@ -493,6 +493,8 @@ GameObject:
   - component: {fileID: 329207928}
   - component: {fileID: 329207930}
   - component: {fileID: 329207929}
+  - component: {fileID: 910000101}
+  - component: {fileID: 910000102}
   m_Layer: 6
   m_Name: Image
   m_TagString: Untagged
@@ -513,6 +515,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2083168902}
+  - {fileID: 2140634924}
+  - {fileID: 910000201}
+  - {fileID: 910000401}
   m_Father: {fileID: 1881871074}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -966,6 +971,166 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 788538143}
   m_CullTransparentMesh: 1
+--- !u!114 &910000101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 329207927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8f2a91b4d3e4f5a9b6c7d8e9f0a1b2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleText: {fileID: 2083168903}
+  dripContainer: {fileID: 910000201}
+  bloodPool: {fileID: 910000402}
+  bloodFloodOverlay: {fileID: 2140634925}
+  fontRegistry: {fileID: 11400000, guid: 507ac132a98599d4d8995a82be0d85f2, type: 2}
+  floorLine: {fileID: 0}
+  autoPlayBloodFlood: 0
+  minDropDelay: 0.45
+  maxDropDelay: 1.1
+  minOozeDelay: 1.6
+  maxOozeDelay: 3.2
+  initialOozeDelayMin: 0.4
+  initialOozeDelayMax: 1.2
+  loadMockPayloadOnStart: 0
+  minStreakLength: 34
+  maxStreakLength: 80
+  minDropSize: 7
+  maxDropSize: 11
+  oozeGrowDuration: 1.9
+  minFallDuration: 0.42
+  maxFallDuration: 0.6
+  intensityDelayScale: 0.55
+--- !u!114 &910000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 329207927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e4b2c91d8f6430a9e1b2c3d4e5f6071, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleText: {fileID: 2083168903}
+  renderer: {fileID: 910000101}
+  loadVisualParamsFromMock: 1
+  applyOnStart: 1
+--- !u!1 &910000200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000201}
+  m_Layer: 6
+  m_Name: BloodDripContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &910000201
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000200}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329207928}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &910000400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000401}
+  - component: {fileID: 910000402}
+  m_Layer: 6
+  m_Name: BloodPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &910000401
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000400}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329207928}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 1}
+  m_SizeDelta: {x: 0, y: 24}
+  m_Pivot: {x: 0.5, y: 0}
+--- !u!114 &910000402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2e4d9c35f6a4781b0d3e8f7a2c91563, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poolVisualRect: {fileID: 0}
+  poolImage: {fileID: 0}
+  splashRoot: {fileID: 0}
+  spreadRoot: {fileID: 0}
+  impactCoordinateSpace: {fileID: 0}
+  basePoolWidth: 0
+  basePoolHeight: 22
+  maxPoolWidth: 420
+  maxPoolHeight: 36
+  widthGrowthMultiplier: 1.4
+  heightPerWidth: 0.048
+  growthDuration: 0.45
+  growthBloomStrength: 0.045
+  splashCount: 3
+  splashDuration: 0.35
+  splashSizeRange: {x: 2, y: 4}
+  splashOffsetXRange: {x: -14, y: 14}
+  splashOffsetYRange: {x: -10, y: -2}
+  spreadEnabled: 1
+  spreadBurstsPerImpact: 2
+  spreadWidthRange: {x: 36, y: 110}
+  spreadHeightRange: {x: 3, y: 12}
+  spreadDuration: 1.8
+  spreadAlpha: 0.22
+  maxSpreadWidth: 180
+  spreadVerticalJitter: 6
+  maxRetainedSpreadStains: 32
 --- !u!1 &977653443
 GameObject:
   m_ObjectHideFlags: 0
@@ -1813,7 +1978,7 @@ MonoBehaviour:
 '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
-  m_sharedMaterial: {fileID: 6921901605891436827, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
+  m_sharedMaterial: {fileID: -2718773640641851388, guid: f0138332c5e84f349a20ab8c20fe7081, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1888,6 +2053,166 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2083168901}
+  m_CullTransparentMesh: 1
+--- !u!1 &2140634923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2140634924}
+  - component: {fileID: 2140634927}
+  - component: {fileID: 2140634926}
+  - component: {fileID: 2140634925}
+  m_Layer: 0
+  m_Name: BloodFloodOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2140634924
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140634923}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329207928}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2140634925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140634923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7528ffbcdd06e4b40a4c954dcadb404d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerOrder: 1
+  graphic: {fileID: 2140634926}
+  overlayMaterial: {fileID: 0}
+  bloodColor: {r: 0.29, g: 0.02, b: 0.02, a: 1}
+  edgeColor: {r: 0.12, g: 0.01, b: 0.01, a: 1}
+  waveAmplitude: 10
+  waveFrequency: 2.4
+  maxAlpha: 0.9
+  minAlpha: 0.28
+  fillPerImpact: 0.01
+  impactRiseDuration: 1.25
+  simpleDropFillMultiplier: 1
+  attachedStreakFillMultiplier: 1.1
+  maxFillAmount: 1
+  fullThreshold: 0.98
+  fullSettleDuration: 1
+  fullWaveAmplitudeMultiplier: 1.8
+  finalBloodColor: {r: 0.12, g: 0.01, b: 0.01, a: 1}
+  finalEdgeColor: {r: 0.05, g: 0.005, b: 0.005, a: 1}
+  finalMaxAlpha: 0.96
+  contentToSubmerge: {fileID: 0}
+  contentFadeDuration: 0.5
+  contentSubmergedAlpha: 0.18
+  onFloodFull:
+    m_PersistentCalls:
+      m_Calls: []
+  fillAmount: 0
+  floodDuration: 18
+  startDelay: 1.2
+  autoPlayOnEnable: 0
+  floodCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0.15
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 0.12
+      inSlope: 0.35
+      outSlope: 0.65
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 0.48
+      inSlope: 1.1
+      outSlope: 1.35
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1.6
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noiseDriftSpeed: 0.08
+--- !u!114 &2140634926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140634923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e049a75ecedd6b146a94f0411a7a9a4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  fillAmount: 0
+  bloodColor: {r: 0.29, g: 0.02, b: 0.02, a: 1}
+  edgeColor: {r: 0.12, g: 0.01, b: 0.01, a: 1}
+  waveAmplitude: 10
+  waveFrequency: 2.4
+  maxAlpha: 0.9
+  minAlpha: 0.28
+  noiseStrength: 0.12
+  noiseSeed: 4.7
+--- !u!222 &2140634927
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140634923}
   m_CullTransparentMesh: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

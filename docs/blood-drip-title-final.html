@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>타이틀 핏방울 최종안 (풀링 + 랜덤 드립)</title>
+<style>
+  :root{
+    --blood:#8a0303;
+    --blood-bright:#c11414;
+    --blood-dark:#4a0101;
+    --bg:#0a0708;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(circle at 50% 35%, #1a1210 0%, var(--bg) 70%);
+    color:#cbb8b8;
+    font-family:"Segoe UI","Noto Sans KR",sans-serif;
+    min-height:100vh;
+    padding:36px 24px 80px;
+  }
+  h1.page{text-align:center;font-size:22px;letter-spacing:4px;color:#e8d9d9;margin-bottom:6px;}
+  p.sub{text-align:center;color:#7a6a6a;margin-bottom:28px;font-size:13px;}
+  .controls{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:28px;flex-wrap:wrap;}
+  .controls input{background:#000;border:1px solid #3a2a2a;color:#e8d9d9;padding:9px 14px;border-radius:6px;font-size:15px;letter-spacing:2px;width:280px;text-align:center;}
+  .controls button{background:var(--blood);border:none;color:#fff;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:13px;letter-spacing:1px;}
+  .controls button:hover{background:var(--blood-bright);}
+
+  .stage{
+    position:relative;
+    max-width:900px;height:380px;margin:0 auto;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border-radius:16px;
+    border:1px solid #2a1d1c;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(60,0,0,.45), transparent 60%),
+      linear-gradient(180deg,#120c0b,#080505);
+  }
+  .title{
+    font-family:"Times New Roman",serif;font-weight:700;
+    font-size:64px;letter-spacing:8px;
+    color:var(--blood-bright);
+    text-shadow:
+      0 0 8px rgba(180,0,0,.55),
+      0 0 22px rgba(120,0,0,.4),
+      0 2px 3px rgba(0,0,0,.9);
+    position:relative;white-space:nowrap;user-select:none;
+  }
+  .title .ch{display:inline-block;}
+  .floor-line{position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(90,20,20,.25);}
+
+  .drop{
+    position:absolute;width:9px;height:9px;
+    background:radial-gradient(circle at 35% 30%, var(--blood-bright), var(--blood) 60%, var(--blood-dark));
+    border-radius:50%;
+    box-shadow:0 0 6px rgba(180,0,0,.5);
+    pointer-events:none;
+  }
+  .drop::before{
+    content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+    border-left:3px solid transparent;border-right:3px solid transparent;
+    border-bottom:6px solid var(--blood);
+  }
+  .pool{
+    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    width:0;height:6px;
+    background:radial-gradient(ellipse at center, var(--blood-bright) 0%, var(--blood) 45%, var(--blood-dark) 85%, transparent);
+    border-radius:50% 50% 45% 45%;
+    filter:blur(.5px);
+    box-shadow:0 0 12px rgba(150,0,0,.5);
+  }
+  .splash{
+    position:absolute;width:6px;height:6px;border-radius:50%;
+    background:var(--blood);pointer-events:none;
+  }
+  /* 글자에서 흘러내리는 줄기 */
+  .streak{
+    position:absolute;width:4px;
+    background:linear-gradient(180deg, rgba(193,20,20,0) 0%, var(--blood-bright) 18%, var(--blood) 55%, var(--blood-dark) 100%);
+    border-radius:2px;
+    transform-origin:top;
+    transform:scaleY(0);
+    pointer-events:none;
+    box-shadow:0 0 5px rgba(150,0,0,.45);
+  }
+  /* 줄기 끝에 맺힌 방울 */
+  .streak-tip{
+    position:absolute;width:8px;height:10px;
+    background:radial-gradient(circle at 35% 30%, var(--blood-bright), var(--blood) 60%, var(--blood-dark));
+    border-radius:50% 50% 50% 50%;
+    pointer-events:none;
+    box-shadow:0 0 6px rgba(180,0,0,.5);
+  }
+</style>
+</head>
+<body>
+  <h1 class="page">최종안 · 빨강 타이틀 + 전체 랜덤 드립 + 풀링</h1>
+  <p class="sub">글자 전체에서 랜덤하게 핏방울이 떨어지고 바닥에 웅덩이가 점점 고인다</p>
+
+  <div class="controls">
+    <input id="titleInput" value="DISPUTATIO" maxlength="16">
+    <button onclick="render()">타이틀 적용 / 다시재생</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="floor-line"></div>
+    <div class="title" id="title"></div>
+    <div class="pool" id="pool"></div>
+  </div>
+
+<script type="application/json" id="cursorUnityPortSpec">
+{
+  "schemaVersion": "1.0.0",
+  "sourcePrototype": "docs/blood-drip-title-final.html",
+  "targetProject": "disputatio Unity project",
+  "featureName": "Backend configurable blood-drip title renderer",
+  "goal": "Port this HTML title prototype into Unity so the title text itself appears to bleed downward, while the displayed language, font, color, and drip intensity can be controlled by backend-provided data.",
+  "visualReference": {
+    "stage": "Dark vignette title screen with a red title centered above a floor line and a growing blood pool.",
+    "titleBehavior": "The title should not only spawn independent drops. Thin red streaks should visually attach to the lower parts of the glyphs, grow downward, form a rounded droplet at the tip, detach, fall, splash, and contribute to a pool.",
+    "mood": "Quiet, ominous, theatrical, readable. Effects should support the title, not obscure it.",
+    "currentHtmlAnchors": [
+      "buildTitle(text)",
+      "anchorOf(stage, ch)",
+      "oozeFrom(stage, pool, ch)",
+      "dripFrom(stage, pool, ch)",
+      "impact(stage, x, y)",
+      "growPool(pool, amount)"
+    ]
+  },
+  "backendContract": {
+    "endpointShape": "Unity should consume a serializable title style payload from the backend or a local mock service during development.",
+    "examplePayload": {
+      "text": "DISPUTATIO",
+      "language": "en",
+      "fontKey": "cinzel",
+      "color": "#c11414",
+      "darkColor": "#4a0101",
+      "brightColor": "#ff2a2a",
+      "dripIntensity": 0.75,
+      "poolEnabled": true,
+      "seed": 1138
+    },
+    "fields": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "notes": "Displayed title. Must support Korean and English at minimum."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": true,
+        "notes": "Used for fallback font selection and future localization logic. Expected examples: ko, en, ja."
+      },
+      {
+        "name": "fontKey",
+        "type": "string",
+        "required": true,
+        "notes": "Stable key mapped inside Unity to a prebuilt TMP_FontAsset. Backend should not send raw font files for the first implementation."
+      },
+      {
+        "name": "color",
+        "type": "hex string",
+        "required": false,
+        "notes": "Main title and blood color."
+      },
+      {
+        "name": "darkColor",
+        "type": "hex string",
+        "required": false,
+        "notes": "Darker blood gradient/shadow color."
+      },
+      {
+        "name": "brightColor",
+        "type": "hex string",
+        "required": false,
+        "notes": "Highlight color for wet blood tips and glow."
+      },
+      {
+        "name": "dripIntensity",
+        "type": "number 0..1",
+        "required": false,
+        "notes": "Controls spawn frequency, streak length, and splash amount. Clamp in Unity."
+      },
+      {
+        "name": "poolEnabled",
+        "type": "boolean",
+        "required": false,
+        "notes": "Allows disabling the floor pool if the title is used in UI overlays."
+      },
+      {
+        "name": "seed",
+        "type": "integer",
+        "required": false,
+        "notes": "Optional deterministic random seed for repeatable capture/testing."
+      }
+    ]
+  },
+  "unityArchitecture": {
+    "recommendedRendering": "Use TextMeshPro for the title text. Use TMP_Text.textInfo.characterInfo after ForceMeshUpdate() to derive per-character lower anchor positions. Spawn Unity-side BloodDrip instances from those anchors.",
+    "sceneObjects": [
+      "TitleRoot",
+      "TitleRoot/TMP_TitleText",
+      "TitleRoot/BloodDripContainer",
+      "TitleRoot/BloodPool"
+    ],
+    "scripts": [
+      {
+        "name": "TitleStylePayload",
+        "purpose": "Serializable DTO matching the backend JSON contract."
+      },
+      {
+        "name": "TitleStyleService",
+        "purpose": "Loads title style data from backend later, with local mock JSON support first."
+      },
+      {
+        "name": "TitleFontRegistry",
+        "purpose": "Maps backend fontKey + language to TMP_FontAsset references and fallbacks."
+      },
+      {
+        "name": "BloodDripTitleRenderer",
+        "purpose": "Applies payload to TMP text, updates colors/font, computes glyph anchors, and schedules drips."
+      },
+      {
+        "name": "BloodDrip",
+        "purpose": "Animates one attached streak, tip droplet, detach/fall, and callback into the pool."
+      },
+      {
+        "name": "BloodPool",
+        "purpose": "Grows the floor pool and handles small splash particles."
+      }
+    ],
+    "fontPolicy": "Prebuild TMP_FontAsset assets inside Unity. Backend sends only fontKey. Korean requires a TMP font asset with Hangul coverage or dynamic/fallback TMP font setup.",
+    "doNotDoFirst": [
+      "Do not embed a webview just to render this HTML.",
+      "Do not fetch arbitrary remote font files at runtime for the first pass.",
+      "Do not obscure the title with excessive blood density."
+    ]
+  },
+  "acceptanceCriteria": [
+    "A Unity scene/prefab can display a title using backend-style JSON data.",
+    "Changing text from English to Korean updates the rendered title without code changes.",
+    "Changing fontKey selects a different registered TMP font asset.",
+    "Drips visually originate from glyph lower bounds, not from unrelated random screen positions.",
+    "At least one attached streak grows downward before the droplet detaches and falls.",
+    "dripIntensity affects spawn rate and visual density.",
+    "Missing/unknown fontKey falls back safely based on language.",
+    "The renderer has a local mock payload path so it can be tested without a live backend."
+  ],
+  "externalPromptDocument": "docs/blood-drip-title-cursor-prompts.md",
+  "parsingNotes": {
+    "selector": "#cursorUnityPortSpec",
+    "browserParsingExample": "JSON.parse(document.querySelector('#cursorUnityPortSpec').textContent)",
+    "nodeParsingHint": "Use an HTML parser or extract the script tag by id, then JSON.parse its textContent. Do not scrape visible Korean UI copy as the source of truth.",
+    "unityParsingHint": "This block is for Cursor/developer planning. Unity runtime should consume its own JSON payload from Assets or backend, not this HTML file directly."
+  }
+}
+</script>
+
+<script>
+const rand=(a,b)=>a+Math.random()*(b-a);
+const el=cls=>{const d=document.createElement('div');d.className=cls;return d;};
+
+function parseCursorUnityPortSpec(){
+  const node=document.getElementById('cursorUnityPortSpec');
+  if(!node) throw new Error('Missing #cursorUnityPortSpec');
+  return JSON.parse(node.textContent);
+}
+
+let timers=[];
+function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+function later(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t;}
+
+function buildTitle(text){
+  document.getElementById('title').innerHTML =
+    [...text].map(c=>`<span class="ch">${c===' '?'&nbsp;':c}</span>`).join('');
+}
+
+function anchorOf(stage,ch){
+  const sr=stage.getBoundingClientRect();
+  const cr=ch.getBoundingClientRect();
+  return {x:cr.left-sr.left+cr.width/2, y:cr.bottom-sr.top, floor:sr.height};
+}
+
+let poolW=0;
+
+function render(){
+  clearTimers();
+  const stage=document.getElementById('stage');
+  const pool=document.getElementById('pool');
+  // 잔여 방울 정리
+  stage.querySelectorAll('.drop,.splash').forEach(n=>n.remove());
+  poolW=0; pool.style.transition='none'; pool.style.width='0'; pool.style.height='6px'; pool.style.opacity='1';
+
+  buildTitle(document.getElementById('titleInput').value || "DISPUTATIO");
+  const cs=[...document.querySelectorAll('#title .ch')].filter(c=>c.textContent.trim()!=='');
+
+  // 글자 전체에서 랜덤하게 방울 생성하는 단일 스케줄러
+  function spawn(){
+    const ch=cs[Math.floor(rand(0,cs.length))];
+    dripFrom(stage,pool,ch);
+    later(spawn, rand(450,1100)); // 간헐적이지만 전체적으로 끊이지 않게
+  }
+  spawn();
+
+  // 글자에서 피가 흘러내리는 줄기 스케줄러
+  function oozeLoop(){
+    const ch=cs[Math.floor(rand(0,cs.length))];
+    oozeFrom(stage,pool,ch);
+    later(oozeLoop, rand(1600,3200));
+  }
+  later(oozeLoop, rand(400,1200));
+}
+
+// 글자를 타고 피가 천천히 흘러내림 (자국 남김 → 끝 방울 낙하 → 풀에 합류)
+function oozeFrom(stage,pool,ch){
+  const a=anchorOf(stage,ch);
+  const len=rand(34,80);
+  const x=a.x + rand(-6,6);
+
+  const streak=el('streak');
+  streak.style.left=(x-2)+'px';
+  streak.style.top=(a.y-6)+'px';
+  streak.style.height=len+'px';
+  stage.appendChild(streak);
+
+  const tip=el('streak-tip');
+  tip.style.left=(x-4)+'px';
+  tip.style.top=(a.y-6)+'px';
+  tip.style.transition='top 1.9s cubic-bezier(.55,.06,.68,.19)';
+  stage.appendChild(tip);
+
+  // 줄기가 아래로 자라남
+  streak.style.transition='transform 1.9s cubic-bezier(.55,.06,.68,.19)';
+  requestAnimationFrame(()=>{
+    streak.style.transform='scaleY(1)';
+    tip.style.top=(a.y-6+len)+'px';
+  });
+
+  // 끝까지 내려오면 방울이 똑 떨어져 풀에 합류
+  later(()=>{
+    const fromY=a.y-6+len;
+    const fall=a.floor-fromY-4;
+    if(fall>4){
+      tip.style.transition='top .45s cubic-bezier(.55,0,.85,.3), opacity .3s ease-in .25s';
+      tip.style.top=(fromY+fall)+'px';
+      tip.style.opacity='0';
+      later(()=>{ impact(stage,x,a.floor-4); growPool(pool,8); }, 450);
+    }
+    // 자국은 잠시 남았다가 서서히 사라짐
+    streak.style.transition='opacity 2.6s ease';
+    streak.style.opacity='0';
+    later(()=>{streak.remove();tip.remove();},2700);
+  }, 2000);
+}
+
+function dripFrom(stage,pool,ch){
+  const a=anchorOf(stage,ch);
+  const sz=rand(7,11);
+  const d=el('drop');
+  d.style.width=sz+'px'; d.style.height=sz+'px';
+  d.style.left=(a.x-sz/2)+'px'; d.style.top=(a.y-2)+'px';
+  d.style.transform='scale(0)';
+  d.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+  stage.appendChild(d);
+  requestAnimationFrame(()=>d.style.transform='scale(1)');
+
+  later(()=>{
+    const fall=a.floor-a.y-6;
+    const dur=rand(.42,.6);
+    d.style.transition=`transform ${dur}s cubic-bezier(.55,0,.85,.3)`;
+    d.style.transform=`translateY(${fall}px) scale(1)`;
+    later(()=>{
+      d.remove();
+      impact(stage, a.x, a.floor-4);
+      growPool(pool, sz);
+    }, dur*1000);
+  }, rand(600,1500));
+}
+
+// 착지 순간 작은 튐
+function impact(stage,x,y){
+  for(let i=0;i<3;i++){
+    const s=el('splash');
+    const ss=rand(2,4); s.style.width=ss+'px'; s.style.height=ss+'px';
+    s.style.left=(x-ss/2)+'px'; s.style.top=(y-ss/2)+'px';
+    stage.appendChild(s);
+    const dx=rand(-14,14), dy=rand(-10,-2);
+    s.style.transition='transform .35s cubic-bezier(.2,.7,.3,1), opacity .35s ease-in';
+    requestAnimationFrame(()=>{s.style.transform=`translate(${dx}px,${dy}px) scale(.3)`;s.style.opacity='0';});
+    later(()=>s.remove(),360);
+  }
+}
+
+// 웅덩이 성장
+function growPool(pool,amount){
+  poolW=Math.min(poolW + amount*1.4, 420);
+  pool.style.transition='width .45s cubic-bezier(.39,.58,.57,1), height .45s';
+  pool.style.width=poolW+'px';
+  pool.style.height=Math.min(6+poolW*0.035,20)+'px';
+}
+
+render();
+</script>
+</body>
+</html>
