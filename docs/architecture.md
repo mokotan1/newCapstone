@@ -63,6 +63,7 @@ newCapstone/
 | `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome |
 | `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
+| `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
 | `Assets/godlotto/Script/Core/` | `SingletonMonoBehaviour`, `GameLog` | 씬 간 유지 싱글톤, dev 로그 |
 | `Assets/godlotto/Script/Config/` | `ServerConfig` ScriptableObject | AI 서버 URL 기본값 |
 | `Assets/godlotto/Script/Editor/` | 씬 마이그레이션·에디터 도구 | Fungus→C# 마이그레이션, 씬 일괄 수정 |
@@ -405,6 +406,18 @@ graph TB
 6. **복귀 경로**: `BackNavigator.TryResolveFixedReturnScene`에 case 추가 또는 Fungus `PrevScene` 설정
 7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions` + `RoomUnlockCheckpointTrigger` on Fungus 이벤트
 8. **EditMode 테스트** 추가: `Assets/Editor/Tests/EditMode/...`
+
+### 튜토리얼 퀘스트 단계 연결
+
+1. **단계 id**: `TutorialQuestIds` 상수만 사용 (매직 스트링 금지)
+2. **순수 매핑**: `TutorialQuestProgressAdapter` — 씬·Fungus bool·Kitchen 블록 → step id
+3. **런타임 부트스트랩**: `QuestTrackerHudBootstrap` — DDOL 시스템 생성 + 씬 Canvas 아래 HUD 부착 (`QuestTrackerHudHost`)
+4. **런타임 브리지**: `TutorialQuestGameBridge` — 씬 로드·플래그 엣지·`BlockSignals.OnBlockEnd` 구독
+5. **Fungus 수동 완료**: `CompleteTutorialQuestStep` 커맨드 (`Assets/godlotto/Script/FungusCommands/`)
+6. **수동 QA**: `docs/quest-tracker-manual-verification.md`
+7. 새 단계 신호 추가 시 adapter 상수/메서드 확장 → `TutorialQuestProgressAdapterTests` 추가
+
+**DDOL 정책**: `QuestTrackerHudController`·`TutorialQuestGameBridge`만 `DontDestroyOnLoad` (퀘스트 상태·이벤트 구독 유지). HUD 위젯은 씬 Canvas 자식으로 매 씬 재생성 (`InventoryGuideController`와 동일한 scene-bound UI 패턴).
 
 ### 새로운 API 추가 (백엔드)
 

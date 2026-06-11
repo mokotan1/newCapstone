@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUD 퀘스트 트래커 — 디자인 스펙</title>
+<style>
+  :root{
+    /* ===== 컬러 토큰 ===== */
+    --blood:#8a0303;
+    --blood-bright:#c11414;
+    --blood-dark:#4a0101;
+    --bg:#0a0708;
+    --panel-top:rgba(22,16,16,.92);
+    --panel-bottom:rgba(12,8,8,.92);
+    --panel-edge:#2a1d1c;
+    --ink:#f0e6d6;        /* 활성 텍스트 */
+    --ink-dim:#9a8d79;    /* 대기 단계 텍스트 */
+    --ink-done:#6f6354;   /* 완료 단계 텍스트 */
+    --done:#5e7d52;       /* 완료 체크 */
+    --gold:#c9a86a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(circle at 50% 30%, #1a1210 0%, var(--bg) 72%);
+    color:#cbb8b8;
+    font-family:"Noto Sans KR","Segoe UI",sans-serif;
+    min-height:100vh;padding:36px 24px 90px;
+  }
+  h1.page{text-align:center;font-size:22px;letter-spacing:4px;color:#e8d9d9;margin-bottom:6px;}
+  p.sub{text-align:center;color:#7a6a6a;margin-bottom:36px;font-size:13px;}
+
+  .section-title{
+    max-width:1040px;margin:46px auto 18px;
+    font-size:14px;letter-spacing:3px;color:var(--gold);
+    border-left:3px solid var(--blood);padding-left:12px;
+  }
+  .section-title small{display:block;color:#7a6a6a;letter-spacing:1px;margin-top:4px;font-size:12px;}
+
+  /* 상태 비교용 3분할 보드 */
+  .board{
+    max-width:1040px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  }
+  .cell{
+    position:relative;height:300px;border-radius:12px;overflow:hidden;
+    border:1px solid #2a1d1c;
+    background:
+      radial-gradient(circle at 70% 18%, rgba(60,0,0,.28), transparent 55%),
+      linear-gradient(180deg,#140d0c,#0a0606);
+    box-shadow:inset 0 0 90px rgba(0,0,0,.7);
+  }
+  .cell .state-tag{
+    position:absolute;left:14px;bottom:12px;font-size:11px;letter-spacing:2px;color:#5a4a4a;
+  }
+  .cell .vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 110px 30px rgba(0,0,0,.8);}
+
+  /* ============================================================
+     HUD 퀘스트 트래커 — 본체
+     ============================================================ */
+  .tracker{
+    position:absolute;top:18px;right:16px;width:264px;
+    background:linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
+    border:1px solid var(--panel-edge);
+    border-left:3px solid var(--blood);
+    border-radius:8px;
+    padding:13px 15px 14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.6);
+    backdrop-filter:blur(2px);
+  }
+  .tracker .head{
+    display:flex;align-items:center;gap:7px;
+    font-size:11px;letter-spacing:3px;color:var(--blood-bright);
+    text-transform:uppercase;margin-bottom:9px;
+  }
+  .tracker .head::before{content:"※";font-size:13px;color:var(--blood);}
+  .tracker .quest-name{
+    font-size:15px;color:var(--ink);letter-spacing:.5px;line-height:1.4;
+    margin-bottom:12px;font-weight:600;
+  }
+  .tracker ol{list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .tracker li{
+    display:flex;gap:9px;align-items:flex-start;
+    font-size:13px;line-height:1.5;color:var(--ink-dim);
+  }
+  .tracker li .mark{
+    flex:0 0 16px;height:16px;margin-top:1px;border-radius:3px;
+    border:1.5px solid #4a3a3a;display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:transparent;transition:.2s;
+  }
+  /* 완료 단계 */
+  .tracker li.done{color:var(--ink-done);text-decoration:line-through;
+    text-decoration-color:rgba(94,125,82,.55);}
+  .tracker li.done .mark{border-color:var(--done);color:var(--done);background:rgba(94,125,82,.12);}
+  /* 활성(현재) 단계 */
+  .tracker li.active{color:var(--ink);}
+  .tracker li.active .mark{border-color:var(--blood-bright);box-shadow:0 0 8px rgba(193,20,20,.5);}
+  .tracker li.active .txt::after{
+    content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--blood-bright);margin-left:7px;vertical-align:middle;
+    animation:pulse 1.4s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;box-shadow:0 0 6px var(--blood-bright);}}
+  .tracker .hint{
+    margin-top:12px;padding-top:10px;border-top:1px dashed #3a2a2a;
+    font-size:12px;color:#8a7a6a;font-style:italic;line-height:1.5;
+  }
+  /* 임무 완료 배너 */
+  .tracker.cleared{border-left-color:var(--done);}
+  .tracker .cleared-banner{
+    margin-top:11px;text-align:center;font-size:12px;letter-spacing:3px;
+    color:var(--done);border-top:1px dashed #3a4a30;padding-top:11px;
+  }
+
+  /* ============================================================
+     스펙 시트
+     ============================================================ */
+  .spec{
+    max-width:1040px;margin:38px auto 0;
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  }
+  .spec-card{
+    background:linear-gradient(180deg,#140e0d,#0d0808);
+    border:1px solid #241a19;border-radius:10px;padding:20px 22px;
+  }
+  .spec-card h3{
+    font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:14px;
+    border-bottom:1px solid #2a1d1c;padding-bottom:9px;
+  }
+  table.kv{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.kv td{padding:5px 0;vertical-align:top;line-height:1.55;}
+  table.kv td.k{color:#8a7a6a;width:46%;padding-right:10px;}
+  table.kv td.v{color:#d6c8b4;}
+  .swatch{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;
+    vertical-align:middle;border:1px solid rgba(255,255,255,.12);}
+  code{font-family:"Consolas",monospace;color:#d8b87a;font-size:12px;
+    background:rgba(201,168,106,.08);padding:1px 5px;border-radius:3px;}
+
+  .states{max-width:1040px;margin:24px auto 0;font-size:12.5px;color:#a99c8a;line-height:1.8;}
+  .states b{color:var(--gold);}
+  .states .row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #1f1716;}
+  .states .row:last-child{border:none;}
+  .states .label{flex:0 0 92px;color:#cbb8b8;font-weight:600;}
+</style>
+</head>
+<body>
+  <h1 class="page">HUD 퀘스트 트래커 — 디자인 스펙</h1>
+  <p class="sub">The Unholy of Mention · 화면 우측 상단 상시 표시 위젯</p>
+
+  <!-- ===== 상태 비교 보드 ===== -->
+  <h2 class="section-title">상태 비교
+    <small>진행에 따라 같은 위젯이 변하는 모습 — ① 진행 중 ② 마지막 단계 ③ 임무 완료</small>
+  </h2>
+  <div class="board">
+
+    <!-- ① 진행 중 -->
+    <div class="cell">
+      <div class="tracker">
+        <div class="head">현재 임무</div>
+        <div class="quest-name">저택에 불을 밝혀라</div>
+        <ol>
+          <li class="done"><span class="mark">✓</span><span class="txt">주방으로 이동한다</span></li>
+          <li class="active"><span class="mark"></span><span class="txt">다용도실 차단기를 올린다</span></li>
+          <li><span class="mark"></span><span class="txt">불 켜진 복도를 살핀다</span></li>
+        </ol>
+        <div class="hint">불이 없으면 핏자국이 보이지 않는다…</div>
+      </div>
+      <div class="state-tag">① 진행 중 (active)</div>
+      <div class="vignette"></div>
+    </div>
+
+    <!-- ② 마지막 단계 -->
+    <div class="cell">
+      <div class="tracker">
+        <div class="head">현재 임무</div>
+        <div class="quest-name">병 속 열쇠를 꺼내라</div>
+        <ol>
+          <li class="done"><span class="mark">✓</span><span class="txt">화분 속 병을 발견한다</span></li>
+          <li class="done"><span class="mark">✓</span><span class="txt">싱크대에서 병에 물을 채운다</span></li>
+          <li class="active"><span class="mark"></span><span class="txt">떠오른 열쇠를 집는다</span></li>
+        </ol>
+        <div class="hint">물이 차오르자 열쇠가 떠오른다.</div>
+      </div>
+      <div class="state-tag">② 마지막 단계</div>
+      <div class="vignette"></div>
+    </div>
+
+    <!-- ③ 임무 완료 -->
+    <div class="cell">
+      <div class="tracker cleared">
+        <div class="head">현재 임무</div>
+        <div class="quest-name">병 속 열쇠를 꺼내라</div>
+        <ol>
+          <li class="done"><span class="mark">✓</span><span class="txt">화분 속 병을 발견한다</span></li>
+          <li class="done"><span class="mark">✓</span><span class="txt">싱크대에서 병에 물을 채운다</span></li>
+          <li class="done"><span class="mark">✓</span><span class="txt">떠오른 열쇠를 집는다</span></li>
+        </ol>
+        <div class="cleared-banner">임무 완료</div>
+      </div>
+      <div class="state-tag">③ 완료 → 다음 퀘스트로 교체</div>
+      <div class="vignette"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== 스펙 시트 ===== -->
+  <h2 class="section-title">디자인 스펙</h2>
+  <div class="spec">
+
+    <div class="spec-card">
+      <h3>레이아웃 · 박스</h3>
+      <table class="kv">
+        <tr><td class="k">앵커</td><td class="v">화면 우측 상단 (top-right)</td></tr>
+        <tr><td class="k">여백 (margin)</td><td class="v">top 18px · right 16px</td></tr>
+        <tr><td class="k">폭</td><td class="v">264px (고정)</td></tr>
+        <tr><td class="k">패딩</td><td class="v">13 / 15 / 14 / 15 px</td></tr>
+        <tr><td class="k">모서리</td><td class="v">radius 8px</td></tr>
+        <tr><td class="k">테두리</td><td class="v">1px <code>#2a1d1c</code> · 좌측 3px <code>#8a0303</code></td></tr>
+        <tr><td class="k">그림자</td><td class="v">0 8 30 rgba(0,0,0,.6)</td></tr>
+        <tr><td class="k">배경</td><td class="v">세로 그라데이션 <code>rgba(22,16,16,.92)</code> → <code>rgba(12,8,8,.92)</code> + blur 2px</td></tr>
+      </table>
+    </div>
+
+    <div class="spec-card">
+      <h3>타이포그래피</h3>
+      <table class="kv">
+        <tr><td class="k">서체</td><td class="v">Noto Sans KR</td></tr>
+        <tr><td class="k">헤더 "현재 임무"</td><td class="v">11px · letter-spacing 3px · UPPER · <code>#c11414</code></td></tr>
+        <tr><td class="k">퀘스트 이름</td><td class="v">15px · 600 · <code>#f0e6d6</code></td></tr>
+        <tr><td class="k">단계 텍스트</td><td class="v">13px · line-height 1.5</td></tr>
+        <tr><td class="k">힌트</td><td class="v">12px · italic · <code>#8a7a6a</code></td></tr>
+        <tr><td class="k">단계 간격</td><td class="v">gap 9px</td></tr>
+        <tr><td class="k">체크박스</td><td class="v">16×16 · radius 3px · border 1.5px</td></tr>
+      </table>
+    </div>
+
+    <div class="spec-card">
+      <h3>컬러 토큰</h3>
+      <table class="kv">
+        <tr><td class="k"><span class="swatch" style="background:#8a0303"></span>blood (강조선)</td><td class="v"><code>#8a0303</code></td></tr>
+        <tr><td class="k"><span class="swatch" style="background:#c11414"></span>blood-bright (활성·헤더)</td><td class="v"><code>#c11414</code></td></tr>
+        <tr><td class="k"><span class="swatch" style="background:#f0e6d6"></span>ink (활성 글자)</td><td class="v"><code>#f0e6d6</code></td></tr>
+        <tr><td class="k"><span class="swatch" style="background:#9a8d79"></span>ink-dim (대기 글자)</td><td class="v"><code>#9a8d79</code></td></tr>
+        <tr><td class="k"><span class="swatch" style="background:#6f6354"></span>ink-done (완료 글자)</td><td class="v"><code>#6f6354</code></td></tr>
+        <tr><td class="k"><span class="swatch" style="background:#5e7d52"></span>done (완료 체크)</td><td class="v"><code>#5e7d52</code></td></tr>
+      </table>
+    </div>
+
+    <div class="spec-card">
+      <h3>모션</h3>
+      <table class="kv">
+        <tr><td class="k">활성 단계 점</td><td class="v">6px 빨강 원 · <code>pulse</code> 1.4s 무한 (opacity .3↔1 + glow)</td></tr>
+        <tr><td class="k">완료 전환</td><td class="v">체크 페이드인 0.2s · 텍스트 줄긋기 동시</td></tr>
+        <tr><td class="k">위젯 등장</td><td class="v">우측에서 슬라이드 + 페이드 0.35s (신규 퀘스트 시)</td></tr>
+        <tr><td class="k">완료 배너</td><td class="v">좌측선 → <code>#5e7d52</code>, 1.5초 후 다음 퀘스트로 크로스페이드</td></tr>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ===== 상태 정의 ===== -->
+  <h2 class="section-title">단계(li) 상태 정의</h2>
+  <div class="states">
+    <div class="row"><span class="label">대기</span>
+      <span>기본 — 빈 체크박스(테두리 <code>#4a3a3a</code>), 글자 <code>#9a8d79</code>. 아직 도달하지 않은 단계.</span></div>
+    <div class="row"><span class="label">활성 .active</span>
+      <span>현재 해야 할 단 하나의 단계. 글자 <code>#f0e6d6</code>, 체크박스 테두리 빨강 + glow, 끝에 펄스 점.</span></div>
+    <div class="row"><span class="label">완료 .done</span>
+      <span>체크박스에 ✓(<code>#5e7d52</code>), 글자 줄긋기 + <code>#6f6354</code>로 흐려짐.</span></div>
+    <div class="row"><span class="label">완료(임무)</span>
+      <span>모든 단계 .done → 좌측선 녹색 전환, "임무 완료" 배너 노출 후 다음 퀘스트로 교체.</span></div>
+  </div>
+
+  <p class="sub" style="margin-top:40px;">원칙: <b>활성 단계는 항상 정확히 1개</b> — 플레이어가 "지금 뭘 해야 하지?"를 한눈에 알 수 있게 한다.</p>
+</body>
+</html>
