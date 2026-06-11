@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CSharpSyntaxChecker.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+47e7f967c2e12afd37888a0455074e1fd2842892")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e15c7a27245d3f15d422b928b1670e11543b8248")]
 [assembly: System.Reflection.AssemblyProductAttribute("CSharpSyntaxChecker.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CSharpSyntaxChecker.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
