@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>타이틀 핏방울 연출 견본 (DOTween 참고용)</title>
+<style>
+  :root{
+    --blood:#8a0303;
+    --blood-bright:#b71010;
+    --blood-dark:#4a0101;
+    --bg:#0a0708;
+    --panel:#15100f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(circle at 50% 30%, #1a1210 0%, var(--bg) 70%);
+    color:#cbb8b8;
+    font-family:"Segoe UI","Noto Sans KR",sans-serif;
+    min-height:100vh;
+    padding:40px 24px 120px;
+  }
+  h1.page{
+    text-align:center;
+    font-size:26px;
+    letter-spacing:4px;
+    color:#e8d9d9;
+    margin-bottom:6px;
+  }
+  p.sub{text-align:center;color:#7a6a6a;margin-bottom:36px;font-size:13px;}
+  .controls{
+    display:flex;gap:12px;justify-content:center;align-items:center;
+    margin-bottom:40px;flex-wrap:wrap;
+  }
+  .controls input{
+    background:#000;border:1px solid #3a2a2a;color:#e8d9d9;
+    padding:8px 14px;border-radius:6px;font-size:14px;letter-spacing:2px;width:260px;text-align:center;
+  }
+  .controls button{
+    background:var(--blood);border:none;color:#fff;padding:8px 18px;border-radius:6px;
+    cursor:pointer;font-size:13px;letter-spacing:1px;
+  }
+  .controls button:hover{background:var(--blood-bright);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+    gap:28px;
+    max-width:1400px;margin:0 auto;
+  }
+  .sample{
+    background:linear-gradient(180deg,var(--panel),#0c0809);
+    border:1px solid #2a1d1c;
+    border-radius:14px;
+    padding:20px 20px 0;
+    overflow:hidden;
+    position:relative;
+  }
+  .sample-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .sample-head h2{font-size:16px;color:#e8d9d9;letter-spacing:1px;}
+  .sample-head .tag{font-size:11px;color:var(--blood-bright);border:1px solid var(--blood-dark);padding:2px 8px;border-radius:20px;}
+  .sample .desc{font-size:12px;color:#8a7a7a;line-height:1.5;margin-bottom:8px;min-height:34px;}
+  .stage{
+    position:relative;
+    height:230px;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+    margin:0 -20px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(40,0,0,.4), transparent 60%);
+  }
+  .title{
+    font-family:"Times New Roman",serif;
+    font-weight:700;
+    font-size:48px;
+    letter-spacing:6px;
+    color:#d8cccc;
+    text-shadow:0 0 14px rgba(0,0,0,.9);
+    position:relative;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .dotween-note{
+    font-size:11px;color:#6f5f5f;line-height:1.6;
+    border-top:1px solid #241818;
+    margin:14px -20px 0;
+    padding:12px 20px;
+    background:#0a0606;
+  }
+  .dotween-note code{color:#c98a8a;font-family:Consolas,monospace;}
+  .dotween-note b{color:#9a8888;}
+
+  /* 핏방울 공통 */
+  .drop{
+    position:absolute;
+    width:9px;height:9px;
+    background:radial-gradient(circle at 35% 30%, var(--blood-bright), var(--blood) 60%, var(--blood-dark));
+    border-radius:50% 50% 50% 50%;
+    box-shadow:0 0 6px rgba(180,0,0,.5);
+    pointer-events:none;
+  }
+  /* 물방울 모양(위 뾰족 아래 둥글) */
+  .drop::before{
+    content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+    border-left:3px solid transparent;border-right:3px solid transparent;
+    border-bottom:6px solid var(--blood);
+  }
+  .pool{
+    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    width:0;height:5px;
+    background:radial-gradient(ellipse at center, var(--blood) 0%, var(--blood-dark) 80%, transparent);
+    border-radius:50%;
+    filter:blur(.4px);
+  }
+  .floor-line{position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(80,20,20,.25);}
+</style>
+</head>
+<body>
+  <h1 class="page">타이틀 핏방울 연출 견본</h1>
+  <p class="sub">메인 메뉴 타이틀 — 간헐적 드립 연출 5종 · DOTween 이식 참고용</p>
+
+  <div class="controls">
+    <input id="titleInput" value="DISPUTATIO" maxlength="14">
+    <button onclick="applyTitle()">타이틀 적용</button>
+    <button onclick="location.reload()">전체 다시재생</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+<script>
+/* ===== 샘플 정의 ===== */
+const SAMPLES = [
+  {
+    name:"1. 클래식 드립",
+    tag:"Sequence Loop",
+    desc:"한 글자 밑에서 핏방울이 서서히 맺혔다가 간헐적으로 똑 떨어진다. 가장 차분하고 정석적인 호러 연출.",
+    note:`<b>DOTween:</b> 맺힘 <code>drop.DOScale(1, 0.6f).SetEase(Ease.OutBack)</code> → 대기 <code>AppendInterval(랜덤 2~4s)</code> → 낙하 <code>DOMoveY(bottom, 0.45f).SetEase(Ease.InQuad)</code> → 페이드아웃. <code>Sequence</code>를 <code>SetLoops(-1)</code>로.`,
+    init:classicDrip
+  },
+  {
+    name:"2. 멀티 랜덤 드립",
+    tag:"Multi RNG",
+    desc:"여러 글자에서 서로 다른 타이밍으로 핏방울이 떨어진다. 살아있는 듯 불규칙해 긴장감이 높다.",
+    note:`<b>DOTween:</b> 글자 앵커마다 독립 <code>Sequence</code>. 각자 <code>SetDelay(Random.Range(0,3))</code> + <code>AppendInterval(Random.Range(1.5,5))</code>. 풀링된 drop 오브젝트 재사용 권장.`,
+    init:multiDrip
+  },
+  {
+    name:"3. 슬로우 우즈 (흘러내림)",
+    tag:"Streak",
+    desc:"핏방울이 떨어지지 않고 글자를 타고 천천히 흘러내리며 자국을 남긴다. 끈적하고 무거운 느낌.",
+    note:`<b>DOTween:</b> 세로 스케일 트릭 — 흐름 줄기 <code>streak.DOScaleY(1, 1.8f).SetEase(Ease.InCubic)</code> (피벗 top). 끝에 방울 <code>DOMoveY</code> 살짝. 자국은 알파 유지해 누적.`,
+    init:slowOoze
+  },
+  {
+    name:"4. 스플래터 (튀김)",
+    tag:"Burst",
+    desc:"떨어진 핏방울이 바닥에 닿는 순간 여러 파편으로 탁 튀어 흩어진다. 임팩트가 강한 연출.",
+    note:`<b>DOTween:</b> 낙하 <code>DOMoveY(InQuad)</code> → <code>OnComplete</code>에서 파편 6~8개 <code>DOLocalMove</code>(부채꼴) + <code>DOScale(0)</code> + <code>DOFade(0)</code> 동시 <code>Join</code>. 바닥 얼룩은 <code>DOFade</code>로 잔류.`,
+    init:splatter
+  },
+  {
+    name:"5. 풀링 (고임)",
+    tag:"Accumulate",
+    desc:"핏방울이 반복해 떨어지며 바닥에 웅덩이가 점점 커진다. 시간이 흐를수록 고조되는 누적형.",
+    note:`<b>DOTween:</b> drop 낙하 <code>OnComplete</code>마다 pool <code>DOScaleX(currentWidth += k, 0.4f).SetEase(Ease.OutSine)</code>. 일정 크기 도달 시 <code>DOFade</code>로 리셋하거나 유지.`,
+    init:pooling
+  },
+];
+
+/* ===== 렌더 ===== */
+const TITLE = () => document.getElementById('titleInput').value || "DISPUTATIO";
+function buildTitle(text){
+  // 각 글자를 span으로 감싸 앵커로 사용
+  return [...text].map(c=>`<span class="ch">${c===' '?'&nbsp;':c}</span>`).join('');
+}
+
+function makeStage(s){
+  const card=document.createElement('div');
+  card.className='sample';
+  card.innerHTML=`
+    <div class="sample-head"><h2>${s.name}</h2><span class="tag">${s.tag}</span></div>
+    <div class="desc">${s.desc}</div>
+    <div class="stage">
+      <div class="floor-line"></div>
+      <div class="title">${buildTitle(TITLE())}</div>
+    </div>
+    <div class="dotween-note">${s.note}</div>`;
+  return card;
+}
+
+function render(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  SAMPLES.forEach(s=>{
+    const card=makeStage(s);
+    grid.appendChild(card);
+    const stage=card.querySelector('.stage');
+    const title=card.querySelector('.title');
+    requestAnimationFrame(()=>s.init(stage,title));
+  });
+}
+function applyTitle(){render();}
+
+/* ===== 유틸 ===== */
+const rand=(a,b)=>a+Math.random()*(b-a);
+function chars(title){return [...title.querySelectorAll('.ch')];}
+// 글자 하단 중앙 좌표(stage 기준)
+function anchorOf(stage,ch){
+  const sr=stage.getBoundingClientRect();
+  const cr=ch.getBoundingClientRect();
+  return {x:cr.left-sr.left+cr.width/2, y:cr.bottom-sr.top, floor:sr.height};
+}
+function el(cls){const d=document.createElement('div');d.className=cls;return d;}
+
+/* ===== 1. 클래식 드립 ===== */
+function classicDrip(stage,title){
+  const cs=chars(title);
+  const ch=cs[Math.floor(cs.length/2)] || cs[0];
+  function cycle(){
+    const a=anchorOf(stage,ch);
+    const d=el('drop');
+    d.style.left=(a.x-4)+'px'; d.style.top=(a.y-2)+'px';
+    d.style.transform='scale(0)'; d.style.transition='transform .6s cubic-bezier(.34,1.56,.64,1)';
+    stage.appendChild(d);
+    requestAnimationFrame(()=>d.style.transform='scale(1)');
+    // 대기 후 낙하
+    setTimeout(()=>{
+      const fall=a.floor-a.y-6;
+      d.style.transition='transform .45s cubic-bezier(.55,0,.85,.4), opacity .3s ease-in .25s';
+      d.style.transform=`translateY(${fall}px) scale(1)`;
+      d.style.opacity='0';
+      setTimeout(()=>d.remove(), 700);
+    }, rand(1800,3600));
+    setTimeout(cycle, rand(3200,5200));
+  }
+  cycle();
+}
+
+/* ===== 2. 멀티 랜덤 드립 ===== */
+function multiDrip(stage,title){
+  const cs=chars(title);
+  cs.forEach(ch=>{
+    if(Math.random()<0.45) return; // 일부 글자만 사용
+    function cycle(){
+      const a=anchorOf(stage,ch);
+      const d=el('drop');
+      const sz=rand(6,11);
+      d.style.width=sz+'px'; d.style.height=sz+'px';
+      d.style.left=(a.x-sz/2)+'px'; d.style.top=(a.y-2)+'px';
+      d.style.transform='scale(0)'; d.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
+      stage.appendChild(d);
+      requestAnimationFrame(()=>d.style.transform='scale(1)');
+      setTimeout(()=>{
+        const fall=a.floor-a.y-4;
+        const dur=rand(.4,.7);
+        d.style.transition=`transform ${dur}s cubic-bezier(.55,0,.85,.4), opacity .3s ease-in ${dur*0.6}s`;
+        d.style.transform=`translateY(${fall}px) scale(1)`;
+        d.style.opacity='0';
+        setTimeout(()=>d.remove(), (dur+.4)*1000);
+      }, rand(900,2600));
+      setTimeout(cycle, rand(2200,5500));
+    }
+    setTimeout(cycle, rand(0,3000));
+  });
+}
+
+/* ===== 3. 슬로우 우즈 ===== */
+function slowOoze(stage,title){
+  const cs=chars(title);
+  function cycle(){
+    const ch=cs[Math.floor(rand(0,cs.length))];
+    const a=anchorOf(stage,ch);
+    const maxLen=rand(40,90);
+    // 자국(줄기)
+    const streak=el('');
+    streak.style.position='absolute';
+    streak.style.left=(a.x-1.5)+'px';
+    streak.style.top=a.y+'px';
+    streak.style.width='3px';
+    streak.style.height=maxLen+'px';
+    streak.style.background='linear-gradient(180deg, rgba(138,3,3,.0), #8a0303 30%, #4a0101)';
+    streak.style.transformOrigin='top';
+    streak.style.transform='scaleY(0)';
+    streak.style.transition='transform 1.8s cubic-bezier(.55,.06,.68,.19)';
+    streak.style.borderRadius='2px';
+    stage.appendChild(streak);
+    // 흐르는 끝 방울
+    const d=el('drop');
+    d.style.left=(a.x-4)+'px'; d.style.top=a.y+'px';
+    d.style.transition='top 1.8s cubic-bezier(.55,.06,.68,.19)';
+    stage.appendChild(d);
+    requestAnimationFrame(()=>{
+      streak.style.transform='scaleY(1)';
+      d.style.top=(a.y+maxLen-4)+'px';
+    });
+    // 서서히 자국 페이드(잔류 후 사라짐)
+    setTimeout(()=>{
+      streak.style.transition='opacity 2.5s ease'; d.style.transition='opacity 2.5s ease';
+      streak.style.opacity='0'; d.style.opacity='0';
+      setTimeout(()=>{streak.remove();d.remove();},2600);
+    }, rand(2500,4000));
+    setTimeout(cycle, rand(3500,5500));
+  }
+  cycle();
+}
+
+/* ===== 4. 스플래터 ===== */
+function splatter(stage,title){
+  const cs=chars(title);
+  function cycle(){
+    const ch=cs[Math.floor(rand(0,cs.length))];
+    const a=anchorOf(stage,ch);
+    const d=el('drop');
+    d.style.left=(a.x-4)+'px'; d.style.top=(a.y-2)+'px';
+    d.style.transform='scale(0)'; d.style.transition='transform .4s cubic-bezier(.34,1.56,.64,1)';
+    stage.appendChild(d);
+    requestAnimationFrame(()=>d.style.transform='scale(1)');
+    setTimeout(()=>{
+      const fy=a.floor-8;
+      const fall=fy-a.y;
+      d.style.transition='transform .4s cubic-bezier(.55,0,.85,.3)';
+      d.style.transform=`translateY(${fall}px) scale(1)`;
+      // 임팩트
+      setTimeout(()=>{
+        d.remove();
+        burst(stage,a.x,fy);
+      }, 400);
+    }, rand(700,1800));
+    setTimeout(cycle, rand(1800,3600));
+  }
+  function burst(stage,x,y){
+    // 바닥 얼룩
+    const stain=el('');
+    stain.style.position='absolute';
+    stain.style.left=(x-10)+'px'; stain.style.top=(y-3)+'px';
+    stain.style.width='20px';stain.style.height='6px';
+    stain.style.background='radial-gradient(ellipse,#6a0202,transparent 70%)';
+    stain.style.borderRadius='50%';stain.style.opacity='0';
+    stain.style.transition='opacity .2s, transform 3s ease';
+    stage.appendChild(stain);
+    requestAnimationFrame(()=>{stain.style.opacity='.9';stain.style.transform='scaleX(1.4)';});
+    setTimeout(()=>{stain.style.transition='opacity 2s';stain.style.opacity='0';setTimeout(()=>stain.remove(),2000);},800);
+    // 파편
+    const n=7;
+    for(let i=0;i<n;i++){
+      const p=el('drop');
+      const sz=rand(3,6); p.style.width=sz+'px';p.style.height=sz+'px';
+      p.style.left=(x-sz/2)+'px'; p.style.top=(y-sz/2)+'px';
+      p.querySelector(':scope')?.remove?.();
+      stage.appendChild(p);
+      const ang=Math.PI*(0.15+0.7*(i/(n-1))); // 위쪽 부채꼴
+      const dist=rand(14,34);
+      const dx=Math.cos(ang)*dist*(rand(-1,1)>0?1:-1);
+      const dy=-Math.sin(ang)*dist*0.7;
+      p.style.transition='transform .5s cubic-bezier(.2,.7,.3,1), opacity .5s ease-in';
+      requestAnimationFrame(()=>{
+        p.style.transform=`translate(${dx}px,${dy}px) scale(.4)`;
+        p.style.opacity='0';
+      });
+      setTimeout(()=>p.remove(),550);
+    }
+  }
+  cycle();
+}
+
+/* ===== 5. 풀링 ===== */
+function pooling(stage,title){
+  const cs=chars(title);
+  const ch=cs[Math.floor(cs.length/2)]||cs[0];
+  const a0=anchorOf(stage,ch);
+  const pool=el('pool');
+  pool.style.left=a0.x+'px';
+  stage.appendChild(pool);
+  let w=0;
+  function cycle(){
+    const a=anchorOf(stage,ch);
+    const d=el('drop');
+    d.style.left=(a.x-4)+'px'; d.style.top=(a.y-2)+'px';
+    d.style.transform='scale(0)'; d.style.transition='transform .35s cubic-bezier(.34,1.56,.64,1)';
+    stage.appendChild(d);
+    requestAnimationFrame(()=>d.style.transform='scale(1)');
+    setTimeout(()=>{
+      const fall=a.floor-a.y-6;
+      d.style.transition='transform .42s cubic-bezier(.55,0,.85,.3)';
+      d.style.transform=`translateY(${fall}px) scale(1)`;
+      setTimeout(()=>{
+        d.remove();
+        // 웅덩이 성장
+        w=Math.min(w+rand(8,16), 180);
+        pool.style.transition='width .4s cubic-bezier(.39,.58,.57,1), height .4s';
+        pool.style.width=w+'px';
+        pool.style.height=Math.min(5+w*0.04,12)+'px';
+        if(w>=180){ // 가득 차면 천천히 리셋
+          setTimeout(()=>{
+            pool.style.transition='opacity 1.5s, width 1.5s';
+            pool.style.opacity='0';
+            setTimeout(()=>{w=0;pool.style.width='0';pool.style.opacity='1';pool.style.transition='none';},1500);
+          },1200);
+        }
+      },420);
+    }, rand(700,1500));
+    setTimeout(cycle, rand(1400,2600));
+  }
+  cycle();
+}
+
+render();
+</script>
+</body>
+</html>

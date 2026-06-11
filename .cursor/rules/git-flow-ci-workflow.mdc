@@ -1,0 +1,94 @@
+---
+description: Git Flow와 CI/CD 기준으로 브랜치, 커밋, PR, 자동 생성 파일을 점검
+alwaysApply: true
+---
+
+# Git Flow · CI/CD (newCapstone)
+
+이 저장소는 **Git Flow**로 운영한다. 기능 개발·커밋·PR·CI 판단 시 아래 단계와 금지 사항을 따른다.
+
+상세 절차·체크리스트: **`.cursor/skills/newcapstone-git-flow-ci/SKILL.md`**
+
+## 브랜치 역할
+
+| 브랜치 | 용도 | PR 대상 |
+|--------|------|---------|
+| `main` | 배포 가능한 안정 상태 | — (직접 기능 커밋 금지) |
+| `develop` | 통합·다음 릴리즈 준비 | `release/*` → `main` 전 단계 |
+| `feature/*` | 일반 기능 개발 | `develop` |
+| `release/*` | QA, 버전 고정, 릴리즈 준비 | `main` (+ `develop` 반영) |
+| `hotfix/*` | `main` 기준 긴급 수정 | `main` → `develop` 백머지 |
+
+## Git 상태 해석 — 단계표
+
+현재 브랜치·변경 파일을 보고 **어느 단계인지** 먼저 판정한다.
+
+| 단계 | 상태 신호 | 에이전트 행동 |
+|------|-----------|---------------|
+| 1. 브랜치 준비 | `feature/*` 없음, 작업 시작 전 | `develop`에서 `feature/<이름>` 분기 권장 |
+| 2. feature 개발 중 | `feature/*`, 미커밋 변경 있음 | 구현·테스트; `main`/`develop` 직접 작업 금지 |
+| 3. 커밋 전 정리 | 스테이징 전·후 | 변경 파일을 소스/테스트/문서/자동생성으로 분류 |
+| 4. 로컬 검증 | 커밋 직전 | 영역별 검증 (아래 §로컬 검증) |
+| 5. 커밋 및 push | 검증 통과 | 의미 있는 커밋 메시지, `feature/*`에 push |
+| 6. PR 생성 | push 완료 | **base: `develop`**, 변경 요약·테스트 계획 |
+| 7. CI 검증 | PR 열림 / push 후 | GitHub Actions 결과 확인·실패 시 수정 |
+| 8. develop merge | CI 통과·리뷰 후 | `feature/*` → `develop` |
+| 9. release 준비 | 릴리즈 시점 | `release/*`에서 QA·버전 고정 |
+| 10. main 배포 가능 | `release`/`hotfix` 완료 | `main` 안정, 배포 워크플로 대상 |
+
+**분기 판정 규칙**
+
+- `main`에서 일반 기능 작업 중 → **중단**, `feature/*` 또는 `hotfix/*`로 이동
+- `develop`에서 큰 기능 직접 작업 → **`feature/*` 분리** 권장
+- `feature/*` + 변경 있음 → 단계 **2** 또는 **3**
+- `hotfix/*` → 긴급 수정만; 완료 후 `main`·`develop` 모두 반영
+
+## 자동 생성 파일 — 커밋 금지
+
+다음은 **커밋 대상에서 제외**한다. `git status`에 보이면 스테이징하지 말고 `.gitignore` 정합을 확인한다.
+
+- Unity: `disputatio/Library/`, `Temp/`, `Logs/`, `Build/`, `Builds/`, `UserSettings/`(로컬), `obj/`(루트)
+- IDE·빌드: `.vs/`, `*.user`, `ExportedObj/`, 대부분의 `*.csproj`/`*.sln`(예외: `scripts/CSharpSyntaxChecker/**/*.csproj`)
+- .NET 산출물: `**/bin/`, `**/obj/`(특히 `scripts/CSharpSyntaxChecker/**/obj/`)
+- Python: `__pycache__/`, `.pytest_cache/`, `.venv/`
+- 로컬 도구: `.cursor/errors/`, `.env`
+
+**Unity `.meta`**: 에셋과 쌍으로 유지. **임의 삭제 금지**. 새 에셋 추가 시 `.meta` 함께 커밋.
+
+**대용량 에셋**: Git LFS 미설정 시 일반 커밋에 대용량 바이너리를 섞지 않는다. 필요 시 LFS·별도 에셋 정책을 먼저 정한다.
+
+## 로컬 검증 (커밋·PR 전)
+
+| 변경 영역 | 최소 검증 |
+|-----------|-----------|
+| `disputatio/` C#·씬·프리팹 | `.cursor/rules/unity-verification-postflight.mdc` + `newcapstone-unity-automation` |
+| `backend_ai/` Python | `ruff check backend_ai`, `python -m py_compile` (해당 파일) |
+| `scripts/CSharpSyntaxChecker` | `dotnet test scripts/CSharpSyntaxChecker/CSharpSyntaxChecker.Tests/` |
+| `.github/workflows/` | 워크플로 문법·트리거 이해; push 후 CI 확인 |
+
+CI는 `.github/workflows/ci-check.yml`(Python + C# 구문), `backend-build.yml`(`backend_ai` 변경 시)을 참고한다.
+
+## PR 전 최소 점검
+
+1. 현재 브랜치가 `feature/*`(또는 `release/*`/`hotfix/*` 목적에 맞는지)
+2. PR base가 올바른지 (`feature` → `develop`)
+3. 변경 파일 목록에 **자동 생성 파일 없음**
+4. 테스트·로컬 검증 필요 여부 충족
+5. 테스트 실패·CI 실패를 숨기지 않음
+
+## 금지 (요약)
+
+- `main`에 일반 기능 직접 커밋
+- `develop`에 큰 기능을 feature 없이 직접 커밋
+- `Library/`, `Temp/`, `obj/`, `Build/` 산출물 커밋
+- Unity `.meta` 임의 삭제
+- 테스트·CI 실패 상태로 PR
+- CI/워크플로 변경 후 검증 없이 완료 처리
+
+## 관련 스킬·규칙
+
+- `.cursor/skills/newcapstone-git-flow-ci/SKILL.md` — 본 워크플로 상세
+- `.cursor/rules/architecture-preflight.mdc` — 구현 전 `docs/architecture.md`
+- `.cursor/rules/unity-verification-postflight.mdc` — Unity 사후 검증
+- `.cursor/rules/fix-ci-errors.mdc` — CI 실패 수집·수정
+- `.cursor/skills/newcapstone-unity-automation/SKILL.md` — unity-cli 검증
