@@ -3139,6 +3139,9 @@ GameObject:
   - component: {fileID: 684100762}
   - component: {fileID: 684100764}
   - component: {fileID: 684100763}
+  - component: {fileID: 684100767}
+  - component: {fileID: 684100766}
+  - component: {fileID: 684100765}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -3173,7 +3176,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 684100715}
   selectedCommands:
-  - {fileID: 684100763}
+  - {fileID: 684100765}
   variables: []
   description: 
   stepPause: 0
@@ -3229,12 +3232,14 @@ MonoBehaviour:
   - {fileID: 684100757}
   - {fileID: 684100738}
   - {fileID: 684100751}
+  - {fileID: 684100767}
   - {fileID: 684100736}
   - {fileID: 684100756}
   - {fileID: 684100750}
   - {fileID: 684100759}
   - {fileID: 684100755}
   - {fileID: 684100754}
+  - {fileID: 684100766}
   - {fileID: 684100748}
   - {fileID: 684100761}
   - {fileID: 684100764}
@@ -3242,6 +3247,7 @@ MonoBehaviour:
   - {fileID: 684100758}
   - {fileID: 684100753}
   - {fileID: 684100752}
+  - {fileID: 684100765}
   - {fileID: 684100744}
   - {fileID: 684100760}
   - {fileID: 684100762}
@@ -3836,6 +3842,51 @@ MonoBehaviour:
   itemId: 164
   indentLevel: 0
   sfxIndex: 2
+--- !u!114 &684100765
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68938aac14bd4fb9a8a08b963d3fb14a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 168
+  indentLevel: 0
+  sfxIndex: 23
+--- !u!114 &684100766
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68938aac14bd4fb9a8a08b963d3fb14a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 167
+  indentLevel: 0
+  sfxIndex: 23
+--- !u!114 &684100767
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684100712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68938aac14bd4fb9a8a08b963d3fb14a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 166
+  indentLevel: 0
+  sfxIndex: 23
 --- !u!1 &725136841
 GameObject:
   m_ObjectHideFlags: 0
