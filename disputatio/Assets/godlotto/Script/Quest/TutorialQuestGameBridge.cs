@@ -35,6 +35,9 @@ public sealed class TutorialQuestGameBridge : MonoBehaviour
 
     void Update()
     {
+        if (!InventoryAccessState.IsUnlocked)
+            return;
+
         PollFungusFlagEdges();
     }
 
@@ -51,6 +54,9 @@ public sealed class TutorialQuestGameBridge : MonoBehaviour
             return;
 
         hud.AttachHudToScene(scene);
+
+        if (!InventoryAccessState.IsUnlocked)
+            return;
 
         if (TutorialQuestWorldScenes.ShouldHideTutorialHud(scene.name))
             return;
@@ -153,6 +159,9 @@ public sealed class TutorialQuestGameBridge : MonoBehaviour
     void OnBlockEnd(Block block)
     {
         if (block == null)
+            return;
+
+        if (!InventoryAccessState.IsUnlocked)
             return;
 
         if (!TutorialQuestWorldScenes.IsKitchenScene(SceneManager.GetActiveScene().name))

@@ -8,21 +8,32 @@ using UnityEngine.UI;
 [TestFixture]
 public class QuestTrackerHudHostTests
 {
+    const string InventoryUnlockedPrefsKey = "InventoryAccess.UnlockedAfterHallPlayableRetry";
+
     Scene testScene;
     GameObject sceneCanvasObject;
+    GameObject questTrackerCanvasObject;
     GameObject extraHudObject;
 
     [SetUp]
     public void SetUp()
     {
+        PlayerPrefs.DeleteKey(InventoryUnlockedPrefsKey);
+        PlayerPrefs.Save();
         testScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
     }
 
     [TearDown]
     public void TearDown()
     {
+        PlayerPrefs.DeleteKey(InventoryUnlockedPrefsKey);
+        PlayerPrefs.Save();
+
         if (extraHudObject != null)
             Object.DestroyImmediate(extraHudObject);
+
+        if (questTrackerCanvasObject != null)
+            Object.DestroyImmediate(questTrackerCanvasObject);
 
         if (sceneCanvasObject != null)
             Object.DestroyImmediate(sceneCanvasObject);
@@ -31,33 +42,38 @@ public class QuestTrackerHudHostTests
     }
 
     [Test]
-    public void ResolveCanvasParent_UsesExistingSceneCanvas()
+    public void ResolveCanvasParent_ReusesDedicatedQuestTrackerCanvas()
     {
-        sceneCanvasObject = CreateCanvasInActiveScene("GameplayCanvas");
+        questTrackerCanvasObject = QuestTrackerHudHost.CreateOverlayCanvas();
 
-        Transform parent = QuestTrackerHudHost.ResolveCanvasParent(() => sceneCanvasObject.GetComponent<Canvas>());
+        Transform parent = QuestTrackerHudHost.ResolveCanvasParent(() => questTrackerCanvasObject.GetComponent<Canvas>());
 
-        Assert.AreSame(sceneCanvasObject.transform, parent);
+        Assert.AreSame(questTrackerCanvasObject.transform, parent);
     }
 
     [Test]
-    public void ResolveCanvasParent_CreatesOverlayCanvasWhenMissing()
+    public void ResolveCanvasParent_CreatesDedicatedOverlayCanvasWhenMissing()
     {
+        sceneCanvasObject = CreateCanvasInActiveScene("SayDialogCanvas");
+
         Transform parent = QuestTrackerHudHost.ResolveCanvasParent(() => null);
 
         Assert.IsNotNull(parent);
+        Assert.AreNotSame(sceneCanvasObject.transform, parent);
         var canvas = parent.GetComponent<Canvas>();
         Assert.IsNotNull(canvas);
         Assert.AreEqual(RenderMode.ScreenSpaceOverlay, canvas.renderMode);
+        Assert.IsTrue(canvas.overrideSorting);
+        Assert.AreEqual(QuestTrackerHudHost.CanvasSortingOrder, canvas.sortingOrder);
         Assert.AreEqual(QuestTrackerHudHost.FallbackCanvasObjectName, parent.name);
     }
 
     [Test]
     public void DestroyExtraHudRoots_RemovesDuplicatesButKeepsManagedHud()
     {
-        sceneCanvasObject = CreateCanvasInActiveScene("GameplayCanvas");
-        GameObject keepHud = CreateHudRoot(sceneCanvasObject.transform);
-        extraHudObject = CreateHudRoot(sceneCanvasObject.transform);
+        questTrackerCanvasObject = QuestTrackerHudHost.CreateOverlayCanvas();
+        GameObject keepHud = CreateHudRoot(questTrackerCanvasObject.transform);
+        extraHudObject = CreateHudRoot(questTrackerCanvasObject.transform);
 
         int destroyed = QuestTrackerHudHost.DestroyExtraHudRoots(testScene, keepHud);
 
@@ -67,8 +83,13 @@ public class QuestTrackerHudHostTests
     }
 
     [Test]
-    public void ShouldAttachHud_HidesOnMainMenuOnly()
+    public void ShouldAttachHud_HidesOnMainMenuAndBeforeInventoryUnlock()
     {
+        Assert.IsFalse(QuestTrackerHudHost.ShouldAttachHud(SceneNames.MainMenu));
+        Assert.IsFalse(QuestTrackerHudHost.ShouldAttachHud(SceneNames.Kitchen));
+
+        InventoryAccessState.Unlock();
+
         Assert.IsFalse(QuestTrackerHudHost.ShouldAttachHud(SceneNames.MainMenu));
         Assert.IsTrue(QuestTrackerHudHost.ShouldAttachHud(SceneNames.Kitchen));
     }

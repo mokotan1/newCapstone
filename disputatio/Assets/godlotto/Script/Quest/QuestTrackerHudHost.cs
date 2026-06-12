@@ -11,23 +11,44 @@ public static class QuestTrackerHudHost
 {
     public const string FallbackCanvasObjectName = "QuestTrackerCanvas";
 
+    /// <summary>SayDialog(10) 위, Book overlay(50)·DialogueLog/Settings(60+) 아래.</summary>
+    public const int CanvasSortingOrder = 30;
+
     public static bool ShouldAttachHud(string sceneName)
     {
+        if (!InventoryAccessState.IsUnlocked)
+            return false;
+
         return !TutorialQuestWorldScenes.ShouldHideTutorialHud(sceneName);
     }
 
-    public static Transform ResolveCanvasParent(Func<Canvas> findCanvas = null)
+    public static Transform ResolveCanvasParent(Func<Canvas> findDedicatedCanvas = null)
     {
-        Canvas canvas = findCanvas != null ? findCanvas() : FindSceneCanvas();
+        Canvas canvas = findDedicatedCanvas != null ? findDedicatedCanvas() : FindDedicatedCanvas();
         if (canvas != null)
             return canvas.transform;
 
         return CreateOverlayCanvas().transform;
     }
 
-    public static Canvas FindSceneCanvas()
+    public static Canvas FindDedicatedCanvas()
     {
-        return UnityEngine.Object.FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+        Scene activeScene = SceneManager.GetActiveScene();
+        if (!activeScene.IsValid())
+            return null;
+
+        GameObject[] roots = activeScene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            GameObject root = roots[i];
+            if (root == null || !string.Equals(root.name, FallbackCanvasObjectName, StringComparison.Ordinal))
+                continue;
+
+            if (root.TryGetComponent(out Canvas canvas))
+                return canvas;
+        }
+
+        return null;
     }
 
     public static GameObject CreateOverlayCanvas()
@@ -41,6 +62,8 @@ public static class QuestTrackerHudHost
 
         var canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = CanvasSortingOrder;
 
         var scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

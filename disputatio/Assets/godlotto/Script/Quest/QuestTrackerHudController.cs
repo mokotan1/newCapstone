@@ -31,7 +31,7 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
 
     void Update()
     {
-        if (TutorialQuestWorldScenes.ShouldHideTutorialHud(SceneManager.GetActiveScene().name)
+        if (!QuestTrackerHudHost.ShouldAttachHud(SceneManager.GetActiveScene().name)
             && hudView != null
             && hudView.gameObject.activeSelf)
             hudView.gameObject.SetActive(false);
@@ -54,6 +54,9 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
     public bool PresentQuest(string questId, bool playIntro = true)
     {
         if (trackerState == null)
+            return false;
+
+        if (!QuestTrackerHudHost.ShouldAttachHud(SceneManager.GetActiveScene().name))
             return false;
 
         AttachHudToScene(SceneManager.GetActiveScene());

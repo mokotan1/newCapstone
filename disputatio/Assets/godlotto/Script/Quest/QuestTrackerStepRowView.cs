@@ -38,7 +38,7 @@ public sealed class QuestTrackerStepRowView : MonoBehaviour
         if (stepText != null)
         {
             stepText.text = text ?? string.Empty;
-            stepText.fontStyle = phase == QuestStepPhase.Completed ? FontStyles.Strikethrough : FontStyles.Normal;
+            stepText.fontStyle = FontStyles.Normal;
         }
 
         switch (phase)
@@ -114,7 +114,7 @@ public sealed class QuestTrackerStepRowView : MonoBehaviour
             markLabel.color = QuestTrackerStylePalette.Done;
         }
 
-        SetStrikeVisible(true);
+        SetStrikeVisible(false);
         SetPulseVisible(false);
     }
 

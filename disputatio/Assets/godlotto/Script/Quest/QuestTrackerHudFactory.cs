@@ -57,7 +57,7 @@ public static class QuestTrackerHudFactory
             (int)QuestTrackerStylePalette.PanelPaddingRight,
             (int)QuestTrackerStylePalette.PanelPaddingTop,
             (int)QuestTrackerStylePalette.PanelPaddingBottom);
-        layout.spacing = 9f;
+        layout.spacing = 15f;
         layout.childAlignment = TextAnchor.UpperLeft;
         layout.childControlWidth = true;
         layout.childControlHeight = true;
@@ -70,7 +70,7 @@ public static class QuestTrackerHudFactory
         header.characterSpacing = 12f;
 
         TextMeshProUGUI questName = CreateText(content, "QuestName", QuestTrackerStylePalette.QuestNameFontSize, QuestTrackerStylePalette.Ink, FontStyles.Bold);
-        questName.margin = new Vector4(0f, 0f, 0f, 3f);
+        questName.margin = new Vector4(0f, 0f, 0f, 6f);
 
         RectTransform stepsContainer = CreateStretchRect(content, "Steps");
         var stepsLayout = stepsContainer.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -83,7 +83,7 @@ public static class QuestTrackerHudFactory
         stepsContainer.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         TextMeshProUGUI hint = CreateText(content, "Hint", QuestTrackerStylePalette.HintFontSize, QuestTrackerStylePalette.Hint, FontStyles.Italic);
-        hint.margin = new Vector4(0f, 8f, 0f, 0f);
+        hint.margin = new Vector4(0f, 16f, 0f, 0f);
 
         TextMeshProUGUI clearedBanner = CreateText(content, "ClearedBanner", QuestTrackerStylePalette.ClearedBannerFontSize, QuestTrackerStylePalette.Done, FontStyles.UpperCase);
         clearedBanner.alignment = TextAlignmentOptions.Center;
@@ -115,18 +115,27 @@ public static class QuestTrackerHudFactory
         rowObject.transform.SetParent(parent, false);
 
         var layout = rowObject.GetComponent<HorizontalLayoutGroup>();
-        layout.spacing = 9f;
+        layout.spacing = QuestTrackerStylePalette.StepRowHorizontalSpacing;
         layout.childAlignment = TextAnchor.UpperLeft;
-        layout.childControlWidth = false;
+        layout.childControlWidth = true;
         layout.childControlHeight = true;
         layout.childForceExpandWidth = false;
         layout.childForceExpandHeight = false;
 
         var layoutElement = rowObject.GetComponent<LayoutElement>();
-        layoutElement.minHeight = 20f;
+        layoutElement.minHeight = QuestTrackerStylePalette.StepRowMinHeight;
+        layoutElement.flexibleWidth = 1f;
+        layoutElement.preferredWidth = QuestTrackerStylePalette.ResolveContentInnerWidth();
 
         Image markBackground = CreateImage(rowObject.transform, "Mark", QuestTrackerStylePalette.MarkSize, QuestTrackerStylePalette.MarkSize);
         markBackground.color = new Color(0f, 0f, 0f, 0.12f);
+        var markLayout = markBackground.gameObject.AddComponent<LayoutElement>();
+        markLayout.minWidth = QuestTrackerStylePalette.MarkSize;
+        markLayout.preferredWidth = QuestTrackerStylePalette.MarkSize;
+        markLayout.flexibleWidth = 0f;
+        markLayout.minHeight = QuestTrackerStylePalette.MarkSize;
+        markLayout.preferredHeight = QuestTrackerStylePalette.MarkSize;
+        markLayout.flexibleHeight = 0f;
         var markOutline = markBackground.gameObject.AddComponent<Outline>();
         markOutline.effectColor = QuestTrackerStylePalette.MarkBorderPending;
         markOutline.effectDistance = new Vector2(1.5f, -1.5f);
@@ -138,14 +147,17 @@ public static class QuestTrackerHudFactory
         markLabel.rectTransform.offsetMin = Vector2.zero;
         markLabel.rectTransform.offsetMax = Vector2.zero;
 
-        var textColumn = CreateStretchRect(rowObject.transform, "TextColumn");
+        var textColumn = CreateLeftTopStretchRect(rowObject.transform, "TextColumn");
         var textColumnLayout = textColumn.gameObject.AddComponent<LayoutElement>();
+        textColumnLayout.minWidth = QuestTrackerStylePalette.StepTextColumnMinWidth;
+        textColumnLayout.preferredWidth = QuestTrackerStylePalette.ResolveStepTextPreferredWidth();
         textColumnLayout.flexibleWidth = 1f;
-        textColumnLayout.minWidth = 180f;
+        textColumnLayout.flexibleHeight = 0f;
 
         TextMeshProUGUI stepText = CreateText(textColumn, "StepText", QuestTrackerStylePalette.StepFontSize, QuestTrackerStylePalette.InkDim, FontStyles.Normal);
         stepText.alignment = TextAlignmentOptions.TopLeft;
         stepText.textWrappingMode = TextWrappingModes.Normal;
+        ConfigureTopStretchTextRect(stepText.rectTransform);
 
         Image strikethrough = CreateImage(textColumn, "Strikethrough", 0f, 1f);
         strikethrough.color = new Color(QuestTrackerStylePalette.Done.r, QuestTrackerStylePalette.Done.g, QuestTrackerStylePalette.Done.b, 0.55f);
@@ -162,7 +174,7 @@ public static class QuestTrackerHudFactory
         var pulseRect = pulse.rectTransform;
         pulseRect.anchorMin = new Vector2(1f, 0.5f);
         pulseRect.anchorMax = new Vector2(1f, 0.5f);
-        pulseRect.anchoredPosition = new Vector2(-3f, 0f);
+        pulseRect.anchoredPosition = new Vector2(-6f, 0f);
 
         var rowView = rowObject.GetComponent<QuestTrackerStepRowView>();
         rowView.Bind(markBackground, markLabel, stepText, strikethrough, pulse);
@@ -193,6 +205,28 @@ public static class QuestTrackerHudFactory
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         return rect;
+    }
+
+    static RectTransform CreateLeftTopStretchRect(Transform parent, string name)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var rect = go.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        return rect;
+    }
+
+    static void ConfigureTopStretchTextRect(RectTransform rect)
+    {
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     static Image CreateStretchImage(RectTransform parent, string name, Color color)

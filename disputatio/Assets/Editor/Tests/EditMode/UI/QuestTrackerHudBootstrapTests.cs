@@ -7,12 +7,15 @@ using UnityEngine.SceneManagement;
 public class QuestTrackerHudBootstrapTests
 {
     const string MainMenuScenePath = "Assets/Scenes/godlotto/MainMenuScene.unity";
+    const string InventoryUnlockedPrefsKey = "InventoryAccess.UnlockedAfterHallPlayableRetry";
 
     GameObject systemsObject;
 
     [SetUp]
     public void SetUp()
     {
+        PlayerPrefs.DeleteKey(InventoryUnlockedPrefsKey);
+        PlayerPrefs.Save();
         QuestTrackerHudController.ResetInstanceForTests();
         QuestTrackerHudBootstrap.ResetForTests();
         TutorialQuestCatalog.ResetCacheForTest();
@@ -22,6 +25,8 @@ public class QuestTrackerHudBootstrapTests
     [TearDown]
     public void TearDown()
     {
+        PlayerPrefs.DeleteKey(InventoryUnlockedPrefsKey);
+        PlayerPrefs.Save();
         QuestTrackerHudBootstrap.ResetForTests();
         QuestTrackerHudController.ResetInstanceForTests();
 
@@ -34,7 +39,8 @@ public class QuestTrackerHudBootstrapTests
     [Test]
     public void AttachHudToActiveScene_ReusesStateAfterHudDestroyed()
     {
-        var canvasObject = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas));
+        new GameObject("SayDialogCanvas", typeof(RectTransform), typeof(Canvas));
+        InventoryAccessState.Unlock();
 
         systemsObject = new GameObject("TutorialQuestSystems");
         var controller = systemsObject.AddComponent<QuestTrackerHudController>();
@@ -45,12 +51,16 @@ public class QuestTrackerHudBootstrapTests
         controller.PresentQuest(TutorialQuestIds.LightTheManor, playIntro: false);
         Assert.IsNotNull(controller.HudView);
 
+        Transform questCanvas = controller.HudView.transform.parent;
+        Assert.IsNotNull(questCanvas);
+        Assert.AreEqual(QuestTrackerHudHost.FallbackCanvasObjectName, questCanvas.name);
+
         Object.DestroyImmediate(controller.HudView.gameObject);
         controller.AttachHudToScene(gameplayScene);
 
         Assert.AreEqual(TutorialQuestIds.LightTheManor, controller.TrackerState.CurrentQuestId);
         Assert.IsNotNull(controller.HudView);
-        Assert.AreSame(canvasObject.transform, controller.HudView.transform.parent);
+        Assert.AreSame(questCanvas, controller.HudView.transform.parent);
         Assert.AreEqual(1, QuestTrackerHudHost.FindHudRootsInScene(gameplayScene).Count);
     }
 
