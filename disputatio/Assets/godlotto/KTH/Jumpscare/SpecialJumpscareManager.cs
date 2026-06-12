@@ -268,6 +268,17 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
         if (isJumpscareInProgress) return;
 
         Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (IsRetryClicked(worldPos))
+        {
+            StopHeartbeatSound();
+            StopJumpscareSound();
+            RestoreInputStateBeforeRetry();
+            InventoryAccessState.TryUnlockAfterRetry(SceneManager.GetActiveScene().name, retrySceneName, true);
+            CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
+            CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
+            return;
+        }
+
         Collider2D hit = Physics2D.OverlapPoint(worldPos);
         if (hit == null) return;
 
@@ -276,19 +287,29 @@ public class SpecialJumpscareManager : SingletonMonoBehaviour<SpecialJumpscareMa
             && hit.gameObject == triggerObject)
         {
             ExecuteJumpscare();
-            return;
+        }
+    }
+
+    private bool IsRetryClicked(Vector2 worldPos)
+    {
+        if (retryClickObject == null || !retryClickObject.activeInHierarchy)
+            return false;
+
+        Collider2D[] retryColliders = retryClickObject.GetComponentsInChildren<Collider2D>(false);
+        foreach (Collider2D retryCollider in retryColliders)
+        {
+            if (retryCollider != null && retryCollider.enabled && retryCollider.OverlapPoint(worldPos))
+                return true;
         }
 
-        if (retryClickObject != null && retryClickObject.activeSelf
-            && hit.gameObject == retryClickObject)
+        SpriteRenderer[] retryRenderers = retryClickObject.GetComponentsInChildren<SpriteRenderer>(false);
+        foreach (SpriteRenderer retryRenderer in retryRenderers)
         {
-            StopHeartbeatSound();
-            StopJumpscareSound();
-            RestoreInputStateBeforeRetry();
-            InventoryAccessState.TryUnlockAfterRetry(SceneManager.GetActiveScene().name, retrySceneName, true);
-            CheckpointLoadCoordinator.RefreshLatestProgressSnapshot();
-            CheckpointLoadCoordinator.LoadLatestOrFallback(retrySceneName);
+            if (retryRenderer != null && retryRenderer.enabled && retryRenderer.bounds.Contains(worldPos))
+                return true;
         }
+
+        return false;
     }
 
     private IEnumerator WaitAndExecuteScare()
