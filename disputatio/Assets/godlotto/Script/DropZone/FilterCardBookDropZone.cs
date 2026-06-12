@@ -205,7 +205,7 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         filterCardImageRect.anchoredPosition = Vector2.zero;
         // 카드 크기를 고정값으로 강제한다. 스케일 대신 sizeDelta로 직접 지정해
         // RectTransform의 Width/Height가 곧 표시 크기가 되도록 한다.
-        filterCardImageRect.sizeDelta = new Vector2(710.8362f, 695.5485f);
+        filterCardImageRect.sizeDelta = ResolveFilterCardImageSize();
         filterCardImageRect.localScale = Vector3.one;
         filterCardImageRect.localRotation = Quaternion.identity;
         filterCardImageRect.SetAsLastSibling();
@@ -214,6 +214,21 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         var drag = filterCardImageObject != null ? filterCardImageObject.GetComponent<FilterCardBoundedDrag>() : null;
         if (drag != null)
             drag.SetBounds(resolvedBook != null ? resolvedBook : transform as RectTransform);
+    }
+
+    private Vector2 ResolveFilterCardImageSize()
+    {
+        if (diaryMirrorPuzzleController == null)
+            return new Vector2(710.8362f, 695.5485f);
+
+        var image = filterCardImageObject != null ? filterCardImageObject.GetComponent<Image>() : null;
+        Sprite sprite = image != null ? image.sprite : null;
+        if (sprite == null || sprite.rect.height <= 0f)
+            return new Vector2(190f, 620f);
+
+        float targetHeight = 620f;
+        float targetWidth = targetHeight * (sprite.rect.width / sprite.rect.height);
+        return new Vector2(Mathf.Clamp(targetWidth, 150f, 240f), targetHeight);
     }
 
     private void SetFilterCardImageActive(bool active)
