@@ -17,6 +17,7 @@ public static class FungusVariableKeys
     // Item acquisition flags mirrored by ItemPickup and developer item grants.
     public const string GetFood = "GetFood";
     public const string GetFilterCard = "GetFilterCard";
+    public const string GetBookmarkMirror = "GetBookmarkMirror";
     public const string HaveMaidKey = "HaveMaidKey";
     public const string HaveBasementKey = "HaveBasementKey";
     public const string HasBible = "HasBible";

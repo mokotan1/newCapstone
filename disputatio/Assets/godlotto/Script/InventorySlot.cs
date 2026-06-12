@@ -240,6 +240,28 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
 
 
+            FilterCardBookDropZone filterCardBookDropZone =
+
+                dropTarget.GetComponent<FilterCardBookDropZone>()
+
+                ?? dropTarget.GetComponentInParent<FilterCardBookDropZone>();
+
+            if (filterCardBookDropZone != null)
+
+            {
+
+                LogDrag("OnEndDrag handled by UI FilterCardBookDropZone");
+
+                filterCardBookDropZone.OnDrop(eventData);
+
+                FinishDrag();
+
+                return;
+
+            }
+
+
+
             if (dropTarget.GetComponent<WorldItemDropZone>() != null
 
                 || dropTarget.GetComponentInParent<WorldItemDropZone>() != null)
