@@ -198,7 +198,7 @@ public sealed class JumpscareEffects
             _retryClickObject.SetActive(true);
             SpriteRenderer retryRenderer = _retryClickObject.GetComponent<SpriteRenderer>();
             if (retryRenderer != null)
-                JumpscareGameOverLayout.ApplyHallPlayableRetryLayout(retryRenderer);
+                JumpscareGameOverLayout.PrepareRetryRenderer(retryRenderer);
         }
     }
 

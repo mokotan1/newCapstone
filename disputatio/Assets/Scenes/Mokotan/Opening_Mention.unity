@@ -4518,6 +4518,7 @@ GameObject:
   - component: {fileID: 1313011556}
   - component: {fileID: 1313011557}
   - component: {fileID: 2100731001}
+  - component: {fileID: 2100731002}
   m_Layer: 0
   m_Name: Flowchart
   m_TagString: Untagged
@@ -4552,7 +4553,7 @@ MonoBehaviour:
   selectedBlocks:
   - {fileID: 1313011468}
   selectedCommands:
-  - {fileID: 1313011469}
+  - {fileID: 2100731002}
   variables:
   - {fileID: 1313011520}
   - {fileID: 1313011529}
@@ -4640,6 +4641,7 @@ MonoBehaviour:
   - {fileID: 1313011528}
   - {fileID: 1313011517}
   - {fileID: 1313011465}
+  - {fileID: 2100731002}
   - {fileID: 1313011471}
   - {fileID: 1313011470}
   - {fileID: 1313011469}
@@ -9820,6 +9822,21 @@ MonoBehaviour:
   fenceBlockName: Fance_Clicked
   openSceneName: Opening_Mention _open
   enableDebugLogging: 0
+--- !u!114 &2100731002
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313011441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68938aac14bd4fb9a8a08b963d3fb14a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemId: 102
+  indentLevel: 2
+  sfxIndex: 21
 --- !u!1 &2129862305
 GameObject:
   m_ObjectHideFlags: 0
