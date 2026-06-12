@@ -43,6 +43,9 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
     [Header("사용 횟수 설정")]
     public int maxUses = 1;
 
+    [Tooltip("켜져 있으면 최대 사용 횟수에 도달했을 때 인벤토리에서 아이템을 제거한다. BookmarkMirror처럼 퍼즐 도구로 재사용해야 하는 아이템은 끈다.")]
+    public bool consumeItemOnDrop = true;
+
     [Header("Diary Mirror Puzzle")]
     [Tooltip("지정하면 BookmarkMirror 활성화 후 거울 숫자 퍼즐(7337) 정답 검사를 시작한다.")]
     public StudyRoomDiaryMirrorPuzzleController diaryMirrorPuzzleController;
@@ -79,14 +82,22 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
 
         string itemName = requiredItem != null ? requiredItem.itemName : "아이템";
 
-        if (currentUses >= maxUses)
+        bool enforceUseLimit = consumeItemOnDrop && maxUses > 0;
+        if (enforceUseLimit && currentUses >= maxUses)
         {
             GameLog.Log(itemName + " 은(는) 더 이상 사용할 수 없습니다.");
             return;
         }
 
-        currentUses++;
-        GameLog.Log(itemName + " 을(를) 책 패널에 사용했습니다. (" + currentUses + "/" + maxUses + ")");
+        if (enforceUseLimit)
+        {
+            currentUses++;
+            GameLog.Log(itemName + " 을(를) 책 패널에 사용했습니다. (" + currentUses + "/" + maxUses + ")");
+        }
+        else
+        {
+            GameLog.Log(itemName + " 을(를) 책 패널에 사용했습니다.");
+        }
 
         // 1) 드래그 경계가 될 책 패널을 확보한다. 씬에 미리 배치된 인스턴스를 우선 사용한다.
         EnsureBookOverlay();
@@ -105,8 +116,8 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         if (diaryMirrorPuzzleController != null)
             diaryMirrorPuzzleController.NotifyMirrorCardActivated(filterCardImageRect, activeCardRotator);
 
-        // 5) 인벤토리에서 아이템을 소비한다.
-        if (currentUses >= maxUses && InventoryManager.instance != null)
+        // 5) 소비형 아이템만 인벤토리에서 제거한다. BookmarkMirror는 재시도 가능한 퍼즐 도구로 남긴다.
+        if (enforceUseLimit && currentUses >= maxUses && InventoryManager.instance != null)
             InventoryManager.instance.RemoveItem(requiredItem);
 
         // 드롭 처리가 끝났으므로 드래그 상태를 정리한다.

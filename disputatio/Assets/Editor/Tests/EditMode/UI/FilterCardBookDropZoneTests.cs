@@ -108,6 +108,7 @@ public class FilterCardBookDropZoneTests
     public void OnDrop_BookmarkMirror_ActivatesMirrorCard_AndStartsPuzzle()
     {
         InventorySlot.draggedItem = bookmarkMirror;
+        dropZone.consumeItemOnDrop = false;
 
         dropZone.OnDrop(new PointerEventData(EventSystem.current));
 
@@ -117,6 +118,22 @@ public class FilterCardBookDropZoneTests
         Transform overlay = mirrorCardObject.transform.Find("StudyRoomDiaryMirrorOverlay");
         Assert.IsNotNull(overlay, "Mirror puzzle overlay should be created after BookmarkMirror drop.");
         Assert.IsTrue(overlay.gameObject.activeSelf);
+    }
+
+    [Test]
+    public void OnDrop_ReusableBookmarkMirror_AllowsSecondDropAfterPanelReset()
+    {
+        dropZone.consumeItemOnDrop = false;
+
+        InventorySlot.draggedItem = bookmarkMirror;
+        dropZone.OnDrop(new PointerEventData(EventSystem.current));
+        mirrorCardObject.SetActive(false);
+
+        InventorySlot.draggedItem = bookmarkMirror;
+        dropZone.OnDrop(new PointerEventData(EventSystem.current));
+
+        Assert.IsTrue(mirrorCardObject.activeSelf, "Reusable BookmarkMirror should be usable again after the panel is reset.");
+        Assert.IsNull(InventorySlot.draggedItem, "Reusable drop should still clear drag state after a successful second drop.");
     }
 
     [Test]

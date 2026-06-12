@@ -72,6 +72,9 @@ public class BookmarkMirrorIntegrationTests
         Assert.IsFalse(
             mirrorDropZoneBlock.Contains($"guid: {FilterCardGuid}"),
             "Diary mirror drop zone must not require FilterCard.");
+        Assert.IsTrue(
+            mirrorDropZoneBlock.Contains("consumeItemOnDrop: 0"),
+            "BookmarkMirror should remain reusable after dropping it on the diary clue.");
     }
 
     [Test]
