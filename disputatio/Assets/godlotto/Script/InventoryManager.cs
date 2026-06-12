@@ -127,6 +127,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
         TryAddItemInternal(item, respectSlotLimit: true);
     }
 
+    public bool HasItem(Item item)
+    {
+        return item != null && items.Contains(item);
+    }
+
     /// <summary>개발자 모드 전용: 슬롯 한도를 무시하고 아이템을 추가합니다.</summary>
     internal bool TryAddItemForDeveloperMode(Item item)
     {

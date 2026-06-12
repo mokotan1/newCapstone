@@ -1622,6 +1622,8 @@ GameObject:
   - component: {fileID: 421797634}
   - component: {fileID: 421797636}
   - component: {fileID: 421797635}
+  - component: {fileID: 880001001}
+  - component: {fileID: 880001002}
   m_Layer: 6
   m_Name: CardStackPanel
   m_TagString: Untagged
@@ -8430,6 +8432,99 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 828886283}
   m_CullTransparentMesh: 1
+--- !u!114 &880001001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421797633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e8c2a19b3d4e6f8a0c1d2e3f4a5b61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mirrorCardRect: {fileID: 1493005121}
+  codeView: {fileID: 880001002}
+  bookOverlayRect: {fileID: 7700000102}
+  solutionMarker: {fileID: 880001012}
+  targetAnchoredPosition: {x: 168, y: 0}
+  positionTolerance: 45
+  successDelaySeconds: 0.15
+  roomController: {fileID: 826082832}
+  flowchart: {fileID: 826082676}
+  successInteractionId: unlock
+  successFungusBlockName: UnlockSuccess
+  solvedBoolVariableName: DiarySolved
+  setSolvedBoolBeforeSuccess: 1
+  preferInteractionController: 1
+--- !u!114 &880001002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421797633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d7b1a08c2d4f5e7a9b0c1d2e3f4a56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  diaryCode: 7337
+  showTopHalf: 1
+  codeAreaSize: {x: 420, y: 160}
+  codeFontSize: 112
+  codeColor: {r: 0.12, g: 0.1, b: 0.08, a: 1}
+  clueAnchoredPosition: {x: 0, y: 0}
+  frameThickness: 8
+  frameColor: {r: 0.74, g: 0.78, b: 0.84, a: 0.95}
+  glintColor: {r: 0.86, g: 0.93, b: 1, a: 0.22}
+  glintRotationDegrees: -38
+  glintSize: {x: 220, y: 36}
+  bookOverlayRect: {fileID: 7700000102}
+  mirrorCardRect: {fileID: 1493005121}
+  puzzlePanelRect: {fileID: 0}
+  halfCodeMaskRect: {fileID: 0}
+  halfCodeText: {fileID: 0}
+  overlayRootRect: {fileID: 0}
+  mirrorViewportRect: {fileID: 0}
+  fullCodeText: {fileID: 0}
+  mirrorGlintImage: {fileID: 0}
+--- !u!1 &880001011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 880001012}
+  m_Layer: 6
+  m_Name: MirrorSolutionMarker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &880001012
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 880001011}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7700000102}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 168, y: 0}
+  m_SizeDelta: {x: 40, y: 40}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &887872285
 GameObject:
   m_ObjectHideFlags: 0
@@ -10725,7 +10820,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3272164269882564855, guid: 9b45a85c7eac66a4da291d06c3319e39, type: 3}
+  m_Sprite: {fileID: 5829471630284756193, guid: c4d8e2f1a3b5c6d7e8f9a0b1c2d3e4f5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -11796,7 +11891,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1755439166
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11861,7 +11956,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755439165}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f55531d3b5b3ca469012281fbf096c3, type: 3}
   m_Name: 
@@ -13214,7 +13309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d642306d1d264999bb405247b88e52a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  requiredItem: {fileID: 11400000, guid: fdbb615d89f38ee478245637d6a26e32, type: 2}
+  requiredItem: {fileID: 11400000, guid: 877726e16099412aaf58c39b648f843d, type: 2}
   filterCardObject: {fileID: 1493005120}
   rotateRightButtonObject: {fileID: 1175951045}
   rotateLeftButtonObject: {fileID: 897723159}
@@ -13225,6 +13320,8 @@ MonoBehaviour:
   bookOverlaySize: {x: 760, y: 760}
   bookOverlayBackgroundColor: {r: 0.78, g: 0.7, b: 0.54, a: 1}
   maxUses: 1
+  diaryMirrorPuzzleController: {fileID: 880001001}
+  hideRotateButtonsForDiaryMirror: 1
 --- !u!1 &7700000101
 GameObject:
   m_ObjectHideFlags: 0
@@ -13257,6 +13354,7 @@ RectTransform:
   m_Children:
   - {fileID: 1493005121}
   - {fileID: 7700000202}
+  - {fileID: 880001012}
   m_Father: {fileID: 7700000002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

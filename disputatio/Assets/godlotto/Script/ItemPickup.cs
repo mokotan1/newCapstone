@@ -25,17 +25,25 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
     private void SuppressIfAlreadyTaken()
     {
         Flowchart fc = FlowchartLocator.Resolve(targetFlowchart);
+        if (IsAlreadyTaken(fc))
+            Destroy(gameObject);
+    }
+
+    private bool IsAlreadyTaken(Flowchart fc)
+    {
         if (fc == null)
-            return;
+            return false;
 
         if (item != null && ItemAcquisitionTracker.IsAcquired(fc, item.itemId))
-        {
-            Destroy(gameObject);
-            return;
-        }
+            return true;
 
         if (!string.IsNullOrEmpty(fungusVariableName) && fc.GetBooleanVariable(fungusVariableName))
-            Destroy(gameObject);
+            return true;
+
+        if (item != null && InventoryManager.instance != null && InventoryManager.instance.HasItem(item))
+            return true;
+
+        return false;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -52,6 +60,12 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
     private void PickUp()
     {
         Flowchart fc = FlowchartLocator.Resolve(targetFlowchart);
+        if (IsAlreadyTaken(fc))
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         if (fc != null)
         {
             if (!string.IsNullOrEmpty(fungusVariableName))

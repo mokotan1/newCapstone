@@ -44,8 +44,9 @@ public class ItemLookupTests
     {
         IReadOnlyList<Item> items = ItemLookup.GetAllItems();
 
-        Assert.GreaterOrEqual(items.Count, 17);
+        Assert.GreaterOrEqual(items.Count, 18);
         Assert.IsNotNull(ItemLookup.FindById(1));
+        Assert.IsNotNull(ItemLookup.FindById(17));
         Assert.IsNull(items.FirstOrDefault(i => i != null && i.name.StartsWith("Test_")));
     }
 

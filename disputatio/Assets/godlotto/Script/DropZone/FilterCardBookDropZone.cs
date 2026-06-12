@@ -1,18 +1,22 @@
+using Godlotto.Interaction;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// CardStackPanel 아래 새 책 패널에 부착되는 드롭 존. 인벤토리의 FilterCard 아이템을
-/// 드롭하면 BookOverlayPanelA 안의 FilterCardImage를 활성화해서 자유 이동/회전할 수
-/// 있도록 만든다.
+/// CardStackPanel 아래 책 패널에 부착되는 Mirror Item Drop Zone.
+/// 서재 다이어리 퍼즐에서는 <c>BookmarkMirror</c>를 드롭하면 BookOverlayPanelA 안의
+/// 거울 카드 이미지를 활성화해 자유 이동·배치로 7337 단서를 완성한다.
+/// (클래스명은 기존 FilterCard 책장 퍼즐과의 호환을 위해 유지)
 /// </summary>
 public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
 {
-    [Header("필요한 아이템")]
+    [Header("Mirror Item Drop Zone")]
+    [Tooltip("서재 다이어리 거울 퍼즐: BookmarkMirror. 책장 단서 퍼즐 등 다른 용도는 별도 DropZone 사용.")]
     public Item requiredItem;
 
-    [Header("상호작용 오브젝트")]
+    [Header("Mirror Card (UI Image)")]
+    [Tooltip("드롭 시 활성화되는 거울 카드 UI. Source Image는 BookmarkMirror 스프라이트를 사용한다.")]
     public GameObject filterCardObject;
     public GameObject rotateRightButtonObject;
     public GameObject rotateLeftButtonObject;
@@ -39,6 +43,13 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
     [Header("사용 횟수 설정")]
     public int maxUses = 1;
 
+    [Header("Diary Mirror Puzzle")]
+    [Tooltip("지정하면 BookmarkMirror 활성화 후 거울 숫자 퍼즐(7337) 정답 검사를 시작한다.")]
+    public StudyRoomDiaryMirrorPuzzleController diaryMirrorPuzzleController;
+
+    [Tooltip("거울 숫자 퍼즐에서는 회전 버튼을 표시하지 않는다.")]
+    public bool hideRotateButtonsForDiaryMirror = true;
+
     private int currentUses = 0;
     private RectTransform resolvedBook;
     private GameObject filterCardImageObject;
@@ -51,6 +62,8 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         EnsureFilterCardImage();
         SetFilterCardImageActive(false);
         HideFilterCardImage();
+        if (diaryMirrorPuzzleController != null)
+            diaryMirrorPuzzleController.ShowHalfCodeClue(resolvedBook);
         RewireRotateButtons();
 
         // 기존 DropZone과 동일: 시작 시 회전 버튼을 숨긴다.
@@ -85,9 +98,12 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         SetFilterCardImageActive(true);
         RewireRotateButtons();
 
-        // 4) 회전 버튼 표시 (기존 회전 흐름 유지).
-        if (rotateRightButtonObject != null) rotateRightButtonObject.SetActive(true);
-        if (rotateLeftButtonObject != null) rotateLeftButtonObject.SetActive(true);
+        bool showRotateButtons = !hideRotateButtonsForDiaryMirror || diaryMirrorPuzzleController == null;
+        if (rotateRightButtonObject != null) rotateRightButtonObject.SetActive(showRotateButtons);
+        if (rotateLeftButtonObject != null) rotateLeftButtonObject.SetActive(showRotateButtons);
+
+        if (diaryMirrorPuzzleController != null)
+            diaryMirrorPuzzleController.NotifyMirrorCardActivated(filterCardImageRect, activeCardRotator);
 
         // 5) 인벤토리에서 아이템을 소비한다.
         if (currentUses >= maxUses && InventoryManager.instance != null)

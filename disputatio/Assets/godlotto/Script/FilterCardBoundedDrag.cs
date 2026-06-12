@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -13,6 +14,9 @@ public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHand
     [Tooltip("드래그 이동을 가둘 영역. 보통 드롭 시 FilterCardBookDropZone이 코드로 주입한다. " +
              "비어 있으면 부모 RectTransform을 경계로 사용한다.")]
     [SerializeField] private RectTransform boundsRect;
+
+    /// <summary>드래그 종료 및 경계 보정 후 호출.</summary>
+    public event Action DragEnded;
 
     private RectTransform rectTransform;
 
@@ -51,6 +55,7 @@ public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHand
     {
         // 위치를 되돌리지 않는다. 경계만 한 번 더 보정한다.
         ClampInsideBounds();
+        DragEnded?.Invoke();
     }
 
     /// <summary>

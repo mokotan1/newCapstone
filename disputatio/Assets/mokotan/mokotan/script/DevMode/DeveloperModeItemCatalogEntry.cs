@@ -28,7 +28,7 @@ public sealed class DeveloperModeItemCatalogEntry
         if (item == null)
             return null;
 
-        string displayName = string.IsNullOrWhiteSpace(item.itemName) ? item.name : item.itemName.Trim();
+        string displayName = DeveloperModeItemCategoryResolver.GetItemDisplayName(item);
         string description = string.IsNullOrWhiteSpace(item.itemDescription)
             ? string.Empty
             : item.itemDescription.Trim();

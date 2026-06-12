@@ -1,9 +1,16 @@
+using System;
 using UnityEngine;
 
 public class FilterCardRotator : MonoBehaviour
 {
     // 플레이어가 인지하는 각도를 저장할 변수 (0, 90, 180, 270)
     private float currentAngle = 0f;
+
+    /// <summary>UI에 적용된 Z축 시각 각도(0~360).</summary>
+    public float CurrentVisualAngleDegrees => NormalizeVisualAngle(-currentAngle);
+
+    /// <summary>회전 버튼으로 90° 회전이 적용된 뒤 호출된다.</summary>
+    public event Action Rotated;
 
     // 오른쪽으로 90도 회전시키는 함수
     public void RotateRight()
@@ -43,5 +50,15 @@ public class FilterCardRotator : MonoBehaviour
         // 유니티의 Z축 회전은 반시계가 양수(+)이므로,
         // 우리가 원하는 시계 방향 회전을 위해서는 currentAngle에 음수(-)를 붙여줍니다.
         transform.localRotation = Quaternion.Euler(0, 0, -currentAngle);
+        Rotated?.Invoke();
+    }
+
+    static float NormalizeVisualAngle(float angleDegrees)
+    {
+        float normalized = angleDegrees % 360f;
+        if (normalized < 0f)
+            normalized += 360f;
+
+        return normalized;
     }
 }

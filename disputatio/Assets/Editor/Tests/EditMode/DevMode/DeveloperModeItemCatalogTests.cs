@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -54,5 +55,39 @@ public class DeveloperModeItemCatalogTests
     public void MatchesSearch_ReturnsFalse_ForNullEntry()
     {
         Assert.IsFalse(DeveloperModeItemCatalog.MatchesSearch(null, "test"));
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        ItemRegistry.ResetCacheForTest();
+    }
+
+    [Test]
+    public void BuildGrantableEntries_IncludesBookmarkMirror_FromProductionRegistry()
+    {
+        Item bookmarkMirror = ItemLookup.FindById(17);
+
+        Assert.IsNotNull(bookmarkMirror);
+        Assert.AreEqual("BookmarkMirror", bookmarkMirror.itemName);
+
+        List<DeveloperModeItemCatalogEntry> entries =
+            DeveloperModeItemCatalog.BuildGrantableEntries(ItemLookup.GetAllItems());
+
+        Assert.IsNotNull(entries.FirstOrDefault(entry =>
+            entry != null && entry.Item != null && entry.Item.itemName == "BookmarkMirror"));
+    }
+
+    [Test]
+    public void FromItem_UsesKoreanDisplayName_ForBookmarkMirror()
+    {
+        Item bookmarkMirror = ItemLookup.FindById(17);
+        Assert.IsNotNull(bookmarkMirror);
+
+        DeveloperModeItemCatalogEntry entry = DeveloperModeItemCatalogEntry.FromItem(bookmarkMirror);
+
+        Assert.AreEqual("책갈피 거울", entry.DisplayName);
+        Assert.AreEqual(DeveloperModeItemCategory.Quest, entry.Category);
+        Assert.IsTrue(DeveloperModeItemCatalog.MatchesSearch(entry, "책갈피"));
     }
 }
