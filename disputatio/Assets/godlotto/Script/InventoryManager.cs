@@ -130,7 +130,7 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
     /// <summary>개발자 모드 전용: 슬롯 한도를 무시하고 아이템을 추가합니다.</summary>
     internal bool TryAddItemForDeveloperMode(Item item)
     {
-        if (!Debug.isDebugBuild || !DeveloperModeController.IsDeveloperModeEnabled)
+        if (!DeveloperModeController.CanUseDeveloperModeRuntime || !DeveloperModeController.IsDeveloperModeEnabled)
             return false;
 
         return TryAddItemInternal(item, respectSlotLimit: false);
@@ -139,7 +139,7 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
     /// <summary>개발자 모드 전용: UI 슬롯 수를 최소 <paramref name="minimumSlots"/>까지 늘립니다.</summary>
     internal void EnsureDeveloperSlotCapacity(int minimumSlots)
     {
-        if (!Debug.isDebugBuild || !DeveloperModeController.IsDeveloperModeEnabled)
+        if (!DeveloperModeController.CanUseDeveloperModeRuntime || !DeveloperModeController.IsDeveloperModeEnabled)
             return;
 
         int target = Mathf.Clamp(minimumSlots, slots.Count, DeveloperModeItemGrantService.MaxDeveloperInventorySlots);

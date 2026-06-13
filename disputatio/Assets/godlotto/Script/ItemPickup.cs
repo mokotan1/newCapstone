@@ -30,12 +30,19 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
 
         if (item != null && ItemAcquisitionTracker.IsAcquired(fc, item.itemId))
         {
+            GameLog.LogWarning(
+                $"[ItemPickup] Destroy '{gameObject.name}': itemId {item.itemId} already in "
+                + $"{ItemAcquisitionTracker.FungusVariableKey}.");
             Destroy(gameObject);
             return;
         }
 
         if (!string.IsNullOrEmpty(fungusVariableName) && fc.GetBooleanVariable(fungusVariableName))
+        {
+            GameLog.LogWarning(
+                $"[ItemPickup] Destroy '{gameObject.name}': Fungus bool '{fungusVariableName}' is already true.");
             Destroy(gameObject);
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)

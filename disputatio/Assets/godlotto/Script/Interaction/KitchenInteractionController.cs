@@ -16,6 +16,7 @@ namespace Godlotto.Interaction
 
         [SerializeField] KitchenPanelRegistry panelRegistry;
         [SerializeField] KitchenPuzzleState puzzleState;
+        [SerializeField] KitchenSinkWaterDisplay sinkWaterDisplay;
         [SerializeField] bool applyExecuteUiRaycastPolicy = true;
 
         protected override string LogPrefix => "[Kitchen]";
@@ -31,6 +32,7 @@ namespace Godlotto.Interaction
         void Start()
         {
             puzzleState?.HydrateFromFungus();
+            SyncSinkWaterDisplayFromPuzzleState();
 
             if (applyExecuteUiRaycastPolicy)
                 KitchenFlowchartExecuteUiRaycastPolicy.Apply(this);
@@ -56,12 +58,48 @@ namespace Godlotto.Interaction
                 return;
 
             puzzleState.MirrorSinkFlagsToFlowchart(Flowchart);
+
+            // FaucetClicked는 Faucet 블록 완료(OnBlockEnd) 후에만 true가 됩니다.
+            // 클릭 직후 물 연출을 켜면 faucetClosed(=Faucet 버튼 GO)가 비활성화되어
+            // 그 위의 FaucetKeyReleaseController가 FaucetClicked 변화를 감지하지 못합니다.
         }
 
         protected override void OnInteractionBlockCompleted(string blockName)
         {
             puzzleState?.ApplyBlockCompletion(blockName);
+            SyncSinkWaterDisplayAfterBlock(blockName);
         }
+
+        void SyncSinkWaterDisplayAfterBlock(string blockName)
+        {
+            if (sinkWaterDisplay == null || puzzleState == null)
+                return;
+
+            if (blockName == KitchenSinkInteractionGate.FaucetBlockName
+                || blockName == KitchenSinkInteractionGate.BottleDraggedBlockName
+                || blockName == KitchenSinkInteractionGate.FilledBottleBlockName)
+            {
+                SyncSinkWaterDisplayFromPuzzleState();
+            }
+        }
+
+        void SyncSinkWaterDisplayFromPuzzleState()
+        {
+            if (sinkWaterDisplay == null || puzzleState == null)
+                return;
+
+            SyncSinkWaterDisplayFromFaucetRunning(puzzleState.IsSinkWaterRunning);
+        }
+
+        void SyncSinkWaterDisplayFromFaucetRunning(bool faucetRunning)
+        {
+            if (sinkWaterDisplay == null)
+                return;
+
+            sinkWaterDisplay.SyncFromFaucetClicked(faucetRunning);
+        }
+
+        internal void SetSinkWaterDisplayForTests(KitchenSinkWaterDisplay display) => sinkWaterDisplay = display;
 
         static bool IsSinkRouteInteraction(string interactionId)
         {

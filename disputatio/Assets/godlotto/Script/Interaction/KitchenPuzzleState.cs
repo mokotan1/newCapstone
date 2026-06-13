@@ -16,6 +16,9 @@ namespace Godlotto.Interaction
         public bool FaucetClicked { get; private set; }
         public bool BottleDragged { get; private set; }
 
+        /// <summary>싱크 물줄기 표시: 수도꼭지 ON이고 병 드래그 중이 아닐 때.</summary>
+        public bool IsSinkWaterRunning => FaucetClicked && !BottleDragged;
+
         void Awake()
         {
             HydrateFromFungus();
