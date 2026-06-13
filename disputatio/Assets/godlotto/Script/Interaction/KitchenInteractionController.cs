@@ -77,6 +77,22 @@ namespace Godlotto.Interaction
             return !Clickable2D.IsInteractiveUiUnderPointer(screenPosition);
         }
 
+        protected override bool ShouldProcessWorldClickBinding(WorldClickBinding binding, Vector2 screenPosition)
+        {
+            if (!IsFripanPanelOpen())
+                return true;
+
+            return binding.interactionId != "fripan" && binding.interactionId != "burner";
+        }
+
+        bool IsFripanPanelOpen()
+        {
+            if (panelRegistry == null)
+                panelRegistry = GetComponent<KitchenPanelRegistry>();
+
+            return panelRegistry != null && panelRegistry.IsFripanPanelOpen;
+        }
+
         /// <summary>
         /// RoomInteractionController.OnClosePanel이 대상 패널을 비활성화한 뒤 호출됩니다.
         /// CloseAllPanels는 형제/자식 패널(burner, Bottle)과 Parret까지 함께 정리합니다.

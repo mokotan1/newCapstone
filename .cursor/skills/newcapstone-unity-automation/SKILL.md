@@ -35,9 +35,12 @@ checkpoints, or tests.
 
 Before using `unity-cli`, confirm both sides exist:
 
-```bash
-unity-cli --project disputatio status
+```powershell
+.\scripts\unity-cli-open-status-cmd.cmd
+.\scripts\unity-cli.cmd --project disputatio status
 ```
+
+AI 에이전트가 Unity CLI를 사용한다면, 첫 CLI 명령 전에 반드시 `.\scripts\unity-cli-open-status-cmd.cmd`로 별도 CMD 상태창을 띄운다. 이미 열린 상태창이 보이면 새로 띄우지 않아도 된다.
 
 If the command is missing or Unity reports no connector, do not assume the
 import is complete. Ask the user to open `disputatio` in Unity and import the
@@ -51,15 +54,16 @@ Prefer `unity-cli` for repeatable command-line automation:
 
 | Task | Use |
 |------|-----|
-| Check Unity connection | `unity-cli --project disputatio status` |
-| Run EditMode tests | `unity-cli --project disputatio test --mode EditMode` |
-| Run PlayMode tests | `unity-cli --project disputatio test --mode PlayMode` |
-| Read compile/runtime errors | `unity-cli --project disputatio console --type error,warning --lines 80` |
-| Enter/exit play mode | `unity-cli --project disputatio editor play --wait` / `editor stop` |
-| Refresh assets or compile | `unity-cli --project disputatio editor refresh --compile` |
-| Re-save changed scenes/prefabs/assets | `unity-cli --project disputatio reserialize <asset-path>` |
-| Query Unity state with short C# | `unity-cli --project disputatio exec "<code>"` |
-| CI-like verification loop | `unity-cli` |
+| Show live Unity CLI status in CMD | `.\scripts\unity-cli-open-status-cmd.cmd` |
+| Check Unity connection | `.\scripts\unity-cli.cmd --project disputatio status` |
+| Run EditMode tests | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode` |
+| Run PlayMode tests | `.\scripts\unity-cli.cmd --project disputatio test --mode PlayMode` |
+| Read compile/runtime errors | `.\scripts\unity-cli.cmd --project disputatio console --type error,warning --lines 80` |
+| Enter/exit play mode | `.\scripts\unity-cli.cmd --project disputatio editor play --wait` / `editor stop` |
+| Refresh assets or compile | `.\scripts\unity-cli.cmd --project disputatio editor refresh --compile` |
+| Re-save changed scenes/prefabs/assets | `.\scripts\unity-cli.cmd --project disputatio reserialize <asset-path>` |
+| Query Unity state with short C# | `.\scripts\unity-cli.cmd --project disputatio exec "<code>"` |
+| CI-like verification loop | `.\scripts\unity-cli.cmd` |
 
 Prefer Unity MCP for interactive editor inspection:
 
@@ -94,17 +98,18 @@ Cursor 규칙 `.cursor/rules/unity-verification-postflight.mdc`를 따른다.
 ### CLI 경로 (Windows)
 
 ```powershell
-# PATH 없을 때
-& "$env:LOCALAPPDATA\unity-cli\unity-cli.exe" --project disputatio status
+.\scripts\unity-cli-open-status-cmd.cmd
+.\scripts\unity-cli.cmd --project disputatio status
 ```
 
 ### 검증 순서
 
-```bash
-unity-cli --project disputatio status
-unity-cli --project disputatio editor refresh --compile    # C# 변경 시
-unity-cli --project disputatio console --type error,warning --lines 80
-unity-cli --project disputatio test --mode EditMode --filter <TestClassName>
+```powershell
+.\scripts\unity-cli-open-status-cmd.cmd
+.\scripts\unity-cli.cmd --project disputatio status
+.\scripts\unity-cli.cmd --project disputatio editor refresh --compile    # C# 변경 시
+.\scripts\unity-cli.cmd --project disputatio console --type error,warning --lines 80
+.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter <TestClassName>
 ```
 
 `--filter`는 **테스트 클래스 전체 이름** (예: `BedRoomInteractionControllerTests`).
@@ -134,8 +139,9 @@ Unity MCP(`validate_script`, `read_console`)는 **보조**. MCP 실패 + `status
 1. Read `docs/architecture.md` and map the task to the documented folder.
 2. Check whether Unity is reachable:
 
-   ```bash
-   unity-cli --project disputatio status
+   ```powershell
+   .\scripts\unity-cli-open-status-cmd.cmd
+   .\scripts\unity-cli.cmd --project disputatio status
    ```
 
 3. If `unity-cli` is unavailable, say so and fall back to Unity MCP or explain
@@ -145,8 +151,8 @@ Unity MCP(`validate_script`, `read_console`)는 **보조**. MCP 실패 + `status
 6. For scene/prefab/asset changes, reserialize only changed assets when
    possible:
 
-   ```bash
-   unity-cli --project disputatio reserialize Assets/Scenes/Mokotan/Opening_Office.unity
+   ```powershell
+   .\scripts\unity-cli.cmd --project disputatio reserialize Assets/Scenes/Mokotan/Opening_Office.unity
    ```
 
 7. Summarize what changed, **which commands ran and pass/fail counts**, and any
@@ -156,11 +162,11 @@ Unity MCP(`validate_script`, `read_console`)는 **보조**. MCP 실패 + `status
 
 Use filters to keep outputs small:
 
-```bash
-unity-cli --project disputatio test --mode EditMode --filter ServerConfig
-unity-cli --project disputatio test --mode EditMode --filter Checkpoint
-unity-cli --project disputatio console --type error --lines 40
-unity-cli --project disputatio exec "return UnityEditor.EditorSceneManagement.EditorSceneManager.GetActiveScene().path;"
+```powershell
+.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter ServerConfig
+.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter Checkpoint
+.\scripts\unity-cli.cmd --project disputatio console --type error --lines 40
+.\scripts\unity-cli.cmd --project disputatio exec "return UnityEditor.EditorSceneManagement.EditorSceneManager.GetActiveScene().path;"
 ```
 
 When shell escaping becomes awkward, prefer a small temporary editor utility or

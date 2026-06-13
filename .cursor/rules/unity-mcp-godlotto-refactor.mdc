@@ -12,12 +12,15 @@ alwaysApply: false
 
 `CSharpSyntaxChecker`만으로 완료 처리하지 않는다.
 
-## 1순위: unity-cli
+## 1순위: unity-cli wrapper
 
-1. `unity-cli --project disputatio status` (Windows: `$env:LOCALAPPDATA\unity-cli\unity-cli.exe` 폴백)
-2. `editor refresh --compile`
-3. `console --type error,warning --lines 80`
-4. 변경 영역에 맞는 `test --mode EditMode --filter <TestClassName>`  
+AI 에이전트가 Unity CLI를 사용한다면, 첫 CLI 명령 전에 **반드시** `.\scripts\unity-cli-open-status-cmd.cmd`로 별도 CMD 상태창을 띄운다. 이미 열린 상태창이 보이면 새로 띄우지 않아도 된다.
+
+1. `.\scripts\unity-cli-open-status-cmd.cmd`
+2. `.\scripts\unity-cli.cmd --project disputatio status`
+3. `editor refresh --compile`
+4. `console --type error,warning --lines 80`
+5. 변경 영역에 맞는 `test --mode EditMode --filter <TestClassName>`  
    - Interaction 공통 파일 변경 시: postflight 규칙 §4 Interaction 스위트 8종 각각 실행
 
 ## 2순위: Unity MCP (보조, 연결 시)
@@ -27,7 +30,7 @@ alwaysApply: false
 - 변경 스크립트마다 `validate_script` (`uri`: `Assets/godlotto/...`, `level`: `standard`)
 - `read_console` (`action`: `get`, `types`: `error`)
 
-MCP가 실패해도 **unity-cli가 ready이면 CLI 검증을 계속**한다.
+MCP가 실패해도 **unity-cli wrapper status가 ready이면 CLI 검증을 계속**한다.
 
 ## 예외
 

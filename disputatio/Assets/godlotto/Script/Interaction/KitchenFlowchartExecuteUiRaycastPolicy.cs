@@ -19,19 +19,22 @@ namespace Godlotto.Interaction
                 return;
 
             var configuredButtons = new HashSet<Button>();
+            KitchenPanelRegistry registry = controller.GetComponent<KitchenPanelRegistry>();
+            if (registry != null)
+            {
+                foreach (GameObject panel in registry.GetAllPanels())
+                {
+                    DisableDecorativePanelBackgroundRaycast(panel);
+                    EnsurePanelCanvasGroup(panel);
+                }
+            }
+
             foreach (Button button in Object.FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (!IsExecuteRoutedButton(button, controller) || !configuredButtons.Add(button))
                     continue;
 
-                ConfigureExecuteButton(button);
-            }
-
-            KitchenPanelRegistry registry = controller.GetComponent<KitchenPanelRegistry>();
-            if (registry != null)
-            {
-                foreach (GameObject panel in registry.GetAllPanels())
-                    DisableDecorativePanelBackgroundRaycast(panel);
+                ConfigureExecuteButton(button, registry);
             }
         }
 
@@ -53,7 +56,7 @@ namespace Godlotto.Interaction
             return false;
         }
 
-        internal static void ConfigureExecuteButton(Button button)
+        internal static void ConfigureExecuteButton(Button button, KitchenPanelRegistry registry = null)
         {
             if (button == null)
                 return;
@@ -65,7 +68,41 @@ namespace Godlotto.Interaction
             if (!IsTransparentGraphic(graphic))
                 return;
 
+            if (IsPanelHitTargetButton(button, registry))
+                return;
+
             graphic.raycastTarget = false;
+        }
+
+        internal static bool IsPanelHitTargetButton(Button button, KitchenPanelRegistry registry)
+        {
+            if (button == null || registry == null)
+                return false;
+
+            Transform buttonTransform = button.transform;
+            foreach (GameObject panel in registry.GetAllPanels())
+            {
+                if (panel == null)
+                    continue;
+
+                if (buttonTransform.IsChildOf(panel.transform) || buttonTransform == panel.transform)
+                    return true;
+            }
+
+            return false;
+        }
+
+        internal static void EnsurePanelCanvasGroup(GameObject panelRoot)
+        {
+            if (panelRoot == null)
+                return;
+
+            CanvasGroup group = panelRoot.GetComponent<CanvasGroup>();
+            if (group == null)
+                group = panelRoot.AddComponent<CanvasGroup>();
+
+            group.blocksRaycasts = true;
+            group.interactable = true;
         }
 
         internal static void DisableDecorativePanelBackgroundRaycast(GameObject panelRoot)
@@ -78,10 +115,6 @@ namespace Godlotto.Interaction
                 return;
 
             background.raycastTarget = false;
-
-            CanvasGroup group = panelRoot.GetComponent<CanvasGroup>();
-            if (group != null)
-                group.blocksRaycasts = false;
         }
 
         internal static bool IsTransparentGraphic(Graphic graphic)

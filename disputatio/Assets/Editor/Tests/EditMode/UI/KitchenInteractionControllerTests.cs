@@ -138,6 +138,38 @@ public class KitchenInteractionControllerTests
     }
 
     [Test]
+    public void ShouldProcessWorldClickBinding_SuppressesFripanAndBurner_WhenFripanPanelOpen()
+    {
+        var registryGo = new GameObject("Registry");
+        var registry = registryGo.AddComponent<KitchenPanelRegistry>();
+        var fripanPanel = CreatePanel("firpan_Panel", active: true);
+        SetRegistryField(registry, "fripanPanel", fripanPanel);
+        SetPrivateField(controller, "panelRegistry", registry);
+
+        var fripanBinding = new WorldClickBinding { interactionId = "fripan" };
+        var burnerBinding = new WorldClickBinding { interactionId = "burner" };
+        var doorBinding = new WorldClickBinding { interactionId = "door" };
+
+        Assert.IsFalse(InvokeShouldProcessWorldClickBinding(fripanBinding));
+        Assert.IsFalse(InvokeShouldProcessWorldClickBinding(burnerBinding));
+        Assert.IsTrue(InvokeShouldProcessWorldClickBinding(doorBinding));
+
+        fripanPanel.SetActive(false);
+        Assert.IsTrue(InvokeShouldProcessWorldClickBinding(fripanBinding));
+
+        Object.DestroyImmediate(registryGo);
+        Object.DestroyImmediate(fripanPanel);
+    }
+
+    bool InvokeShouldProcessWorldClickBinding(WorldClickBinding binding)
+    {
+        var method = typeof(KitchenInteractionController).GetMethod(
+            "ShouldProcessWorldClickBinding",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        return (bool)method.Invoke(controller, new object[] { binding, Vector2.zero });
+    }
+
+    [Test]
     public void OnClosePanel_Backspace_ClosesAllRegistryPanels_WithoutFungusBlock()
     {
         var registryGo = new GameObject("Registry");
