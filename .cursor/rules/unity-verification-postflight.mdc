@@ -14,17 +14,16 @@ alwaysApply: false
 
 ## 1. unity-cli 실행 경로
 
-Windows에서 `unity-cli`가 PATH에 없을 수 있다. Shell에서 **항상** 아래 중 하나로 실행한다.
+Windows에서 `unity-cli`가 PATH에 없을 수 있다. Shell에서 **항상** repo-local wrapper를 실행한다.
+
+AI 에이전트가 Unity CLI를 사용한다면, 첫 CLI 명령 전에 **반드시 별도 CMD 상태창**을 띄운다. 이미 열린 상태창이 보이면 새로 띄우지 않아도 된다.
 
 ```powershell
-# PATH에 있으면
-unity-cli --project disputatio status
-
-# 없으면 (기본 설치 위치)
-& "$env:LOCALAPPDATA\unity-cli\unity-cli.exe" --project disputatio status
+.\scripts\unity-cli-open-status-cmd.cmd
+.\scripts\unity-cli.cmd --project disputatio status
 ```
 
-이후 명령도 동일한 실행 파일을 사용한다. 아래 예시는 `unity-cli`로 표기한다.
+이후 명령도 동일한 wrapper를 사용한다.
 
 ## 2. 필수 절차 (코드 변경 후)
 
@@ -33,19 +32,20 @@ unity-cli --project disputatio status
 1. **연결 확인**
 
    ```bash
-   unity-cli --project disputatio status
+   .\scripts\unity-cli-open-status-cmd.cmd
+   .\scripts\unity-cli.cmd --project disputatio status
    ```
 
 2. **C# 변경 시 컴파일**
 
    ```bash
-   unity-cli --project disputatio editor refresh --compile
+   .\scripts\unity-cli.cmd --project disputatio editor refresh --compile
    ```
 
 3. **콘솔 에러·경고**
 
    ```bash
-   unity-cli --project disputatio console --type error,warning --lines 80
+   .\scripts\unity-cli.cmd --project disputatio console --type error,warning --lines 80
    ```
 
    본인 변경으로 생긴 **새 error**가 있으면 해소 후 다시 확인한다.
@@ -55,14 +55,14 @@ unity-cli --project disputatio status
    `--filter`는 **클래스 전체 이름**이어야 한다 (부분 문자열·`|` 불가).
 
    ```bash
-   unity-cli --project disputatio test --mode EditMode --filter <TestClassName>
+   .\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter <TestClassName>
    ```
 
 5. **씬·프리팹 직접 수정 시** (YAML 편집 포함)
 
    ```bash
-   unity-cli --project disputatio reserialize <Assets/...경로>
-   unity-cli --project disputatio console --type error --lines 40
+   .\scripts\unity-cli.cmd --project disputatio reserialize <Assets/...경로>
+   .\scripts\unity-cli.cmd --project disputatio console --type error --lines 40
    ```
 
 6. **응답에 포함**: 실행한 명령, 통과/실패 수, 남은 Unity Editor 수동 단계.
@@ -106,16 +106,16 @@ WifeRoomPuzzleControllerTests
 
 ## 5. Unity MCP와의 관계
 
-- **기본 검증 루프**: `unity-cli` (위 2~4절).
+- **기본 검증 루프**: `.\scripts\unity-cli.cmd` (위 2~4절).
 - **보조**: `user-unityMCP`의 `validate_script` / `read_console` / `run_tests` — MCP가 연결된 경우 **추가로** 사용 가능.
-- MCP만 실패하고 `unity-cli status`가 `ready`이면 **unity-cli로 계속** 검증한다.
+- MCP만 실패하고 `.\scripts\unity-cli.cmd --project disputatio status`가 `ready`이면 **unity-cli wrapper로 계속** 검증한다.
 - **둘 다 불가** (`no Unity instances`, CLI 미설치): 검증을 생략하지 말고 사용자에게 Unity Editor 열기·커넥터 import·CLI 설치를 안내하고, **블로커로 명시**한다.
 
 ## 6. 완료 게이트 (체크리스트)
 
 다음을 만족하기 전 **"완료", "수정됨", "커밋 가능"**이라고 말하지 않는다.
 
-- [ ] `unity-cli status` 실행 (또는 불가 사유 기록)
+- [ ] `.\scripts\unity-cli.cmd --project disputatio status` 실행 (또는 불가 사유 기록)
 - [ ] C# 변경 시 `editor refresh --compile` + `console`
 - [ ] 해당 `--filter` EditMode 테스트 통과 (또는 신규 테스트 추가 후 통과)
 - [ ] Interaction 공통 변경 시 §4 스위트 실행

@@ -16,11 +16,35 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
 
     public static bool IsDeveloperModeEnabled { get; private set; }
 
+#if UNITY_INCLUDE_TESTS
+    internal static bool? RuntimeAvailabilityOverrideForTests { get; set; }
+#endif
+
+    /// <summary>
+    /// 에디터·Development Build·<c>ENABLE_DEVELOPER_MODE</c>에서만 Dev Mode 런타임(F2/F3 등)을 허용합니다.
+    /// 릴리즈 빌드에서는 false입니다.
+    /// </summary>
+    public static bool CanUseDeveloperModeRuntime
+    {
+        get
+        {
+#if UNITY_INCLUDE_TESTS
+            if (RuntimeAvailabilityOverrideForTests.HasValue)
+                return RuntimeAvailabilityOverrideForTests.Value;
+#endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ENABLE_DEVELOPER_MODE
+            return true;
+#else
+            return false;
+#endif
+        }
+    }
+
     protected override bool PersistAcrossScenes => true;
 
     protected override void OnSingletonAwake()
     {
-        IsDeveloperModeEnabled = Debug.isDebugBuild && ReadDevModeFromVariableManager();
+        IsDeveloperModeEnabled = CanUseDeveloperModeRuntime && ReadDevModeFromVariableManager();
     }
 
     private void OnEnable()
@@ -37,32 +61,20 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
 
     private void Start()
     {
-        if (developerOverlay == null)
-            developerOverlay = FindFirstObjectByType<InGameDeveloperOverlay>(FindObjectsInactive.Include);
-        if (developerOverlay == null)
-        {
-            var overlayObject = new GameObject("InGameDeveloperOverlay");
-            developerOverlay = overlayObject.AddComponent<InGameDeveloperOverlay>();
-            DontDestroyOnLoad(overlayObject);
-        }
+        EnsureDeveloperOverlay();
+        EnsureServices();
 
-        if (quickRestartService == null)
-            quickRestartService = GetComponent<QuickRestartService>() ?? gameObject.AddComponent<QuickRestartService>();
-        if (openingSkipService == null)
-            openingSkipService = GetComponent<OpeningSkipService>() ?? gameObject.AddComponent<OpeningSkipService>();
         if (developerOverlay != null)
             developerOverlay.SetVisible(IsDeveloperModeEnabled);
     }
 
     private void Update()
     {
-        if (!Debug.isDebugBuild)
+        if (!CanUseDeveloperModeRuntime)
             return;
 
         if (Input.GetKeyDown(toggleDevModeKey))
-        {
-            SetDeveloperModeEnabled(!IsDeveloperModeEnabled);
-        }
+            ToggleDeveloperMode();
 
         if (!IsDeveloperModeEnabled)
             return;
@@ -73,6 +85,14 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
             quickRestartService.TriggerRestart();
         if (Input.GetKeyDown(skipOpeningKey))
             openingSkipService.SkipOpening();
+    }
+
+    public void ToggleDeveloperMode()
+    {
+        if (!CanUseDeveloperModeRuntime)
+            return;
+
+        SetDeveloperModeEnabled(!IsDeveloperModeEnabled);
     }
 
     private void HandlePlayerDied()
@@ -119,10 +139,47 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
     {
         IsDeveloperModeEnabled = enabled;
         WriteDevModeToVariableManager(enabled);
+        EnsureDeveloperOverlay();
 
         if (developerOverlay != null)
             developerOverlay.SetVisible(enabled);
     }
+
+    private void EnsureDeveloperOverlay()
+    {
+        if (developerOverlay != null)
+            return;
+
+        developerOverlay = FindFirstObjectByType<InGameDeveloperOverlay>(FindObjectsInactive.Include);
+        if (developerOverlay != null)
+            return;
+
+        var overlayObject = new GameObject("InGameDeveloperOverlay");
+        developerOverlay = overlayObject.AddComponent<InGameDeveloperOverlay>();
+        if (Application.isPlaying)
+            DontDestroyOnLoad(overlayObject);
+    }
+
+    private void EnsureServices()
+    {
+        if (quickRestartService == null)
+            quickRestartService = GetComponent<QuickRestartService>() ?? gameObject.AddComponent<QuickRestartService>();
+        if (openingSkipService == null)
+            openingSkipService = GetComponent<OpeningSkipService>() ?? gameObject.AddComponent<OpeningSkipService>();
+    }
+
+#if UNITY_INCLUDE_TESTS
+    internal static void ResetTestOverrides()
+    {
+        RuntimeAvailabilityOverrideForTests = null;
+        IsDeveloperModeEnabled = false;
+    }
+
+    internal static void SetIsDeveloperModeEnabledForTests(bool enabled)
+    {
+        IsDeveloperModeEnabled = enabled;
+    }
+#endif
 
     private static bool ReadDevModeFromVariableManager()
     {

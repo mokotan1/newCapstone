@@ -8,6 +8,45 @@ using UnityEngine;
 public class KitchenFripanClickTests
 {
     [Test]
+    public void FripanPanel_CanvasGroup_DoesNotBlockChildBurnerClicks()
+    {
+        string sceneText = ReadKitchenSceneText();
+        string panelObject = FindGameObjectBlock(sceneText, "firpan_Panel");
+        string canvasGroupComponent = FindComponentBlockOnGameObject(sceneText, panelObject, "225");
+
+        StringAssert.Contains("m_BlocksRaycasts: 1", canvasGroupComponent);
+        StringAssert.Contains("m_Interactable: 1", canvasGroupComponent);
+
+        string panelImageComponent = FindComponentBlockOnGameObject(
+            sceneText,
+            panelObject,
+            "114",
+            "fe87c0e1cc204ed48ad3b37840f39efc");
+        StringAssert.Contains("m_RaycastTarget: 0", panelImageComponent);
+    }
+
+    [Test]
+    public void FripanPanel_BurnerButton_KeepsRaycastTargetEnabled()
+    {
+        string sceneText = ReadKitchenSceneText();
+        string burnerObject = FindGameObjectBlock(sceneText, "burner");
+        string imageComponent = FindComponentBlockOnGameObject(
+            sceneText,
+            burnerObject,
+            "114",
+            "fe87c0e1cc204ed48ad3b37840f39efc");
+        string buttonComponent = FindComponentBlockOnGameObject(
+            sceneText,
+            burnerObject,
+            "114",
+            "4e29b1a8efbd4b44bb3f3716e73f07ff");
+
+        StringAssert.Contains("m_RaycastTarget: 1", imageComponent);
+        StringAssert.Contains("m_MethodName: OnInteraction", buttonComponent);
+        StringAssert.Contains("m_StringArgument: burner", buttonComponent);
+    }
+
+    [Test]
     public void FripanWorldClick_IsRoutedThroughKitchenInteractionController()
     {
         string sceneText = ReadKitchenSceneText();
@@ -336,6 +375,29 @@ public class KitchenFripanClickTests
         MatchCollection matches = Regex.Matches(gameObjectBlock, @"- component: \{fileID: (?<id>[0-9]+)\}");
         Assert.Greater(matches.Count, componentIndex, $"GameObject did not have component index {componentIndex}.");
         return matches[componentIndex].Groups["id"].Value;
+    }
+
+    static string FindComponentBlockOnGameObject(
+        string sceneText,
+        string gameObjectBlock,
+        string unityType,
+        string scriptGuid = null)
+    {
+        foreach (Match match in Regex.Matches(gameObjectBlock, @"- component: \{fileID: (?<id>[0-9]+)\}"))
+        {
+            string fileId = match.Groups["id"].Value;
+            if (!Regex.IsMatch(sceneText, $@"--- !u!{Regex.Escape(unityType)} &{Regex.Escape(fileId)}\r?\n"))
+                continue;
+
+            string block = FindObjectBlock(sceneText, unityType, fileId);
+            if (scriptGuid != null && !block.Contains($"guid: {scriptGuid}"))
+                continue;
+
+            return block;
+        }
+
+        Assert.Fail($"Could not find component !u!{unityType} on GameObject.");
+        return string.Empty;
     }
 
     private static string FindObjectBlock(string sceneText, string unityType, string fileId)

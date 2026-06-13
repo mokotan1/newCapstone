@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// Debug 빌드 + 개발자 모드에서만 <see cref="Item"/>을 인벤토리에 지급합니다.
+/// <see cref="DeveloperModeController.CanUseDeveloperModeRuntime"/> + 개발자 모드에서만 <see cref="Item"/>을 인벤토리에 지급합니다.
 /// </summary>
 public static class DeveloperModeItemGrantService
 {
@@ -17,7 +17,7 @@ public static class DeveloperModeItemGrantService
     public static DeveloperModeItemSelectionGrantResult LastSelectionResult { get; private set; }
 
     public static bool CanGrant =>
-        Debug.isDebugBuild && DeveloperModeController.IsDeveloperModeEnabled;
+        DeveloperModeController.CanUseDeveloperModeRuntime && DeveloperModeController.IsDeveloperModeEnabled;
 
     public static List<DeveloperModeItemCatalogEntry> GetCatalogEntries()
     {
@@ -112,7 +112,7 @@ public static class DeveloperModeItemGrantService
         {
             report.WasBlockedByDevMode = true;
             LastReport = report;
-            GameLog.LogWarning("[DeveloperModeItemGrant] 거부: Debug 빌드가 아니거나 개발자 모드가 꺼져 있습니다.");
+            GameLog.LogWarning("[DeveloperModeItemGrant] 거부: 개발자 모드 런타임이 허용되지 않거나 개발자 모드가 꺼져 있습니다.");
             return report;
         }
 
