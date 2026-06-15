@@ -107,6 +107,11 @@ public sealed class ResolutionAudioSettings
         if (UseGlobalGraphics)
         {
             List<string> options = Global.GetResolutionOptions();
+            if (options == null || options.Count == 0)
+                options = ResolutionListUtility.BuildLabels(ResolutionListUtility.BuildPreferredResolutionList());
+            if (options.Count == 0)
+                options.Add("1920 x 1080");
+
             resolutionDropdown.AddOptions(options);
             int idx = Mathf.Clamp(Global.currentResolutionIndex, 0, Mathf.Max(0, options.Count - 1));
             resolutionDropdown.value = idx;
@@ -117,7 +122,11 @@ public sealed class ResolutionAudioSettings
         }
 
         _localResolutions = ResolutionListUtility.BuildPreferredResolutionList();
-        resolutionDropdown.AddOptions(ResolutionListUtility.BuildLabels(_localResolutions));
+        List<string> localOptions = ResolutionListUtility.BuildLabels(_localResolutions);
+        if (localOptions.Count == 0)
+            localOptions.Add("1920 x 1080");
+
+        resolutionDropdown.AddOptions(localOptions);
 
         int currentScreenIndex = 0;
         for (int i = 0; i < _localResolutions.Count; i++)
