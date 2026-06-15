@@ -45,13 +45,38 @@ public static class ResolutionListUtility
     public static List<Resolution> BuildPreferredResolutionList()
     {
         Resolution[] all = Screen.resolutions;
-        IEnumerable<Resolution> unique = all
+        List<Resolution> unique = all
             .GroupBy(r => new { r.width, r.height })
-            .Select(g => g.OrderByDescending(r => r.refreshRateRatio.value).First());
+            .Select(g => g.OrderByDescending(r => r.refreshRateRatio.value).First())
+            .OrderBy(r => r.width)
+            .ThenBy(r => r.height)
+            .ToList();
 
-        return unique
+        List<Resolution> preferred = unique
             .Where(r => PreferredSizes.Any(p => p.x == r.width && p.y == r.height))
             .ToList();
+
+        if (preferred.Count > 0)
+            return preferred;
+
+        if (unique.Count > 0)
+            return unique;
+
+        int fallbackWidth = Screen.currentResolution.width > 0 ? Screen.currentResolution.width : Screen.width;
+        int fallbackHeight = Screen.currentResolution.height > 0 ? Screen.currentResolution.height : Screen.height;
+        if (fallbackWidth <= 0)
+            fallbackWidth = 1920;
+        if (fallbackHeight <= 0)
+            fallbackHeight = 1080;
+
+        return new List<Resolution>
+        {
+            new Resolution
+            {
+                width = fallbackWidth,
+                height = fallbackHeight
+            }
+        };
     }
 
     public static List<string> BuildLabels(IReadOnlyList<Resolution> resolutions)

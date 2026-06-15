@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 public class MainMenu : MonoBehaviour
 {
     public Button[] menuButtons; // Start, Load, Setting, Exit
+    [SerializeField] private MainMenuConfigPanel configPanel;
 
     private int currentButtonIndex = 0;
     private Vector3 lastMousePosition;
@@ -16,6 +17,13 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+        if (configPanel == null)
+        {
+            MainMenuConfigPanel[] panels = Resources.FindObjectsOfTypeAll<MainMenuConfigPanel>();
+            if (panels.Length > 0)
+                configPanel = panels[0];
+        }
+
         SetKeyboardMode();
         lastMousePosition = Input.mousePosition;
         SelectButton(currentButtonIndex);
@@ -23,6 +31,13 @@ public class MainMenu : MonoBehaviour
 
     void Update()
     {
+        if (configPanel != null && configPanel.IsOpen)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+                configPanel.Close();
+            return;
+        }
+
         if (Input.mousePosition != lastMousePosition)
         {
             SetMouseMode();
@@ -112,7 +127,13 @@ public class MainMenu : MonoBehaviour
 
     public void OnSettingButton()
     {
+        if (configPanel != null)
+        {
+            configPanel.Toggle();
+            return;
+        }
 
+        GameLog.LogWarning("[MainMenu] ConfigPanel is not assigned.");
     }
 
     public void OnExitButton()

@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CommandInfo("Audio",
              "Play Random Registered SFX",
-             "Plays one random SFX clip from AudioController.sfxList by index.")]
+             "Plays one random SFX clip from SfxController.sfxList by index.")]
 [AddComponentMenu("")]
 public class PlayRandomRegisteredSfx : Command
 {
@@ -18,10 +18,10 @@ public class PlayRandomRegisteredSfx : Command
 
     public override void OnEnter()
     {
-        if (AudioController.Instance != null && sfxIndices != null && sfxIndices.Length > 0)
+        if (SfxController.Instance != null && sfxIndices != null && sfxIndices.Length > 0)
         {
             int selectedIndex = sfxIndices[Random.Range(0, sfxIndices.Length)];
-            AudioController.Instance.PlaySFX(selectedIndex);
+            SfxController.Instance.PlaySFX(selectedIndex);
         }
 
         Continue();
