@@ -53,8 +53,8 @@ env:
   UNITY_VERSION: "6000.0.36f1"
   PROJECT_PATH: disputatio
   TARGET_PLATFORM: StandaloneWindows64
-  BUILD_NAME: Disputatio
-  ARTIFACT_NAME: Disputatio-Windows
+  BUILD_NAME: The Unholy of Mention
+  ARTIFACT_NAME: The-Unholy-of-Mention-Windows
 
 jobs:
   build-windows:
@@ -123,7 +123,7 @@ jobs:
           if gh release view "${TAG}" >/dev/null 2>&1; then
             gh release upload "${TAG}" "${ZIP_NAME}" --clobber
           else
-            gh release create "${TAG}" "${ZIP_NAME}" --title "Disputatio ${TAG}" --notes "${NOTES}"
+            gh release create "${TAG}" "${ZIP_NAME}" --title "The Unholy of Mention ${TAG}" --notes "${NOTES}"
           fi
 ```
 
@@ -159,7 +159,7 @@ UNITY_PASSWORD
 
 Run the `Unity Client Build` workflow with `workflow_dispatch`.
 
-Expected: the workflow builds successfully and uploads a `Disputatio-Windows-*` artifact.
+Expected: the workflow builds successfully and uploads a `The-Unholy-of-Mention-Windows-*` artifact.
 
 - [ ] **Step 3: Test a release tag**
 
@@ -172,7 +172,7 @@ Expected: the workflow creates or updates the `v0.1.0-test` GitHub Release and a
 
 - [ ] **Step 4: Download and launch the build**
 
-Download the zip from GitHub Releases, extract it, and launch `Disputatio.exe`.
+Download the zip from GitHub Releases, extract it, and launch `The Unholy of Mention.exe`.
 
 Expected: the application opens and reaches the main menu.
 
