@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CommandInfo("Audio",
              "Stop Registered SFX",
-             "Stops active SFX instances started from AudioController.sfxList.")]
+             "Stops active SFX instances started from SfxController.sfxList.")]
 [AddComponentMenu("")]
 public class StopRegisteredSfx : Command
 {
@@ -21,12 +21,12 @@ public class StopRegisteredSfx : Command
 
     public override void OnEnter()
     {
-        if (AudioController.Instance != null)
+        if (SfxController.Instance != null)
         {
             if (stopAllSfx)
-                AudioController.Instance.StopAllSFX();
+                SfxController.Instance.StopAllSFX();
             else
-                AudioController.Instance.StopSFX(sfxIndex);
+                SfxController.Instance.StopSFX(sfxIndex);
         }
 
         Continue();

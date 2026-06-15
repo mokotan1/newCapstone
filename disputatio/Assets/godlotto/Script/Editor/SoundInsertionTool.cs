@@ -9,8 +9,8 @@ using UnityEngine.SceneManagement;
 public sealed class SoundInsertionTool : EditorWindow
 {
     private const string AudioBridgePrefabPath = "Assets/godlotto/Prefab/Audio Bridge.prefab";
-    private const string BgmPlayerPrefabPath = "Assets/godlotto/Prefab/BGM Player.prefab";
-    private const string RuntimeBgmPlayerPrefabPath = "Assets/godlotto/Resources/Audio/BGM Player.prefab";
+    private const string SfxPlayerPrefabPath = "Assets/godlotto/Prefab/SFX Player.prefab";
+    private const string RuntimeSfxPlayerPrefabPath = "Assets/godlotto/Resources/Audio/SFX Player.prefab";
 
     private AudioClip selectedClip;
     private int sfxIndex;
@@ -87,8 +87,8 @@ public sealed class SoundInsertionTool : EditorWindow
 
     private static void AddClipToGlobalSfxList(AudioClip clip)
     {
-        int authoringIndex = AddClipToPrefabSfxList(BgmPlayerPrefabPath, clip);
-        int runtimeIndex = AddClipToPrefabSfxList(RuntimeBgmPlayerPrefabPath, clip);
+        int authoringIndex = AddClipToPrefabSfxList(SfxPlayerPrefabPath, clip);
+        int runtimeIndex = AddClipToPrefabSfxList(RuntimeSfxPlayerPrefabPath, clip);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -99,8 +99,8 @@ public sealed class SoundInsertionTool : EditorWindow
 
     private static void ClearGlobalSfxIndex(int index)
     {
-        SetPrefabSfxIndex(BgmPlayerPrefabPath, index, null, removeSlot: false);
-        SetPrefabSfxIndex(RuntimeBgmPlayerPrefabPath, index, null, removeSlot: false);
+        SetPrefabSfxIndex(SfxPlayerPrefabPath, index, null, removeSlot: false);
+        SetPrefabSfxIndex(RuntimeSfxPlayerPrefabPath, index, null, removeSlot: false);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"[SoundInsertionTool] SFX index {index} 슬롯을 비웠습니다. 기존 Fungus 인덱스는 유지됩니다.");
@@ -108,8 +108,8 @@ public sealed class SoundInsertionTool : EditorWindow
 
     private static void RemoveGlobalSfxIndex(int index)
     {
-        SetPrefabSfxIndex(BgmPlayerPrefabPath, index, null, removeSlot: true);
-        SetPrefabSfxIndex(RuntimeBgmPlayerPrefabPath, index, null, removeSlot: true);
+        SetPrefabSfxIndex(SfxPlayerPrefabPath, index, null, removeSlot: true);
+        SetPrefabSfxIndex(RuntimeSfxPlayerPrefabPath, index, null, removeSlot: true);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.LogWarning($"[SoundInsertionTool] SFX index {index}를 삭제했습니다. 뒤쪽 index가 당겨졌으므로 기존 Fungus 참조를 확인하십시오.");
@@ -120,10 +120,10 @@ public sealed class SoundInsertionTool : EditorWindow
         GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
         try
         {
-            AudioController controller = prefabRoot.GetComponent<AudioController>();
+            SfxController controller = prefabRoot.GetComponent<SfxController>();
             if (controller == null)
             {
-                Debug.LogError($"[SoundInsertionTool] AudioController가 없습니다: {prefabPath}");
+                Debug.LogError($"[SoundInsertionTool] SfxController가 없습니다: {prefabPath}");
                 return -1;
             }
 
@@ -148,7 +148,7 @@ public sealed class SoundInsertionTool : EditorWindow
         GameObject prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
         try
         {
-            AudioController controller = prefabRoot.GetComponent<AudioController>();
+            SfxController controller = prefabRoot.GetComponent<SfxController>();
             if (controller == null || controller.sfxList == null || index < 0 || index >= controller.sfxList.Length)
                 return;
 
@@ -169,8 +169,8 @@ public sealed class SoundInsertionTool : EditorWindow
 
     private void DrawCurrentSfxList()
     {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RuntimeBgmPlayerPrefabPath);
-        AudioController controller = prefab != null ? prefab.GetComponent<AudioController>() : null;
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RuntimeSfxPlayerPrefabPath);
+        SfxController controller = prefab != null ? prefab.GetComponent<SfxController>() : null;
 
         EditorGUILayout.LabelField("Current Runtime SFX Index", EditorStyles.boldLabel);
         if (controller == null || controller.sfxList == null || controller.sfxList.Length == 0)
