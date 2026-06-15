@@ -39,6 +39,13 @@ public class ServerConfigTests
         Assert.IsTrue(config.BypassTlsCertificate);
     }
 
+    [Test]
+    public void FreshInstance_ChatApiToken_DefaultsToEmpty()
+    {
+        ServerConfig config = ScriptableObject.CreateInstance<ServerConfig>();
+        Assert.AreEqual("", config.ChatApiToken);
+    }
+
     // ---------------------------------------------------------------
     //  Caching behavior
     // ---------------------------------------------------------------
@@ -101,6 +108,7 @@ public class ServerConfigTests
         Assert.AreNotSame(a, b);
         Assert.AreEqual(a.ChatUrl, b.ChatUrl);
         Assert.AreEqual(a.BypassTlsCertificate, b.BypassTlsCertificate);
+        Assert.AreEqual(a.ChatApiToken, b.ChatApiToken);
     }
 
     [Test]

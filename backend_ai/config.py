@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str = ""
     google_api_key: str = ""
+    chat_api_token: str = ""
 
     default_model_groq: str = "llama-3.3-70b-versatile"
     default_model_gemini: str = "gemini-2.0-flash"

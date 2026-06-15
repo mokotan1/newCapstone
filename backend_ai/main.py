@@ -15,6 +15,7 @@ from models.responses import ChatResponse, TutorGradeResponse
 from providers.groq_provider import GroqProvider
 from providers.gemini_provider import GeminiProvider
 from services.chat_service import ChatService
+from services.chat_auth import verify_chat_api_token
 from services.quiz_bank import QuizBank
 from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
 from services.rate_limit import build_rate_limiter
@@ -104,6 +105,7 @@ async def chat(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(status_code=500, detail="API 키 설정 필요")
 
+    verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
     result = await chat_service.chat(payload)
@@ -127,6 +129,7 @@ async def chat_stream(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(status_code=500, detail="API 키 설정 필요")
 
+    verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
     async def event_generator():

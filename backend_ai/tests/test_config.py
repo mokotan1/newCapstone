@@ -26,3 +26,9 @@ def test_get_settings_legacy_capstone_when_groq_empty(monkeypatch, fresh_setting
     monkeypatch.setenv("capstone", "legacy-key")
     cfg = importlib.reload(fresh_settings)
     assert cfg.get_settings().groq_api_key == "legacy-key"
+
+
+def test_get_settings_loads_chat_api_token(monkeypatch, fresh_settings):
+    monkeypatch.setenv("CHAT_API_TOKEN", "server-token")
+    cfg = importlib.reload(fresh_settings)
+    assert cfg.get_settings().chat_api_token == "server-token"

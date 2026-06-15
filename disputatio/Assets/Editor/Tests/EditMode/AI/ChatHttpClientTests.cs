@@ -91,13 +91,36 @@ public class ChatHttpClientTests
     }
 
     [Test]
-    public void ResolveChatClientUserId_InEditor_ReturnsEditorId()
+    public void ResolveChatClientUserId_ReturnsAnonymousStableId()
     {
-#if UNITY_EDITOR
-        Assert.AreEqual("unity-editor", ChatHttpClient.ResolveChatClientUserId());
-#else
-        Assert.Pass("Skipped: not running in editor.");
-#endif
+        ChatHttpClient.ResetAnonymousUserIdForTest();
+
+        string first = ChatHttpClient.ResolveChatClientUserId();
+        string second = ChatHttpClient.ResolveChatClientUserId();
+
+        Assert.IsTrue(first.StartsWith("anon-"));
+        Assert.AreEqual(first, second);
+        Assert.AreEqual(41, first.Length);
+    }
+
+    [Test]
+    public void GetChatApiTokenHeader_EmptyToken_ReturnsFalse()
+    {
+        bool hasHeader = ChatHttpClient.TryGetChatApiTokenHeader("", out string headerName, out string headerValue);
+
+        Assert.IsFalse(hasHeader);
+        Assert.AreEqual("", headerName);
+        Assert.AreEqual("", headerValue);
+    }
+
+    [Test]
+    public void GetChatApiTokenHeader_Token_ReturnsAuthorizationBearer()
+    {
+        bool hasHeader = ChatHttpClient.TryGetChatApiTokenHeader("  secret-token  ", out string headerName, out string headerValue);
+
+        Assert.IsTrue(hasHeader);
+        Assert.AreEqual("Authorization", headerName);
+        Assert.AreEqual("Bearer secret-token", headerValue);
     }
 
     // ---------------------------------------------------------------
