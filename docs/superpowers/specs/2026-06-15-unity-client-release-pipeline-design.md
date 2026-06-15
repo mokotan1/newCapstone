@@ -19,9 +19,10 @@ The client pipeline uses three levels of confidence:
 
 - `workflow_dispatch`: manual smoke test for the GitHub Actions build pipeline.
 - `pull_request`: build validation for Unity project changes, with an artifact uploaded for inspection.
+- `push` to `main`: builds the Windows client and uploads a GitHub Actions artifact when Unity project files change.
 - `push` tag `v*`: production release path. Builds the Windows client, zips the output, creates or updates a GitHub Release, and uploads the zip.
 
-Regular `main` pushes do not create releases. This avoids noisy release history and keeps release creation intentional.
+Regular `main` pushes create build artifacts but do not create releases. This avoids noisy release history and keeps release creation intentional.
 
 ## Workflow Behavior
 
@@ -30,7 +31,7 @@ The workflow creates a Windows x64 standalone build using GameCI Unity Builder. 
 - `projectPath: disputatio`
 - `unityVersion: 6000.0.36f1`
 - `targetPlatform: StandaloneWindows64`
-- `buildName: Disputatio`
+- `buildName: The Unholy of Mention`
 
 The workflow uploads the build zip as a GitHub Actions artifact on every successful run. On `v*` tags, it also publishes the zip to GitHub Releases.
 
@@ -62,7 +63,7 @@ The first verification path is:
 1. Run the workflow manually with `workflow_dispatch`.
 2. Confirm the Actions artifact exists.
 3. Download and unzip the artifact.
-4. Confirm `Disputatio.exe` exists in the zip.
+4. Confirm `The Unholy of Mention.exe` exists in the zip.
 5. Run the executable locally and verify the main menu opens.
 
 The release verification path is:
