@@ -39,8 +39,15 @@ on:
       - "disputatio/Packages/**"
       - "disputatio/ProjectSettings/**"
   push:
+    branches:
+      - main
     tags:
       - "v*"
+    paths:
+      - ".github/workflows/unity-client-build.yml"
+      - "disputatio/Assets/**"
+      - "disputatio/Packages/**"
+      - "disputatio/ProjectSettings/**"
 
 permissions:
   contents: write

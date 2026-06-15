@@ -19,9 +19,10 @@ The client pipeline uses three levels of confidence:
 
 - `workflow_dispatch`: manual smoke test for the GitHub Actions build pipeline.
 - `pull_request`: build validation for Unity project changes, with an artifact uploaded for inspection.
+- `push` to `main`: builds the Windows client and uploads a GitHub Actions artifact when Unity project files change.
 - `push` tag `v*`: production release path. Builds the Windows client, zips the output, creates or updates a GitHub Release, and uploads the zip.
 
-Regular `main` pushes do not create releases. This avoids noisy release history and keeps release creation intentional.
+Regular `main` pushes create build artifacts but do not create releases. This avoids noisy release history and keeps release creation intentional.
 
 ## Workflow Behavior
 
