@@ -38,29 +38,36 @@ public sealed class DeveloperModeItemPickerGui
         "기타",
     };
 
-    public void Draw()
+    public void Draw(DeveloperModeGuiStyles styles)
     {
+        if (styles == null)
+            return;
+
         if (!DeveloperModeItemGrantService.CanGrant)
             return;
 
-        sectionExpanded = GUILayout.Toggle(sectionExpanded, "아이템 선택 지급", "Button");
+        sectionExpanded = GUILayout.Toggle(sectionExpanded, "아이템 선택 지급", styles.ToggleButton);
         if (!sectionExpanded)
             return;
 
         RefreshCatalogIfNeeded();
         RefreshFilteredEntries();
 
-        GUILayout.BeginVertical("box");
-        GUILayout.Label("검색 (이름 / ID / 카테고리 / 설명)");
-        searchQuery = GUILayout.TextField(searchQuery ?? string.Empty);
+        GUILayout.BeginVertical(styles.Box);
+        GUILayout.Label("검색 (이름 / ID / 카테고리 / 설명)", styles.Label);
+        searchQuery = GUILayout.TextField(searchQuery ?? string.Empty, styles.TextField);
 
         categoryFilterIndex = GUILayout.SelectionGrid(
             categoryFilterIndex,
             CategoryFilterLabels,
-            4);
+            4,
+            styles.Button);
 
-        GUILayout.Label($"목록 {filteredEntries.Count} / {catalogCache.Count}");
-        itemListScroll = GUILayout.BeginScrollView(itemListScroll, GUILayout.Height(140f));
+        GUILayout.Label($"목록 {filteredEntries.Count} / {catalogCache.Count}", styles.Label);
+        itemListScroll = GUILayout.BeginScrollView(
+            itemListScroll,
+            styles.Box,
+            GUILayout.Height(styles.ScaledHeight(140f)));
         for (int i = 0; i < filteredEntries.Count; i++)
         {
             DeveloperModeItemCatalogEntry entry = filteredEntries[i];
@@ -68,30 +75,28 @@ public sealed class DeveloperModeItemPickerGui
                 continue;
 
             bool isSelected = i == selectedEntryIndex;
-            GUIStyle style = isSelected ? GUI.skin.button : GUI.skin.label;
-            if (GUILayout.Button(entry.ListLabel, style))
-            {
+            GUIStyle rowStyle = isSelected ? styles.Button : styles.Label;
+            if (GUILayout.Button(entry.ListLabel, rowStyle))
                 selectedEntryIndex = i;
-            }
 
             if (isSelected)
-                GUILayout.Label(entry.ShortDescription);
+                GUILayout.Label(entry.ShortDescription, styles.Label);
         }
         GUILayout.EndScrollView();
 
         GUILayout.BeginHorizontal();
-        GUILayout.Label("수량", GUILayout.Width(36f));
-        quantityText = GUILayout.TextField(quantityText ?? "1", GUILayout.Width(48f));
-        if (GUILayout.Button("선택 아이템 지급", GUILayout.Width(140f)))
+        GUILayout.Label("수량", styles.Label, GUILayout.Width(styles.ScaledWidth(36f)));
+        quantityText = GUILayout.TextField(quantityText ?? "1", styles.TextField, GUILayout.Width(styles.ScaledWidth(48f)));
+        if (GUILayout.Button("선택 아이템 지급", styles.Button, GUILayout.Width(styles.ScaledWidth(140f))))
             GrantSelectedEntry();
         GUILayout.EndHorizontal();
 
-        GUILayout.Label("인벤토리는 스택 불가 — 동일 아이템은 1개만 지급됩니다.");
+        GUILayout.Label("인벤토리는 스택 불가 — 동일 아이템은 1개만 지급됩니다.", styles.Label);
 
         if (lastResult != null)
-            GUILayout.Label(lastResult.ToString());
+            GUILayout.Label(lastResult.ToString(), styles.Label);
         else if (DeveloperModeItemGrantService.LastSelectionResult != null)
-            GUILayout.Label(DeveloperModeItemGrantService.LastSelectionResult.ToString());
+            GUILayout.Label(DeveloperModeItemGrantService.LastSelectionResult.ToString(), styles.Label);
 
         GUILayout.EndVertical();
     }

@@ -65,6 +65,9 @@ namespace Godlotto.Interaction
                 if (binding.collider == null || !binding.collider.enabled)
                     continue;
 
+                if (!ShouldProcessWorldClickBinding(binding, screenPosition))
+                    continue;
+
                 if (!binding.collider.OverlapPoint(ScreenToWorldOnGameplayPlane(screenPosition)))
                     continue;
 
@@ -72,6 +75,8 @@ namespace Godlotto.Interaction
                 return;
             }
         }
+
+        protected virtual bool ShouldProcessWorldClickBinding(WorldClickBinding binding, Vector2 screenPosition) => true;
 
         /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
         public virtual void OnInteraction(string interactionId)

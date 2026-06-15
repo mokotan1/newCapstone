@@ -5,7 +5,7 @@ public static class DeveloperModeBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureDeveloperModeController()
     {
-        if (!Debug.isDebugBuild)
+        if (!DeveloperModeController.CanUseDeveloperModeRuntime)
             return;
 
         if (Object.FindFirstObjectByType<DeveloperModeController>(FindObjectsInactive.Include) != null)

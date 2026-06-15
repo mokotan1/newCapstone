@@ -47,6 +47,8 @@ namespace Godlotto.Interaction
             CloseBottlePanel();
         }
 
+        public bool IsFripanPanelOpen => fripanPanel != null && fripanPanel.activeInHierarchy;
+
         internal IReadOnlyList<GameObject> GetAllPanels() => new[]
         {
             burnerPanel,

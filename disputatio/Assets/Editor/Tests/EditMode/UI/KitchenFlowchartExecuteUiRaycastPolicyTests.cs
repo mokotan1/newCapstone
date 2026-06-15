@@ -31,6 +31,23 @@ public class KitchenFlowchartExecuteUiRaycastPolicyTests
     }
 
     [Test]
+    public void ConfigureExecuteButton_KeepsRaycast_ForTransparentPanelHitTarget()
+    {
+        GameObject panel = CreatePanelBackground("firpan_Panel");
+        Button burnerButton = CreateButton("burner", alpha: 0f);
+        burnerButton.transform.SetParent(panel.transform, false);
+
+        var registryGo = new GameObject("Registry");
+        spawned.Add(registryGo);
+        var registry = registryGo.AddComponent<KitchenPanelRegistry>();
+        SetRegistryField(registry, "fripanPanel", panel);
+
+        KitchenFlowchartExecuteUiRaycastPolicy.ConfigureExecuteButton(burnerButton, registry);
+
+        Assert.IsTrue(burnerButton.targetGraphic.raycastTarget);
+    }
+
+    [Test]
     public void ConfigureExecuteButton_KeepsRaycast_ForVisibleExecuteGraphic()
     {
         Button button = CreateButton("VisibleExecute", alpha: 1f);
@@ -41,14 +58,28 @@ public class KitchenFlowchartExecuteUiRaycastPolicyTests
     }
 
     [Test]
-    public void DisableDecorativePanelBackgroundRaycast_TurnsOffBackgroundImage()
+    public void DisableDecorativePanelBackgroundRaycast_TurnsOffBackgroundImage_KeepsCanvasGroupBlocksRaycasts()
     {
         GameObject panel = CreatePanelBackground("Sink_Pannel");
 
         KitchenFlowchartExecuteUiRaycastPolicy.DisableDecorativePanelBackgroundRaycast(panel);
 
         Assert.IsFalse(panel.GetComponent<Image>().raycastTarget);
-        Assert.IsFalse(panel.GetComponent<CanvasGroup>().blocksRaycasts);
+        Assert.IsTrue(panel.GetComponent<CanvasGroup>().blocksRaycasts);
+    }
+
+    [Test]
+    public void DisableDecorativePanelBackgroundRaycast_LeavesChildButtonRaycastEnabled()
+    {
+        GameObject panel = CreatePanelBackground("firpan_Panel");
+        Button childButton = CreateButton("ChildAction", alpha: 1f);
+        childButton.transform.SetParent(panel.transform, false);
+
+        KitchenFlowchartExecuteUiRaycastPolicy.DisableDecorativePanelBackgroundRaycast(panel);
+
+        Assert.IsFalse(panel.GetComponent<Image>().raycastTarget);
+        Assert.IsTrue(panel.GetComponent<CanvasGroup>().blocksRaycasts);
+        Assert.IsTrue(childButton.targetGraphic.raycastTarget);
     }
 
     [Test]
@@ -86,5 +117,12 @@ public class KitchenFlowchartExecuteUiRaycastPolicyTests
         image.raycastTarget = true;
         go.GetComponent<CanvasGroup>().blocksRaycasts = true;
         return go;
+    }
+
+    static void SetRegistryField(KitchenPanelRegistry registry, string fieldName, GameObject panel)
+    {
+        typeof(KitchenPanelRegistry)
+            .GetField(fieldName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?.SetValue(registry, panel);
     }
 }

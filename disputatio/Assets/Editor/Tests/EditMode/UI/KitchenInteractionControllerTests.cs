@@ -10,7 +10,11 @@ public class KitchenInteractionControllerTests
     GameObject root;
     KitchenInteractionController controller;
     KitchenPuzzleState puzzleState;
+    KitchenSinkWaterDisplay sinkWaterDisplay;
     Flowchart flowchart;
+    GameObject water;
+    GameObject faucetClosed;
+    GameObject faucetOpen;
 
     [SetUp]
     public void SetUp()
@@ -26,7 +30,31 @@ public class KitchenInteractionControllerTests
         puzzleState = root.AddComponent<KitchenPuzzleState>();
         controller = root.AddComponent<KitchenInteractionController>();
 
+        var displayPanel = new GameObject(KitchenSinkWaterDisplayPolicy.SinkPanelName);
+        displayPanel.transform.SetParent(root.transform, false);
+        var overlayGo = new GameObject(KitchenSinkWaterDisplayPolicy.OverlayChildName);
+        overlayGo.transform.SetParent(displayPanel.transform, false);
+        var overlayCanvas = overlayGo.AddComponent<Canvas>();
+        var faucetClosedGo = new GameObject(KitchenSinkWaterDisplayPolicy.FaucetClosedName);
+        var faucetOpenGo = new GameObject(KitchenSinkWaterDisplayPolicy.FaucetOpenName);
+        var waterGo = new GameObject(KitchenSinkWaterDisplayPolicy.WaterRootName);
+        faucetClosedGo.transform.SetParent(displayPanel.transform, false);
+        faucetOpenGo.transform.SetParent(overlayGo.transform, false);
+        waterGo.transform.SetParent(overlayGo.transform, false);
+        faucetClosed = faucetClosedGo;
+        faucetOpen = faucetOpenGo;
+        water = waterGo;
+
+        sinkWaterDisplay = displayPanel.AddComponent<KitchenSinkWaterDisplay>();
+        sinkWaterDisplay.SetReferencesForTests(
+            new GameObject(KitchenSinkWaterDisplayPolicy.BackgroundChildName),
+            overlayCanvas,
+            faucetClosed,
+            faucetOpen,
+            water);
+
         puzzleState.SetFlowchartForTests(flowchart);
+        controller.SetSinkWaterDisplayForTests(sinkWaterDisplay);
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.FaucetClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
@@ -135,6 +163,82 @@ public class KitchenInteractionControllerTests
         Assert.AreEqual(KitchenSinkInteractionGate.BottleDraggedBlockName, executedBlock);
         Assert.IsTrue(puzzleState.BottleDragged);
         Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.BottleDragged));
+        Assert.IsFalse(water.activeSelf);
+        Assert.IsTrue(faucetClosed.activeSelf);
+        Assert.IsFalse(faucetOpen.activeSelf);
+    }
+
+    [Test]
+    public void PrepareInteractionExecution_Faucet_DoesNotSyncWaterBeforeBlockCompletion()
+    {
+        puzzleState.SetSinkFlagsForTests(hasBottle: true, bottleClicked: true, faucetClicked: false, bottleDragged: false);
+
+        InvokePrepareInteractionExecution(
+            KitchenSinkInteractionGate.FaucetInteractionId,
+            KitchenSinkInteractionGate.FaucetBlockName);
+
+        Assert.IsFalse(water.activeSelf);
+        Assert.IsTrue(faucetClosed.activeSelf);
+        Assert.IsFalse(faucetOpen.activeSelf);
+    }
+
+    [Test]
+    public void OnBlockEnd_Faucet_SyncsWaterDisplayFromPuzzleState()
+    {
+        puzzleState.SetSinkFlagsForTests(hasBottle: true, bottleClicked: true, faucetClicked: false, bottleDragged: false);
+
+        controller.InvokeBlockEndForTests(CreateBlock(flowchart, KitchenSinkInteractionGate.FaucetBlockName));
+
+        Assert.IsTrue(puzzleState.FaucetClicked);
+        Assert.IsTrue(water.activeSelf);
+        Assert.IsFalse(faucetClosed.activeSelf);
+        Assert.IsTrue(faucetOpen.activeSelf);
+    }
+
+    [Test]
+    public void OnBlockEnd_BottleDragged_TurnsWaterDisplayOff()
+    {
+        puzzleState.SetSinkFlagsForTests(hasBottle: true, bottleClicked: true, faucetClicked: true, bottleDragged: false);
+        sinkWaterDisplay.SyncFromFaucetClicked(true);
+
+        controller.InvokeBlockEndForTests(CreateBlock(flowchart, KitchenSinkInteractionGate.BottleDraggedBlockName));
+
+        Assert.IsTrue(puzzleState.BottleDragged);
+        Assert.IsFalse(water.activeSelf);
+        Assert.IsTrue(faucetClosed.activeSelf);
+        Assert.IsFalse(faucetOpen.activeSelf);
+    }
+
+    [Test]
+    public void ShouldProcessWorldClickBinding_SuppressesFripanAndBurner_WhenFripanPanelOpen()
+    {
+        var registryGo = new GameObject("Registry");
+        var registry = registryGo.AddComponent<KitchenPanelRegistry>();
+        var fripanPanel = CreatePanel("firpan_Panel", active: true);
+        SetRegistryField(registry, "fripanPanel", fripanPanel);
+        SetPrivateField(controller, "panelRegistry", registry);
+
+        var fripanBinding = new WorldClickBinding { interactionId = "fripan" };
+        var burnerBinding = new WorldClickBinding { interactionId = "burner" };
+        var doorBinding = new WorldClickBinding { interactionId = "door" };
+
+        Assert.IsFalse(InvokeShouldProcessWorldClickBinding(fripanBinding));
+        Assert.IsFalse(InvokeShouldProcessWorldClickBinding(burnerBinding));
+        Assert.IsTrue(InvokeShouldProcessWorldClickBinding(doorBinding));
+
+        fripanPanel.SetActive(false);
+        Assert.IsTrue(InvokeShouldProcessWorldClickBinding(fripanBinding));
+
+        Object.DestroyImmediate(registryGo);
+        Object.DestroyImmediate(fripanPanel);
+    }
+
+    bool InvokeShouldProcessWorldClickBinding(WorldClickBinding binding)
+    {
+        var method = typeof(KitchenInteractionController).GetMethod(
+            "ShouldProcessWorldClickBinding",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        return (bool)method.Invoke(controller, new object[] { binding, Vector2.zero });
     }
 
     [Test]
@@ -240,8 +344,15 @@ public class KitchenInteractionControllerTests
         return block;
     }
 
-    static void AddBooleanVariable(Flowchart target, string key, bool value)
+    void InvokePrepareInteractionExecution(string interactionId, string blockName)
     {
+        typeof(KitchenInteractionController).GetMethod(
+            "PrepareInteractionExecution",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?.Invoke(controller, new object[] { interactionId, blockName });
+    }
+
+    static void AddBooleanVariable(Flowchart target, string key, bool value)    {
         var variable = target.gameObject.AddComponent<BooleanVariable>();
         variable.Key = key;
         variable.Value = value;
