@@ -85,6 +85,7 @@ public sealed class ChatHttpClient
 {
     private const int NonStreamingTimeoutSeconds = 60;
     private const int StreamingTimeoutSeconds = 120;
+    private const string AnonymousUserIdPrefsKey = "ChatHttpClient.AnonymousUserId";
 
     private readonly Func<string> _resolveServerUrl;
     private readonly IChatHttpCallbacks _host;
@@ -123,12 +124,35 @@ public sealed class ChatHttpClient
     /// <summary>일부 백엔드(Gains 등)가 요구하는 <c>user_id</c>.</summary>
     public static string ResolveChatClientUserId()
     {
-#if UNITY_EDITOR
-        return "unity-editor";
-#else
-        string id = SystemInfo.deviceUniqueIdentifier;
-        return string.IsNullOrEmpty(id) ? "unknown-device" : id;
-#endif
+        string existing = PlayerPrefs.GetString(AnonymousUserIdPrefsKey, "");
+        if (!string.IsNullOrEmpty(existing))
+            return existing;
+
+        string created = "anon-" + Guid.NewGuid().ToString("D");
+        PlayerPrefs.SetString(AnonymousUserIdPrefsKey, created);
+        PlayerPrefs.Save();
+        return created;
+    }
+
+    internal static void ResetAnonymousUserIdForTest()
+    {
+        PlayerPrefs.DeleteKey(AnonymousUserIdPrefsKey);
+        PlayerPrefs.Save();
+    }
+
+    public static bool TryGetChatApiTokenHeader(string token, out string headerName, out string headerValue)
+    {
+        string trimmed = (token ?? "").Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            headerName = "";
+            headerValue = "";
+            return false;
+        }
+
+        headerName = "Authorization";
+        headerValue = "Bearer " + trimmed;
+        return true;
     }
 
     public static void AttachCertificateBypass(UnityWebRequest request)
@@ -178,6 +202,7 @@ public sealed class ChatHttpClient
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
+            AttachChatApiToken(request);
             AttachCertificateBypass(request);
             request.timeout = NonStreamingTimeoutSeconds;
 
@@ -264,6 +289,7 @@ public sealed class ChatHttpClient
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Accept", "text/event-stream");
+            AttachChatApiToken(request);
             AttachCertificateBypass(request);
             request.timeout = StreamingTimeoutSeconds;
 
@@ -346,5 +372,11 @@ public sealed class ChatHttpClient
                 _host.HandleChatbotResponse(responseText, functionCalls));
             _host.IsRequestInProgress = false;
         }
+    }
+
+    private static void AttachChatApiToken(UnityWebRequest request)
+    {
+        if (TryGetChatApiTokenHeader(ServerConfig.GetOrCreate().ChatApiToken, out string headerName, out string headerValue))
+            request.SetRequestHeader(headerName, headerValue);
     }
 }
