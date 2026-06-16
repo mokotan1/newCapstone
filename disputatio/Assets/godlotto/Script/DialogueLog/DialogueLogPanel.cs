@@ -42,8 +42,11 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     [SerializeField] private int canvasSortingOrder = 60;
 
     readonly List<DialogueLogEntry> entries = new List<DialogueLogEntry>();
+    readonly List<DialogueLogEntry> cheshireEntries = new List<DialogueLogEntry>();
     readonly List<DialogInput> disabledInputs = new List<DialogInput>();
     DialogueLogSayDialogSnapshot sayDialogSnapshot;
+    DialogueLogTabBar activeTabBar;
+    DialogueLogContentTab activeContentTab = DialogueLogContentTab.Dialogue;
     bool isOpen;
 
     GameObject activePanelRoot;
@@ -52,6 +55,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
     public bool IsOpen => isOpen;
     public DialogueLogVisualStyle VisualStyle => visualStyle;
+    public DialogueLogContentTab ActiveContentTab => activeContentTab;
 
     /// <summary>
     /// EditMode 테스트에서 DontDestroyOnLoad 직후 static Instance가 비는 경우를 보정한다.
@@ -133,6 +137,43 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         DialogueLogLogic.TryAppend(entries, sayDialog.NameText, sayDialog.StoryText);
     }
 
+    /// <summary>체셔 탭에 플레이어 질문을 추가한다.</summary>
+    public bool TryAppendCheshirePlayer(string text) =>
+        TryAppendCheshire(DialogueLogLogic.CheshirePlayerSpeaker, text);
+
+    /// <summary>체셔 탭에 체셔 최종 응답을 한 번만 추가한다.</summary>
+    public bool TryAppendCheshireResponse(string text) =>
+        TryAppendCheshire(DialogueLogLogic.CheshireBotSpeaker, text);
+
+    bool TryAppendCheshire(string speaker, string text)
+    {
+        if (!DialogueLogLogic.TryAppend(cheshireEntries, speaker, text))
+            return false;
+
+        if (isOpen && activeContentTab == DialogueLogContentTab.Cheshire)
+        {
+            BuildContent();
+            StartCoroutine(ScrollToBottomNextFrame());
+        }
+
+        return true;
+    }
+
+    public void SelectContentTab(DialogueLogContentTab tab)
+    {
+        if (activeContentTab == tab)
+            return;
+
+        activeContentTab = tab;
+        activeTabBar?.SetSelected(activeContentTab);
+
+        if (!isOpen)
+            return;
+
+        BuildContent();
+        StartCoroutine(ScrollToBottomNextFrame());
+    }
+
     public void Toggle()
     {
         if (!isOpen && ModalGamePause.IsSettingsOpen)
@@ -154,6 +195,8 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         isOpen = true;
         activePanelRoot.SetActive(true);
 
+        EnsureTabBar();
+        activeTabBar?.SetSelected(activeContentTab);
         BuildContent();
         EnsureCanvasSortsAboveSayDialog();
         BlockDialogueAdvance();
@@ -244,30 +287,99 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
         Transform content = activeScrollRect.content;
         for (int i = content.childCount - 1; i >= 0; i--)
-            Destroy(content.GetChild(i).gameObject);
+        {
+            GameObject child = content.GetChild(i).gameObject;
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                DestroyImmediate(child);
+            else
+#endif
+                Destroy(child);
+        }
 
         var palette = DialogueLogStylePalette.ForStyle(visualStyle);
 
-        foreach (DialogueLogEntry entry in entries)
+        IReadOnlyList<DialogueLogEntry> source = GetActiveEntries();
+        if (source.Count == 0)
         {
-            GameObject go = Instantiate(activeEntryPrefab, content);
-            go.SetActive(true);
+            ShowEmptyState(content);
+            return;
+        }
 
-            var entryView = go.GetComponent<DialogueLogEntryView>();
-            if (entryView != null)
-            {
-                entryView.Bind(entry, palette);
-                continue;
-            }
+        for (int i = 0; i < source.Count; i++)
+            InstantiateEntryView(source[i], content, palette);
+    }
 
-            var label = go.GetComponentInChildren<TMP_Text>(true);
-            if (label != null)
-            {
-                label.text = DialogueLogLogic.FormatEntry(entry);
-                DialogueLogTypography.ApplyBody(label, visualStyle);
-            }
+    void ShowEmptyState(Transform content)
+    {
+        var emptyGo = new GameObject("EmptyState", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        emptyGo.transform.SetParent(content, false);
+
+        var rect = emptyGo.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        var label = emptyGo.GetComponent<TextMeshProUGUI>();
+        label.text = activeContentTab == DialogueLogContentTab.Cheshire
+            ? DialogueLogTabSpec.EmptyCheshireText
+            : DialogueLogTabSpec.EmptyDialogueText;
+        label.alignment = TextAlignmentOptions.Center;
+        label.verticalAlignment = VerticalAlignmentOptions.Middle;
+        label.color = DialogueLogTabSpec.EmptyTextColor;
+        label.raycastTarget = false;
+        label.enableAutoSizing = false;
+        label.fontSize = DialogueLogTabSpec.EmptyFontSize;
+    }
+
+    IReadOnlyList<DialogueLogEntry> GetActiveEntries() =>
+        activeContentTab == DialogueLogContentTab.Cheshire ? cheshireEntries : entries;
+
+    void InstantiateEntryView(DialogueLogEntry entry, Transform content, DialogueLogStylePalette palette)
+    {
+        GameObject go = Instantiate(activeEntryPrefab, content);
+        go.SetActive(true);
+
+        var entryView = go.GetComponent<DialogueLogEntryView>();
+        if (entryView != null)
+        {
+            entryView.Bind(entry, palette);
+            return;
+        }
+
+        var label = go.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = DialogueLogLogic.FormatEntry(entry);
+            DialogueLogTypography.ApplyBody(label, visualStyle);
         }
     }
+
+    void EnsureTabBar()
+    {
+        if (activePanelRoot == null)
+            return;
+
+        activeTabBar = DialogueLogTabBar.EnsureUnder(activePanelRoot.transform, this, visualStyle);
+        if (activeTabBar != null)
+            activeTabBar.gameObject.SetActive(true);
+
+        if (visualStyle == DialogueLogVisualStyle.ParchmentCodex && activeScrollRect != null)
+            DialogueLogParchmentTabLayout.Apply(activePanelRoot.transform, activeScrollRect);
+    }
+
+    internal int DialogueEntryCountForTests => entries.Count;
+
+    internal int CheshireEntryCountForTests => cheshireEntries.Count;
+
+    internal bool TryAppendDialogueForTests(string speaker, string text) =>
+        DialogueLogLogic.TryAppend(entries, speaker, text);
+
+    internal int ActiveScrollEntryCountForTests =>
+        activeScrollRect != null && activeScrollRect.content != null
+            ? activeScrollRect.content.childCount
+            : 0;
 
     IEnumerator ScrollToBottomNextFrame()
     {

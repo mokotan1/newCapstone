@@ -150,6 +150,7 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
         }
 
         StartCoroutine(GetGPTResponse(message));
+        AppendCheshirePlayerLog(message);
         userInputField.text = "";
     }
 
@@ -181,6 +182,7 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
         }
 
         StartCoroutine(GetGPTResponse(message));
+        AppendCheshirePlayerLog(message);
         userInputField.text = "";
     }
 
@@ -327,6 +329,22 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     protected virtual void OnStreamTextDelta(string delta) { }
 
+    protected void AppendCheshirePlayerLog(string message)
+    {
+        if (DialogueLogPanel.Instance == null)
+            return;
+
+        DialogueLogPanel.Instance.TryAppendCheshirePlayer(message);
+    }
+
+    protected void AppendCheshireResponseLog(string responseMessage)
+    {
+        if (DialogueLogPanel.Instance == null || string.IsNullOrWhiteSpace(responseMessage))
+            return;
+
+        DialogueLogPanel.Instance.TryAppendCheshireResponse(responseMessage);
+    }
+
     protected virtual HeuristicSignalInput BuildHeuristicSignalInput(string userMessage)
     {
         return new HeuristicSignalInput
@@ -381,5 +399,8 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     IEnumerator IChatHttpCallbacks.HandleChatbotResponse(
         string responseMessage, List<FunctionCallData> functionCalls)
-        => HandleChatbotResponse(responseMessage, functionCalls);
+    {
+        AppendCheshireResponseLog(responseMessage);
+        yield return HandleChatbotResponse(responseMessage, functionCalls);
+    }
 }

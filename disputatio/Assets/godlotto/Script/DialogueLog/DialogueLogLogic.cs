@@ -38,6 +38,18 @@ public static class DialogueLogLogic
 
 
 
+    /// <summary>체셔 탭 — 플레이어 질문 화자.</summary>
+
+    public const string CheshirePlayerSpeaker = "나";
+
+
+
+    /// <summary>체셔 탭 — AI 응답 화자.</summary>
+
+    public const string CheshireBotSpeaker = "체셔";
+
+
+
     /// <summary>TMP 폰트에서 □로 깨질 수 있는 코드포인트(장식용 Unicode).</summary>
 
     static readonly int[] RiskyOrnamentCodePoints = { 0x2767, 0x2766, 0x2726, 0x2731 };

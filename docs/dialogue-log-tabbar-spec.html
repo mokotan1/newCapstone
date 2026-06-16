@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dialogue Log Tab Bar Spec</title>
+  <style>
+    :root {
+      --bg: #2b261d;
+      --panel: #efe4cf;
+      --panel-border: #9a793f;
+      --paper: #f8f1df;
+      --ink: #3f2d18;
+      --muted: rgba(63, 45, 24, 0.55);
+      --muted-hover: rgba(63, 45, 24, 0.72);
+      --line: rgba(123, 93, 44, 0.35);
+      --accent: #8b6b31;
+      --content-border: rgba(154, 121, 63, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+    }
+
+    .log-panel {
+      width: 690px;
+      height: 380px;
+      position: relative;
+      padding: 8px 12px 12px;
+      background: var(--panel);
+      border: 2px solid var(--panel-border);
+      color: var(--ink);
+    }
+
+    .close {
+      position: absolute;
+      top: 0;
+      right: 6px;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: 30px;
+      line-height: 30px;
+      font-family: Georgia, "Times New Roman", serif;
+      cursor: pointer;
+    }
+
+    .title {
+      height: 22px;
+      text-align: center;
+      font-size: 16px;
+      line-height: 22px;
+      letter-spacing: 4px;
+      color: var(--ink);
+    }
+
+    .tabbar {
+      width: 336px;
+      height: 52px;
+      margin: 9px auto 10px;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      width: 160px;
+      min-height: 52px;
+      position: relative;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 52px;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+
+    .tab:hover {
+      color: var(--muted-hover);
+    }
+
+    .tab.active {
+      color: var(--ink);
+    }
+
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: -1px;
+      height: 4px;
+      background: var(--accent);
+    }
+
+    .content {
+      height: 265px;
+      overflow: auto;
+      padding: 20px 24px;
+      background: rgba(255, 252, 241, 0.45);
+      border: 1px solid var(--content-border);
+    }
+
+    .empty {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: rgba(63, 45, 24, 0.42);
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .entry {
+      margin: 0 0 20px;
+    }
+
+    .speaker {
+      margin-bottom: 6px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .text {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.55;
+      color: rgba(63, 45, 24, 0.88);
+    }
+  </style>
+</head>
+<body>
+  <section class="log-panel" aria-label="대사 기록 패널">
+    <button class="close" type="button" aria-label="닫기">X</button>
+    <header class="title">:: 대 사 기 록 ::</header>
+
+    <nav class="tabbar" aria-label="로그 탭">
+      <button class="tab active" type="button" data-tab="dialogue">대사</button>
+      <button class="tab" type="button" data-tab="cheshire">체셔</button>
+    </nav>
+
+    <main class="content" id="content">
+      <div class="empty">아직 기록된 대사가 없습니다.</div>
+    </main>
+  </section>
+
+  <script>
+    const content = document.querySelector("#content");
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const emptyMessages = {
+      dialogue: "아직 기록된 대사가 없습니다.",
+      cheshire: "아직 체셔와 나눈 대화가 없습니다."
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((candidate) => candidate.classList.toggle("active", candidate === tab));
+        content.innerHTML = `<div class="empty">${emptyMessages[tab.dataset.tab]}</div>`;
+      });
+    });
+  </script>
+</body>
+</html>
