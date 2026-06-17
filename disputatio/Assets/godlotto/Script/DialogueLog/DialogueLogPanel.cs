@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Fungus;
+using Godlotto.ModalInput;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -52,6 +53,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     GameObject activePanelRoot;
     ScrollRect activeScrollRect;
     GameObject activeEntryPrefab;
+    Image modalRaycastBlocker;
 
     public bool IsOpen => isOpen;
     public DialogueLogVisualStyle VisualStyle => visualStyle;
@@ -204,6 +206,9 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         EnsureCanvasSortsAboveSayDialog();
         BlockDialogueAdvance();
         SettingPanelWorldInputBlocker.Begin(activePanelRoot);
+        ModalInputGate.Begin(this, activePanelRoot, blocksHud: true, blocksWorld: true);
+        // 로그 패널 밖 UI 클릭을 EventSystem 레벨에서 소비하는 투명 차단막(공통 처리).
+        modalRaycastBlocker = ModalRaycastBlocker.Create(activePanelRoot.transform);
         Time.timeScale = 0f;
 
         StartCoroutine(ScrollToBottomNextFrame());
@@ -222,6 +227,9 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         sayDialogSnapshot.Restore();
         sayDialogSnapshot = default;
 
+        ModalInputGate.End(this);
+        ModalRaycastBlocker.Remove(modalRaycastBlocker);
+        modalRaycastBlocker = null;
         if (ModalGamePause.ShouldEndWorldInputBlocker())
             SettingPanelWorldInputBlocker.End();
         Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();

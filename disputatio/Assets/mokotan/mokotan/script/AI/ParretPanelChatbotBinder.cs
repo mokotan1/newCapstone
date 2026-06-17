@@ -1,5 +1,6 @@
 using System;
 using Fungus;
+using Godlotto.ModalInput;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,6 +37,7 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
 
         ResolveSharedReferences();
         EnsureCheshireLogButton(gameObject);
+        EnsureModalInputScope(gameObject);
         ConfigureChatbot(chatbot);
         WireSendButton(chatbot);
 
@@ -75,6 +77,28 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
             sync = panelRoot.AddComponent<TutorPanelSayDialogSync>();
         sync.Initialize(sayDialog);
         return sync;
+    }
+
+    /// <summary>
+    /// 체셔/튜터 채팅 패널 루트에 <see cref="ModalInputScope"/> 를 보장합니다.
+    /// 패널이 활성화되어 있는 동안 뒤쪽 월드 클릭/HUD 버튼이 막힙니다.
+    /// 패널 루트의 활성/비활성 = 채팅 열림/닫힘 이라는 기존 invariant
+    /// (<see cref="TutorPanelSayDialogSync"/> 와 동일)에 의존합니다.
+    /// </summary>
+    public static ModalInputScope EnsureModalInputScope(GameObject panelRoot)
+    {
+        if (panelRoot == null)
+            return null;
+
+        ModalInputScope scope = panelRoot.GetComponent<ModalInputScope>();
+        if (scope == null)
+            scope = panelRoot.AddComponent<ModalInputScope>();
+
+        // 체셔/튜터 패널 뒤의 UI 클릭을 EventSystem 레벨에서 소비하도록 투명 차단막을 명시적으로 켭니다.
+        // (씬에 직렬화된 인스턴스가 createRaycastBlocker=false 로 남아 있어도 바인딩 시 보정)
+        scope.SetCreateRaycastBlocker(true);
+
+        return scope;
     }
 
     public static DialogueLogButton EnsureCheshireLogButton(GameObject panelRoot)

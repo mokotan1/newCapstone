@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using Fungus;
+using Godlotto.ModalInput;
 
 public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 {
@@ -41,6 +42,7 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     private ResolutionAudioSettings _resolutionAudio;
     private bool isPanelOpen = false;
+    private Image settingsRaycastBlocker;
 
     public bool IsOpen => isPanelOpen;
 
@@ -128,10 +130,16 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
         {
             EnsureSettingsCanvasSortsAboveSayDialog();
             SettingPanelWorldInputBlocker.Begin(settingPanel);
+            ModalInputGate.Begin(this, settingPanel, blocksHud: true, blocksWorld: true);
+            // 설정 패널 밖 UI 클릭을 EventSystem 레벨에서 소비하는 투명 차단막(공통 처리).
+            settingsRaycastBlocker = ModalRaycastBlocker.Create(settingPanel.transform);
             Time.timeScale = 0f;
         }
         else
         {
+            ModalInputGate.End(this);
+            ModalRaycastBlocker.Remove(settingsRaycastBlocker);
+            settingsRaycastBlocker = null;
             if (ModalGamePause.ShouldEndWorldInputBlocker())
                 SettingPanelWorldInputBlocker.End();
             Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();
@@ -309,6 +317,9 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     protected override void OnDestroy()
     {
+        ModalInputGate.End(this);
+        ModalRaycastBlocker.Remove(settingsRaycastBlocker);
+        settingsRaycastBlocker = null;
         SettingPanelWorldInputBlocker.End();
         base.OnDestroy();
     }

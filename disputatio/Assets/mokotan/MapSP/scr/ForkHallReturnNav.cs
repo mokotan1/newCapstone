@@ -11,6 +11,10 @@ public class ForkHallReturnNav : MonoBehaviour
 
     public void GoToForkTowardCentralHall()
     {
+        // 모달이 열려 HUD 입력을 막는 동안에는 갈림길 복귀 내비게이션을 무시합니다(fail-safe).
+        if (ModalInputGate.IsBlockingHudInput)
+            return;
+
         if (string.IsNullOrEmpty(forkHallSceneName))
             return;
         SceneManager.LoadScene(forkHallSceneName);
