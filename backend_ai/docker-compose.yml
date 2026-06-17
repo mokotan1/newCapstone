@@ -15,6 +15,10 @@ services:
       - .env
     environment:
       PORT: "8000"
+    # 재빌드/재배포(up --build -d) 후에도 수집 CSV 보존.
+    # 컨테이너 WORKDIR=/app, telemetry_log_dir 기본값 "logs" → /app/logs.
+    volumes:
+      - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test:

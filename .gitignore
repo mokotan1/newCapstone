@@ -37,6 +37,7 @@ ExportedObj/
 *.csproj
 # CI Roslyn syntax checker — not Unity-generated; must be tracked for GitHub Actions
 !scripts/CSharpSyntaxChecker/**/*.csproj
+scripts/CSharpSyntaxChecker/**/obj/
 *.unityproj
 *.sln
 *.suo
@@ -75,9 +76,23 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 .env
+tools/.env
 .venv/
 .codex_tmp_runtime/
 .codex_tmp_extracted/
+
+# Play log Google Sheets credentials (never commit real service account keys)
+tools/secrets/*.json
+!tools/secrets/*.example.json
+*-service-account.json
+!*service-account.example.json
+
+# Telemetry play-log CSVs collected on the server (never commit user play data)
+backend_ai/logs/
+
+# Deploy/rollback state written on the EC2 host (deploy.sh / rollback.sh)
+backend_ai/.last_deployed_sha
+backend_ai/.prev_deployed_sha
 
 # Node dependencies generated for local tooling inside Unity assets
 disputatio/Assets/**/node_modules/

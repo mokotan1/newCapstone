@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mokotan.StandingDialogue;
@@ -30,7 +31,7 @@ public class DialogueLogTests
         for (int i = createdObjects.Count - 1; i >= 0; i--)
         {
             if (createdObjects[i] != null)
-                Object.DestroyImmediate(createdObjects[i]);
+                UnityEngine.Object.DestroyImmediate(createdObjects[i]);
         }
 
         createdObjects.Clear();
@@ -139,6 +140,163 @@ public class DialogueLogTests
         Assert.AreEqual(0, entries.Count);
     }
 
+    [Test]
+    public void CheshireSpeakers_UsePlayerAndBotLabels()
+    {
+        Assert.AreEqual("나", DialogueLogLogic.CheshirePlayerSpeaker);
+        Assert.AreEqual("체셔", DialogueLogLogic.CheshireBotSpeaker);
+    }
+
+    // ---------------------------------------------------------------
+    //  CheshireLogEntry / CheshireLogLogic
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void CheshireLogEntry_NormalizesNullStrings()
+    {
+        var entry = new CheshireLogEntry(
+            DateTimeOffset.UtcNow,
+            null,
+            null,
+            null,
+            0);
+
+        Assert.AreEqual(string.Empty, entry.SceneName);
+        Assert.AreEqual(string.Empty, entry.Speaker);
+        Assert.AreEqual(string.Empty, entry.Text);
+    }
+
+    [Test]
+    public void CheshireLogLogic_TryAppend_AssignsSequentialTurnIndexAndMetadata()
+    {
+        var entries = new List<CheshireLogEntry>();
+        var timestamp = new DateTimeOffset(2026, 6, 16, 12, 0, 0, TimeSpan.Zero);
+
+        Assert.IsTrue(CheshireLogLogic.TryAppend(
+            entries,
+            DialogueLogLogic.CheshirePlayerSpeaker,
+            "질문",
+            timestamp,
+            "TestScene"));
+        Assert.IsTrue(CheshireLogLogic.TryAppend(
+            entries,
+            DialogueLogLogic.CheshireBotSpeaker,
+            "답변",
+            timestamp.AddSeconds(1),
+            "TestScene"));
+
+        Assert.AreEqual(2, entries.Count);
+        Assert.AreEqual(0, entries[0].TurnIndex);
+        Assert.AreEqual(1, entries[1].TurnIndex);
+        Assert.AreEqual("TestScene", entries[0].SceneName);
+        Assert.AreEqual("TestScene", entries[1].SceneName);
+        Assert.AreEqual(timestamp, entries[0].Timestamp);
+        Assert.AreEqual(timestamp.AddSeconds(1), entries[1].Timestamp);
+    }
+
+    [Test]
+    public void CheshireLogLogic_TryAppend_SkipsDuplicateSpeakerAndText()
+    {
+        var entries = new List<CheshireLogEntry>();
+        var timestamp = DateTimeOffset.UtcNow;
+
+        Assert.IsTrue(CheshireLogLogic.TryAppend(entries, "나", "같은 줄", timestamp, "A"));
+        Assert.IsFalse(CheshireLogLogic.TryAppend(entries, "나", "같은 줄", timestamp.AddMinutes(1), "B"));
+        Assert.AreEqual(1, entries.Count);
+    }
+
+    [Test]
+    public void CheshireLogLogic_ToDialogueLogEntry_MapsSpeakerAndTextOnly()
+    {
+        var cheshire = new CheshireLogEntry(
+            DateTimeOffset.UtcNow,
+            "Kitchen",
+            "체셔",
+            "응답 본문",
+            3);
+
+        DialogueLogEntry uiEntry = CheshireLogLogic.ToDialogueLogEntry(cheshire);
+
+        Assert.AreEqual("체셔", uiEntry.Speaker);
+        Assert.AreEqual("응답 본문", uiEntry.Text);
+    }
+
+    [Test]
+    public void Panel_TryAppendCheshire_AddsPlayerAndBotEntries()
+    {
+        DialogueLogPanel panel = CreatePanelWithScrollAndEntry(out _);
+
+        Assert.IsTrue(panel.TryAppendCheshirePlayer("질문입니다."));
+        Assert.IsTrue(panel.TryAppendCheshireResponse("답변입니다."));
+
+        Assert.AreEqual(2, panel.CheshireEntryCountForTests);
+        Assert.AreEqual(0, panel.DialogueEntryCountForTests);
+        Assert.AreEqual(2, panel.CheshireLogs.Count);
+        Assert.AreEqual(0, panel.CheshireLogs[0].TurnIndex);
+        Assert.AreEqual(1, panel.CheshireLogs[1].TurnIndex);
+        Assert.AreEqual(DialogueLogLogic.CheshirePlayerSpeaker, panel.CheshireLogs[0].Speaker);
+        Assert.AreEqual(DialogueLogLogic.CheshireBotSpeaker, panel.CheshireLogs[1].Speaker);
+    }
+
+    [Test]
+    public void Panel_SelectContentTab_SwitchesActiveTabAndRebuildsContent()
+    {
+        DialogueLogPanel panel = CreatePanelWithScrollAndEntry(out GameObject logPanelRoot);
+
+        panel.TryAppendDialogueForTests("NPC", "대사 한 줄.");
+        panel.TryAppendCheshirePlayer("체셔에게 묻기");
+        panel.TryAppendCheshireResponse("체셔의 답");
+
+        panel.Open();
+        Assert.AreEqual(DialogueLogContentTab.Dialogue, panel.ActiveContentTab);
+        Assert.AreEqual(1, panel.ActiveScrollEntryCountForTests);
+
+        panel.SelectContentTab(DialogueLogContentTab.Cheshire);
+        Assert.AreEqual(DialogueLogContentTab.Cheshire, panel.ActiveContentTab);
+        Assert.AreEqual(2, panel.ActiveScrollEntryCountForTests);
+
+        panel.SelectContentTab(DialogueLogContentTab.Dialogue);
+        Assert.AreEqual(1, panel.ActiveScrollEntryCountForTests);
+
+        panel.Close();
+        Assert.IsFalse(logPanelRoot.activeSelf);
+    }
+
+    [Test]
+    public void Panel_CheshireAppendWhileOpenOnCheshireTab_RefreshesScroll()
+    {
+        DialogueLogPanel panel = CreatePanelWithScrollAndEntry(out _);
+
+        panel.Open();
+        panel.SelectContentTab(DialogueLogContentTab.Cheshire);
+        Assert.AreEqual(1, panel.ActiveScrollEntryCountForTests);
+
+        panel.TryAppendCheshirePlayer("새 질문");
+        Assert.AreEqual(1, panel.ActiveScrollEntryCountForTests);
+    }
+
+    [Test]
+    public void TabSpec_MatchesHtmlMockupDimensions()
+    {
+        Assert.AreEqual(372f, DialogueLogTabSpec.TabBarWidth);
+        Assert.AreEqual(62f, DialogueLogTabSpec.TabBarHeight);
+        Assert.AreEqual(176f, DialogueLogTabSpec.TabWidth);
+        Assert.AreEqual(34f, DialogueLogTabSpec.TabFontSize);
+        Assert.AreEqual(116f, DialogueLogTabSpec.ScrollTopInset);
+        Assert.AreEqual(252f, DialogueLogTabSpec.ContentHeight);
+        Assert.AreEqual(22f, DialogueLogTabSpec.EmptyFontSize);
+        Assert.AreEqual("아직 기록된 대사가 없습니다.", DialogueLogTabSpec.EmptyDialogueText);
+    }
+
+    [Test]
+    public void Panel_OpenWithNoEntries_ShowsEmptyStateChild()
+    {
+        DialogueLogPanel panel = CreatePanelWithScrollAndEntry(out _);
+
+        panel.Open();
+
+        Assert.AreEqual(1, panel.ActiveScrollEntryCountForTests);
+    }
     [Test]
     public void FormatSpeakerLine_Parchment_UsesSafeAsciiPrefix()
     {
@@ -340,6 +498,19 @@ public class DialogueLogTests
         Assert.AreEqual(0.15f, spec.colorBlock.fadeDuration);
     }
 
+    [Test]
+    public void ChatbotBookmarkSpec_PlacesButtonAboveInputFieldRightEdge()
+    {
+        DialogueLogButtonSpec.BookmarkButtonSpec spec = DialogueLogButtonSpec.CreateChatbotBookmarkDefaults();
+
+        Assert.AreEqual("CheshireLogButton", spec.buttonName);
+        Assert.AreEqual(new Vector2(0.95f, 0f), spec.anchor);
+        Assert.AreEqual(new Vector2(1f, 0f), spec.pivot);
+        Assert.AreEqual(new Vector2(-12f, 252f), spec.anchoredPosition);
+        Assert.AreEqual(new Vector2(52f, 128f), spec.size);
+        Assert.AreEqual("로그", spec.captionText);
+    }
+
     // ---------------------------------------------------------------
     //  DialogueLogButton
     // ---------------------------------------------------------------
@@ -474,6 +645,27 @@ public class DialogueLogTests
         return panel;
     }
 
+    private DialogueLogPanel CreatePanelWithScrollAndEntry(out GameObject logPanelRoot)
+    {
+        DialogueLogPanel panel = CreatePanel(out logPanelRoot);
+
+        var scroll = CreateScrollRect();
+        scroll.transform.SetParent(logPanelRoot.transform, false);
+
+        var entryPrefab = Track(new GameObject("Entry", typeof(RectTransform), typeof(DialogueLogEntryView)));
+        SetPrivateField(panel, "scrollRect", scroll);
+        SetPrivateField(panel, "entryPrefab", entryPrefab);
+        SetPrivateField(panel, "visualStyle", DialogueLogVisualStyle.ParchmentCodex);
+        SetPrivateField(panel, "parchmentLayer", new DialogueLogStyleLayer
+        {
+            panelRoot = logPanelRoot,
+            scrollRect = scroll,
+            entryPrefab = entryPrefab,
+        });
+
+        return panel;
+    }
+
     private DialogueLogPanel CreatePanelWithStyleLayers(out GameObject logPanelRoot)
     {
         var root = Track(new GameObject("DialogueLogPanelRoot"));
@@ -519,13 +711,13 @@ public class DialogueLogTests
         T[] found;
         do
         {
-            found = Object.FindObjectsByType<T>(
+            found = UnityEngine.Object.FindObjectsByType<T>(
                 FindObjectsInactive.Include,
                 FindObjectsSortMode.None);
             for (int i = 0; i < found.Length; i++)
             {
                 if (found[i] != null && found[i].gameObject != null)
-                    Object.DestroyImmediate(found[i].gameObject);
+                    UnityEngine.Object.DestroyImmediate(found[i].gameObject);
             }
         }
         while (found.Length > 0);

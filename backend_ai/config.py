@@ -53,6 +53,13 @@ class Settings(BaseSettings):
     tutor_grade_fuzzy_ratio: float = 0.82
     tutor_grade_fuzzy_max_len: int = 24
 
+    # Play-log telemetry ingestion (POST /telemetry → append CSV under backend_ai/).
+    telemetry_enabled: bool = True
+    telemetry_log_dir: str = "logs"
+    telemetry_csv_filename: str = "play_logs.csv"
+    #: Max events accepted per request (bounds payload / abuse).
+    telemetry_max_batch: int = 500
+
 
 @lru_cache
 def get_settings() -> Settings:

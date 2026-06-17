@@ -35,6 +35,22 @@ public static class DialogueLogButtonSpec
     }
 
     [Serializable]
+    public class BookmarkButtonSpec
+    {
+        public string buttonName = "CheshireLogButton";
+        public Vector2 anchor = new Vector2(0.95f, 0f);
+        public Vector2 pivot = new Vector2(1f, 0f);
+        public Vector2 anchoredPosition = new Vector2(-12f, 252f);
+        public Vector2 size = new Vector2(52f, 128f);
+        public string captionText = "로그";
+        public float captionFontSize = 18f;
+        public Color background = new Color(0.42f, 0.30f, 0.16f, 0.92f);
+        public Color border = new Color(0.82f, 0.66f, 0.36f, 1f);
+        public Color foreground = new Color(0.96f, 0.87f, 0.66f, 1f);
+        public ColorBlockData colorBlock = ColorBlockData.BookmarkDefaults();
+    }
+
+    [Serializable]
     public struct ColorBlockData
     {
         public Color normalColor;
@@ -54,6 +70,17 @@ public static class DialogueLogButtonSpec
             disabledColor = new Color(0.839f, 0.745f, 0.588f, 0.25f),
             colorMultiplier = 1f,
             fadeDuration = 0.15f,
+        };
+
+        public static ColorBlockData BookmarkDefaults() => new ColorBlockData
+        {
+            normalColor = new Color(1f, 1f, 1f, 1f),
+            highlightedColor = new Color(1f, 0.94f, 0.78f, 1f),
+            pressedColor = new Color(0.86f, 0.72f, 0.48f, 1f),
+            selectedColor = new Color(1f, 1f, 1f, 1f),
+            disabledColor = new Color(0.64f, 0.56f, 0.44f, 0.45f),
+            colorMultiplier = 1f,
+            fadeDuration = 0.12f,
         };
 
         public ColorBlock ToUnityColorBlock()
@@ -100,6 +127,8 @@ public static class DialogueLogButtonSpec
     }
 
     public static void ClearCacheForTests() => cachedSpec = null;
+
+    public static BookmarkButtonSpec CreateChatbotBookmarkDefaults() => new BookmarkButtonSpec();
 
     static GhostButtonSpec CreateDefaults() => new GhostButtonSpec();
 

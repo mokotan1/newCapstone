@@ -1,5 +1,6 @@
 using System;
 using Fungus;
+using Godlotto.ModalInput;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,6 +36,8 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         BaseChatbot chatbot = GetOrAddChatbot(chatbotType);
 
         ResolveSharedReferences();
+        EnsureCheshireLogButton(gameObject);
+        EnsureModalInputScope(gameObject);
         ConfigureChatbot(chatbot);
         WireSendButton(chatbot);
 
@@ -74,6 +77,115 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
             sync = panelRoot.AddComponent<TutorPanelSayDialogSync>();
         sync.Initialize(sayDialog);
         return sync;
+    }
+
+    /// <summary>
+    /// 체셔/튜터 채팅 패널 루트에 <see cref="ModalInputScope"/> 를 보장합니다.
+    /// 패널이 활성화되어 있는 동안 뒤쪽 월드 클릭/HUD 버튼이 막힙니다.
+    /// 패널 루트의 활성/비활성 = 채팅 열림/닫힘 이라는 기존 invariant
+    /// (<see cref="TutorPanelSayDialogSync"/> 와 동일)에 의존합니다.
+    /// </summary>
+    public static ModalInputScope EnsureModalInputScope(GameObject panelRoot)
+    {
+        if (panelRoot == null)
+            return null;
+
+        ModalInputScope scope = panelRoot.GetComponent<ModalInputScope>();
+        if (scope == null)
+            scope = panelRoot.AddComponent<ModalInputScope>();
+
+        // 체셔/튜터 패널 뒤의 UI 클릭을 EventSystem 레벨에서 소비하도록 투명 차단막을 명시적으로 켭니다.
+        // (씬에 직렬화된 인스턴스가 createRaycastBlocker=false 로 남아 있어도 바인딩 시 보정)
+        scope.SetCreateRaycastBlocker(true);
+
+        return scope;
+    }
+
+    public static DialogueLogButton EnsureCheshireLogButton(GameObject panelRoot)
+    {
+        if (panelRoot == null)
+            return null;
+
+        DialogueLogButton existing = panelRoot.GetComponentInChildren<DialogueLogButton>(true);
+        if (existing != null && existing.gameObject.name == "CheshireLogButton")
+            return existing;
+
+        DialogueLogButtonSpec.BookmarkButtonSpec spec = DialogueLogButtonSpec.CreateChatbotBookmarkDefaults();
+        var buttonGo = new GameObject(
+            spec.buttonName,
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image),
+            typeof(Button));
+        buttonGo.transform.SetParent(panelRoot.transform, false);
+        buttonGo.transform.SetAsLastSibling();
+
+        var rect = buttonGo.GetComponent<RectTransform>();
+        rect.anchorMin = spec.anchor;
+        rect.anchorMax = spec.anchor;
+        rect.pivot = spec.pivot;
+        rect.anchoredPosition = spec.anchoredPosition;
+        rect.sizeDelta = spec.size;
+
+        var background = buttonGo.GetComponent<Image>();
+        background.color = spec.background;
+        background.raycastTarget = true;
+        background.raycastPadding = new Vector4(12f, 12f, 12f, 12f);
+
+        var button = buttonGo.GetComponent<Button>();
+        button.targetGraphic = background;
+        button.transition = Selectable.Transition.ColorTint;
+        button.colors = spec.colorBlock.ToUnityColorBlock();
+
+        CreateRule(buttonGo.transform, "TopRule", spec.border, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, 3f));
+        CreateRule(buttonGo.transform, "SideRule", spec.border, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(3f, 0f));
+
+        var captionGo = new GameObject("Caption", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        captionGo.transform.SetParent(buttonGo.transform, false);
+        var captionRect = captionGo.GetComponent<RectTransform>();
+        captionRect.anchorMin = Vector2.zero;
+        captionRect.anchorMax = Vector2.one;
+        captionRect.pivot = new Vector2(0.5f, 0.5f);
+        captionRect.anchoredPosition = Vector2.zero;
+        captionRect.sizeDelta = Vector2.zero;
+
+        var caption = captionGo.GetComponent<TextMeshProUGUI>();
+        caption.text = "로\n그";
+        caption.fontSize = spec.captionFontSize;
+        caption.color = spec.foreground;
+        caption.alignment = TextAlignmentOptions.Center;
+        caption.enableAutoSizing = false;
+        caption.lineSpacing = 16f;
+        caption.raycastTarget = false;
+        caption.margin = new Vector4(0f, 12f, 0f, 10f);
+
+        var logButton = buttonGo.AddComponent<DialogueLogButton>();
+        logButton.SetUseOverlaySorting(false);
+        return logButton;
+    }
+
+    private static void CreateRule(
+        Transform parent,
+        string name,
+        Color color,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        Vector2 pivot,
+        Vector2 sizeDelta)
+    {
+        var ruleGo = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        ruleGo.transform.SetParent(parent, false);
+
+        var rect = ruleGo.GetComponent<RectTransform>();
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.pivot = pivot;
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = sizeDelta;
+
+        var image = ruleGo.GetComponent<Image>();
+        image.color = color;
+        image.raycastTarget = false;
     }
 
     private BaseChatbot GetOrAddChatbot(Type chatbotType)
