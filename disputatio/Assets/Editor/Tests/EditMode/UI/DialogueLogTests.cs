@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Mokotan.StandingDialogue;
@@ -30,7 +31,7 @@ public class DialogueLogTests
         for (int i = createdObjects.Count - 1; i >= 0; i--)
         {
             if (createdObjects[i] != null)
-                Object.DestroyImmediate(createdObjects[i]);
+                UnityEngine.Object.DestroyImmediate(createdObjects[i]);
         }
 
         createdObjects.Clear();
@@ -146,6 +147,80 @@ public class DialogueLogTests
         Assert.AreEqual("체셔", DialogueLogLogic.CheshireBotSpeaker);
     }
 
+    // ---------------------------------------------------------------
+    //  CheshireLogEntry / CheshireLogLogic
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void CheshireLogEntry_NormalizesNullStrings()
+    {
+        var entry = new CheshireLogEntry(
+            DateTimeOffset.UtcNow,
+            null,
+            null,
+            null,
+            0);
+
+        Assert.AreEqual(string.Empty, entry.SceneName);
+        Assert.AreEqual(string.Empty, entry.Speaker);
+        Assert.AreEqual(string.Empty, entry.Text);
+    }
+
+    [Test]
+    public void CheshireLogLogic_TryAppend_AssignsSequentialTurnIndexAndMetadata()
+    {
+        var entries = new List<CheshireLogEntry>();
+        var timestamp = new DateTimeOffset(2026, 6, 16, 12, 0, 0, TimeSpan.Zero);
+
+        Assert.IsTrue(CheshireLogLogic.TryAppend(
+            entries,
+            DialogueLogLogic.CheshirePlayerSpeaker,
+            "질문",
+            timestamp,
+            "TestScene"));
+        Assert.IsTrue(CheshireLogLogic.TryAppend(
+            entries,
+            DialogueLogLogic.CheshireBotSpeaker,
+            "답변",
+            timestamp.AddSeconds(1),
+            "TestScene"));
+
+        Assert.AreEqual(2, entries.Count);
+        Assert.AreEqual(0, entries[0].TurnIndex);
+        Assert.AreEqual(1, entries[1].TurnIndex);
+        Assert.AreEqual("TestScene", entries[0].SceneName);
+        Assert.AreEqual("TestScene", entries[1].SceneName);
+        Assert.AreEqual(timestamp, entries[0].Timestamp);
+        Assert.AreEqual(timestamp.AddSeconds(1), entries[1].Timestamp);
+    }
+
+    [Test]
+    public void CheshireLogLogic_TryAppend_SkipsDuplicateSpeakerAndText()
+    {
+        var entries = new List<CheshireLogEntry>();
+        var timestamp = DateTimeOffset.UtcNow;
+
+        Assert.IsTrue(CheshireLogLogic.TryAppend(entries, "나", "같은 줄", timestamp, "A"));
+        Assert.IsFalse(CheshireLogLogic.TryAppend(entries, "나", "같은 줄", timestamp.AddMinutes(1), "B"));
+        Assert.AreEqual(1, entries.Count);
+    }
+
+    [Test]
+    public void CheshireLogLogic_ToDialogueLogEntry_MapsSpeakerAndTextOnly()
+    {
+        var cheshire = new CheshireLogEntry(
+            DateTimeOffset.UtcNow,
+            "Kitchen",
+            "체셔",
+            "응답 본문",
+            3);
+
+        DialogueLogEntry uiEntry = CheshireLogLogic.ToDialogueLogEntry(cheshire);
+
+        Assert.AreEqual("체셔", uiEntry.Speaker);
+        Assert.AreEqual("응답 본문", uiEntry.Text);
+    }
+
     [Test]
     public void Panel_TryAppendCheshire_AddsPlayerAndBotEntries()
     {
@@ -156,6 +231,11 @@ public class DialogueLogTests
 
         Assert.AreEqual(2, panel.CheshireEntryCountForTests);
         Assert.AreEqual(0, panel.DialogueEntryCountForTests);
+        Assert.AreEqual(2, panel.CheshireLogs.Count);
+        Assert.AreEqual(0, panel.CheshireLogs[0].TurnIndex);
+        Assert.AreEqual(1, panel.CheshireLogs[1].TurnIndex);
+        Assert.AreEqual(DialogueLogLogic.CheshirePlayerSpeaker, panel.CheshireLogs[0].Speaker);
+        Assert.AreEqual(DialogueLogLogic.CheshireBotSpeaker, panel.CheshireLogs[1].Speaker);
     }
 
     [Test]
@@ -631,13 +711,13 @@ public class DialogueLogTests
         T[] found;
         do
         {
-            found = Object.FindObjectsByType<T>(
+            found = UnityEngine.Object.FindObjectsByType<T>(
                 FindObjectsInactive.Include,
                 FindObjectsSortMode.None);
             for (int i = 0; i < found.Length; i++)
             {
                 if (found[i] != null && found[i].gameObject != null)
-                    Object.DestroyImmediate(found[i].gameObject);
+                    UnityEngine.Object.DestroyImmediate(found[i].gameObject);
             }
         }
         while (found.Length > 0);

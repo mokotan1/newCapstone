@@ -29,6 +29,11 @@ class TutorGradeResponse(BaseModel):
     unknown_question: bool = False
 
 
+class TelemetryResponse(BaseModel):
+    status: Literal["ok"] = "ok"
+    accepted: int = 0
+
+
 class SSEEvent(BaseModel):
     type: Literal["text_delta", "function_call", "error", "done"]
     content: str | None = None

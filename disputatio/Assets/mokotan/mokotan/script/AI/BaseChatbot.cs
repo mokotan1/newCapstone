@@ -331,6 +331,9 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     protected void AppendCheshirePlayerLog(string message)
     {
+        if (!string.IsNullOrWhiteSpace(message))
+            PlayLogRecorder.RecordCheshireUserMessage(message, PlayLogRecorder.BuildProgressStateSnapshot(GetType().Name));
+
         if (DialogueLogPanel.Instance == null)
             return;
 
@@ -339,7 +342,12 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     protected void AppendCheshireResponseLog(string responseMessage)
     {
-        if (DialogueLogPanel.Instance == null || string.IsNullOrWhiteSpace(responseMessage))
+        if (string.IsNullOrWhiteSpace(responseMessage))
+            return;
+
+        PlayLogRecorder.RecordCheshireBotResponse(responseMessage, PlayLogRecorder.BuildProgressStateSnapshot(GetType().Name));
+
+        if (DialogueLogPanel.Instance == null)
             return;
 
         DialogueLogPanel.Instance.TryAppendCheshireResponse(responseMessage);

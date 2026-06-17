@@ -42,7 +42,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     [SerializeField] private int canvasSortingOrder = 60;
 
     readonly List<DialogueLogEntry> entries = new List<DialogueLogEntry>();
-    readonly List<DialogueLogEntry> cheshireEntries = new List<DialogueLogEntry>();
+    readonly List<CheshireLogEntry> cheshireLogEntries = new List<CheshireLogEntry>();
     readonly List<DialogInput> disabledInputs = new List<DialogInput>();
     DialogueLogSayDialogSnapshot sayDialogSnapshot;
     DialogueLogTabBar activeTabBar;
@@ -56,6 +56,9 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
     public bool IsOpen => isOpen;
     public DialogueLogVisualStyle VisualStyle => visualStyle;
     public DialogueLogContentTab ActiveContentTab => activeContentTab;
+
+    /// <summary>CSV 내보내기 등 후속 작업용 체셔 로그 누적본(읽기 전용).</summary>
+    public IReadOnlyList<CheshireLogEntry> CheshireLogs => cheshireLogEntries;
 
     /// <summary>
     /// EditMode 테스트에서 DontDestroyOnLoad 직후 static Instance가 비는 경우를 보정한다.
@@ -147,7 +150,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
     bool TryAppendCheshire(string speaker, string text)
     {
-        if (!DialogueLogLogic.TryAppend(cheshireEntries, speaker, text))
+        if (!CheshireLogLogic.TryAppend(cheshireLogEntries, speaker, text))
             return false;
 
         if (isOpen && activeContentTab == DialogueLogContentTab.Cheshire)
@@ -299,15 +302,33 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
         var palette = DialogueLogStylePalette.ForStyle(visualStyle);
 
-        IReadOnlyList<DialogueLogEntry> source = GetActiveEntries();
-        if (source.Count == 0)
+        if (activeContentTab == DialogueLogContentTab.Cheshire)
+        {
+            if (cheshireLogEntries.Count == 0)
+            {
+                ShowEmptyState(content);
+                return;
+            }
+
+            for (int i = 0; i < cheshireLogEntries.Count; i++)
+            {
+                InstantiateEntryView(
+                    CheshireLogLogic.ToDialogueLogEntry(cheshireLogEntries[i]),
+                    content,
+                    palette);
+            }
+
+            return;
+        }
+
+        if (entries.Count == 0)
         {
             ShowEmptyState(content);
             return;
         }
 
-        for (int i = 0; i < source.Count; i++)
-            InstantiateEntryView(source[i], content, palette);
+        for (int i = 0; i < entries.Count; i++)
+            InstantiateEntryView(entries[i], content, palette);
     }
 
     void ShowEmptyState(Transform content)
@@ -332,9 +353,6 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
         label.enableAutoSizing = false;
         label.fontSize = DialogueLogTabSpec.EmptyFontSize;
     }
-
-    IReadOnlyList<DialogueLogEntry> GetActiveEntries() =>
-        activeContentTab == DialogueLogContentTab.Cheshire ? cheshireEntries : entries;
 
     void InstantiateEntryView(DialogueLogEntry entry, Transform content, DialogueLogStylePalette palette)
     {
@@ -371,7 +389,7 @@ public class DialogueLogPanel : SingletonMonoBehaviour<DialogueLogPanel>
 
     internal int DialogueEntryCountForTests => entries.Count;
 
-    internal int CheshireEntryCountForTests => cheshireEntries.Count;
+    internal int CheshireEntryCountForTests => cheshireLogEntries.Count;
 
     internal bool TryAppendDialogueForTests(string speaker, string text) =>
         DialogueLogLogic.TryAppend(entries, speaker, text);
