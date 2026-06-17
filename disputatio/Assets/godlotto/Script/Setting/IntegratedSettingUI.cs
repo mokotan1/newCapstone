@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using System.Collections;
@@ -17,6 +18,7 @@ public class IntegratedSettingUI : MonoBehaviour
     public UIMode uiMode = UIMode.PopupPanel; 
 
     [Header("UI Components")]
+    public AudioMixer audioMixer;
     public Slider bgmSlider;
     public Slider sfxSlider;
     public TMP_Dropdown resolutionDropdown;
@@ -37,23 +39,11 @@ public class IntegratedSettingUI : MonoBehaviour
     private int currentIndex = 0;
     private Vector3 lastMousePosition;
     private bool isReturningToMainMenu;
+    private ResolutionAudioSettings resolutionAudio;
 
     void Start()
     {
-        if (GlobalSettingManager.Instance == null)
-        {
-            Debug.LogError("[UI] GlobalSettingManager가 없습니다!");
-            return;
-        }
-
-        bgmSlider.onValueChanged.AddListener(OnBGMChanged);
-        sfxSlider.onValueChanged.AddListener(OnSFXChanged);
-        fullscreenToggle.onValueChanged.AddListener(GlobalSettingManager.Instance.SetFullscreen);
-        
-        resolutionDropdown.ClearOptions();
-        resolutionDropdown.AddOptions(GlobalSettingManager.Instance.GetResolutionOptions());
-        resolutionDropdown.onValueChanged.AddListener(GlobalSettingManager.Instance.SetResolutionIndex);
-
+        EnsureResolutionAudio();
         SyncUIWithManager();
 
         lastMousePosition = Input.mousePosition;
@@ -80,32 +70,47 @@ public class IntegratedSettingUI : MonoBehaviour
 
     private void SyncUIWithManager()
     {
-        var mgr = GlobalSettingManager.Instance;
+        EnsureResolutionAudio();
 
         bgmSlider.onValueChanged.RemoveAllListeners();
         sfxSlider.onValueChanged.RemoveAllListeners();
         fullscreenToggle.onValueChanged.RemoveAllListeners();
         resolutionDropdown.onValueChanged.RemoveAllListeners();
 
-        bgmSlider.value = mgr.bgmVolume;
-        sfxSlider.value = mgr.sfxVolume;
-        fullscreenToggle.isOn = mgr.isFullscreen;
-        
-        int savedIndex = mgr.currentResolutionIndex;
-        if (savedIndex < 0 || savedIndex >= resolutionDropdown.options.Count)
-            savedIndex = mgr.FindCurrentResolutionIndex();
-
-        resolutionDropdown.value = savedIndex;
-        resolutionDropdown.RefreshShownValue();
+        bgmSlider.value = resolutionAudio.GetPersistedBgmLinear();
+        sfxSlider.value = resolutionAudio.GetPersistedSfxLinear();
+        fullscreenToggle.isOn = resolutionAudio.GetPersistedFullscreen();
+        resolutionAudio.ApplyAudioFromLinear(bgmSlider.value, sfxSlider.value);
+        resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
 
         bgmSlider.onValueChanged.AddListener(OnBGMChanged);
         sfxSlider.onValueChanged.AddListener(OnSFXChanged);
-        fullscreenToggle.onValueChanged.AddListener(GlobalSettingManager.Instance.SetFullscreen);
-        resolutionDropdown.onValueChanged.AddListener(GlobalSettingManager.Instance.SetResolutionIndex);
+        fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
     }
 
-    public void OnBGMChanged(float value) => GlobalSettingManager.Instance.SetBGM(value);
-    public void OnSFXChanged(float value) => GlobalSettingManager.Instance.SetSFX(value);
+    private void EnsureResolutionAudio()
+    {
+        if (resolutionAudio == null)
+            resolutionAudio = new ResolutionAudioSettings(audioMixer);
+    }
+
+    public void OnBGMChanged(float value)
+    {
+        EnsureResolutionAudio();
+        resolutionAudio.SetBgmVolume(value);
+    }
+
+    public void OnSFXChanged(float value)
+    {
+        EnsureResolutionAudio();
+        resolutionAudio.SetSfxVolume(value);
+    }
+
+    public void OnFullscreenChanged(bool value)
+    {
+        EnsureResolutionAudio();
+        resolutionAudio.SetFullscreen(value);
+    }
 
     // ★★★ [추가됨] 드롭다운이 펼쳐져 있는지 확인하는 함수 ★★★
     // TMP Dropdown은 펼쳐질 때 'Dropdown List'라는 이름의 자식 오브젝트를 생성합니다.

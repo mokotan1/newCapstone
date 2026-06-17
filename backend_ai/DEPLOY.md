@@ -9,6 +9,7 @@
    - Windows: `copy .env.example .env`  
    - macOS/Linux: `cp .env.example .env`
 3. `GROQ_API_KEY`, `GOOGLE_API_KEY` 등 필요한 값을 채움
+   - 운영에서 채팅 API를 보호하려면 `CHAT_API_TOKEN` 도 채우고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춤
 4. 서버 실행: `uvicorn main:app --host 0.0.0.0 --port 8000` (또는 `python main.py`)
 
 `config.py`는 **`backend_ai` 폴더 안의 `.env`** 를 실행 위치와 관계없이 읽습니다.
@@ -25,6 +26,7 @@
 
 - 인스턴스/컨테이너의 **환경 변수**에 `GROQ_API_KEY`, `GOOGLE_API_KEY` 설정  
   (AWS Systems Manager Parameter Store, Secrets Manager, 호스팅 패널의 Env 설정 등)
+- 운영에서 공개 API로 열 경우 `CHAT_API_TOKEN` 설정 권장
 - `.env` 파일을 서버에만 두고 권한 제한 (선택)
 
 ## 환경 변수 이름 (요약)
@@ -33,6 +35,7 @@
 |------|------|
 | `GROQ_API_KEY` | Groq (우선) |
 | `GOOGLE_API_KEY` | Gemini 폴백 |
+| `CHAT_API_TOKEN` | 선택: `/chat`, `/chat/stream` 보호용 공유 토큰 |
 | `capstone` | 레거시 Groq 키 (`GROQ_API_KEY` 가 비었을 때만) |
 
 키는 **절대** 저장소에 넣지 말고, 위 경로로만 배포하세요.
@@ -48,7 +51,7 @@ CI 가 main 에 머지될 때마다 다음 두 태그로 이미지를 푸시합�
 
 ```bash
 docker pull ghcr.io/<owner>/newcapstone-ai:latest
-docker run -e GROQ_API_KEY=... -e GOOGLE_API_KEY=... -p 8000:8000 \
+docker run -e GROQ_API_KEY=... -e GOOGLE_API_KEY=... -e CHAT_API_TOKEN=... -p 8000:8000 \
   ghcr.io/<owner>/newcapstone-ai:latest
 ```
 

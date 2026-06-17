@@ -19,8 +19,12 @@ public class ServerConfig : ScriptableObject
     [Tooltip("When true, TLS certificate validation is skipped (dev/staging only).")]
     [SerializeField] private bool bypassTlsCertificate = true;
 
+    [Tooltip("Optional shared token for the chat API. Leave empty for local development.")]
+    [SerializeField] private string chatApiToken = "";
+
     public string ChatUrl => chatUrl;
     public bool BypassTlsCertificate => bypassTlsCertificate;
+    public string ChatApiToken => chatApiToken;
 
     private static ServerConfig _cached;
 

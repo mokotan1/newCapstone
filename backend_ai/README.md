@@ -17,6 +17,7 @@ copy .env.example .env
 ```
 
 `.env` 파일을 열어 `GROQ_API_KEY`, `GOOGLE_API_KEY` 를 입력합니다.  
+운영에서 `/chat` 호출을 보호하려면 `CHAT_API_TOKEN` 도 입력하고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춥니다.  
 (레거시로 `capstone` 이름만 쓰는 경우도 `.env.example` 주석 참고.)
 
 서버 실행:
@@ -38,6 +39,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 |------|------|
 | `GROQ_API_KEY` | Groq API 키 (권장) |
 | `GOOGLE_API_KEY` | Google AI Studio (Gemini) 폴백 |
+| `CHAT_API_TOKEN` | 선택: 설정 시 `/chat`, `/chat/stream` 요청에 동일 토큰 필요 |
 | `capstone` | 예전 Groq 키 변수명 (`GROQ_API_KEY` 가 비었을 때만 사용) |
 
 ## API
@@ -46,6 +48,8 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 - **채팅**: `POST /chat` — JSON `{ "prompt": "...", "system": "...", "use_tools": true }`
 - **스트리밍**: `POST /chat/stream`
 - **튜터 채점(LLM 없음)**: `POST /tutor/grade` — JSON `{ "question_id": "Q002", "user_answer": "골리앗", "correct_count_before": 1, "quiz_target": 5 }` → `is_correct`, `reference_snippet`, `quiz_complete_after`, `unknown_question`
+
+`CHAT_API_TOKEN` 이 설정된 서버의 채팅 API는 `Authorization: Bearer <token>` 또는 `X-Chat-Api-Token: <token>` 헤더가 필요합니다.
 
 ### 튜터 룸 (RAG·문제 은행)
 

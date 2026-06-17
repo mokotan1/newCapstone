@@ -3,7 +3,7 @@ using UnityEngine;
 
 [CommandInfo("Audio",
              "Play Registered SFX",
-             "Plays an SFX clip from AudioController.sfxList by index.")]
+             "Plays an SFX clip from SfxController.sfxList by index.")]
 [AddComponentMenu("")]
 public class PlayRegisteredSfx : Command
 {
@@ -18,8 +18,8 @@ public class PlayRegisteredSfx : Command
 
     public override void OnEnter()
     {
-        if (AudioController.Instance != null)
-            AudioController.Instance.PlaySFX(sfxIndex);
+        if (SfxController.Instance != null)
+            SfxController.Instance.PlaySFX(sfxIndex);
 
         Continue();
     }
