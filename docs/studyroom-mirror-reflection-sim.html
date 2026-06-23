@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudyRoom Mirror Reflection Puzzle Simulation</title>
+  <style>
+    :root {
+      --ink: #1d1812;
+      --paper: #d7c397;
+      --paper-dark: #aa8f5f;
+      --wood: #3d2b20;
+      --brass: #c9a44c;
+      --blue: #8fd3f4;
+      --red: #a83a32;
+      --green: #4aa564;
+      --muted: #867763;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 30% 18%, rgba(201, 164, 76, 0.16), transparent 26%),
+        linear-gradient(135deg, #231914 0%, #3b2a1d 48%, #191410 100%);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(720px, 1fr) 320px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .stage-wrap {
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      min-width: 0;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100%, 960px);
+      aspect-ratio: 16 / 10;
+      min-height: 520px;
+      border: 1px solid rgba(255, 236, 186, 0.18);
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.16), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.18)),
+        repeating-linear-gradient(90deg, #4b3325 0 54px, #523929 54px 108px);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .diary {
+      position: absolute;
+      left: 18%;
+      top: 12%;
+      width: 64%;
+      height: 76%;
+      border: 2px solid #725839;
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, rgba(75, 52, 32, 0.14) 0 49%, rgba(66, 44, 26, 0.28) 50%, rgba(75, 52, 32, 0.12) 51%),
+        radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.22), transparent 18%),
+        var(--paper);
+      box-shadow:
+        inset 0 0 42px rgba(83, 57, 30, 0.34),
+        0 16px 30px rgba(0, 0, 0, 0.24);
+    }
+
+    .diary::before,
+    .diary::after {
+      content: "";
+      position: absolute;
+      top: 8%;
+      bottom: 8%;
+      width: 1px;
+      background: rgba(98, 70, 42, 0.24);
+    }
+
+    .diary::before {
+      left: 49.7%;
+    }
+
+    .diary::after {
+      left: 50.3%;
+    }
+
+    .page-lines {
+      position: absolute;
+      inset: 13% 7%;
+      opacity: 0.24;
+      background: repeating-linear-gradient(0deg, transparent 0 27px, #6b5339 28px 29px);
+    }
+
+    .half-code {
+      position: absolute;
+      left: 36%;
+      top: 33%;
+      width: 28%;
+      height: 82px;
+      overflow: hidden;
+      filter: blur(0.1px);
+    }
+
+    .half-code span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 96px;
+      line-height: 82px;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0;
+      color: rgba(42, 27, 17, 0.72);
+    }
+
+    .half-code .cover {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 40px;
+      height: 48px;
+      background: var(--paper);
+      box-shadow: 0 -8px 14px rgba(215, 195, 151, 0.75);
+    }
+
+    .hidden-mark {
+      position: absolute;
+      right: 19%;
+      top: 48%;
+      width: 62px;
+      height: 62px;
+      border: 1px solid rgba(87, 61, 37, 0.2);
+      border-radius: 50%;
+      opacity: 0.35;
+      background:
+        radial-gradient(circle, rgba(124, 45, 39, 0.58), transparent 38%),
+        radial-gradient(circle, transparent 0 35%, rgba(74, 49, 30, 0.24) 36% 39%, transparent 40%);
+      transition: opacity 160ms ease, filter 160ms ease, transform 160ms ease;
+    }
+
+    .hidden-mark.hit {
+      opacity: 1;
+      filter: drop-shadow(0 0 20px rgba(248, 218, 118, 0.92));
+      transform: scale(1.08);
+    }
+
+    .source {
+      position: absolute;
+      left: 7.5%;
+      top: 46.5%;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #f8d96d;
+      box-shadow: 0 0 26px #f8d96d;
+    }
+
+    .source::after {
+      content: "";
+      position: absolute;
+      left: 28px;
+      top: 11px;
+      width: 92px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(248, 217, 109, 0.88), rgba(248, 217, 109, 0));
+    }
+
+    .ray {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 5px;
+      width: 100px;
+      border-radius: 999px;
+      transform-origin: 0 50%;
+      pointer-events: none;
+      opacity: 0.74;
+      background: linear-gradient(90deg, rgba(247, 218, 113, 0), rgba(247, 218, 113, 0.95), rgba(143, 211, 244, 0.24));
+      box-shadow: 0 0 14px rgba(247, 218, 113, 0.68);
+    }
+
+    .ray.reflected {
+      background: linear-gradient(90deg, rgba(143, 211, 244, 0.84), rgba(143, 211, 244, 0.46), rgba(143, 211, 244, 0));
+      box-shadow: 0 0 18px rgba(143, 211, 244, 0.62);
+    }
+
+    .ray.hot {
+      height: 7px;
+      opacity: 1;
+      box-shadow: 0 0 26px rgba(248, 218, 118, 0.92);
+    }
+
+    .mirror {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      width: 112px;
+      height: 248px;
+      transform: translate(-50%, -50%) rotate(18deg);
+      transform-origin: 50% 50%;
+      cursor: grab;
+      filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.28));
+    }
+
+    .mirror:active {
+      cursor: grabbing;
+    }
+
+    .mirror-base {
+      position: absolute;
+      inset: 0;
+      border: 8px solid #594334;
+      border-radius: 58px 58px 18px 18px;
+      background: linear-gradient(130deg, #8c704e, #463124 54%, #9d8058);
+    }
+
+    .mirror-surface {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 20px;
+      height: 152px;
+      overflow: hidden;
+      border: 4px solid rgba(221, 225, 226, 0.72);
+      border-radius: 42px 42px 12px 12px;
+      background:
+        linear-gradient(130deg, rgba(255, 255, 255, 0.54), rgba(113, 184, 214, 0.4) 42%, rgba(32, 71, 86, 0.5)),
+        #8fd3f4;
+    }
+
+    .mirror-surface::after {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: 34px;
+      width: 128px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(-35deg);
+    }
+
+    .mirror-code {
+      position: absolute;
+      inset: 38px -68px auto -68px;
+      height: 66px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 76px;
+      line-height: 66px;
+      font-weight: 800;
+      color: rgba(232, 246, 255, 0.9);
+      text-align: center;
+      opacity: var(--code-opacity, 0.2);
+      transition: opacity 120ms ease;
+    }
+
+    .mirror-handle {
+      position: absolute;
+      left: 31px;
+      right: 31px;
+      bottom: 18px;
+      height: 58px;
+      border-radius: 18px;
+      background: linear-gradient(#3b2a20, #72543b);
+    }
+
+    .ghost-target {
+      position: absolute;
+      left: calc(50% - 70px);
+      top: calc(50% - 156px);
+      width: 140px;
+      height: 312px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 76px 76px 22px 22px;
+      transform: rotate(31deg);
+      pointer-events: none;
+    }
+
+    .complete-code {
+      position: absolute;
+      left: 36%;
+      top: 33%;
+      width: 28%;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 96px;
+      line-height: 82px;
+      font-weight: 800;
+      text-align: center;
+      color: rgba(116, 35, 30, 0);
+      text-shadow: none;
+      transition: color 180ms ease, text-shadow 180ms ease;
+      pointer-events: none;
+    }
+
+    .complete-code.solved {
+      color: rgba(116, 35, 30, 0.95);
+      text-shadow: 0 0 18px rgba(248, 218, 118, 0.85);
+    }
+
+    .panel {
+      padding: 24px 22px;
+      background: #201915;
+      border-left: 1px solid rgba(255, 236, 186, 0.12);
+      color: #f1e5cc;
+      overflow: auto;
+    }
+
+    .panel h1 {
+      margin: 0 0 18px;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 750;
+    }
+
+    .control {
+      margin: 18px 0;
+    }
+
+    .control label {
+      display: block;
+      margin-bottom: 8px;
+      color: #cdbd9f;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--brass);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid rgba(255, 236, 186, 0.16);
+      border-radius: 7px;
+      color: #f6ead0;
+      background: #463427;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #574130;
+    }
+
+    .meters {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .meter {
+      display: grid;
+      grid-template-columns: 82px 1fr 46px;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #cdbd9f;
+    }
+
+    .bar {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--red);
+      transition: width 100ms ease, background 100ms ease;
+    }
+
+    .fill.good {
+      background: var(--green);
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 14px;
+      min-height: 72px;
+      border: 1px solid rgba(255, 236, 186, 0.14);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.055);
+      color: #e9d8b7;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .status strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #ffe39b;
+    }
+
+    .legend {
+      margin-top: 18px;
+      color: #a9987b;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .stage-wrap {
+        padding: 16px;
+      }
+
+      .stage {
+        min-height: 420px;
+      }
+
+      .panel {
+        border-left: 0;
+        border-top: 1px solid rgba(255, 236, 186, 0.12);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="stage-wrap">
+      <div class="stage" id="stage">
+        <div class="diary">
+          <div class="page-lines"></div>
+          <div class="half-code"><span>7337</span><div class="cover"></div></div>
+          <div class="complete-code" id="completeCode">7337</div>
+          <div class="hidden-mark" id="hiddenMark"></div>
+        </div>
+
+        <div class="ghost-target" aria-hidden="true"></div>
+        <div class="source" id="source"></div>
+        <div class="ray incoming" id="incomingRay"></div>
+        <div class="ray reflected" id="reflectedRay"></div>
+
+        <div class="mirror" id="mirror" role="button" aria-label="책갈피 거울 드래그">
+          <div class="mirror-base"></div>
+          <div class="mirror-surface">
+            <div class="mirror-code" id="mirrorCode">7337</div>
+          </div>
+          <div class="mirror-handle"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h1>책갈피 거울 반사 퍼즐</h1>
+
+      <div class="control">
+        <label for="angle">거울 각도 <span id="angleLabel">18</span>도</label>
+        <input id="angle" type="range" min="-70" max="70" value="18">
+      </div>
+
+      <div class="buttons">
+        <button type="button" id="leftBtn">-5도</button>
+        <button type="button" id="resetBtn">초기화</button>
+        <button type="button" id="rightBtn">+5도</button>
+      </div>
+
+      <div class="meters">
+        <div class="meter">
+          <span>위치</span>
+          <div class="bar"><div class="fill" id="posFill"></div></div>
+          <span id="posText">0%</span>
+        </div>
+        <div class="meter">
+          <span>각도</span>
+          <div class="bar"><div class="fill" id="angleFill"></div></div>
+          <span id="angleText">0%</span>
+        </div>
+        <div class="meter">
+          <span>반사</span>
+          <div class="bar"><div class="fill" id="rayFill"></div></div>
+          <span id="rayText">0%</span>
+        </div>
+      </div>
+
+      <div class="status" id="status">
+        <strong>조작</strong>
+        거울을 드래그하고 각도를 조절해 반사광이 오른쪽의 희미한 표식을 지나가게 하세요.
+      </div>
+
+      <div class="legend">
+        이 샘플은 Unity 2D UI에 그대로 옮길 수 있는 구조입니다. 거울 카드는 RectTransform,
+        빛줄기는 얇은 Image, 판정은 Vector2.Reflect와 목표점 거리 계산으로 처리합니다.
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const stage = document.getElementById("stage");
+    const mirror = document.getElementById("mirror");
+    const angle = document.getElementById("angle");
+    const angleLabel = document.getElementById("angleLabel");
+    const incomingRay = document.getElementById("incomingRay");
+    const reflectedRay = document.getElementById("reflectedRay");
+    const hiddenMark = document.getElementById("hiddenMark");
+    const completeCode = document.getElementById("completeCode");
+    const mirrorCode = document.getElementById("mirrorCode");
+    const status = document.getElementById("status");
+    const source = document.getElementById("source");
+
+    const posFill = document.getElementById("posFill");
+    const angleFill = document.getElementById("angleFill");
+    const rayFill = document.getElementById("rayFill");
+    const posText = document.getElementById("posText");
+    const angleText = document.getElementById("angleText");
+    const rayText = document.getElementById("rayText");
+
+    const state = {
+      x: 0.5,
+      y: 0.52,
+      angle: 18,
+      dragging: false,
+      pointerOffsetX: 0,
+      pointerOffsetY: 0
+    };
+
+    const ideal = {
+      x: 0.5,
+      y: 0.5,
+      angle: 31
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function stagePoint(element) {
+      const sr = stage.getBoundingClientRect();
+      const er = element.getBoundingClientRect();
+      return {
+        x: er.left + er.width / 2 - sr.left,
+        y: er.top + er.height / 2 - sr.top
+      };
+    }
+
+    function setRay(element, start, end) {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const length = Math.hypot(dx, dy);
+      const deg = Math.atan2(dy, dx) * 180 / Math.PI;
+      element.style.left = `${start.x}px`;
+      element.style.top = `${start.y - 2.5}px`;
+      element.style.width = `${length}px`;
+      element.style.transform = `rotate(${deg}deg)`;
+    }
+
+    function dot(a, b) {
+      return a.x * b.x + a.y * b.y;
+    }
+
+    function norm(v) {
+      const len = Math.hypot(v.x, v.y) || 1;
+      return { x: v.x / len, y: v.y / len };
+    }
+
+    function reflect(incoming, normal) {
+      const d = dot(incoming, normal);
+      return {
+        x: incoming.x - 2 * d * normal.x,
+        y: incoming.y - 2 * d * normal.y
+      };
+    }
+
+    function lineTargetScore(origin, direction, target, tolerance) {
+      const unit = norm(direction);
+      const toTarget = { x: target.x - origin.x, y: target.y - origin.y };
+      const projection = dot(toTarget, unit);
+      if (projection < 0) return 0;
+      const closest = {
+        x: origin.x + unit.x * projection,
+        y: origin.y + unit.y * projection
+      };
+      const distance = Math.hypot(target.x - closest.x, target.y - closest.y);
+      return clamp(1 - distance / tolerance, 0, 1);
+    }
+
+    function percent(value) {
+      return `${Math.round(value * 100)}%`;
+    }
+
+    function updateMeter(fill, text, value) {
+      fill.style.width = percent(value);
+      fill.classList.toggle("good", value >= 0.82);
+      text.textContent = percent(value);
+    }
+
+    function render() {
+      const sr = stage.getBoundingClientRect();
+      const px = state.x * sr.width;
+      const py = state.y * sr.height;
+      mirror.style.left = `${px}px`;
+      mirror.style.top = `${py}px`;
+      mirror.style.transform = `translate(-50%, -50%) rotate(${state.angle}deg)`;
+      angle.value = String(Math.round(state.angle));
+      angleLabel.textContent = String(Math.round(state.angle));
+
+      const sourcePoint = stagePoint(source);
+      const mirrorPoint = { x: px, y: py };
+      const targetPoint = stagePoint(hiddenMark);
+      setRay(incomingRay, sourcePoint, mirrorPoint);
+
+      const incoming = norm({ x: mirrorPoint.x - sourcePoint.x, y: mirrorPoint.y - sourcePoint.y });
+      const surfaceRad = state.angle * Math.PI / 180;
+      const normal = norm({ x: -Math.sin(surfaceRad), y: Math.cos(surfaceRad) });
+      const reflected = norm(reflect(incoming, normal));
+      const reflectedEnd = {
+        x: mirrorPoint.x + reflected.x * sr.width * 0.55,
+        y: mirrorPoint.y + reflected.y * sr.width * 0.55
+      };
+      setRay(reflectedRay, mirrorPoint, reflectedEnd);
+
+      const posDistance = Math.hypot((state.x - ideal.x) * sr.width, (state.y - ideal.y) * sr.height);
+      const posScore = clamp(1 - posDistance / 130, 0, 1);
+      const angleDelta = Math.abs(((state.angle - ideal.angle + 180) % 360) - 180);
+      const angleScore = clamp(1 - angleDelta / 28, 0, 1);
+      const rayScore = lineTargetScore(mirrorPoint, reflected, targetPoint, 86);
+      const solved = posScore > 0.72 && angleScore > 0.72 && rayScore > 0.82;
+
+      updateMeter(posFill, posText, posScore);
+      updateMeter(angleFill, angleText, angleScore);
+      updateMeter(rayFill, rayText, rayScore);
+
+      reflectedRay.classList.toggle("hot", rayScore > 0.82);
+      incomingRay.classList.toggle("hot", solved);
+      hiddenMark.classList.toggle("hit", rayScore > 0.82);
+      completeCode.classList.toggle("solved", solved);
+      mirrorCode.style.setProperty("--code-opacity", solved ? "0.92" : String(0.2 + rayScore * 0.55));
+
+      if (solved) {
+        status.innerHTML = "<strong>성공</strong>위치, 각도, 반사 방향이 모두 맞았습니다. 숨겨진 숫자가 완전히 드러납니다.";
+      } else if (rayScore > 0.82) {
+        status.innerHTML = "<strong>거의 맞음</strong>빛은 표식을 지나갑니다. 거울 위치나 각도를 조금 더 다듬어 보세요.";
+      } else if (posScore > 0.72 && angleScore > 0.72) {
+        status.innerHTML = "<strong>방향 확인</strong>거울 자체는 좋아 보입니다. 반사광이 표식을 통과하도록 미세 조정하세요.";
+      } else if (posScore > 0.72) {
+        status.innerHTML = "<strong>위치 좋음</strong>거울은 다이어리 위에 놓였습니다. 이제 각도를 맞춰 반사광을 보내세요.";
+      } else {
+        status.innerHTML = "<strong>조작</strong>거울을 다이어리 중앙의 반쪽 숫자 근처로 옮기고 각도를 조절하세요.";
+      }
+    }
+
+    mirror.addEventListener("pointerdown", (event) => {
+      const sr = stage.getBoundingClientRect();
+      const mx = state.x * sr.width;
+      const my = state.y * sr.height;
+      state.dragging = true;
+      state.pointerOffsetX = event.clientX - sr.left - mx;
+      state.pointerOffsetY = event.clientY - sr.top - my;
+      mirror.setPointerCapture(event.pointerId);
+    });
+
+    mirror.addEventListener("pointermove", (event) => {
+      if (!state.dragging) return;
+      const sr = stage.getBoundingClientRect();
+      state.x = clamp((event.clientX - sr.left - state.pointerOffsetX) / sr.width, 0.16, 0.84);
+      state.y = clamp((event.clientY - sr.top - state.pointerOffsetY) / sr.height, 0.18, 0.82);
+      render();
+    });
+
+    mirror.addEventListener("pointerup", (event) => {
+      state.dragging = false;
+      mirror.releasePointerCapture(event.pointerId);
+    });
+
+    angle.addEventListener("input", () => {
+      state.angle = Number(angle.value);
+      render();
+    });
+
+    document.getElementById("leftBtn").addEventListener("click", () => {
+      state.angle = clamp(state.angle - 5, -70, 70);
+      render();
+    });
+
+    document.getElementById("rightBtn").addEventListener("click", () => {
+      state.angle = clamp(state.angle + 5, -70, 70);
+      render();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      state.x = 0.5;
+      state.y = 0.52;
+      state.angle = 18;
+      render();
+    });
+
+    window.addEventListener("resize", render);
+    render();
+  </script>
+</body>
+</html>
