@@ -17,9 +17,14 @@ public static class FungusVariableKeys
     // Item acquisition flags mirrored by ItemPickup and developer item grants.
     public const string GetFood = "GetFood";
     public const string GetFilterCard = "GetFilterCard";
+    public const string GetBookmarkMirror = "GetBookmarkMirror";
     public const string HaveMaidKey = "HaveMaidKey";
     public const string HaveBasementKey = "HaveBasementKey";
     public const string HasBible = "HasBible";
+
+    // StudyRoom 다이어리/책갈피 거울 퍼즐 (기존 변수명 유지).
+    public const string DiarySolved = "DiarySolved";
+    public const string HaveTutorKey = "HaveTutorKey";
 
     // Kitchen sink/bottle puzzle (global bool, Kitchen Flowchart + Variablemanager)
     public const string GetBottle = "GetBottle";

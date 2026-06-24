@@ -24,6 +24,7 @@ public class ItemAcquisitionTrackerTests
     [TestCase(1, FungusVariableKeys.GetBottle, "Bottle")]
     [TestCase(2, FungusVariableKeys.GetFood, "Food")]
     [TestCase(4, FungusVariableKeys.GetFilterCard, "FilterCard")]
+    [TestCase(17, FungusVariableKeys.GetBookmarkMirror, "BookmarkMirror")]
     [TestCase(8, FungusVariableKeys.HaveMaidKey, "MaidRoom_Key")]
     [TestCase(12, FungusVariableKeys.HaveBasementKey, "BasementKey")]
     [TestCase(19, FungusVariableKeys.HasBible, "Illustrated Bible")]

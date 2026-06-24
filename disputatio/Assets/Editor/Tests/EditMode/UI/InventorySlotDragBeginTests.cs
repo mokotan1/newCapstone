@@ -93,6 +93,38 @@ public class InventorySlotDragBeginTests
             Assert.IsTrue(group.blocksRaycasts, "blocksRaycasts must be restored after drag ends.");
     }
 
+    [Test]
+    public void OnEndDrag_FilterCardBookDropZoneChild_ConsumesFilterCard()
+    {
+        var filterCard = ScriptableObject.CreateInstance<Item>();
+        filterCard.itemName = "FilterCard";
+        filterCard.icon = bottle.icon;
+        slot.AddItem(filterCard);
+
+        var dropZoneGo = new GameObject("FilterCardBookPanel", typeof(RectTransform), typeof(Image));
+        dropZoneGo.transform.SetParent(canvasRoot.transform, false);
+        var dropZone = dropZoneGo.AddComponent<FilterCardBookDropZone>();
+        dropZone.requiredItem = filterCard;
+        dropZone.maxUses = 1;
+
+        var hitChild = new GameObject("BookOverlayRaycastChild", typeof(RectTransform), typeof(Image));
+        hitChild.transform.SetParent(dropZoneGo.transform, false);
+
+        slot.OnBeginDrag(new PointerEventData(EventSystem.current) { position = new Vector2(100f, 100f) });
+        Assert.AreEqual(filterCard, InventorySlot.draggedItem);
+
+        slot.OnEndDrag(new PointerEventData(EventSystem.current)
+        {
+            pointerEnter = hitChild,
+        });
+
+        Assert.IsNull(InventorySlot.draggedItem);
+        Assert.IsTrue(dropZone.gameObject.activeSelf);
+        Assert.IsNull(GetPrivateStaticDragIcon());
+
+        Object.DestroyImmediate(filterCard);
+    }
+
     static GameObject GetPrivateStaticDragIcon()
     {
         var field = typeof(InventorySlot).GetField("dragIcon", BindingFlags.NonPublic | BindingFlags.Static);

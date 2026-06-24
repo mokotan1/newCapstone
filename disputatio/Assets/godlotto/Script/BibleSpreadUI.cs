@@ -430,7 +430,7 @@ public class BibleSpreadUI : MonoBehaviour
         tmp.color = def.labelColor;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
-        tmp.enableWordWrapping = false;
+        tmp.textWrappingMode = TextWrappingModes.NoWrap;
         if (font != null)
         {
             tmp.font = font;
@@ -473,7 +473,7 @@ public class BibleSpreadUI : MonoBehaviour
         tmp.color = block.color;
         tmp.alignment = block.alignment;
         tmp.raycastTarget = false;
-        tmp.enableWordWrapping = true;
+        tmp.textWrappingMode = TextWrappingModes.Normal;
         tmp.overflowMode = TextOverflowModes.Overflow;
         if (block.lineSpacing > 0f)
             tmp.lineSpacing = block.lineSpacing;

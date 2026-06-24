@@ -24,7 +24,7 @@ namespace Godlotto.Interaction
             if (controller == null || string.IsNullOrWhiteSpace(interactionId))
                 return;
 
-            controller.OnInteraction(interactionId);
+            controller.OnInteraction(interactionId, gameObject);
         }
     }
 }
