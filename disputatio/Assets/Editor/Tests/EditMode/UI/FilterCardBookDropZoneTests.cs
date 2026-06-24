@@ -90,6 +90,13 @@ public class FilterCardBookDropZoneTests
         typeof(StudyRoomDiaryMirrorPuzzleController)
             .GetField("successFungusBlockName", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             ?.SetValue(mirrorController, string.Empty);
+        // 드롭 흐름/라우팅만 검증한다. 각도·반사 게이트는 거울 컨트롤러 전용 테스트에서 다룬다.
+        typeof(StudyRoomDiaryMirrorPuzzleController)
+            .GetField("requireMirrorAngle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?.SetValue(mirrorController, false);
+        typeof(StudyRoomDiaryMirrorPuzzleController)
+            .GetField("requireReflection", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?.SetValue(mirrorController, false);
 
         dropZone.diaryMirrorPuzzleController = mirrorController;
     }

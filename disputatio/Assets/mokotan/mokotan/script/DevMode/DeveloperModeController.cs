@@ -80,7 +80,12 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
             return;
 
         if (Input.GetKeyDown(toggleOverlayKey) && developerOverlay != null)
-            developerOverlay.ToggleVisible();
+        {
+            if (developerOverlay.IsVisible && developerOverlay.IsOverlayMinimized)
+                developerOverlay.SetOverlayMinimized(false);
+            else
+                developerOverlay.ToggleVisible();
+        }
         if (Input.GetKeyDown(quickRestartKey))
             quickRestartService.TriggerRestart();
         if (Input.GetKeyDown(skipOpeningKey))
@@ -133,6 +138,33 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
         }
 
         return DeveloperModeItemGrantService.GrantSelectedItem(item, quantity);
+    }
+
+    /// <summary>서재 거울 퍼즐 QA — BookmarkMirror 즉시 지급.</summary>
+    public DeveloperModeItemSelectionGrantResult RequestGrantBookmarkMirror()
+    {
+        if (!IsDeveloperModeEnabled)
+        {
+            return new DeveloperModeItemSelectionGrantResult
+            {
+                WasBlockedByDevMode = true,
+                FailureReason = "개발자 모드가 꺼져 있습니다.",
+            };
+        }
+
+        return StudyRoomPuzzleDevTool.GrantBookmarkMirror();
+    }
+
+    /// <summary>서재 거울 퍼즐 QA — DiarySolved/HaveTutorKey 초기화.</summary>
+    public bool RequestResetStudyRoomPuzzle()
+    {
+        return IsDeveloperModeEnabled && StudyRoomPuzzleDevTool.ResetPuzzle();
+    }
+
+    /// <summary>서재 거울 퍼즐 QA — 강제 성공(기존 SuccessRouter 흐름 재사용).</summary>
+    public bool RequestForceSolveStudyRoomPuzzle()
+    {
+        return IsDeveloperModeEnabled && StudyRoomPuzzleDevTool.ForceSolve();
     }
 
     private void SetDeveloperModeEnabled(bool enabled)

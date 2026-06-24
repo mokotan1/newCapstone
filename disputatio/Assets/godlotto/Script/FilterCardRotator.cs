@@ -1,10 +1,18 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class FilterCardRotator : MonoBehaviour
+public class FilterCardRotator : MonoBehaviour, IScrollHandler, IPointerEnterHandler, IPointerExitHandler
 {
     // 플레이어가 인지하는 각도를 저장할 변수 (0, 90, 180, 270)
     private float currentAngle = 0f;
+
+    [SerializeField] private float buttonRotateStepDegrees = 90f;
+    [SerializeField] private float fineRotateStepDegrees = 5f;
+    [SerializeField] private KeyCode rotateLeftKey = KeyCode.Q;
+    [SerializeField] private KeyCode rotateRightKey = KeyCode.E;
+
+    private bool pointerInside;
 
     /// <summary>UI에 적용된 Z축 시각 각도(0~360).</summary>
     public float CurrentVisualAngleDegrees => NormalizeVisualAngle(-currentAngle);
@@ -12,36 +20,58 @@ public class FilterCardRotator : MonoBehaviour
     /// <summary>회전 버튼으로 90° 회전이 적용된 뒤 호출된다.</summary>
     public event Action Rotated;
 
+    private void Update()
+    {
+        if (!pointerInside)
+            return;
+
+        if (Input.GetKeyDown(rotateLeftKey))
+            RotateVisualBy(-fineRotateStepDegrees);
+        else if (Input.GetKeyDown(rotateRightKey))
+            RotateVisualBy(fineRotateStepDegrees);
+    }
+
     // 오른쪽으로 90도 회전시키는 함수
     public void RotateRight()
     {
-        // 사용자가 인지하는 각도는 90도씩 더해줍니다.
-        currentAngle += 90f;
+        RotateVisualBy(buttonRotateStepDegrees);
+    }
 
-        // 360도가 되면 0으로 되돌립니다.
-        if (currentAngle >= 360f)
-        {
-            currentAngle = 0f;
-        }
+    public void OnScroll(PointerEventData eventData)
+    {
+        if (eventData == null || Mathf.Approximately(eventData.scrollDelta.y, 0f))
+            return;
 
-        // 실제 회전을 적용합니다. 시계 방향으로 돌리기 위해 음수(-) 값을 사용합니다.
+        RotateVisualBy(Mathf.Sign(eventData.scrollDelta.y) * fineRotateStepDegrees);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        pointerInside = true;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        pointerInside = false;
+    }
+
+    public void RotateVisualBy(float deltaDegrees)
+    {
+        float visualAngle = NormalizeVisualAngle(CurrentVisualAngleDegrees + deltaDegrees);
+        currentAngle = NormalizeVisualAngle(-visualAngle);
         ApplyRotation();
+    }
+
+    public void ConfigureRotationSteps(float buttonStepDegrees, float fineStepDegrees)
+    {
+        buttonRotateStepDegrees = Mathf.Max(0.1f, Mathf.Abs(buttonStepDegrees));
+        fineRotateStepDegrees = Mathf.Max(0.1f, Mathf.Abs(fineStepDegrees));
     }
 
     // 왼쪽으로 90도 회전시키는 함수
     public void RotateLeft()
     {
-        // 사용자가 인지하는 각도는 90도씩 빼줍니다.
-        currentAngle -= 90f;
-
-        // 0도보다 작아지면 270도로 순환시킵니다.
-        if (currentAngle < 0f)
-        {
-            currentAngle = 270f;
-        }
-
-        // 실제 회전을 적용합니다.
-        ApplyRotation();
+        RotateVisualBy(-buttonRotateStepDegrees);
     }
 
     // 실제 회전값을 적용하는 함수

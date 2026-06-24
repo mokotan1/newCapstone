@@ -9,7 +9,12 @@ using UnityEngine.EventSystems;
 /// 회전(FilterCardRotator)과는 독립적으로 동작한다.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
-public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class FilterCardBoundedDrag : MonoBehaviour,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler
 {
     [Tooltip("드래그 이동을 가둘 영역. 보통 드롭 시 FilterCardBookDropZone이 코드로 주입한다. " +
              "비어 있으면 부모 RectTransform을 경계로 사용한다.")]
@@ -19,6 +24,9 @@ public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHand
     public event Action DragEnded;
 
     private RectTransform rectTransform;
+    private bool pointerHeld;
+    private Camera dragCamera;
+    private Vector2 pointerOffset;
 
     // 매 프레임 할당을 피하기 위해 재사용하는 꼭짓점 버퍼.
     private readonly Vector3[] cardCorners = new Vector3[4];
@@ -26,34 +34,121 @@ public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHand
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
+        EnsureInitialized();
     }
 
     /// <summary>드롭 시 책 패널 RectTransform을 드래그 경계로 주입한다.</summary>
     public void SetBounds(RectTransform bounds)
     {
+        EnsureInitialized();
         boundsRect = bounds;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // 자유 이동만 담당하므로 시작 시점에 별도로 저장할 상태가 없다.
+        EnsureInitialized();
+        CapturePointerOffset(eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        // transform.root(Canvas) 스케일 보정 — 기존 Draggable과 동일한 방식.
-        float rootScale = transform.root.localScale.x;
-        if (Mathf.Approximately(rootScale, 0f))
-            rootScale = 1f;
+        EnsureInitialized();
+        if (rectTransform == null)
+            return;
 
-        rectTransform.anchoredPosition += eventData.delta / rootScale;
-        ClampInsideBounds();
+        MoveToScreenPosition(eventData.position, eventData.pressEventCamera);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        EnsureInitialized();
+        pointerHeld = false;
         // 위치를 되돌리지 않는다. 경계만 한 번 더 보정한다.
+        ClampInsideBounds();
+        DragEnded?.Invoke();
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        EnsureInitialized();
+        pointerHeld = true;
+        CapturePointerOffset(eventData);
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        pointerHeld = false;
+        ClampInsideBounds();
+        DragEnded?.Invoke();
+    }
+
+    private void Update()
+    {
+        if (!pointerHeld)
+            return;
+
+        if (!Input.GetMouseButton(0))
+        {
+            pointerHeld = false;
+            ClampInsideBounds();
+            DragEnded?.Invoke();
+            return;
+        }
+
+        MoveToScreenPosition(Input.mousePosition, dragCamera);
+    }
+
+    private void EnsureInitialized()
+    {
+        if (rectTransform == null)
+            rectTransform = GetComponent<RectTransform>();
+    }
+
+    private void CapturePointerOffset(PointerEventData eventData)
+    {
+        if (eventData == null || rectTransform == null)
+            return;
+
+        dragCamera = eventData.pressEventCamera;
+        RectTransform parent = rectTransform.parent as RectTransform;
+        if (parent == null)
+        {
+            pointerOffset = Vector2.zero;
+            return;
+        }
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parent,
+                eventData.position,
+                dragCamera,
+                out Vector2 localPoint))
+        {
+            pointerOffset = rectTransform.anchoredPosition - localPoint;
+        }
+    }
+
+    private void MoveToScreenPosition(Vector2 screenPosition, Camera eventCamera)
+    {
+        RectTransform parent = rectTransform != null ? rectTransform.parent as RectTransform : null;
+        if (parent == null)
+            return;
+
+        Camera cameraToUse = eventCamera != null ? eventCamera : dragCamera;
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parent,
+                screenPosition,
+                cameraToUse,
+                out Vector2 localPoint))
+        {
+            return;
+        }
+
+        rectTransform.anchoredPosition = localPoint + pointerOffset;
+        ClampInsideBounds();
+    }
+
+    public void NotifyExternalDragEnded()
+    {
         ClampInsideBounds();
         DragEnded?.Invoke();
     }
@@ -64,6 +159,10 @@ public class FilterCardBoundedDrag : MonoBehaviour, IBeginDragHandler, IDragHand
     /// </summary>
     private void ClampInsideBounds()
     {
+        EnsureInitialized();
+        if (rectTransform == null)
+            return;
+
         RectTransform bounds = boundsRect != null ? boundsRect : rectTransform.parent as RectTransform;
         if (bounds == null)
             return;

@@ -22,6 +22,10 @@ public static class FungusVariableKeys
     public const string HaveBasementKey = "HaveBasementKey";
     public const string HasBible = "HasBible";
 
+    // StudyRoom 다이어리/책갈피 거울 퍼즐 (기존 변수명 유지).
+    public const string DiarySolved = "DiarySolved";
+    public const string HaveTutorKey = "HaveTutorKey";
+
     // Kitchen sink/bottle puzzle (global bool, Kitchen Flowchart + Variablemanager)
     public const string GetBottle = "GetBottle";
     public const string BottleClicked = "BottleClicked";

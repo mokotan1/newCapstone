@@ -14,6 +14,7 @@ public class StudyRoomPuzzleControllerTests
     public void SetUp()
     {
         RoomInteractionController.ResetStateForTests();
+        ModalInputGate.ResetForTests();
         FungusDialogueBridge.ResetForTests();
         SceneInteractionController.RespectLegacyInteractionLock = false;
         SceneInteractionController.BlockDuringFungusDialogue = false;
@@ -49,6 +50,7 @@ public class StudyRoomPuzzleControllerTests
     public void TearDown()
     {
         RoomInteractionController.ResetStateForTests();
+        ModalInputGate.ResetForTests();
         FungusDialogueBridge.ResetForTests();
         foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
             Object.DestroyImmediate(runner.gameObject);
@@ -84,6 +86,26 @@ public class StudyRoomPuzzleControllerTests
         controller.OnInteraction("cardstack");
 
         Assert.AreEqual("CardStack_Clicked", executedBlock);
+    }
+
+    [Test]
+    public void OnInteraction_CardStackId_WhenInputSourceIsOutsideModal_DoesNotExecuteMappedBlock()
+    {
+        var panel = new GameObject("OpenModalPanel");
+        ModalInputGate.Begin(panel, panel, blocksHud: true, blocksWorld: true);
+
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction("cardstack", root);
+
+        Assert.IsNull(executedBlock);
+
+        Object.DestroyImmediate(panel);
     }
 
     [Test]

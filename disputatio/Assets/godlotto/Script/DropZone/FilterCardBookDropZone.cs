@@ -1,4 +1,5 @@
 using Godlotto.Interaction;
+using Godlotto.ModalInput;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -50,28 +51,50 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
     [Tooltip("지정하면 BookmarkMirror 활성화 후 거울 숫자 퍼즐(7337) 정답 검사를 시작한다.")]
     public StudyRoomDiaryMirrorPuzzleController diaryMirrorPuzzleController;
 
-    [Tooltip("거울 숫자 퍼즐에서는 회전 버튼을 표시하지 않는다.")]
-    public bool hideRotateButtonsForDiaryMirror = true;
+    [Tooltip("거울 숫자 퍼즐에서는 5도 미세 회전 버튼을 표시한다. 이전 호환이 필요할 때만 켠다.")]
+    public bool hideRotateButtonsForDiaryMirror = false;
 
     private int currentUses = 0;
     private RectTransform resolvedBook;
     private GameObject filterCardImageObject;
     private RectTransform filterCardImageRect;
     private FilterCardRotator activeCardRotator;
+    private FilterCardBoundedDrag activeCardDrag;
+    private bool fallbackDraggingMirror;
+    private Vector2 fallbackPointerOffset;
+    private bool hasStarted;
 
     private void Start()
     {
+        hasStarted = true;
         EnsureBookOverlay();
         EnsureFilterCardImage();
         SetFilterCardImageActive(false);
         HideFilterCardImage();
         if (diaryMirrorPuzzleController != null)
             diaryMirrorPuzzleController.ShowHalfCodeClue(resolvedBook);
+        StyleDiaryMirrorDropPanel();
         RewireRotateButtons();
 
         // 기존 DropZone과 동일: 시작 시 회전 버튼을 숨긴다.
         if (rotateRightButtonObject != null) rotateRightButtonObject.SetActive(false);
         if (rotateLeftButtonObject != null) rotateLeftButtonObject.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        if (!hasStarted || diaryMirrorPuzzleController == null)
+            return;
+
+        RestoreDiaryMirrorDropPanel();
+    }
+
+    private void Update()
+    {
+        if (TryHandleCloseButtonClick())
+            return;
+
+        UpdateDiaryMirrorFallbackDrag();
     }
 
     public void OnDrop(PointerEventData eventData)
@@ -124,19 +147,43 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         InventorySlot.ClearDragState();
     }
 
+    private void RestoreDiaryMirrorDropPanel()
+    {
+        fallbackDraggingMirror = false;
+
+        EnsureBookOverlay();
+        HideFilterCardImage();
+        SetFilterCardImageActive(false);
+
+        if (rotateRightButtonObject != null)
+            rotateRightButtonObject.SetActive(false);
+
+        if (rotateLeftButtonObject != null)
+            rotateLeftButtonObject.SetActive(false);
+
+        if (diaryMirrorPuzzleController != null)
+            diaryMirrorPuzzleController.ShowHalfCodeClue(resolvedBook);
+
+        KeepCloseButtonOnTop();
+    }
+
     private void EnsureBookOverlay()
     {
-        if (resolvedBook != null)
-            return;
-
-        resolvedBook = bookOverlayInstance != null ? bookOverlayInstance : FindExistingBookOverlay();
         if (resolvedBook == null)
-            resolvedBook = SpawnBookOverlay();
+        {
+            resolvedBook = bookOverlayInstance != null ? bookOverlayInstance : FindExistingBookOverlay();
+            if (resolvedBook == null)
+                resolvedBook = SpawnBookOverlay();
+
+            if (resolvedBook != null)
+            {
+                PrepareBookOverlayForCardDrop(resolvedBook.gameObject);
+                ApplyBookOverlayLayout(resolvedBook);
+            }
+        }
 
         if (resolvedBook != null)
         {
-            PrepareBookOverlayForCardDrop(resolvedBook.gameObject);
-            ApplyBookOverlayLayout(resolvedBook);
             resolvedBook.gameObject.SetActive(true);
             resolvedBook.SetAsFirstSibling();
             KeepCloseButtonOnTop();
@@ -154,6 +201,9 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         if (filterCardImageObject != null && filterCardImageRect != null)
         {
             SetFilterCardImageParent();
+            ConfigureFilterCardInteractions();
+            if (diaryMirrorPuzzleController != null)
+                HideLegacyRotateChrome();
             return;
         }
 
@@ -170,21 +220,149 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
 
         SetFilterCardImageParent();
 
+        ConfigureFilterCardInteractions();
+        filterCardImageRect.SetAsLastSibling();
+        KeepCloseButtonOnTop();
+    }
+
+    private void ConfigureFilterCardInteractions()
+    {
+        if (filterCardImageObject == null)
+            return;
+
         var image = filterCardImageObject.GetComponent<Image>();
         if (image != null)
             image.raycastTarget = true;
+        DisableChildRaycastTargets(filterCardImageObject.transform);
 
-        var drag = filterCardImageObject.GetComponent<FilterCardBoundedDrag>();
-        if (drag == null)
-            drag = filterCardImageObject.AddComponent<FilterCardBoundedDrag>();
-        drag.SetBounds(resolvedBook != null ? resolvedBook : transform as RectTransform);
+        activeCardDrag = filterCardImageObject.GetComponent<FilterCardBoundedDrag>();
+        if (activeCardDrag == null)
+            activeCardDrag = filterCardImageObject.AddComponent<FilterCardBoundedDrag>();
+        activeCardDrag.enabled = true;
+        activeCardDrag.SetBounds(resolvedBook != null ? resolvedBook : transform as RectTransform);
 
         activeCardRotator = filterCardImageObject.GetComponent<FilterCardRotator>();
         if (activeCardRotator == null)
             activeCardRotator = filterCardImageObject.AddComponent<FilterCardRotator>();
+        activeCardRotator.enabled = true;
 
-        filterCardImageRect.SetAsLastSibling();
-        KeepCloseButtonOnTop();
+        if (diaryMirrorPuzzleController != null)
+            activeCardRotator.ConfigureRotationSteps(5f, 5f);
+    }
+
+    private void UpdateDiaryMirrorFallbackDrag()
+    {
+        if (diaryMirrorPuzzleController == null
+            || filterCardImageRect == null
+            || filterCardImageObject == null
+            || !filterCardImageObject.activeInHierarchy)
+        {
+            fallbackDraggingMirror = false;
+            return;
+        }
+
+        Camera eventCamera = ResolveCanvasCamera();
+        RectTransform parent = filterCardImageRect.parent as RectTransform;
+        if (parent == null)
+            return;
+
+        if (Input.GetMouseButtonDown(0)
+            && !IsPointerOverCloseButton(Input.mousePosition, eventCamera)
+            && RectTransformUtility.RectangleContainsScreenPoint(filterCardImageRect, Input.mousePosition, eventCamera)
+            && RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parent,
+                Input.mousePosition,
+                eventCamera,
+                out Vector2 localPoint))
+        {
+            fallbackDraggingMirror = true;
+            fallbackPointerOffset = filterCardImageRect.anchoredPosition - localPoint;
+        }
+
+        if (!fallbackDraggingMirror)
+            return;
+
+        if (!Input.GetMouseButton(0))
+        {
+            fallbackDraggingMirror = false;
+            if (activeCardDrag != null)
+                activeCardDrag.NotifyExternalDragEnded();
+            return;
+        }
+
+        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            parent,
+            Input.mousePosition,
+            eventCamera,
+            out Vector2 currentLocalPoint))
+        {
+            return;
+        }
+
+        filterCardImageRect.anchoredPosition = currentLocalPoint + fallbackPointerOffset;
+        ClampMirrorInsideResolvedBook();
+    }
+
+    private Camera ResolveCanvasCamera()
+    {
+        var canvas = filterCardImageObject != null ? filterCardImageObject.GetComponentInParent<Canvas>() : null;
+        if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            return null;
+
+        return canvas.worldCamera;
+    }
+
+    private void ClampMirrorInsideResolvedBook()
+    {
+        if (filterCardImageRect == null)
+            return;
+
+        RectTransform bounds = resolvedBook != null ? resolvedBook : transform as RectTransform;
+        RectTransform parent = filterCardImageRect.parent as RectTransform;
+        if (bounds == null || parent == null)
+            return;
+
+        Vector3[] cardCorners = new Vector3[4];
+        Vector3[] boundCorners = new Vector3[4];
+        filterCardImageRect.GetWorldCorners(cardCorners);
+        bounds.GetWorldCorners(boundCorners);
+
+        float cardMinX = Mathf.Min(cardCorners[0].x, cardCorners[1].x, cardCorners[2].x, cardCorners[3].x);
+        float cardMaxX = Mathf.Max(cardCorners[0].x, cardCorners[1].x, cardCorners[2].x, cardCorners[3].x);
+        float cardMinY = Mathf.Min(cardCorners[0].y, cardCorners[1].y, cardCorners[2].y, cardCorners[3].y);
+        float cardMaxY = Mathf.Max(cardCorners[0].y, cardCorners[1].y, cardCorners[2].y, cardCorners[3].y);
+
+        float boundMinX = Mathf.Min(boundCorners[0].x, boundCorners[1].x, boundCorners[2].x, boundCorners[3].x);
+        float boundMaxX = Mathf.Max(boundCorners[0].x, boundCorners[1].x, boundCorners[2].x, boundCorners[3].x);
+        float boundMinY = Mathf.Min(boundCorners[0].y, boundCorners[1].y, boundCorners[2].y, boundCorners[3].y);
+        float boundMaxY = Mathf.Max(boundCorners[0].y, boundCorners[1].y, boundCorners[2].y, boundCorners[3].y);
+
+        Vector3 worldOffset = Vector3.zero;
+        if (cardMinX < boundMinX)
+            worldOffset.x = boundMinX - cardMinX;
+        else if (cardMaxX > boundMaxX)
+            worldOffset.x = boundMaxX - cardMaxX;
+
+        if (cardMinY < boundMinY)
+            worldOffset.y = boundMinY - cardMinY;
+        else if (cardMaxY > boundMaxY)
+            worldOffset.y = boundMaxY - cardMaxY;
+
+        if (worldOffset != Vector3.zero)
+            filterCardImageRect.position += worldOffset;
+    }
+
+    private static void DisableChildRaycastTargets(Transform root)
+    {
+        if (root == null)
+            return;
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+            foreach (var graphic in child.GetComponentsInChildren<Graphic>(true))
+                graphic.raycastTarget = false;
+        }
     }
 
     private void SetFilterCardImageParent()
@@ -202,9 +380,17 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         if (filterCardImageRect == null)
             return;
 
+        SetFilterCardImageParent();
+
+        if (diaryMirrorPuzzleController != null)
+        {
+            ApplyBookmarkMirrorLayout();
+            HideLegacyRotateChrome();
+            KeepCloseButtonOnTop();
+            return;
+        }
+
         filterCardImageRect.anchoredPosition = Vector2.zero;
-        // 카드 크기를 고정값으로 강제한다. 스케일 대신 sizeDelta로 직접 지정해
-        // RectTransform의 Width/Height가 곧 표시 크기가 되도록 한다.
         filterCardImageRect.sizeDelta = ResolveFilterCardImageSize();
         filterCardImageRect.localScale = Vector3.one;
         filterCardImageRect.localRotation = Quaternion.identity;
@@ -214,6 +400,51 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         var drag = filterCardImageObject != null ? filterCardImageObject.GetComponent<FilterCardBoundedDrag>() : null;
         if (drag != null)
             drag.SetBounds(resolvedBook != null ? resolvedBook : transform as RectTransform);
+
+        ConfigureFilterCardInteractions();
+    }
+
+    private void ApplyBookmarkMirrorLayout()
+    {
+        filterCardImageRect.pivot = new Vector2(0.5f, 1f);
+        filterCardImageRect.anchorMin = new Vector2(0.5f, 1f);
+        filterCardImageRect.anchorMax = new Vector2(0.5f, 1f);
+        filterCardImageRect.anchoredPosition = new Vector2(0f, -28f);
+        filterCardImageRect.sizeDelta = ResolveFilterCardImageSize();
+        filterCardImageRect.localScale = Vector3.one;
+        filterCardImageRect.localRotation = Quaternion.identity;
+        filterCardImageRect.SetAsLastSibling();
+
+        var image = filterCardImageObject != null ? filterCardImageObject.GetComponent<Image>() : null;
+        if (image != null)
+            image.preserveAspect = true;
+
+        var drag = filterCardImageObject != null ? filterCardImageObject.GetComponent<FilterCardBoundedDrag>() : null;
+        if (drag != null)
+            drag.SetBounds(resolvedBook != null ? resolvedBook : transform as RectTransform);
+    }
+
+    private void HideLegacyRotateChrome()
+    {
+        if (filterCardImageRect == null)
+            return;
+
+        Transform rotateImage = filterCardImageRect.Find("RotateImage");
+        if (rotateImage != null)
+            rotateImage.gameObject.SetActive(false);
+    }
+
+    private void StyleDiaryMirrorDropPanel()
+    {
+        if (diaryMirrorPuzzleController == null)
+            return;
+
+        var panelImage = GetComponent<Image>();
+        if (panelImage == null)
+            return;
+
+        panelImage.color = new Color(1f, 0.95f, 0.82f, 0.06f);
+        panelImage.raycastTarget = true;
     }
 
     private Vector2 ResolveFilterCardImageSize()
@@ -224,11 +455,11 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         var image = filterCardImageObject != null ? filterCardImageObject.GetComponent<Image>() : null;
         Sprite sprite = image != null ? image.sprite : null;
         if (sprite == null || sprite.rect.height <= 0f)
-            return new Vector2(190f, 620f);
+            return new Vector2(56f, 280f);
 
-        float targetHeight = 620f;
+        float targetHeight = 280f;
         float targetWidth = targetHeight * (sprite.rect.width / sprite.rect.height);
-        return new Vector2(Mathf.Clamp(targetWidth, 150f, 240f), targetHeight);
+        return new Vector2(Mathf.Clamp(targetWidth, 48f, 110f), targetHeight);
     }
 
     private void SetFilterCardImageActive(bool active)
@@ -271,6 +502,9 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         var reader = book.GetComponent<BookOverlayPagedReader>();
         if (reader != null)
             reader.enabled = false;
+
+        if (book.GetComponent<ModalInputScope>() == null)
+            book.AddComponent<ModalInputScope>();
 
         var canvas = book.GetComponent<Canvas>();
         if (canvas != null)
@@ -323,7 +557,103 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
 
         Transform closeButton = resolvedBook.Find("CloseButton");
         if (closeButton != null)
+        {
+            EnsureCloseButtonInteractive(closeButton);
             closeButton.SetAsLastSibling();
+        }
+    }
+
+    private bool IsPointerOverCloseButton(Vector2 screenPosition, Camera eventCamera)
+    {
+        if (resolvedBook == null)
+            return false;
+
+        Transform closeButton = resolvedBook.Find("CloseButton");
+        RectTransform closeRect = closeButton as RectTransform;
+        return closeRect != null
+            && closeButton.gameObject.activeInHierarchy
+            && RectTransformUtility.RectangleContainsScreenPoint(closeRect, screenPosition, eventCamera);
+    }
+
+    private bool TryHandleCloseButtonClick()
+    {
+        if (resolvedBook == null || !resolvedBook.gameObject.activeInHierarchy || !Input.GetMouseButtonDown(0))
+            return false;
+
+        Camera eventCamera = ResolveCanvasCamera();
+        if (!IsPointerOverCloseButton(Input.mousePosition, eventCamera))
+            return false;
+
+        CloseBookOverlayFromPuzzle();
+        return true;
+    }
+
+    private void EnsureCloseButtonInteractive(Transform closeButton)
+    {
+        if (closeButton == null)
+            return;
+
+        closeButton.gameObject.SetActive(true);
+
+        var image = closeButton.GetComponent<Image>();
+        if (image != null)
+            image.raycastTarget = true;
+
+        var button = closeButton.GetComponent<Button>();
+        if (button != null)
+        {
+            button.interactable = true;
+            button.onClick.RemoveListener(CloseBookOverlayFromPuzzle);
+            button.onClick.AddListener(CloseBookOverlayFromPuzzle);
+        }
+
+        foreach (var graphic in closeButton.GetComponentsInChildren<Graphic>(true))
+        {
+            if (graphic.transform == closeButton)
+                continue;
+
+            graphic.raycastTarget = false;
+        }
+    }
+
+    private void CloseBookOverlayFromPuzzle()
+    {
+        fallbackDraggingMirror = false;
+
+        if (filterCardImageObject != null)
+            filterCardImageObject.SetActive(false);
+
+        if (rotateRightButtonObject != null)
+            rotateRightButtonObject.SetActive(false);
+
+        if (rotateLeftButtonObject != null)
+            rotateLeftButtonObject.SetActive(false);
+
+        if (resolvedBook != null)
+            resolvedBook.gameObject.SetActive(false);
+
+        var cardStackPanel = FindAncestorNamed("CardStackPanel");
+        if (cardStackPanel != null)
+            cardStackPanel.SetActive(false);
+
+        InteractionLock.ForceUnlock();
+        var flowchart = FlowchartLocator.Find();
+        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+        DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+    }
+
+    private GameObject FindAncestorNamed(string ancestorName)
+    {
+        var current = transform.parent;
+        while (current != null)
+        {
+            if (current.name == ancestorName)
+                return current.gameObject;
+
+            current = current.parent;
+        }
+
+        return null;
     }
 
     private static bool IsCloseButtonContent(Transform target)
