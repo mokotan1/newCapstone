@@ -106,8 +106,9 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         if (panelRoot == null)
             return null;
 
-        DialogueLogButton existing = panelRoot.GetComponentInChildren<DialogueLogButton>(true);
-        if (existing != null && existing.gameObject.name == "CheshireLogButton")
+        panelRoot = ResolveCheshireLogButtonRoot(panelRoot);
+        DialogueLogButton existing = FindCheshireLogButton(panelRoot);
+        if (existing != null)
             return existing;
 
         DialogueLogButtonSpec.BookmarkButtonSpec spec = DialogueLogButtonSpec.CreateChatbotBookmarkDefaults();
@@ -162,6 +163,32 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
         var logButton = buttonGo.AddComponent<DialogueLogButton>();
         logButton.SetUseOverlaySorting(false);
         return logButton;
+    }
+
+    private static GameObject ResolveCheshireLogButtonRoot(GameObject startObject)
+    {
+        Transform fallback = startObject.transform;
+        for (Transform current = startObject.transform; current != null; current = current.parent)
+        {
+            if (FindCheshireLogButton(current.gameObject) != null)
+                return current.gameObject;
+
+            if (fallback == startObject.transform && current.GetComponent<RectTransform>() != null)
+                fallback = current;
+        }
+
+        return fallback.gameObject;
+    }
+
+    private static DialogueLogButton FindCheshireLogButton(GameObject root)
+    {
+        foreach (DialogueLogButton button in root.GetComponentsInChildren<DialogueLogButton>(true))
+        {
+            if (button.gameObject.name == "CheshireLogButton")
+                return button;
+        }
+
+        return null;
     }
 
     private static void CreateRule(
