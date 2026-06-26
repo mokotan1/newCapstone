@@ -46,6 +46,9 @@ namespace Godlotto.Interaction
 
         protected override bool ShouldExecuteInteraction(string interactionId, string blockName)
         {
+            if (!KitchenParretInteractionGate.ShouldExecuteFungusBlock(interactionId, puzzleState))
+                return false;
+
             return KitchenSinkInteractionGate.ShouldExecuteFungusBlock(interactionId, puzzleState);
         }
 
@@ -53,6 +56,13 @@ namespace Godlotto.Interaction
         {
             if (puzzleState == null)
                 return;
+
+            if (interactionId == KitchenParretInteractionGate.ParretInteractionId)
+            {
+                puzzleState.SetParretClicked(true);
+                DisableParretWorldCollider();
+                return;
+            }
 
             if (!IsSinkRouteInteraction(interactionId))
                 return;
@@ -129,6 +139,11 @@ namespace Godlotto.Interaction
                 panelRegistry = GetComponent<KitchenPanelRegistry>();
 
             return panelRegistry != null && panelRegistry.IsFripanPanelOpen;
+        }
+
+        void DisableParretWorldCollider()
+        {
+            SetWorldClickColliderEnabled(KitchenParretInteractionGate.ParretInteractionId, false);
         }
 
         /// <summary>

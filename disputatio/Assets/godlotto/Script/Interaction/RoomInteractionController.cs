@@ -79,6 +79,22 @@ namespace Godlotto.Interaction
 
         protected virtual bool ShouldProcessWorldClickBinding(WorldClickBinding binding, Vector2 screenPosition) => true;
 
+        protected void SetWorldClickColliderEnabled(string interactionId, bool enabled)
+        {
+            if (string.IsNullOrWhiteSpace(interactionId))
+                return;
+
+            for (int i = 0; i < worldClicks.Length; i++)
+            {
+                WorldClickBinding binding = worldClicks[i];
+                if (binding.interactionId != interactionId || binding.collider == null)
+                    continue;
+
+                binding.collider.enabled = enabled;
+                return;
+            }
+        }
+
         /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
         public virtual void OnInteraction(string interactionId)
         {

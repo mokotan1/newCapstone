@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Fungus;
+using Godlotto.Interaction;
 using TMPro;
 
 public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
@@ -36,6 +37,7 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     private DialogInput chatDialogInput;
     private ChatHttpClient _httpClient;
     private ChatHistoryManager _historyManager;
+    private string ChatRequestInputGateReason => $"{GetType().Name}:{GetInstanceID()}:chat_request";
 
     // ---------------------------------------------------------------
     //  Protected helper access for subclasses
@@ -103,6 +105,8 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     {
         if (userInputField != null && RegisterInputFieldSubmitListener)
             userInputField.onSubmit.RemoveListener(OnInputFieldSubmit);
+
+        InteractionInputGate.Unblock(ChatRequestInputGateReason);
     }
 
     public void ConfigureSharedBindings(
@@ -381,7 +385,14 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     bool IChatHttpCallbacks.IsRequestInProgress
     {
         get => isRequestInProgress;
-        set => isRequestInProgress = value;
+        set
+        {
+            isRequestInProgress = value;
+            if (value)
+                InteractionInputGate.Block(ChatRequestInputGateReason);
+            else
+                InteractionInputGate.Unblock(ChatRequestInputGateReason);
+        }
     }
 
     bool? IChatHttpCallbacks.UseToolsOverrideForNextRequest

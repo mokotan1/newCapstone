@@ -60,9 +60,11 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
     void Start()
     {
         _resolutionAudio = new ResolutionAudioSettings(audioMixer);
+        EnsureUiReferences();
         LoadSettings();
         AssignListeners();
-        _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+        if (resolutionDropdown != null)
+            _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
     }
 
     void Update()
@@ -98,17 +100,50 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     private void LoadSettings()
     {
-        bgmSlider.value = _resolutionAudio.GetPersistedBgmLinear();
-        sfxSlider.value = _resolutionAudio.GetPersistedSfxLinear();
-        fullscreenToggle.isOn = _resolutionAudio.GetPersistedFullscreen();
-        _resolutionAudio.ApplyAudioFromLinear(bgmSlider.value, sfxSlider.value);
+        EnsureUiReferences();
+
+        if (bgmSlider != null)
+            bgmSlider.value = _resolutionAudio.GetPersistedBgmLinear();
+        if (sfxSlider != null)
+            sfxSlider.value = _resolutionAudio.GetPersistedSfxLinear();
+        if (fullscreenToggle != null)
+            fullscreenToggle.isOn = _resolutionAudio.GetPersistedFullscreen();
+
+        _resolutionAudio.ApplyAudioFromLinear(
+            bgmSlider != null ? bgmSlider.value : _resolutionAudio.GetPersistedBgmLinear(),
+            sfxSlider != null ? sfxSlider.value : _resolutionAudio.GetPersistedSfxLinear());
     }
 
     private void AssignListeners()
     {
-        bgmSlider.onValueChanged.AddListener(SetBgmVolume);
-        sfxSlider.onValueChanged.AddListener(SetSfxVolume);
-        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        if (bgmSlider != null)
+        {
+            bgmSlider.onValueChanged.RemoveListener(SetBgmVolume);
+            bgmSlider.onValueChanged.AddListener(SetBgmVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveListener(SetSfxVolume);
+            sfxSlider.onValueChanged.AddListener(SetSfxVolume);
+        }
+
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.RemoveListener(SetFullscreen);
+            fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        }
+    }
+
+    private void EnsureUiReferences()
+    {
+        if (settingPanel == null)
+            return;
+
+        SettingDisplayControlsFactory.EnsureDisplayControls(
+            settingPanel.transform,
+            ref resolutionDropdown,
+            ref fullscreenToggle);
     }
 
     public void ToggleSettingPanel()
@@ -128,6 +163,11 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
         if (isPanelOpen)
         {
+            EnsureUiReferences();
+            LoadSettings();
+            if (resolutionDropdown != null)
+                _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+            AssignListeners();
             EnsureSettingsCanvasSortsAboveSayDialog();
             SettingPanelWorldInputBlocker.Begin(settingPanel);
             ModalInputGate.Begin(this, settingPanel, blocksHud: true, blocksWorld: true);

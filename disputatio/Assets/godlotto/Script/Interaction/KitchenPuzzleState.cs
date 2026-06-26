@@ -15,6 +15,8 @@ namespace Godlotto.Interaction
         public bool BottleClicked { get; private set; }
         public bool FaucetClicked { get; private set; }
         public bool BottleDragged { get; private set; }
+        public bool ComeParret { get; private set; }
+        public bool ParretClicked { get; private set; }
 
         /// <summary>싱크 물줄기 표시: 수도꼭지 ON이고 병 드래그 중이 아닐 때.</summary>
         public bool IsSinkWaterRunning => FaucetClicked && !BottleDragged;
@@ -34,6 +36,17 @@ namespace Godlotto.Interaction
             BottleClicked = ReadBool(fc, FungusVariableKeys.BottleClicked);
             FaucetClicked = ReadBool(fc, FungusVariableKeys.FaucetClicked);
             BottleDragged = ReadBool(fc, FungusVariableKeys.BottleDragged);
+            ComeParret = ReadBool(fc, FungusVariableKeys.ComeParret);
+            ParretClicked = ReadBool(fc, FungusVariableKeys.ParretClicked);
+        }
+
+        public void RefreshComeParretFromFungus()
+        {
+            Flowchart fc = FlowchartLocator.Resolve(flowchart);
+            if (fc == null)
+                return;
+
+            ComeParret = ReadBool(fc, FungusVariableKeys.ComeParret);
         }
 
         /// <summary>ExecuteBlock 직전에 Fungus If 분기가 C# 상태와 일치하도록 미러합니다.</summary>
@@ -91,6 +104,12 @@ namespace Godlotto.Interaction
             MirrorBool(FlowchartLocator.Resolve(flowchart), FungusVariableKeys.BottleDragged, value);
         }
 
+        public void SetParretClicked(bool value)
+        {
+            ParretClicked = value;
+            MirrorBool(FlowchartLocator.Resolve(flowchart), FungusVariableKeys.ParretClicked, value);
+        }
+
         static bool ReadBool(Flowchart fc, string key)
         {
             if (fc != null && fc.GetBooleanVariable(key))
@@ -137,6 +156,12 @@ namespace Godlotto.Interaction
             BottleClicked = bottleClicked;
             FaucetClicked = faucetClicked;
             BottleDragged = bottleDragged;
+        }
+
+        internal void SetParretFlagsForTests(bool comeParret, bool parretClicked)
+        {
+            ComeParret = comeParret;
+            ParretClicked = parretClicked;
         }
     }
 }

@@ -1,9 +1,18 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using Godlotto.Interaction;
 using NUnit.Framework;
 
 [TestFixture]
 public class ChatHttpClientTests
 {
+    [TearDown]
+    public void TearDown()
+    {
+        InteractionInputGate.ResetForTests();
+    }
+
     // ---------------------------------------------------------------
     //  TryNormalizePromptForChatApi
     // ---------------------------------------------------------------
@@ -167,6 +176,31 @@ public class ChatHttpClientTests
         Assert.AreEqual(expectedUrl, client.ResolvedServerUrl);
     }
 
+    [Test]
+    public void BaseChatbotRequestInProgress_BlocksAndUnblocksSceneInteractions()
+    {
+        var go = new UnityEngine.GameObject("TestChatbot");
+
+        try
+        {
+            var chatbot = go.AddComponent<TestChatbot>();
+            var callbacks = (IChatHttpCallbacks)chatbot;
+
+            callbacks.IsRequestInProgress = true;
+
+            Assert.IsTrue(InteractionInputGate.IsBlocked);
+            Assert.IsFalse(SceneInteractionController.TryInteract("kitchen_parret"));
+
+            callbacks.IsRequestInProgress = false;
+
+            Assert.IsFalse(InteractionInputGate.IsBlocked);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
     // ---------------------------------------------------------------
     //  Minimal stub for IChatHttpCallbacks (constructor tests only)
     // ---------------------------------------------------------------
@@ -186,6 +220,18 @@ public class ChatHttpClientTests
         public System.Collections.IEnumerator HandleChatbotResponse(
             string responseMessage,
             System.Collections.Generic.List<FunctionCallData> functionCalls)
+        {
+            yield break;
+        }
+    }
+
+    private sealed class TestChatbot : BaseChatbot
+    {
+        protected override string BuildFinalSystemPrompt() => "";
+
+        protected override IEnumerator HandleChatbotResponse(
+            string responseMessage,
+            List<FunctionCallData> functionCalls)
         {
             yield break;
         }

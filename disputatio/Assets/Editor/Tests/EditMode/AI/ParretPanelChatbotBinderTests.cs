@@ -106,6 +106,25 @@ public class ParretPanelChatbotBinderTests
     }
 
     [Test]
+    public void BindForScene_ReusesExistingCheshireLogButton_WhenBinderIsOnChildManager()
+    {
+        var panel = new GameObject("Parret_Panel", typeof(RectTransform));
+        _createdObjects.Add(panel);
+        var existingButtonObject = new GameObject("CheshireLogButton", typeof(RectTransform));
+        existingButtonObject.transform.SetParent(panel.transform, false);
+        var existingButton = existingButtonObject.AddComponent<DialogueLogButton>();
+        var manager = new GameObject("chatbotManager");
+        manager.transform.SetParent(panel.transform, false);
+        var binder = manager.AddComponent<ParretPanelChatbotBinder>();
+
+        binder.BindForScene("Hall_playerble");
+
+        DialogueLogButton[] buttons = panel.GetComponentsInChildren<DialogueLogButton>(true);
+        Assert.AreEqual(1, buttons.Length);
+        Assert.AreSame(existingButton, buttons[0]);
+    }
+
+    [Test]
     public void StripInlineFunctionTags_RemovesToolMarkupFromDisplayedText()
     {
         string result = ChatResponseDisplayText.StripInlineFunctionTags(

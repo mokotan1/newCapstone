@@ -44,6 +44,7 @@ public class IntegratedSettingUI : MonoBehaviour
     void Start()
     {
         EnsureResolutionAudio();
+        EnsureUiReferences();
         SyncUIWithManager();
 
         lastMousePosition = Input.mousePosition;
@@ -53,10 +54,8 @@ public class IntegratedSettingUI : MonoBehaviour
     void OnEnable()
     {
         isReturningToMainMenu = false;
-        if (GlobalSettingManager.Instance != null)
-        {
-            SyncUIWithManager();
-        }
+        EnsureUiReferences();
+        SyncUIWithManager();
         UnlockCursor();
         if (uiMode == UIMode.PopupPanel && panelRoot != null && panelRoot.activeInHierarchy)
             EnsureSettingsCanvasSortsAboveSayDialog();
@@ -71,21 +70,40 @@ public class IntegratedSettingUI : MonoBehaviour
     private void SyncUIWithManager()
     {
         EnsureResolutionAudio();
+        EnsureUiReferences();
 
-        bgmSlider.onValueChanged.RemoveAllListeners();
-        sfxSlider.onValueChanged.RemoveAllListeners();
-        fullscreenToggle.onValueChanged.RemoveAllListeners();
-        resolutionDropdown.onValueChanged.RemoveAllListeners();
+        if (bgmSlider != null)
+        {
+            bgmSlider.onValueChanged.RemoveAllListeners();
+            bgmSlider.value = resolutionAudio.GetPersistedBgmLinear();
+            bgmSlider.onValueChanged.AddListener(OnBGMChanged);
+        }
 
-        bgmSlider.value = resolutionAudio.GetPersistedBgmLinear();
-        sfxSlider.value = resolutionAudio.GetPersistedSfxLinear();
-        fullscreenToggle.isOn = resolutionAudio.GetPersistedFullscreen();
-        resolutionAudio.ApplyAudioFromLinear(bgmSlider.value, sfxSlider.value);
-        resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveAllListeners();
+            sfxSlider.value = resolutionAudio.GetPersistedSfxLinear();
+            sfxSlider.onValueChanged.AddListener(OnSFXChanged);
+        }
 
-        bgmSlider.onValueChanged.AddListener(OnBGMChanged);
-        sfxSlider.onValueChanged.AddListener(OnSFXChanged);
-        fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.RemoveAllListeners();
+            fullscreenToggle.isOn = resolutionAudio.GetPersistedFullscreen();
+            fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+        }
+
+        if (resolutionDropdown != null)
+            resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+
+        if (bgmSlider != null && sfxSlider != null)
+            resolutionAudio.ApplyAudioFromLinear(bgmSlider.value, sfxSlider.value);
+    }
+
+    private void EnsureUiReferences()
+    {
+        Transform searchRoot = panelRoot != null ? panelRoot.transform : transform;
+        SettingDisplayControlsFactory.EnsureDisplayControls(searchRoot, ref resolutionDropdown, ref fullscreenToggle);
     }
 
     private void EnsureResolutionAudio()

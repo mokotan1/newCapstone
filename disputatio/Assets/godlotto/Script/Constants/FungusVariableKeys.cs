@@ -31,4 +31,8 @@ public static class FungusVariableKeys
     public const string BottleClicked = "BottleClicked";
     public const string FaucetClicked = "FaucetClicked";
     public const string BottleDragged = "BottleDragged";
+
+    // Kitchen Parret(체셔) 등장·1회 클릭 소비
+    public const string ComeParret = "ComeParret";
+    public const string ParretClicked = "ParretClicked";
 }

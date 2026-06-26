@@ -21,6 +21,7 @@ public class KitchenAddKeyFlowTests
     const string InvokeMethodScriptGuid = "688e35811870d403f9e2b1ab2a699d98";
     const string SetVariableScriptGuid = "fb77d0ce495044f6e9feb91b31798e8c";
     const string ItemPickupScriptGuid = "36992d1989d442a48a31cb0b8485dee3";
+    const string ButtonScriptGuid = "4e29b1a8efbd4b44bb3f3716e73f07ff";
     const string FungusBlockScriptGuid = "3d3d73aef2cfc4f51abf34ac00241f60";
     const string FaucetBlockName = "Faucet";
     const string BottleYesBlockName = "yes";
@@ -278,6 +279,38 @@ public class KitchenAddKeyFlowTests
             ParseSortingOrder(keyCanvas),
             ParseSortingOrder(overlayCanvas),
             "MaidRoomKey canvas must sort above SinkWaterOverlay so it remains visible and clickable.");
+    }
+
+    [Test]
+    public void MaidRoomKey_DoesNotHaveButtonComponent()
+    {
+        string sceneText = ReadKitchenSceneText();
+
+        Assert.IsFalse(
+            MaidRoomKeyMonoBehaviourBlocks(sceneText).Any(block => block.Contains($"guid: {ButtonScriptGuid}")),
+            "MaidRoomKey must not have a Button; pickup uses ItemPickup IPointerClickHandler.");
+    }
+
+    [Test]
+    public void MaidRoomKey_DoesNotWireFilledBottleInteractionRoute()
+    {
+        foreach (string componentBlock in MaidRoomKeyMonoBehaviourBlocks(ReadKitchenSceneText()))
+        {
+            StringAssert.DoesNotContain("m_StringArgument: filled_bottle", componentBlock);
+            StringAssert.DoesNotContain("m_MethodName: OnInteraction", componentBlock);
+        }
+    }
+
+    static IEnumerable<string> MaidRoomKeyMonoBehaviourBlocks(string sceneText)
+    {
+        foreach (Match match in Regex.Matches(
+            sceneText,
+            @"--- !u!114 &[0-9]+\r?\nMonoBehaviour:[\s\S]*?(?=--- !u!)",
+            RegexOptions.Multiline))
+        {
+            if (match.Value.Contains($"m_GameObject: {{fileID: {MaidRoomKeySceneFileId}}}"))
+                yield return match.Value;
+        }
     }
 
     static bool CommandListReferencesContainMaidRoomKeySetActive(string blockYaml, bool active)
