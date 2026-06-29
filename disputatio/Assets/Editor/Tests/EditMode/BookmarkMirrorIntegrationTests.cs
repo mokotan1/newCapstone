@@ -12,11 +12,13 @@ public class BookmarkMirrorIntegrationTests
     const string PuzzleBookTextPath = "Assets/Resources/MaidRoomPuzzleBook.txt";
     const string TooltipTablePath = "Assets/Resources/Scenario/item_tooltip_table.csv";
     const string StudyRoomScenePath = "Assets/Scenes/Mokotan/First Floor/1floorRight/StudyRoom.unity";
+    const string MaidRoomScenePath = "Assets/Scenes/Mokotan/First Floor/1floorRight/MaidRoom.unity";
 
     const string BookmarkMirrorGuid = "877726e16099412aaf58c39b648f843d";
     const string FilterCardGuid = "fdbb615d89f38ee478245637d6a26e32";
     const string FilterCardBookDropZoneGuid = "d642306d1d264999bb405247b88e52a6";
     const string DropZoneGuid = "4f55531d3b5b3ca469012281fbf096c3";
+    const string PuzzleBookPageItemGateGuid = "7a3c9e1d4f8b2a6c5d0e4f1b8c2a9d3e";
 
     [TearDown]
     public void TearDown()
@@ -75,6 +77,21 @@ public class BookmarkMirrorIntegrationTests
         Assert.IsTrue(
             mirrorDropZoneBlock.Contains("consumeItemOnDrop: 0"),
             "BookmarkMirror should remain reusable after dropping it on the diary clue.");
+    }
+
+    [Test]
+    public void MaidRoomScene_BookmarkMirrorPickup_AppearsOnPuzzleBookFirstPage()
+    {
+        string sceneYaml = File.ReadAllText(MaidRoomScenePath);
+        string gateBlock = ExtractMonoBehaviourBlock(sceneYaml, PuzzleBookPageItemGateGuid);
+
+        Assert.IsNotNull(gateBlock, "MaidRoom PuzzlePanel must gate the BookmarkMirror pickup by puzzle book page.");
+        Assert.IsTrue(
+            gateBlock.Contains("visibleOnPageIndex: 0"),
+            "BookmarkMirror should be obtainable from the first puzzle book page.");
+        Assert.IsTrue(
+            gateBlock.Contains("pickupObject: {fileID: 1892094432}"),
+            "The puzzle book page gate should control the BookmarkMirror pickup object.");
     }
 
     [Test]
