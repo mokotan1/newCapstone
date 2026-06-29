@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>메이드 방 루페 드래그 시뮬레이션</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #14110e;
+      color: #eee2ca;
+      font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+      overflow-x: hidden;
+    }
+    main {
+      width: min(1120px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 46px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 0 0 22px;
+      color: #b9ab91;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 270px;
+      gap: 18px;
+      align-items: start;
+    }
+    .stage {
+      position: relative;
+      height: 620px;
+      border: 1px solid #4c3a27;
+      border-radius: 8px;
+      background: #201a16;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    .panel {
+      position: absolute;
+      left: 42px;
+      right: 42px;
+      top: 72px;
+      height: 430px;
+      border: 1px solid #6d5438;
+      background:
+        linear-gradient(90deg, rgba(62, 42, 26, .22), transparent 18%, transparent 82%, rgba(54, 35, 23, .25)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 5px),
+        #c5a778;
+      box-shadow: inset 0 0 44px rgba(43, 25, 12, .55);
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(68, 43, 22, .35);
+      pointer-events: none;
+    }
+    .micro-line {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 13px;
+      height: 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      color: rgba(63, 39, 21, .15);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 5px;
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .hidden-letter {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      color: rgba(63, 39, 21, .16);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 5px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .hidden-letter.found {
+      color: rgba(63, 39, 21, .35);
+    }
+    .hit-zone {
+      position: absolute;
+      width: 54px;
+      height: 36px;
+      border: 1px dashed rgba(255, 232, 165, 0);
+      border-radius: 999px;
+      transform: translate(-18px, -9px);
+      transition: border-color .18s ease, background .18s ease;
+      pointer-events: none;
+    }
+    .hit-zone.active {
+      border-color: rgba(255, 232, 165, .58);
+      background: rgba(255, 239, 185, .08);
+    }
+    .panel-title {
+      position: absolute;
+      left: 46px;
+      top: 72px;
+      color: rgba(47, 31, 17, .76);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .body-lines {
+      position: absolute;
+      left: 54px;
+      right: 54px;
+      top: 155px;
+      display: grid;
+      gap: 14px;
+    }
+    .line {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(69, 45, 27, .24);
+    }
+    .line:nth-child(2) { width: 82%; }
+    .line:nth-child(3) { width: 64%; }
+    .line:nth-child(4) { width: 76%; }
+    .lens {
+      position: absolute;
+      left: 54px;
+      top: 14px;
+      width: 116px;
+      height: 116px;
+      border: 7px solid #d8be72;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(255,255,255,.38), transparent 18%),
+        radial-gradient(circle, rgba(247,232,184,.27), rgba(195,165,96,.13) 70%, rgba(56,37,17,.08));
+      box-shadow:
+        0 0 0 2px rgba(58,40,18,.65),
+        inset 0 0 22px rgba(255,255,255,.25),
+        0 8px 20px rgba(38,22,9,.32);
+      cursor: grab;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      transform: rotate(-4deg);
+    }
+    .lens.dragging { cursor: grabbing; }
+    .lens::after {
+      content: "";
+      position: absolute;
+      right: -50px;
+      bottom: -21px;
+      width: 70px;
+      height: 11px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #75532b, #c5a35f 45%, #684823);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+      transform: rotate(42deg);
+      transform-origin: left center;
+    }
+    .lens .shine {
+      position: absolute;
+      left: 26px;
+      top: 20px;
+      width: 30px;
+      height: 15px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      transform: rotate(-22deg);
+    }
+    .magnified {
+      position: relative;
+      z-index: 2;
+      color: #2a190d;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 27px;
+      font-weight: 800;
+      text-shadow: 0 1px 0 rgba(255,255,255,.45);
+      min-width: 38px;
+      text-align: center;
+    }
+    .empty-view {
+      color: rgba(42, 25, 13, .36);
+      font-size: 18px;
+    }
+    .readout {
+      position: absolute;
+      left: 42px;
+      right: 42px;
+      bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid #4b3925;
+      border-radius: 8px;
+      background: #191410;
+      color: #cfc0a4;
+      font-size: 14px;
+    }
+    .letters {
+      display: flex;
+      gap: 8px;
+    }
+    .slot {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #5d482e;
+      border-radius: 6px;
+      background: #241b13;
+      color: rgba(241, 211, 154, .26);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .slot.filled {
+      color: #f1d39a;
+      border-color: #9e7d43;
+      background: #302314;
+    }
+    .side {
+      border: 1px solid #493826;
+      border-radius: 8px;
+      background: #201a16;
+      padding: 16px;
+    }
+    .side h2 {
+      margin: 0 0 12px;
+      color: #f3d9aa;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .side p {
+      margin: 0 0 14px;
+      color: #baad96;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .meter {
+      height: 8px;
+      border-radius: 999px;
+      background: #332719;
+      overflow: hidden;
+      margin: 10px 0 16px;
+    }
+    .bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #8a6836, #f1d39a);
+      transition: width .18s ease;
+    }
+    .reset {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #826640;
+      border-radius: 6px;
+      background: #2d2116;
+      color: #f0d39a;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .reset:hover { background: #392817; }
+    @media (max-width: 900px) {
+      main { width: min(680px, calc(100% - 28px)); }
+      .layout { grid-template-columns: 1fr; }
+      .stage { height: 600px; }
+      .readout {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>금은방 루페 드래그 시뮬레이션</h1>
+    <p class="subtitle">루페를 패널 전체 위로 드래그하세요. 패널 곳곳에 흩어진 `P/A/G/E` 미세문자 근처에 중심이 들어오면 렌즈 안에서 한 글자씩 선명하게 보이고, 아래 기록 칸에 남습니다.</p>
+
+    <section class="layout">
+      <div class="stage" id="stage" aria-label="루페 드래그 시뮬레이션">
+        <div class="panel" id="paper">
+          <div class="micro-line">tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp</div>
+          <div class="panel-title">찢어진 요리책</div>
+          <div class="body-lines">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+          </div>
+        </div>
+
+        <div class="lens" id="lens" role="button" aria-label="드래그 가능한 금은방 루페" tabindex="0">
+          <span class="shine"></span>
+          <div class="magnified empty-view" id="magnified">·</div>
+        </div>
+
+        <div class="readout">
+          <span id="status">상단 라인을 훑어 숨은 글자를 찾는 중</span>
+          <div class="letters" aria-label="발견된 글자">
+            <span class="slot" data-slot="P">?</span>
+            <span class="slot" data-slot="A">?</span>
+            <span class="slot" data-slot="G">?</span>
+            <span class="slot" data-slot="E">?</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <h2>판정 규칙</h2>
+        <p>루페의 중심점이 패널 곳곳에 랜덤 배치된 숨은 글자 주변의 작은 범위에 들어오면 해당 글자가 확대됩니다. 범위를 벗어나면 렌즈 안은 흐릿한 점으로 돌아갑니다.</p>
+        <p>동일 글자는 여러 개 흩어져 있지만, 아래 기록 칸에는 종류별로 한 번만 유지됩니다. `P/A/G/E` 네 종류를 모두 찾으면 페이지가 답이라는 힌트 구조를 보여줍니다.</p>
+        <div class="meter" aria-label="발견 진행도"><div class="bar" id="bar"></div></div>
+        <button class="reset" id="reset" type="button">초기화</button>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const stage = document.getElementById("stage");
+    const paper = document.getElementById("paper");
+    const lens = document.getElementById("lens");
+    const magnified = document.getElementById("magnified");
+    const statusText = document.getElementById("status");
+    const bar = document.getElementById("bar");
+    const resetButton = document.getElementById("reset");
+    let hiddenLetters = [];
+    let hitZones = [];
+    const slots = Array.from(document.querySelectorAll(".slot"));
+    const found = new Set();
+    const requiredLetters = ["P", "A", "G", "E"];
+    const scatteredLetters = "PAGEPAGEPAGEPAGEPAGEPAGE".split("");
+    const hitRadius = 38;
+    let dragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    function seededRandom(seed) {
+      let value = seed;
+      return function nextRandom() {
+        value = (value * 1664525 + 1013904223) % 4294967296;
+        return value / 4294967296;
+      };
+    }
+
+    function scatterHiddenLetters() {
+      const random = seededRandom(Date.now() % 4294967296);
+      const fragment = document.createDocumentFragment();
+      const zoneFragment = document.createDocumentFragment();
+      const paperWidth = paper.clientWidth;
+      const paperHeight = paper.clientHeight;
+      const marginX = 48;
+      const marginTop = 36;
+      const marginBottom = 54;
+
+      hiddenLetters.forEach((letter) => letter.remove());
+      hitZones.forEach((zone) => zone.remove());
+      hiddenLetters = [];
+      hitZones = [];
+
+      scatteredLetters.forEach((letter, index) => {
+        const left = Math.round(marginX + random() * (paperWidth - marginX * 2));
+        const top = Math.round(marginTop + random() * (paperHeight - marginTop - marginBottom));
+        const rotation = Math.round(random() * 38 - 19);
+        const opacity = (0.11 + random() * 0.08).toFixed(2);
+
+        const letterEl = document.createElement("span");
+        letterEl.className = "hidden-letter";
+        letterEl.dataset.letter = letter;
+        letterEl.dataset.index = String(index);
+        letterEl.textContent = letter;
+        letterEl.style.left = `${left}px`;
+        letterEl.style.top = `${top}px`;
+        letterEl.style.transform = `rotate(${rotation}deg)`;
+        letterEl.style.color = `rgba(63, 39, 21, ${opacity})`;
+
+        const zoneEl = document.createElement("span");
+        zoneEl.className = "hit-zone";
+        zoneEl.style.left = `${left}px`;
+        zoneEl.style.top = `${top}px`;
+
+        hiddenLetters.push(letterEl);
+        hitZones.push(zoneEl);
+        fragment.appendChild(letterEl);
+        zoneFragment.appendChild(zoneEl);
+      });
+
+      paper.insertBefore(fragment, paper.querySelector(".panel-title"));
+      paper.insertBefore(zoneFragment, paper.querySelector(".panel-title"));
+    }
+
+    function getLensCenter() {
+      const stageRect = stage.getBoundingClientRect();
+      const lensRect = lens.getBoundingClientRect();
+      return {
+        x: lensRect.left - stageRect.left + lensRect.width / 2,
+        y: lensRect.top - stageRect.top + lensRect.height / 2
+      };
+    }
+
+    function getLetterCenter(letterEl) {
+      const stageRect = stage.getBoundingClientRect();
+      const rect = letterEl.getBoundingClientRect();
+      return {
+        x: rect.left - stageRect.left + rect.width / 2,
+        y: rect.top - stageRect.top + rect.height / 2
+      };
+    }
+
+    function nearestVisibleLetter() {
+      const center = getLensCenter();
+      let nearest = null;
+      let nearestDistance = Infinity;
+
+      hiddenLetters.forEach((letterEl) => {
+        const target = getLetterCenter(letterEl);
+        const distance = Math.hypot(center.x - target.x, center.y - target.y);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearest = letterEl;
+        }
+      });
+
+      if (!nearest || nearestDistance > hitRadius) return null;
+      return nearest;
+    }
+
+    function updateReadout(activeLetter) {
+      hitZones.forEach((zone, index) => {
+        zone.classList.toggle("active", hiddenLetters[index] === activeLetter);
+      });
+
+      if (activeLetter) {
+        const letter = activeLetter.dataset.letter;
+        magnified.textContent = letter;
+        magnified.classList.remove("empty-view");
+        found.add(letter);
+        activeLetter.classList.add("found");
+      } else {
+        magnified.textContent = "·";
+        magnified.classList.add("empty-view");
+      }
+
+      slots.forEach((slot) => {
+        const letter = slot.dataset.slot;
+        const isFilled = found.has(letter);
+        slot.textContent = isFilled ? letter : "?";
+        slot.classList.toggle("filled", isFilled);
+      });
+
+      const percent = Math.round((found.size / requiredLetters.length) * 100);
+      bar.style.width = `${percent}%`;
+
+      if (requiredLetters.every((letter) => found.has(letter))) {
+        statusText.textContent = "힌트 완성: PAGE";
+      } else if (activeLetter) {
+        statusText.textContent = `${activeLetter.dataset.letter} 발견`;
+      } else {
+        statusText.textContent = "상단 라인을 훑어 숨은 글자를 찾는 중";
+      }
+    }
+
+    function clampLens(left, top) {
+      const stageRect = stage.getBoundingClientRect();
+      const lensRect = lens.getBoundingClientRect();
+      const maxLeft = stageRect.width - lensRect.width - 8;
+      const maxTop = stageRect.height - lensRect.height - 8;
+      return {
+        left: Math.max(8, Math.min(maxLeft, left)),
+        top: Math.max(8, Math.min(maxTop, top))
+      };
+    }
+
+    function moveLens(clientX, clientY) {
+      const stageRect = stage.getBoundingClientRect();
+      const next = clampLens(
+        clientX - stageRect.left - dragOffsetX,
+        clientY - stageRect.top - dragOffsetY
+      );
+      lens.style.left = `${next.left}px`;
+      lens.style.top = `${next.top}px`;
+      updateReadout(nearestVisibleLetter());
+    }
+
+    lens.addEventListener("pointerdown", (event) => {
+      const rect = lens.getBoundingClientRect();
+      dragging = true;
+      dragOffsetX = event.clientX - rect.left;
+      dragOffsetY = event.clientY - rect.top;
+      lens.classList.add("dragging");
+      lens.setPointerCapture(event.pointerId);
+      moveLens(event.clientX, event.clientY);
+    });
+
+    lens.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+      moveLens(event.clientX, event.clientY);
+    });
+
+    lens.addEventListener("pointerup", (event) => {
+      dragging = false;
+      lens.classList.remove("dragging");
+      lens.releasePointerCapture(event.pointerId);
+    });
+
+    lens.addEventListener("pointercancel", () => {
+      dragging = false;
+      lens.classList.remove("dragging");
+    });
+
+    lens.addEventListener("keydown", (event) => {
+      const step = event.shiftKey ? 28 : 10;
+      const currentLeft = parseFloat(lens.style.left || "54");
+      const currentTop = parseFloat(lens.style.top || "14");
+      let left = currentLeft;
+      let top = currentTop;
+
+      if (event.key === "ArrowLeft") left -= step;
+      else if (event.key === "ArrowRight") left += step;
+      else if (event.key === "ArrowUp") top -= step;
+      else if (event.key === "ArrowDown") top += step;
+      else return;
+
+      event.preventDefault();
+      const next = clampLens(left, top);
+      lens.style.left = `${next.left}px`;
+      lens.style.top = `${next.top}px`;
+      updateReadout(nearestVisibleLetter());
+    });
+
+    resetButton.addEventListener("click", () => {
+      found.clear();
+      scatterHiddenLetters();
+      lens.style.left = "54px";
+      lens.style.top = "14px";
+      updateReadout(nearestVisibleLetter());
+    });
+
+    scatterHiddenLetters();
+    updateReadout(nearestVisibleLetter());
+  </script>
+</body>
+</html>
