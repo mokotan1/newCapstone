@@ -31,6 +31,22 @@ class _MockProvider(AIProvider):
             yield event
 
 
+class _CapturingProvider(_MockProvider):
+    def __init__(self, events: list[SSEEvent]):
+        super().__init__("capture", events)
+        self.last_messages = None
+
+    async def stream_chat(self, messages, tools=None, temperature=0.7, max_tokens=512) -> AsyncIterator[SSEEvent]:
+        self.last_messages = messages
+        async for event in super().stream_chat(
+            messages,
+            tools=tools,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        ):
+            yield event
+
+
 def test_user_visible_ai_error_rate_limit() -> None:
     msg = _user_visible_ai_error(RuntimeError("Error code: 429 - rate_limit_exceeded"))
     assert "한도" in msg
@@ -152,3 +168,57 @@ class TestChatServiceNonStreaming:
         result = await service.chat(request)
         assert result.response == "답변"
         assert len(result.function_calls) == 0
+@pytest.mark.asyncio
+async def test_hint_rewrite_adds_trusted_policy_and_untrusted_document():
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="병은 목마르다. 싱크대가 기억한다.")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+
+    await service.chat(
+        ChatRequest(
+            prompt="이 병 어디다 써?",
+            system="client scene",
+            hint_rewrite={
+                "hint_id": "opaque_bottle_sink_use",
+                "item_id": "opaque_bottle",
+                "hint_target": "kitchen_sink",
+                "hint_level": "direct",
+                "base_hint": "이 병은 주방 싱크대에서 사용할 수 있다.",
+                "required_terms": ["병", "싱크대"],
+                "forbidden_terms": ["열쇠"],
+            },
+        )
+    )
+
+    assert provider.last_messages is not None
+    assert "rewrite only" in provider.last_messages[0]["content"]
+    user_bundle = "\n".join(m["content"] for m in provider.last_messages if m["role"] == "user")
+    assert "hint_rewrite" in user_bundle
+    assert "opaque_bottle_sink_use" in user_bundle
+
+
+@pytest.mark.asyncio
+async def test_hint_rewrite_forbidden_term_falls_back():
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="싱크대에서 열쇠를 꺼내.")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+
+    result = await service.chat(
+        ChatRequest(
+            prompt="이 병 어디다 써?",
+            hint_rewrite={
+                "hint_id": "opaque_bottle_sink_use",
+                "item_id": "opaque_bottle",
+                "hint_target": "kitchen_sink",
+                "hint_level": "direct",
+                "base_hint": "이 병은 주방 싱크대에서 사용할 수 있다.",
+                "required_terms": ["병", "싱크대"],
+                "forbidden_terms": ["열쇠"],
+                "fallback_line": "그 병은 주방 싱크대에서 물을 채워볼 수 있다.",
+            },
+        )
+    )
+
+    assert result.response == "그 병은 주방 싱크대에서 물을 채워볼 수 있다."
