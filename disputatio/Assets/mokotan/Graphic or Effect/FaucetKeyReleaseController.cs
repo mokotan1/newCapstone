@@ -12,6 +12,7 @@ public class FaucetKeyReleaseController : MonoBehaviour
 {
     [SerializeField] Flowchart targetFlowchart;
     [SerializeField] string faucetBoolName = "FaucetClicked";
+    [SerializeField] string bottleDraggedBoolName = "BottleDragged";
     [SerializeField] string keySpawnBlockName = "addKey";
     [SerializeField] float delaySeconds = 1f;
     [SerializeField] GameObject keyObject;
@@ -57,12 +58,17 @@ public class FaucetKeyReleaseController : MonoBehaviour
         if (!flowchart.GetBooleanVariable(faucetBoolName))
             return;
 
+        if (!string.IsNullOrEmpty(bottleDraggedBoolName)
+            && !flowchart.GetBooleanVariable(bottleDraggedBoolName))
+            return;
+
         hasTriggered = true;
 
         if (enableDebugLogging)
         {
             GameLog.Log(
                 $"[FaucetKeyReleaseController] {faucetBoolName}=true detected; "
+                + $"{bottleDraggedBoolName}=true detected; "
                 + $"spawn key in {delaySeconds:0.##}s");
         }
 

@@ -1,5 +1,6 @@
 using Fungus;
 using Godlotto.Interaction;
+using Godlotto.ModalInput;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -38,6 +39,7 @@ public class BedRoomInteractionControllerTests
     {
         RoomInteractionController.ResetStateForTests();
         FungusDialogueBridge.ResetForTests();
+        ModalInputGate.ResetForTests();
         foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
             Object.DestroyImmediate(runner.gameObject);
         if (root != null)
@@ -147,6 +149,26 @@ public class BedRoomInteractionControllerTests
     }
 
     [Test]
+    public void Awake_AddsModalScopeToSafePanelAndBlocksParrotBehindIt()
+    {
+        ModalInputGate.ResetForTests();
+        var safePanel = new GameObject("SafePanel");
+        safePanel.SetActive(false);
+        var parrot = new GameObject("Parret");
+        SetPrivateField(controller, "safePanel", safePanel);
+
+        InvokeAwake(controller);
+        safePanel.SetActive(true);
+
+        Assert.IsNotNull(safePanel.GetComponent<ModalInputScope>());
+        Assert.IsTrue(ModalInputGate.IsBlockingWorldInput);
+        Assert.IsFalse(ModalInputGate.CanWorldClick(parrot));
+
+        Object.DestroyImmediate(parrot);
+        Object.DestroyImmediate(safePanel);
+    }
+
+    [Test]
     public void OnInteraction_BackId_ExecutesBackSpaceClickedBlock()
     {
         SetPrivateField(controller, "routes", new[]
@@ -237,6 +259,17 @@ public class BedRoomInteractionControllerTests
         typeof(RoomInteractionController)
             .GetMethod(
                 "BuildLookupCaches",
+                System.Reflection.BindingFlags.Instance
+                    | System.Reflection.BindingFlags.NonPublic
+                    | System.Reflection.BindingFlags.DeclaredOnly)
+            ?.Invoke(target, null);
+    }
+
+    static void InvokeAwake(BedRoomInteractionController target)
+    {
+        typeof(BedRoomInteractionController)
+            .GetMethod(
+                "Awake",
                 System.Reflection.BindingFlags.Instance
                     | System.Reflection.BindingFlags.NonPublic
                     | System.Reflection.BindingFlags.DeclaredOnly)

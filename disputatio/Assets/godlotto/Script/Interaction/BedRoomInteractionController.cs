@@ -1,4 +1,5 @@
 using UnityEngine;
+using Godlotto.ModalInput;
 
 namespace Godlotto.Interaction
 {
@@ -15,6 +16,20 @@ namespace Godlotto.Interaction
         [SerializeField] GameObject safeItemEffect;
 
         protected override string LogPrefix => "[BedRoom]";
+
+        protected override void Awake()
+        {
+            base.Awake();
+            EnsureSafePanelModalScope();
+        }
+
+        void EnsureSafePanelModalScope()
+        {
+            if (safePanel == null || safePanel.GetComponent<ModalInputScope>() != null)
+                return;
+
+            safePanel.AddComponent<ModalInputScope>();
+        }
 
         protected override void HandlePanelClosed(string panelCloseId, GameObject closedPanel)
         {
