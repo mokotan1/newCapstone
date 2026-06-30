@@ -19,6 +19,7 @@ public static class DialogueLogEditorSetup
     const string EntryPrefabDarkConfessionPath = "Assets/godlotto/Prefab/DialogueLogEntry_DarkConfession.prefab";
     const string SayDialogGothicPath = "Assets/godlotto/Prefab/SayDialogGothic.prefab";
     const string SayDialogNotebookPath = "Assets/godlotto/Prefab/SayDialogNotebook.prefab";
+    const string ParretPanelPath = "Assets/godlotto/KTH/Parret_Panel.prefab";
     const string HistoryIconPath = "Assets/Fungus/Textures/HistoryIcon.png";
     public const string ManagerObjectName = "DialogueLogManager";
     const string LogButtonName = "LogButton";
@@ -54,12 +55,22 @@ public static class DialogueLogEditorSetup
         Debug.Log("[DialogueLogEditorSetup] SayDialog Gothic·Notebook에 ghost LogButton을 적용했습니다.");
     }
 
+    [MenuItem("Tools/Godlotto/Setup Dialogue Log Button (Cheshire Chatbot Panels)")]
+    public static void ApplyCheshireLogButtonToChatbotPanels()
+    {
+        SetupCheshireLogButton(ParretPanelPath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("[DialogueLogEditorSetup] 체셔/챗봇 패널에 bookmark LogButton을 적용했습니다.");
+    }
+
     public static void ApplyStyle(DialogueLogVisualStyle style)
     {
         GameObject entryPrefab = EnsureEntryPrefab(style);
         SetupIntroScene(entryPrefab, style);
         SetupSayDialogLogButton(SayDialogGothicPath);
         SetupSayDialogLogButton(SayDialogNotebookPath);
+        SetupCheshireLogButton(ParretPanelPath);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -668,6 +679,34 @@ public static class DialogueLogEditorSetup
         }
     }
 
+    static void SetupCheshireLogButton(string prefabPath)
+    {
+        DialogueLogButtonSpec.BookmarkButtonSpec spec = DialogueLogButtonSpec.CreateChatbotBookmarkDefaults();
+
+        var prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
+        try
+        {
+            Transform panel = FindDeepChild(prefabRoot.transform, "Parret_Panel");
+            if (panel == null)
+            {
+                Debug.LogError($"[DialogueLogEditorSetup] {prefabPath}에서 Parret_Panel을 찾을 수 없습니다.");
+                return;
+            }
+
+            Transform existing = FindDeepChild(prefabRoot.transform, spec.buttonName);
+            if (existing != null)
+                Object.DestroyImmediate(existing.gameObject);
+
+            CreateBookmarkLogButton(panel, spec);
+
+            PrefabUtility.SaveAsPrefabAsset(prefabRoot, prefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(prefabRoot);
+        }
+    }
+
     /// <summary>
     /// log-button-03-ghost 스펙 기반 미니멀 고스트 LogButton.
     /// LogButton → Icon / Caption / Underline (VerticalLayoutGroup)
@@ -795,6 +834,66 @@ public static class DialogueLogEditorSetup
         layout.flexibleWidth = 0f;
 
         return underlineGo;
+    }
+
+    static GameObject CreateBookmarkLogButton(Transform parent, DialogueLogButtonSpec.BookmarkButtonSpec spec)
+    {
+        var buttonGo = new GameObject(
+            spec.buttonName,
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image),
+            typeof(Button));
+
+        buttonGo.transform.SetParent(parent, false);
+        buttonGo.transform.SetAsLastSibling();
+
+        var rect = buttonGo.GetComponent<RectTransform>();
+        rect.anchorMin = spec.anchor;
+        rect.anchorMax = spec.anchor;
+        rect.pivot = spec.pivot;
+        rect.anchoredPosition = spec.anchoredPosition;
+        rect.sizeDelta = spec.size;
+
+        var background = buttonGo.GetComponent<Image>();
+        background.color = spec.background;
+        background.raycastTarget = true;
+        background.raycastPadding = new Vector4(12f, 12f, 12f, 12f);
+
+        var button = buttonGo.GetComponent<Button>();
+        button.targetGraphic = background;
+        button.transition = Selectable.Transition.ColorTint;
+        button.colors = spec.colorBlock.ToUnityColorBlock();
+
+        var topRule = CreateImage(buttonGo.transform, "TopRule", spec.border);
+        var topRuleRect = topRule.GetComponent<RectTransform>();
+        topRuleRect.anchorMin = new Vector2(0f, 1f);
+        topRuleRect.anchorMax = new Vector2(1f, 1f);
+        topRuleRect.pivot = new Vector2(0.5f, 1f);
+        topRuleRect.anchoredPosition = Vector2.zero;
+        topRuleRect.sizeDelta = new Vector2(0f, 3f);
+        topRule.GetComponent<Image>().raycastTarget = false;
+
+        var sideRule = CreateImage(buttonGo.transform, "SideRule", spec.border);
+        var sideRuleRect = sideRule.GetComponent<RectTransform>();
+        sideRuleRect.anchorMin = new Vector2(0f, 0f);
+        sideRuleRect.anchorMax = new Vector2(0f, 1f);
+        sideRuleRect.pivot = new Vector2(0f, 0.5f);
+        sideRuleRect.anchoredPosition = Vector2.zero;
+        sideRuleRect.sizeDelta = new Vector2(3f, 0f);
+        sideRule.GetComponent<Image>().raycastTarget = false;
+
+        TextMeshProUGUI caption = CreateLabel(buttonGo.transform, "Caption", "로\n그", spec.captionFontSize, spec.foreground);
+        caption.alignment = TextAlignmentOptions.Center;
+        caption.enableAutoSizing = false;
+        caption.lineSpacing = 16f;
+        caption.raycastTarget = false;
+        SetStretch(caption.rectTransform);
+        caption.margin = new Vector4(0f, 12f, 0f, 10f);
+
+        var logButton = buttonGo.AddComponent<DialogueLogButton>();
+        logButton.SetUseOverlaySorting(false);
+        return buttonGo;
     }
 
     static GameObject CreateImage(Transform parent, string name, Color color)

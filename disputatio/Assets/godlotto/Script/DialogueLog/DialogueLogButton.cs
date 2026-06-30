@@ -15,8 +15,12 @@ public class DialogueLogButton : MonoBehaviour
     const string SettingSortingLayer = "Setting";
     const int LogButtonSortingOrder = 65;
 
+    [SerializeField] bool useOverlaySorting = true;
+
     Canvas overlayCanvas;
     GraphicRaycaster overlayRaycaster;
+
+    public bool UseOverlaySortingForTests => useOverlaySorting;
 
     void Awake()
     {
@@ -40,6 +44,13 @@ public class DialogueLogButton : MonoBehaviour
     {
         transform.SetAsLastSibling();
 
+        if (!useOverlaySorting)
+        {
+            RemoveOverlaySortingComponents();
+            EnsureRaycastPadding();
+            return;
+        }
+
         if (overlayCanvas == null)
             overlayCanvas = GetComponent<Canvas>();
         if (overlayCanvas == null)
@@ -54,8 +65,40 @@ public class DialogueLogButton : MonoBehaviour
         if (overlayRaycaster == null)
             overlayRaycaster = gameObject.AddComponent<GraphicRaycaster>();
 
+        EnsureRaycastPadding();
+    }
+
+    public void SetUseOverlaySorting(bool value)
+    {
+        useOverlaySorting = value;
+        EnsureTopRaycastOrder();
+    }
+
+    void EnsureRaycastPadding()
+    {
         var background = GetComponent<Image>();
         if (background != null)
             background.raycastPadding = new Vector4(12f, 12f, 12f, 12f);
+    }
+
+    void RemoveOverlaySortingComponents()
+    {
+        overlayCanvas = GetComponent<Canvas>();
+        if (overlayCanvas != null)
+            DestroyComponent(overlayCanvas);
+        overlayCanvas = null;
+
+        overlayRaycaster = GetComponent<GraphicRaycaster>();
+        if (overlayRaycaster != null)
+            DestroyComponent(overlayRaycaster);
+        overlayRaycaster = null;
+    }
+
+    static void DestroyComponent(Component component)
+    {
+        if (Application.isPlaying)
+            Destroy(component);
+        else
+            DestroyImmediate(component);
     }
 }

@@ -1,7 +1,9 @@
 using NUnit.Framework;
 using Fungus;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ParretPanelChatbotBinderTests
 {
@@ -77,6 +79,49 @@ public class ParretPanelChatbotBinderTests
 
         Assert.NotNull(sync);
         Assert.AreSame(sync, panel.GetComponent<TutorPanelSayDialogSync>());
+    }
+
+    [Test]
+    public void EnsureCheshireLogButton_CreatesBookmarkButtonAboveInputRightEdge()
+    {
+        var panel = new GameObject("Parret_Panel", typeof(RectTransform));
+        _createdObjects.Add(panel);
+
+        DialogueLogButton button = ParretPanelChatbotBinder.EnsureCheshireLogButton(panel);
+
+        Assert.NotNull(button);
+        Assert.AreEqual("CheshireLogButton", button.gameObject.name);
+        Assert.IsFalse(button.UseOverlaySortingForTests);
+        Assert.IsNull(button.GetComponent<Canvas>());
+        Assert.NotNull(button.GetComponent<Button>());
+        Assert.NotNull(button.GetComponent<Image>());
+        Assert.NotNull(button.GetComponentInChildren<TextMeshProUGUI>(true));
+
+        var rect = button.GetComponent<RectTransform>();
+        Assert.AreEqual(new Vector2(0.95f, 0f), rect.anchorMin);
+        Assert.AreEqual(new Vector2(0.95f, 0f), rect.anchorMax);
+        Assert.AreEqual(new Vector2(1f, 0f), rect.pivot);
+        Assert.AreEqual(new Vector2(-12f, 252f), rect.anchoredPosition);
+        Assert.AreEqual(new Vector2(52f, 128f), rect.sizeDelta);
+    }
+
+    [Test]
+    public void BindForScene_ReusesExistingCheshireLogButton_WhenBinderIsOnChildManager()
+    {
+        var panel = new GameObject("Parret_Panel", typeof(RectTransform));
+        _createdObjects.Add(panel);
+        var existingButtonObject = new GameObject("CheshireLogButton", typeof(RectTransform));
+        existingButtonObject.transform.SetParent(panel.transform, false);
+        var existingButton = existingButtonObject.AddComponent<DialogueLogButton>();
+        var manager = new GameObject("chatbotManager");
+        manager.transform.SetParent(panel.transform, false);
+        var binder = manager.AddComponent<ParretPanelChatbotBinder>();
+
+        binder.BindForScene("Hall_playerble");
+
+        DialogueLogButton[] buttons = panel.GetComponentsInChildren<DialogueLogButton>(true);
+        Assert.AreEqual(1, buttons.Length);
+        Assert.AreSame(existingButton, buttons[0]);
     }
 
     [Test]

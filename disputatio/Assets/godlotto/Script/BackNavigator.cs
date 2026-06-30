@@ -53,6 +53,14 @@ public class BackNavigator : MonoBehaviour
 
     public void GoBack()
     {
+        // 모달 UI(설정·로그·체셔/튜터 패널·책·지도 등)가 열려 HUD 입력을 막는 동안에는
+        // 뒤로가기 같은 HUD 내비게이션을 무시합니다(패널 뒤 버튼 클릭 방지, fail-safe).
+        if (ModalInputGate.IsBlockingHudInput)
+        {
+            GameLog.Log("[BackNavigator] 모달이 열려 있어 뒤로가기 입력을 무시합니다.");
+            return;
+        }
+
         Flowchart global = FlowchartLocator.FindByGameObjectName(globalFlowchartName);
         string fixedReturnScene = ResolveFixedReturnScene();
         if (!string.IsNullOrEmpty(fixedReturnScene))

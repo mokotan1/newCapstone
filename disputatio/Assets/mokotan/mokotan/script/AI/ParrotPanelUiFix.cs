@@ -50,6 +50,9 @@ public class ParrotPanelUiFix : MonoBehaviour
 
     private void OnEnable()
     {
+        ModalInputGate.Begin(this, gameObject, blocksHud: true, blocksWorld: true);
+        HideDuplicateBackspaceNameplates();
+
         // 1. 기존 레이캐스트 차단 해제 로직
         if (sayDialogCanvasGroup != null)
         {
@@ -78,6 +81,8 @@ public class ParrotPanelUiFix : MonoBehaviour
 
     private void OnDisable()
     {
+        ModalInputGate.End(this);
+
         // 패널이 닫힐 때 Parret 다시 활성화
         if (targetParret != null)
             targetParret.SetActive(true);
@@ -85,6 +90,11 @@ public class ParrotPanelUiFix : MonoBehaviour
         // InputPanelNotebook도 함께 비활성화
         if (inputPanelNotebook != null)
             inputPanelNotebook.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        ModalInputGate.End(this);
     }
 
     private void ApplyBackgroundSprite()
@@ -118,4 +128,26 @@ public class ParrotPanelUiFix : MonoBehaviour
 
         return electricOnSprite;
     }
+
+    private void HideDuplicateBackspaceNameplates()
+    {
+        var closers = FindObjectsByType<PanelBackspaceCloser>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None);
+        for (int i = 0; i < closers.Length; i++)
+        {
+            PanelBackspaceCloser closer = closers[i];
+            if (closer == null || closer.gameObject == null)
+                continue;
+            if (closer.transform == transform || closer.transform.IsChildOf(transform))
+                continue;
+            if (closer.gameObject.name != "BackspaceNameplate")
+                continue;
+            if (!closer.TargetsPanel(gameObject))
+                continue;
+
+            closer.gameObject.SetActive(false);
+        }
+    }
+
 }

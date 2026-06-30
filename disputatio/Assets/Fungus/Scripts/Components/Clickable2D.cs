@@ -39,6 +39,11 @@ namespace Fungus
             if (!clickEnabled)
                 return;
 
+            // 모달 UI(설정·로그·체셔/튜터 패널·책·지도 등)가 열려 있고
+            // 이 오브젝트가 허용 루트 밖이면, FungusManager 접근 전에 즉시 무시합니다.
+            if (ShouldBlockWorldClick(gameObject))
+                return;
+
             if (IsModalSayDialogOpen())
                 return;
 
@@ -141,6 +146,15 @@ namespace Fungus
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 모달 UI가 열려 있고, 클릭 대상이 그 모달의 허용 루트(allowedRoot) 밖이면 true.
+        /// 방마다 콜라이더를 끄는 대신 <see cref="ModalInputGate"/> 한 곳에서 판정합니다.
+        /// </summary>
+        public static bool ShouldBlockWorldClick(GameObject target)
+        {
+            return ModalInputGate.IsBlockingWorldInput && !ModalInputGate.IsAllowed(target);
         }
 
         /// <summary>

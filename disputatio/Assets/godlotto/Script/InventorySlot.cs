@@ -142,7 +142,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         var dragRect = dragIcon.GetComponent<RectTransform>();
 
-        dragRect.sizeDelta = new Vector2(100f, 100f);
+        dragRect.sizeDelta = ResolveDragIconSize(dragSprite);
 
         SetDragIconScreenPosition(eventData, dragRect, dragParent);
 
@@ -231,6 +231,28 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             {
 
                 LogDrag("OnEndDrag handled by UI DropZone");
+
+                FinishDrag();
+
+                return;
+
+            }
+
+
+
+            FilterCardBookDropZone filterCardBookDropZone =
+
+                dropTarget.GetComponent<FilterCardBookDropZone>()
+
+                ?? dropTarget.GetComponentInParent<FilterCardBookDropZone>();
+
+            if (filterCardBookDropZone != null)
+
+            {
+
+                LogDrag("OnEndDrag handled by UI FilterCardBookDropZone");
+
+                filterCardBookDropZone.OnDrop(eventData);
 
                 FinishDrag();
 
@@ -503,6 +525,32 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
 
         return slotTransform != null ? slotTransform.root : null;
+
+    }
+
+
+
+    static Vector2 ResolveDragIconSize(Sprite sprite)
+
+    {
+
+        if (sprite == null || sprite.rect.width <= 0f || sprite.rect.height <= 0f)
+
+            return new Vector2(100f, 100f);
+
+
+
+        const float maxSize = 100f;
+
+        float aspect = sprite.rect.width / sprite.rect.height;
+
+        if (aspect >= 1f)
+
+            return new Vector2(maxSize, maxSize / aspect);
+
+
+
+        return new Vector2(maxSize * aspect, maxSize);
 
     }
 

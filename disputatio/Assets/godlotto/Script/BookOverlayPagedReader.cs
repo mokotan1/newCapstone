@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System;
+using Godlotto.ModalInput;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -35,6 +36,7 @@ public class BookOverlayPagedReader : MonoBehaviour
     private readonly List<string> pages = new List<string>();
     private int currentPageIndex;
     private bool lastPageShownSinceOpen;
+    private Image modalRaycastBlocker;
 
     public event Action<BookOverlayPagedReader> LastPageShown;
     public event Action<BookOverlayPagedReader> Closed;
@@ -56,6 +58,9 @@ public class BookOverlayPagedReader : MonoBehaviour
     private void OnEnable()
     {
         InteractionLock.LockUntilUiBoundary();
+        ModalInputGate.Begin(this, gameObject, blocksHud: true, blocksWorld: true);
+        // 패널 뒤 UI 클릭을 EventSystem 레벨에서 소비하는 투명 차단막(공통 처리).
+        modalRaycastBlocker = ModalRaycastBlocker.Create(transform);
         RebuildPages();
         if (resetToFirstPageOnOpen)
             currentPageIndex = 0;
@@ -65,6 +70,9 @@ public class BookOverlayPagedReader : MonoBehaviour
 
     private void OnDisable()
     {
+        ModalInputGate.End(this);
+        ModalRaycastBlocker.Remove(modalRaycastBlocker);
+        modalRaycastBlocker = null;
         InteractionLock.ForceUnlock();
     }
 

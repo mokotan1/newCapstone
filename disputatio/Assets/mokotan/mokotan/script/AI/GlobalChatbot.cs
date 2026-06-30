@@ -81,6 +81,7 @@ public class GlobalChatbot : BaseChatbot
             switch (fc.name)
             {
                 case "give_hint":
+                    RecordGiveHintToolCall(fc.arguments);
                     ApplyGiveHint(fc.arguments);
                     break;
                 case "emote":
@@ -91,6 +92,15 @@ public class GlobalChatbot : BaseChatbot
                     break;
             }
         }
+    }
+
+    void RecordGiveHintToolCall(Dictionary<string, object> args)
+    {
+        if (args == null)
+            return;
+
+        string level = ChatbotToolArgs.GetString(args, "hint_level", "subtle");
+        PlayLogRecorder.RecordGiveHint(level, PlayLogRecorder.BuildProgressStateSnapshot(GetType().Name));
     }
 
     protected virtual void ApplyGiveHint(Dictionary<string, object> args)

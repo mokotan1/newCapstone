@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>도트풍 돋보기 아이템 스프라이트</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #17120f;
+      color: #ddd0bc;
+      font-family: "Malgun Gothic", "Noto Sans KR", sans-serif;
+    }
+    main {
+      width: min(1160px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 50px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: #eadbbd;
+    }
+    .subtitle {
+      margin: 0 0 24px;
+      color: #9f927e;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      border: 2px solid #2a211c;
+      background: #211a16;
+      box-shadow: inset 0 0 0 1px #3a3029;
+      overflow: hidden;
+    }
+    .card h2 {
+      margin: 0;
+      padding: 14px 14px 4px;
+      color: #ddc79f;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .desc {
+      margin: 0;
+      padding: 0 14px 14px;
+      color: #a79a87;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .preview {
+      margin: 0 14px 14px;
+      height: 360px;
+      position: relative;
+      border: 2px solid #30261f;
+      background:
+        linear-gradient(90deg, rgba(34, 27, 23, .95), rgba(48, 40, 34, .82) 48%, rgba(25, 20, 18, .96)),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, transparent 2px 16px),
+        #2a231f;
+      overflow: hidden;
+    }
+    .preview::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      top: 24px;
+      bottom: 92px;
+      border: 2px solid #1b1613;
+      background:
+        linear-gradient(135deg, transparent 0 46%, rgba(92, 82, 70, .22) 46% 50%, transparent 50%),
+        #302822;
+    }
+    .floor-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 90px;
+      height: 2px;
+      background: #16120f;
+      box-shadow: 0 18px 0 #211a16, 0 36px 0 #16120f;
+    }
+    .sprite-stage {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      width: 256px;
+      height: 256px;
+      display: grid;
+      place-items: center;
+    }
+    .sprite {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      grid-template-rows: repeat(16, 1fr);
+      width: 192px;
+      height: 192px;
+      image-rendering: pixelated;
+      filter: drop-shadow(16px 20px 0 rgba(11, 9, 8, .45));
+    }
+    .px { width: 100%; height: 100%; }
+    .x { background: transparent; }
+    .k { background: #17120f; }
+    .o { background: #251d18; }
+    .d { background: #3c3028; }
+    .m { background: #5a4633; }
+    .b { background: #8a6739; }
+    .g { background: #b88b45; }
+    .h { background: #e3c47a; }
+    .w { background: #f2e3b4; }
+    .c { background: #6f827d; opacity: .72; }
+    .q { background: #a9b4a2; opacity: .55; }
+    .r { background: #59302a; }
+    .scale {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      display: grid;
+      grid-template-columns: 58px 82px 1fr;
+      gap: 12px;
+      align-items: end;
+    }
+    .scale-box {
+      display: grid;
+      place-items: center;
+      min-height: 64px;
+      border: 2px solid #30261f;
+      background: #17120f;
+      overflow: hidden;
+    }
+    .scale-box.small .sprite { width: 48px; height: 48px; filter: none; }
+    .scale-box.mid .sprite { width: 72px; height: 72px; filter: none; }
+    .caption {
+      color: #8f8374;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .verdict {
+      margin-top: 22px;
+      padding: 16px;
+      border: 2px solid #30261f;
+      background: #211a16;
+      color: #bfb19b;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .verdict strong { color: #e3c47a; }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      main { width: min(680px, calc(100% - 28px)); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>도트풍 돋보기 아이템 스프라이트</h1>
+    <p class="subtitle">첨부 스크린샷의 어두운 2D 도트 배경에 맞춰, 저채도 갈색 팔레트와 굵은 외곽선, 계단식 대각선으로 다시 그린 루페 아이템 시안입니다.</p>
+
+    <section class="grid">
+      <article class="card">
+        <h2>A. 기본 금은방 루페</h2>
+        <p class="desc">인벤토리 48px에서도 가장 잘 읽히는 형태. 황동색은 낮추고, 렌즈 하이라이트만 제한적으로 밝게 둡니다.</p>
+        <div class="preview">
+          <div class="floor-line"></div>
+          <div class="sprite-stage" data-sprite="a"></div>
+          <div class="scale">
+            <div class="scale-box small" data-sprite="a"></div>
+            <div class="scale-box mid" data-sprite="a"></div>
+            <div class="caption">추천 채택안. 필드 픽업/인벤토리/패널 드래그 UI 모두에서 가장 명확합니다.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>B. 낡은 서랍 도구형</h2>
+        <p class="desc">손잡이를 더 어둡게 하고 붉은 천/왁스 포인트를 넣은 버전. 가정부 방의 오래된 소품 느낌이 납니다.</p>
+        <div class="preview">
+          <div class="floor-line"></div>
+          <div class="sprite-stage" data-sprite="b"></div>
+          <div class="scale">
+            <div class="scale-box small" data-sprite="b"></div>
+            <div class="scale-box mid" data-sprite="b"></div>
+            <div class="caption">서사성은 좋지만 48px에서는 빨간 포인트가 살짝 잡음처럼 보일 수 있습니다.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>C. 어두운 고딕 루페</h2>
+        <p class="desc">거의 검은 황동과 좁은 빛만 남긴 버전. 분위기는 가장 맞지만 아이템 판독성은 조금 낮습니다.</p>
+        <div class="preview">
+          <div class="floor-line"></div>
+          <div class="sprite-stage" data-sprite="c"></div>
+          <div class="scale">
+            <div class="scale-box small" data-sprite="c"></div>
+            <div class="scale-box mid" data-sprite="c"></div>
+            <div class="caption">공포 톤은 강하지만, 실제 아이템 아이콘은 A보다 알아보기 어렵습니다.</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div class="verdict">
+      <strong>추천:</strong> A 기본 금은방 루페. 스크린샷의 어두운 도트 화풍과 맞게 밝은 금색을 줄였고, 렌즈 하이라이트만 형광등처럼 제한적으로 올렸습니다. Unity 스프라이트로 만들 때는 32x32 또는 48x48 기준으로 먼저 찍고, 필드 오브젝트는 2배 스케일로 쓰는 쪽이 좋습니다.
+    </div>
+  </main>
+
+  <script>
+    const sprites = {
+      a: [
+        "................",
+        "................",
+        ".....kkkk.......",
+        "....kgggkk......",
+        "...kghhhgk......",
+        "..kgcqqchgk.....",
+        "..kqc..cqk......",
+        "..kgcqqcgk......",
+        "...kghhgk.......",
+        "....kkgk........",
+        "......kkm.......",
+        ".......kmm......",
+        "........kmm.....",
+        ".........kmm....",
+        "..........kk....",
+        "................"
+      ],
+      b: [
+        "................",
+        "................",
+        ".....kkkk.......",
+        "....kbbgkk......",
+        "...kbhhhbk......",
+        "..kbcqqcbk......",
+        "..kqc..cqk......",
+        "..kbcqqcbk......",
+        "...kbbhbk.......",
+        "....kkbk........",
+        "......kkr.......",
+        ".......krr......",
+        "........kmm.....",
+        ".........kmm....",
+        "..........kk....",
+        "................"
+      ],
+      c: [
+        "................",
+        "................",
+        ".....kkkk.......",
+        "....kddmkk......",
+        "...kdmggdk......",
+        "..kdcqqcdk......",
+        "..kqc..cqk......",
+        "..kdcqqcdk......",
+        "...kdmmdk.......",
+        "....kkdk........",
+        "......kkd.......",
+        ".......kdd......",
+        "........kdm.....",
+        ".........kmm....",
+        "..........kk....",
+        "................"
+      ]
+    };
+
+    function buildSprite(type) {
+      const root = document.createElement("div");
+      root.className = "sprite";
+      sprites[type].forEach((row) => {
+        row.split("").forEach((token) => {
+          const cell = document.createElement("span");
+          cell.className = `px ${token === "." ? "x" : token}`;
+          root.appendChild(cell);
+        });
+      });
+      return root;
+    }
+
+    document.querySelectorAll("[data-sprite]").forEach((target) => {
+      target.appendChild(buildSprite(target.dataset.sprite));
+    });
+  </script>
+</body>
+</html>

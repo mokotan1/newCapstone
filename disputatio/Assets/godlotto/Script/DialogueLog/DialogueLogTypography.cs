@@ -55,6 +55,17 @@ public static class DialogueLogTypography
             label.characterSpacing = typography.titleCharacterSpacing;
     }
 
+    public static void ApplyTab(TMP_Text label, DialogueLogVisualStyle style)
+    {
+        if (label == null)
+            return;
+
+        label.enableAutoSizing = false;
+        label.fontSize = DialogueLogTabSpec.TabFontSize;
+        label.lineSpacing = 0f;
+        label.characterSpacing = 0f;
+    }
+
     public static void ApplyEntryLayout(
         RectTransform entryRoot,
         DialogueLogVisualStyle style,

@@ -1,4 +1,3 @@
-using System;
 using Fungus;
 using UnityEngine;
 
@@ -6,33 +5,31 @@ public class AudioBridge : MonoBehaviour
 {
     public void CallPlayBGM(int index)
     {
-        if (AudioController.instance != null)
-            AudioController.instance.PlayBGM(index);
+        if (AudioController.Instance != null)
+            AudioController.Instance.PlayBGM(index);
     }
 
     public void CallStopMusic()
     {
-        WithControllerSilent(c => c.StopMusic());
+        if (AudioController.Instance != null)
+            AudioController.Instance.StopMusic();
     }
 
     public void CallPlaySFX(int index)
     {
-        WithControllerSilent(c => c.PlaySFX(index));
+        if (SfxController.Instance != null)
+            SfxController.Instance.PlaySFX(index);
     }
 
     public void CallPlayFootstep(int index)
     {
-        WithControllerSilent(c => c.PlayFootstep(index));
+        if (SfxController.Instance != null)
+            SfxController.Instance.PlayFootstep(index);
     }
 
     public void CallPlayFootstepDefault()
     {
-        WithControllerSilent(c => c.PlayFootstep(0));
-    }
-
-    private static void WithControllerSilent(Action<AudioController> action)
-    {
-        if (AudioController.instance != null)
-            action(AudioController.instance);
+        if (SfxController.Instance != null)
+            SfxController.Instance.PlayFootstep(0);
     }
 }

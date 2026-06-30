@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>메이드 방 돋보기 작풍 견본</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #14110e;
+      color: #eee2ca;
+      font-family: "Noto Sans KR", "Malgun Gothic", Arial, sans-serif;
+    }
+    main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 52px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 0 0 28px;
+      color: #b9ab91;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .card {
+      border: 1px solid #493826;
+      border-radius: 8px;
+      background: #201a16;
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 15px 16px 0;
+    }
+    .letter {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid #826640;
+      border-radius: 50%;
+      color: #f0d39a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    h2 {
+      margin: 0;
+      color: #f3d9aa;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+    .desc {
+      margin: 0;
+      padding: 8px 16px 16px;
+      color: #baad96;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .preview {
+      position: relative;
+      height: 310px;
+      margin: 0 16px 16px;
+      border: 1px solid #6d5438;
+      background:
+        linear-gradient(90deg, rgba(62, 42, 26, .22), transparent 18%, transparent 82%, rgba(54, 35, 23, .25)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 5px),
+        #c5a778;
+      box-shadow: inset 0 0 36px rgba(43, 25, 12, .55);
+      overflow: hidden;
+    }
+    .preview::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(68, 43, 22, .35);
+    }
+    .micro-line {
+      position: absolute;
+      left: 30px;
+      right: 30px;
+      top: 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      color: rgba(63, 39, 21, .15);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 5px;
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .panel-title {
+      position: absolute;
+      left: 34px;
+      top: 48px;
+      color: rgba(47, 31, 17, .76);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .body-lines {
+      position: absolute;
+      left: 42px;
+      right: 42px;
+      top: 112px;
+      display: grid;
+      gap: 12px;
+    }
+    .line {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(69, 45, 27, .24);
+    }
+    .line:nth-child(2) { width: 82%; }
+    .line:nth-child(3) { width: 64%; }
+    .line:nth-child(4) { width: 76%; }
+    .lens {
+      position: absolute;
+      left: 35px;
+      top: -27px;
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      transform: rotate(-4deg);
+    }
+    .lens::after {
+      content: "";
+      position: absolute;
+      right: -46px;
+      bottom: -22px;
+      width: 65px;
+      height: 10px;
+      border-radius: 999px;
+      transform: rotate(42deg);
+      transform-origin: left center;
+    }
+    .lens-text {
+      position: relative;
+      z-index: 3;
+      color: #2a190d;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      font-weight: 800;
+      text-shadow: 0 1px 0 rgba(255,255,255,.4);
+    }
+    .a .lens {
+      border: 7px solid #d8be72;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(255,255,255,.38), transparent 18%),
+        radial-gradient(circle, rgba(247,232,184,.24), rgba(195,165,96,.12) 70%, rgba(56,37,17,.08));
+      box-shadow:
+        0 0 0 2px rgba(58,40,18,.65),
+        inset 0 0 22px rgba(255,255,255,.25),
+        0 7px 18px rgba(38,22,9,.28);
+    }
+    .a .lens::after {
+      background: linear-gradient(90deg, #75532b, #c5a35f 45%, #684823);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    .b .lens {
+      border: 6px solid #725332;
+      background:
+        radial-gradient(circle at 36% 25%, rgba(255,255,255,.3), transparent 17%),
+        rgba(239,220,178,.2);
+      box-shadow:
+        0 0 0 2px #2f2114,
+        inset 0 0 18px rgba(255,255,255,.2),
+        0 8px 16px rgba(37,22,12,.35);
+    }
+    .b .lens::before {
+      content: "";
+      position: absolute;
+      inset: -11px;
+      border-radius: 50%;
+      border: 2px solid rgba(51,34,19,.55);
+    }
+    .b .lens::after {
+      background: linear-gradient(90deg, #4a2e1b, #7e5833);
+      height: 12px;
+    }
+    .c .lens {
+      border: 6px solid #b89b60;
+      background:
+        radial-gradient(circle at 28% 30%, rgba(255,255,255,.32), transparent 14%),
+        radial-gradient(circle, rgba(244,227,183,.25), rgba(97,78,49,.16));
+      box-shadow:
+        0 0 0 2px rgba(29,21,15,.75),
+        0 0 0 9px rgba(65,47,29,.22),
+        inset 0 0 20px rgba(255,255,255,.2);
+    }
+    .c .lens::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      border: 1px dashed rgba(63,40,22,.45);
+    }
+    .c .lens::after {
+      background: linear-gradient(90deg, #3e3324, #9a8050 42%, #35271b);
+    }
+    .c .mark {
+      position: absolute;
+      z-index: 4;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(74,43,24,.7);
+      box-shadow: 19px 21px 0 rgba(74,43,24,.55), -22px 28px 0 rgba(74,43,24,.45);
+    }
+    .d .lens {
+      border: 6px solid #a98f63;
+      background:
+        linear-gradient(130deg, transparent 0 46%, rgba(255,255,255,.45) 47% 48%, transparent 49%),
+        linear-gradient(28deg, transparent 0 58%, rgba(58,38,25,.32) 59% 60%, transparent 61%),
+        radial-gradient(circle at 34% 26%, rgba(255,255,255,.35), transparent 17%),
+        rgba(235,218,181,.2);
+      box-shadow:
+        0 0 0 2px rgba(54,38,25,.72),
+        inset 0 0 19px rgba(255,255,255,.16);
+    }
+    .d .lens::before {
+      content: "";
+      position: absolute;
+      left: 47px;
+      top: 14px;
+      width: 1px;
+      height: 78px;
+      background: rgba(72,45,30,.36);
+      transform: rotate(28deg);
+    }
+    .d .lens::after {
+      background: linear-gradient(90deg, #4e3726, #806344 48%, #3b281a);
+    }
+    .d .lens-text {
+      transform: skew(-5deg, 2deg);
+      text-shadow: 2px 0 0 rgba(91,48,32,.18), 0 1px 0 rgba(255,255,255,.35);
+    }
+    .verdict {
+      margin-top: 22px;
+      padding: 16px 18px;
+      border: 1px solid #473623;
+      border-radius: 8px;
+      background: #1d1814;
+      color: #cfc0a4;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .verdict strong { color: #f1d39a; }
+    @media (max-width: 900px) {
+      main { width: min(680px, calc(100% - 28px)); }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>메이드 방 Look 패널용 돋보기 작풍 견본</h1>
+    <p class="subtitle">상단 라인 전체 미세문자(C안)에 올렸을 때의 인상을 비교하기 위한 시안입니다. 임시 확대 문구는 `tmp`를 유지했습니다.</p>
+
+    <section class="grid" aria-label="돋보기 작풍 비교">
+      <article class="card a">
+        <div class="card-head"><span class="letter">A</span><h2>금은방 루페형</h2></div>
+        <p class="desc">황동 테두리와 작은 원형 렌즈. 보석 감정 도구처럼 보여 “작은 글씨를 판독한다”는 기능이 가장 즉시 읽힙니다.</p>
+        <div class="preview">
+          <div class="micro-line">tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp</div>
+          <div class="panel-title">찢어진 요리책</div>
+          <div class="body-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+          <div class="lens"><div class="lens-text">tmp</div></div>
+        </div>
+      </article>
+
+      <article class="card b">
+        <div class="card-head"><span class="letter">B</span><h2>탐정 수첩 돋보기형</h2></div>
+        <p class="desc">낡은 나무 손잡이와 두꺼운 외곽선. 추리 도구 느낌이 강해서 탐정 콘셉트와 안정적으로 맞습니다.</p>
+        <div class="preview">
+          <div class="micro-line">tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp</div>
+          <div class="panel-title">찢어진 요리책</div>
+          <div class="body-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+          <div class="lens"><div class="lens-text">tmp</div></div>
+        </div>
+      </article>
+
+      <article class="card c">
+        <div class="card-head"><span class="letter">C</span><h2>의식 도구형</h2></div>
+        <p class="desc">금속 장식과 작은 표식이 있는 불길한 도구. 성물/의식 분위기를 조금 더 얹고 싶을 때 어울립니다.</p>
+        <div class="preview">
+          <div class="micro-line">tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp</div>
+          <div class="panel-title">찢어진 요리책</div>
+          <div class="body-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+          <div class="lens"><span class="mark"></span><div class="lens-text">tmp</div></div>
+        </div>
+      </article>
+
+      <article class="card d">
+        <div class="card-head"><span class="letter">D</span><h2>깨진 렌즈형</h2></div>
+        <p class="desc">균열과 왜곡이 있어 공포감은 강합니다. 단서 판독 도구보다 저택의 불안정함을 보여주는 연출용에 가깝습니다.</p>
+        <div class="preview">
+          <div class="micro-line">tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp tmp</div>
+          <div class="panel-title">찢어진 요리책</div>
+          <div class="body-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+          <div class="lens"><div class="lens-text">tmp</div></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="verdict">
+      <strong>추천:</strong> 기본 채택은 A 금은방 루페형. 플레이어가 “작은 글씨를 읽는 도구”라고 가장 빨리 이해하고, 메이드 방의 미세문자 힌트와도 가장 직접적으로 맞습니다. B는 탐정물 톤, C는 호러/의식 톤을 더 세게 밀고 싶을 때의 대안입니다.
+    </div>
+  </main>
+</body>
+</html>

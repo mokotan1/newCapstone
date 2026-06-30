@@ -163,8 +163,12 @@ public static class DialogueLogPanelStyleApplicator
         switch (style)
         {
             case DialogueLogVisualStyle.ParchmentCodex:
-                scrollRect.offsetMin = new Vector2(22f, 22f);
-                scrollRect.offsetMax = new Vector2(-22f, -104f);
+                scrollRect.offsetMin = new Vector2(
+                    DialogueLogTabSpec.ContentHorizontalPadding,
+                    DialogueLogTabSpec.PanelBottomPadding);
+                scrollRect.offsetMax = new Vector2(
+                    -DialogueLogTabSpec.ContentHorizontalPadding,
+                    -DialogueLogTabSpec.ScrollTopInset);
                 break;
             case DialogueLogVisualStyle.DarkConfession:
                 scrollRect.offsetMin = new Vector2(34f, 30f);

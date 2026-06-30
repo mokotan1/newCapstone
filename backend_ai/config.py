@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str = ""
     google_api_key: str = ""
+    chat_api_token: str = ""
 
     default_model_groq: str = "llama-3.3-70b-versatile"
     default_model_gemini: str = "gemini-2.0-flash"
@@ -51,6 +52,13 @@ class Settings(BaseSettings):
     tutor_rag_max_context_chars: int = 6000
     tutor_grade_fuzzy_ratio: float = 0.82
     tutor_grade_fuzzy_max_len: int = 24
+
+    # Play-log telemetry ingestion (POST /telemetry → append CSV under backend_ai/).
+    telemetry_enabled: bool = True
+    telemetry_log_dir: str = "logs"
+    telemetry_csv_filename: str = "play_logs.csv"
+    #: Max events accepted per request (bounds payload / abuse).
+    telemetry_max_batch: int = 500
 
 
 @lru_cache

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1069187089704195816}
   - component: {fileID: 6944196267530801438}
-  - component: {fileID: 6944196267530801439}
   - component: {fileID: 1925288339633397219}
   m_Layer: 0
   m_Name: BGM Player
@@ -131,103 +130,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!82 &6944196267530801439
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 582094935831507481}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: -3893149292611179741, guid: a5aecd8f294b4384a83c3cbaaf8b3189, type: 2}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!114 &1925288339633397219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,34 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmAudioSource: {fileID: 6944196267530801438}
-  sfxAudioSource: {fileID: 6944196267530801439}
   bgmList:
   - {fileID: 8300000, guid: f3c866bbc4639e7409c30c71736d84a6, type: 3}
   - {fileID: 8300000, guid: 920a5e60c8eeb794f8f1ad130eb9d308, type: 3}
   - {fileID: 8300000, guid: 60e9c1f9885fbec4ebb152207791864f, type: 3}
-  sfxList:
-  - {fileID: 8300000, guid: 7ca5a9710db4327439c9f8cb8204615e, type: 3}
-  - {fileID: 8300000, guid: 6d9f0304d30c5cf4686c14c860c64800, type: 3}
-  - {fileID: 8300000, guid: 6522a13f0cdd5fb42a8b4901bcf91a64, type: 3}
-  - {fileID: 8300000, guid: 1184dbcc18a3da44ca4c4e62afabeaad, type: 3}
-  - {fileID: 8300000, guid: a0e91f6e25e9ee040807a1e9c2d4b5e8, type: 3}
-  - {fileID: 8300000, guid: 87e408f19cbe7dc45870743288cd0c4e, type: 3}
-  - {fileID: 8300000, guid: 99098f17009fe3f4db2c2324cb3b80fe, type: 3}
-  - {fileID: 8300000, guid: 753f980321ef4f64dabd87f2f00064e7, type: 3}
-  - {fileID: 8300000, guid: 69618db97440ffa40b6ecb8a034ac59b, type: 3}
-  - {fileID: 8300000, guid: 26214c18ce27bec49a19f0ecff31123f, type: 3}
-  - {fileID: 8300000, guid: 492fa647eeb701548bc5365315d45b81, type: 3}
-  - {fileID: 8300000, guid: 25d3f53a518f7ea41aea1a9b6bedf0b7, type: 3}
-  - {fileID: 8300000, guid: eb28524265ba68b449bafe4f7fe4473b, type: 3}
-  - {fileID: 8300000, guid: 055f68c4724ce0d448891f782a5ef5de, type: 3}
-  - {fileID: 0}
-  - {fileID: 8300000, guid: 07d3673ff73ba584d82170c2d59b5cfd, type: 3}
-  - {fileID: 8300000, guid: 0d107f79b2f13f74f9d3d871b0be92df, type: 3}
-  - {fileID: 8300000, guid: 7a800dd38372d7e4fb2ef1a2cd4fb00c, type: 3}
-  - {fileID: 8300000, guid: 3ab45c017e98e064580eb67d96ed8034, type: 3}
-  - {fileID: 8300000, guid: 2f4c79bc0ead5e6409e4891d37ea918d, type: 3}
-  - {fileID: 8300000, guid: 04fcb9d08a71d8d41b676d91b0bcb8d8, type: 3}
-  - {fileID: 8300000, guid: 49bbc835b90408a4d9079e1d76f0a40b, type: 3}
-  - {fileID: 8300000, guid: c82c6b3226c4299498793e7c4a72db08, type: 3}
-  - {fileID: 8300000, guid: 198b4d1e380bdf2479eaf5c1fe11c04c, type: 3}
-  delayBetweenSteps: 0.3

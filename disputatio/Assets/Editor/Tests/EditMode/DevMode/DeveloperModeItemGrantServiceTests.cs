@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -123,5 +124,50 @@ public class DeveloperModeItemGrantServiceTests
         StringAssert.Contains("지급 10", report.ToString());
         StringAssert.Contains("후보 16", report.ToString());
         Assert.IsTrue(report.HasFailures);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        ItemRegistry.ResetCacheForTest();
+    }
+
+    [Test]
+    public void IsGrantableItem_AcceptsBookmarkMirror_FromProductionRegistry()
+    {
+        Item bookmarkMirror = ItemLookup.FindById(17);
+        Assert.IsNotNull(bookmarkMirror);
+
+        Assert.IsTrue(DeveloperModeItemGrantService.IsGrantableItem(bookmarkMirror, out string skipReason));
+        Assert.IsNull(skipReason);
+    }
+
+    [Test]
+    public void IsGrantableItem_StillAcceptsFilterCard()
+    {
+        Item filterCard = ItemLookup.FindById(4);
+        Assert.IsNotNull(filterCard);
+
+        Assert.IsTrue(DeveloperModeItemGrantService.IsGrantableItem(filterCard, out string skipReason));
+        Assert.IsNull(skipReason);
+    }
+
+    [Test]
+    public void CollectGrantableItems_IncludesBookmarkMirrorAndFilterCard()
+    {
+        Item bookmarkMirror = ItemLookup.FindById(17);
+        Item filterCard = ItemLookup.FindById(4);
+        Assert.IsNotNull(bookmarkMirror);
+        Assert.IsNotNull(filterCard);
+
+        var report = new DeveloperModeItemGrantReport();
+        List<Item> result = DeveloperModeItemGrantService.CollectGrantableItems(
+            new[] { bookmarkMirror, filterCard },
+            report);
+
+        Assert.AreEqual(2, result.Count);
+        Assert.IsNotNull(result.FirstOrDefault(item => item.itemName == "BookmarkMirror"));
+        Assert.IsNotNull(result.FirstOrDefault(item => item.itemName == "FilterCard"));
+        Assert.AreEqual(0, report.SkippedInvalidCount);
     }
 }

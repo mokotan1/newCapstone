@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cheshire Panel Log Button Mockups</title>
+  <style>
+    :root {
+      --bg: #211a12;
+      --panel: #eadcc3;
+      --panel-soft: #f8efd9;
+      --line: #9a793f;
+      --ink: #3f2d18;
+      --muted: rgba(63, 45, 24, 0.58);
+      --accent: #8b6b31;
+      --accent-bright: #c7944a;
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(134, 94, 44, 0.22), transparent 34%),
+        var(--bg);
+      font-family: "Malgun Gothic", "Noto Sans KR", Arial, sans-serif;
+      color: var(--ink);
+    }
+
+    .page {
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    .head {
+      margin-bottom: 22px;
+      color: #ead8b7;
+    }
+
+    .head h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      letter-spacing: 0;
+    }
+
+    .head p {
+      margin: 0;
+      color: rgba(234, 216, 183, 0.68);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(480px, 1fr));
+      gap: 24px;
+    }
+
+    .sample {
+      padding: 18px;
+      border: 1px solid rgba(154, 121, 63, 0.32);
+      background: rgba(14, 10, 7, 0.48);
+    }
+
+    .sample h2 {
+      margin: 0 0 5px;
+      color: #ead8b7;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .desc {
+      min-height: 42px;
+      margin: 0 0 14px;
+      color: rgba(234, 216, 183, 0.65);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .stage {
+      height: 620px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(154, 121, 63, 0.22);
+      background:
+        linear-gradient(180deg, rgba(52, 40, 26, 0.16), rgba(12, 9, 6, 0.9)),
+        #15100b;
+    }
+
+    /*
+      Real Parret_Panel reference:
+      - root size: 758 x 1021
+      - BackspaceNameplate: 175 x 71, anchor top-right, anchoredPosition -88,-32
+      This mockup renders the panel at 0.56 scale: 425 x 572.
+    */
+    .panel {
+      width: 425px;
+      height: 572px;
+      position: relative;
+      border: 2px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255, 251, 238, 0.2), rgba(225, 205, 164, 0.18)),
+        var(--panel);
+      box-shadow: 0 18px 34px var(--shadow);
+    }
+
+    .backspace {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 98px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-left: 1px solid rgba(139, 107, 49, 0.35);
+      border-bottom: 1px solid rgba(139, 107, 49, 0.35);
+      background: rgba(248, 239, 217, 0.68);
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .title {
+      position: absolute;
+      left: 26px;
+      top: 22px;
+      font-size: 29px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .portrait {
+      position: absolute;
+      left: 36px;
+      top: 74px;
+      right: 36px;
+      height: 245px;
+      border: 1px solid rgba(154, 121, 63, 0.18);
+      background:
+        radial-gradient(circle at 50% 40%, rgba(139, 107, 49, 0.14), transparent 34%),
+        rgba(255, 252, 241, 0.4);
+    }
+
+    .portrait::before {
+      content: "체셔 대화 / 앵무 영역";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      color: rgba(63, 45, 24, 0.42);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .say-preview {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      bottom: 126px;
+      height: 90px;
+      padding: 14px 18px;
+      border: 1px solid rgba(154, 121, 63, 0.18);
+      background: rgba(255, 252, 241, 0.5);
+      color: rgba(63, 45, 24, 0.74);
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    .input-row {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      bottom: 50px;
+      height: 48px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .input {
+      flex: 1;
+      border: 1px solid rgba(154, 121, 63, 0.28);
+      background: #fbf3e2;
+    }
+
+    .send {
+      width: 72px;
+      display: grid;
+      place-items: center;
+      background: #8b6b31;
+      color: #f6ead0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .hint {
+      position: absolute;
+      left: 36px;
+      bottom: 18px;
+      color: rgba(63, 45, 24, 0.45);
+      font-size: 13px;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .log-icon {
+      width: 24px;
+      height: 22px;
+      position: relative;
+      display: inline-block;
+      flex: 0 0 auto;
+      color: currentColor;
+    }
+
+    .log-icon::before,
+    .log-icon::after,
+    .log-icon span {
+      content: "";
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+
+    .log-icon::before { top: 4px; }
+    .log-icon span { top: 10px; }
+    .log-icon::after { top: 16px; right: 8px; }
+
+    .log-btn {
+      border: 0;
+      letter-spacing: 0;
+    }
+
+    .btn-nameplate {
+      position: absolute;
+      right: 0;
+      top: 48px;
+      width: 118px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 1px solid rgba(139, 107, 49, 0.44);
+      border-right: 0;
+      background: rgba(248, 239, 217, 0.72);
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .btn-nameplate:hover,
+    .btn-nameplate.is-hover {
+      background: rgba(255, 248, 230, 0.92);
+      color: var(--ink);
+      box-shadow: 0 0 0 1px rgba(139, 107, 49, 0.28);
+    }
+
+    .btn-side-tab {
+      position: absolute;
+      right: -2px;
+      top: 124px;
+      width: 64px;
+      height: 132px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 1px solid #967846;
+      border-right: 0;
+      background: linear-gradient(180deg, #ead9b8, #cdb485);
+      color: #4a341c;
+      box-shadow: -4px 5px 10px rgba(0, 0, 0, 0.18);
+      font-size: 19px;
+      font-weight: 800;
+      writing-mode: vertical-rl;
+    }
+
+    .btn-side-tab .log-icon {
+      writing-mode: horizontal-tb;
+      transform: rotate(90deg);
+    }
+
+    .btn-side-tab:hover,
+    .btn-side-tab.is-hover {
+      transform: translateX(-4px);
+      background: linear-gradient(180deg, #f3e4c4, #d8bd8a);
+    }
+
+    .btn-bottom-plate {
+      position: absolute;
+      right: 118px;
+      bottom: 50px;
+      height: 48px;
+      width: 118px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 1px solid rgba(139, 107, 49, 0.5);
+      background: rgba(255, 248, 230, 0.68);
+      color: var(--accent);
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .btn-bottom-plate:hover,
+    .btn-bottom-plate.is-hover {
+      background: rgba(255, 248, 230, 0.95);
+      color: var(--ink);
+    }
+
+    .btn-pill {
+      position: absolute;
+      left: 36px;
+      bottom: 106px;
+      height: 46px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border-radius: 23px;
+      background: linear-gradient(180deg, #d3a04a, #ad7f2f);
+      color: #25180a;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 232, 180, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.28);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .btn-pill:hover,
+    .btn-pill.is-hover {
+      transform: translateY(-2px);
+      background: linear-gradient(180deg, #e6b358, #bd8d33);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 238, 196, 0.72),
+        0 0 14px rgba(199, 149, 59, 0.44),
+        0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .states {
+      margin-top: 14px;
+      display: flex;
+      gap: 16px;
+      padding: 14px;
+      background: rgba(10, 8, 6, 0.55);
+      color: #ead8b7;
+    }
+
+    .state-cell {
+      min-width: 150px;
+      height: 94px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(154, 121, 63, 0.18);
+      background: rgba(238, 224, 200, 0.09);
+    }
+
+    .state-cell .cap {
+      position: absolute;
+      left: 8px;
+      bottom: 6px;
+      color: rgba(234, 216, 183, 0.52);
+      font-size: 11px;
+    }
+
+    .states .log-btn {
+      position: static;
+      transform: none;
+      border-right: 1px solid rgba(139, 107, 49, 0.44);
+    }
+
+    .states .btn-side-tab {
+      writing-mode: horizontal-tb;
+      width: 118px;
+      height: 48px;
+      flex-direction: row;
+      border-right: 1px solid #967846;
+    }
+
+    .states .btn-side-tab .log-icon {
+      transform: none;
+    }
+
+    .notes {
+      margin-top: 12px;
+      color: rgba(234, 216, 183, 0.64);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1060px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="head">
+      <h1>체셔 패널 로그 버튼 견본</h1>
+      <p>실제 <b>Parret_Panel</b> 비율(758 x 1021)과 우상단 <b>BackspaceNameplate</b>(175 x 71)을 기준으로 다시 잡은 배치안입니다.</p>
+    </header>
+
+    <section class="grid">
+      <article class="sample">
+        <h2>A. 우상단 보조 명패</h2>
+        <p class="desc">기존 닫기 명패 바로 아래에 붙이는 가장 안전한 안. 닫기와 같은 계열이라 실제 패널에 자연스럽게 들어갑니다.</p>
+        <div class="stage">
+          <div class="panel">
+            <div class="title">체셔</div>
+            <div class="backspace">닫기 X</div>
+            <button class="log-btn btn-nameplate"><span class="log-icon"><span></span></span>로그</button>
+            <div class="portrait"></div>
+            <div class="say-preview">체셔가 질문에 답하는 영역입니다. 로그 버튼은 닫기 명패 아래 보조 조작으로 보입니다.</div>
+            <div class="input-row"><div class="input"></div><div class="send">전송</div></div>
+            <div class="hint">Enter로 전송</div>
+          </div>
+        </div>
+        <div class="states">
+          <div class="state-cell"><button class="log-btn btn-nameplate"><span class="log-icon"><span></span></span>로그</button><span class="cap">idle</span></div>
+          <div class="state-cell"><button class="log-btn btn-nameplate is-hover"><span class="log-icon"><span></span></span>로그</button><span class="cap">hover</span></div>
+        </div>
+        <p class="notes">추천. Unity에서는 BackspaceNameplate를 복제한 명패 스타일로 만들기 좋습니다. 크기 권장: 210 x 86 원본 스케일 기준.</p>
+      </article>
+
+      <article class="sample">
+        <h2>B. 오른쪽 세로 책갈피</h2>
+        <p class="desc">패널 오른쪽 가장자리에 꽂힌 탭처럼 보이게 하는 안. 기록/책갈피 메타포가 강하고 본문을 덜 침범합니다.</p>
+        <div class="stage">
+          <div class="panel">
+            <div class="title">체셔</div>
+            <div class="backspace">닫기 X</div>
+            <button class="log-btn btn-side-tab"><span class="log-icon"><span></span></span>로그</button>
+            <div class="portrait"></div>
+            <div class="say-preview">체셔가 질문에 답하는 영역입니다. 오른쪽 책갈피가 패널 외곽 조작처럼 보입니다.</div>
+            <div class="input-row"><div class="input"></div><div class="send">전송</div></div>
+            <div class="hint">Enter로 전송</div>
+          </div>
+        </div>
+        <div class="states">
+          <div class="state-cell"><button class="log-btn btn-side-tab"><span class="log-icon"><span></span></span>로그</button><span class="cap">idle</span></div>
+          <div class="state-cell"><button class="log-btn btn-side-tab is-hover"><span class="log-icon"><span></span></span>로그</button><span class="cap">hover</span></div>
+        </div>
+        <p class="notes">분위기 좋음. 단, 패널 밖으로 조금 튀어나오므로 캔버스/마스크에 잘리지 않는지 확인이 필요합니다.</p>
+      </article>
+
+      <article class="sample">
+        <h2>C. 전송 버튼 왼쪽 명패</h2>
+        <p class="desc">입력줄의 조작 버튼 군으로 묶는 안. 기능은 잘 보이지만 전송 버튼과 가까워서 실수 클릭 위험이 있습니다.</p>
+        <div class="stage">
+          <div class="panel">
+            <div class="title">체셔</div>
+            <div class="backspace">닫기 X</div>
+            <div class="portrait"></div>
+            <div class="say-preview">체셔가 질문에 답하는 영역입니다. 로그 버튼은 입력 조작부와 같은 줄에 묶입니다.</div>
+            <button class="log-btn btn-bottom-plate"><span class="log-icon"><span></span></span>로그</button>
+            <div class="input-row"><div class="input"></div><div class="send">전송</div></div>
+            <div class="hint">Enter로 전송</div>
+          </div>
+        </div>
+        <div class="states">
+          <div class="state-cell"><button class="log-btn btn-bottom-plate"><span class="log-icon"><span></span></span>로그</button><span class="cap">idle</span></div>
+          <div class="state-cell"><button class="log-btn btn-bottom-plate is-hover"><span class="log-icon"><span></span></span>로그</button><span class="cap">hover</span></div>
+        </div>
+        <p class="notes">보조안. 전송 버튼과 구분되도록 색 대비를 낮게 유지해야 합니다.</p>
+      </article>
+
+      <article class="sample">
+        <h2>D. 대사 영역 하단 알약</h2>
+        <p class="desc">대화 기록을 “대사/응답 영역의 기능”으로 보여주는 안. 버튼감은 좋지만 대사 영역을 침범합니다.</p>
+        <div class="stage">
+          <div class="panel">
+            <div class="title">체셔</div>
+            <div class="backspace">닫기 X</div>
+            <div class="portrait"></div>
+            <div class="say-preview">체셔가 질문에 답하는 영역입니다. 알약 버튼은 본문 하단에 떠 있습니다.</div>
+            <button class="log-btn btn-pill"><span class="log-icon"><span></span></span>로그 보기</button>
+            <div class="input-row"><div class="input"></div><div class="send">전송</div></div>
+            <div class="hint">Enter로 전송</div>
+          </div>
+        </div>
+        <div class="states">
+          <div class="state-cell"><button class="log-btn btn-pill"><span class="log-icon"><span></span></span>로그 보기</button><span class="cap">idle</span></div>
+          <div class="state-cell"><button class="log-btn btn-pill is-hover"><span class="log-icon"><span></span></span>로그 보기</button><span class="cap">hover</span></div>
+        </div>
+        <p class="notes">가시성은 좋지만 덜 추천. 체셔 응답이 길 때 시각적으로 방해될 수 있습니다.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

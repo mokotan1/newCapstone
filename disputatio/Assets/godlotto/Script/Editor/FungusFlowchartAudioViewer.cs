@@ -7,7 +7,7 @@ using UnityEngine;
 
 public sealed class FungusFlowchartAudioViewer : EditorWindow
 {
-    private const string RuntimeBgmPlayerPrefabPath = "Assets/godlotto/Resources/Audio/BGM Player.prefab";
+    private const string RuntimeSfxPlayerPrefabPath = "Assets/godlotto/Resources/Audio/SFX Player.prefab";
 
     private Flowchart flowchart;
     private int selectedBlockIndex;
@@ -188,8 +188,8 @@ public sealed class FungusFlowchartAudioViewer : EditorWindow
 
     private static AudioClip[] LoadRuntimeSfxList()
     {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RuntimeBgmPlayerPrefabPath);
-        AudioController controller = prefab != null ? prefab.GetComponent<AudioController>() : null;
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RuntimeSfxPlayerPrefabPath);
+        SfxController controller = prefab != null ? prefab.GetComponent<SfxController>() : null;
         return controller != null ? controller.sfxList : null;
     }
 

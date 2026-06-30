@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudyRoom Mirror Sprite Samples</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #161413;
+      --panel: #221d1a;
+      --paper: #c9b68b;
+      --ink: #f4ead6;
+      --muted: #b8a88e;
+      --line: rgba(244, 234, 214, 0.18);
+      --red: #8f352e;
+      --blue: #94b9cc;
+      --silver: #bcc3c3;
+      --gold: #c6a15b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(20, 18, 17, 0.98), rgba(35, 27, 24, 0.96)),
+        #15110f;
+      color: var(--ink);
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .badge {
+      border: 1px solid rgba(198, 161, 91, 0.45);
+      color: #f4d996;
+      padding: 8px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+      background: rgba(198, 161, 91, 0.08);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .sprite-stage {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,0.045) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.045) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.045) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.045) 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+      border: 1px solid rgba(255,255,255,0.09);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .sprite {
+      position: relative;
+      width: 74%;
+      aspect-ratio: 1;
+      filter: drop-shadow(0 12px 12px rgba(0,0,0,0.45));
+    }
+
+    .label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .label h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .mark {
+      color: #1b120b;
+      background: #e4c76f;
+      padding: 3px 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .note {
+      min-height: 64px;
+      font-size: 13px;
+    }
+
+    .spec {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: #c8bca9;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .s1 .glass {
+      position: absolute;
+      inset: 12% 17% 22%;
+      border: 8px solid #413833;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.22), transparent 22%),
+        radial-gradient(circle at 50% 42%, rgba(139, 184, 205, 0.24), transparent 50%),
+        #0a0d10;
+      border-radius: 49% 49% 46% 46%;
+      box-shadow: inset 0 0 0 4px #b8a06a, inset 0 0 18px rgba(147,190,212,0.24);
+    }
+
+    .s1 .handle {
+      position: absolute;
+      left: 43%;
+      top: 70%;
+      width: 14%;
+      height: 27%;
+      background: linear-gradient(90deg, #44362c, #8a6d43, #3a2f29);
+      border: 3px solid #201916;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .s1 .glint,
+    .s2 .glint,
+    .s3 .glint,
+    .s4 .glint,
+    .s5 .glint {
+      position: absolute;
+      width: 48%;
+      height: 8%;
+      left: 25%;
+      top: 30%;
+      transform: rotate(-34deg);
+      background: rgba(241, 251, 255, 0.26);
+    }
+
+    .s2 .glass {
+      position: absolute;
+      inset: 13%;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.18), transparent 18%),
+        radial-gradient(circle at 48% 45%, rgba(99, 144, 165, 0.36), transparent 54%),
+        #08090b;
+      border: 10px solid #aeb6b3;
+      box-shadow: inset 0 0 0 5px #252b2d, 0 0 0 5px #2b2422;
+      transform: rotate(45deg);
+    }
+
+    .s2 .inner {
+      position: absolute;
+      inset: 25%;
+      border: 2px solid rgba(255,255,255,0.18);
+      transform: rotate(45deg);
+    }
+
+    .s3 .glass {
+      position: absolute;
+      inset: 12% 13%;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.2), transparent 24%),
+        radial-gradient(circle at 50% 50%, rgba(143, 53, 46, 0.18), transparent 52%),
+        #0c0b0e;
+      border: 8px solid #38231f;
+      border-radius: 9px;
+      box-shadow: inset 0 0 0 4px #9c7a45, inset 0 0 18px rgba(160, 56, 48, 0.18);
+    }
+
+    .s3 .spine {
+      position: absolute;
+      left: 9%;
+      top: 18%;
+      width: 8%;
+      height: 64%;
+      background: #221512;
+      border-right: 2px solid #ad884c;
+    }
+
+    .s4 .glass {
+      position: absolute;
+      inset: 11%;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.18), transparent 20%),
+        radial-gradient(circle at 52% 45%, rgba(150, 185, 202, 0.25), transparent 51%),
+        #05070a;
+      clip-path: polygon(50% 0, 92% 18%, 100% 58%, 73% 100%, 27% 100%, 0 58%, 8% 18%);
+    }
+
+    .s4 .frame {
+      position: absolute;
+      inset: 5%;
+      background: #a8afae;
+      clip-path: polygon(50% 0, 94% 16%, 100% 59%, 74% 100%, 26% 100%, 0 59%, 6% 16%);
+    }
+
+    .s4 .glass {
+      transform: scale(0.86);
+    }
+
+    .s5 .glass {
+      position: absolute;
+      inset: 14% 18% 24%;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.22), transparent 20%),
+        radial-gradient(circle at 50% 50%, rgba(111, 143, 159, 0.3), transparent 53%),
+        #050609;
+      border: 7px solid #1c1716;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px #7f6843, inset 0 0 0 3px #293236;
+    }
+
+    .s5 .crack {
+      position: absolute;
+      left: 53%;
+      top: 22%;
+      width: 3px;
+      height: 42%;
+      background: rgba(235,245,248,0.38);
+      transform: rotate(18deg);
+      transform-origin: top;
+    }
+
+    .s5 .crack::before,
+    .s5 .crack::after {
+      content: "";
+      position: absolute;
+      top: 45%;
+      width: 24px;
+      height: 3px;
+      background: rgba(235,245,248,0.34);
+    }
+
+    .s5 .crack::before {
+      right: 0;
+      transform: rotate(-36deg);
+    }
+
+    .s5 .crack::after {
+      left: 0;
+      top: 63%;
+      transform: rotate(42deg);
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      header {
+        display: block;
+      }
+
+      .badge {
+        display: inline-block;
+        margin-top: 12px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>서재 7337 거울 스프라이트 견본</h1>
+        <p>새 스프라이트 제작 전 비교용 HTML 목업입니다. 각 견본은 1:1 투명 PNG로 옮기기 쉬운 형태를 기준으로 잡았습니다.</p>
+      </div>
+      <div class="badge">추천: 1번 흑요석 손거울</div>
+    </header>
+
+    <section class="grid" aria-label="거울 스프라이트 후보 5종">
+      <article class="card">
+        <div class="sprite-stage">
+          <div class="sprite s1">
+            <div class="glass"></div>
+            <div class="handle"></div>
+            <div class="glint"></div>
+          </div>
+        </div>
+        <div class="label">
+          <h2>1. 흑요석 손거울</h2>
+          <span class="mark">추천</span>
+        </div>
+        <p class="note">다이어리/서재 분위기와 가장 잘 맞고, 플레이어가 즉시 거울로 인식하기 쉽습니다.</p>
+        <div class="spec">권장 크기: 256x256<br>팔레트: 검정 유리, 낡은 금속, 낮은 푸른 반사</div>
+      </article>
+
+      <article class="card">
+        <div class="sprite-stage">
+          <div class="sprite s2">
+            <div class="glass"></div>
+            <div class="inner"></div>
+            <div class="glint"></div>
+          </div>
+        </div>
+        <div class="label">
+          <h2>2. 마름모 반사판</h2>
+        </div>
+        <p class="note">필터 카드에서 진화한 느낌이 강합니다. 아이템 정체성을 유지하고 싶을 때 좋습니다.</p>
+        <div class="spec">권장 크기: 256x256<br>팔레트: 은색 프레임, 검은 유리, 차가운 반사</div>
+      </article>
+
+      <article class="card">
+        <div class="sprite-stage">
+          <div class="sprite s3">
+            <div class="spine"></div>
+            <div class="glass"></div>
+            <div class="glint"></div>
+          </div>
+        </div>
+        <div class="label">
+          <h2>3. 책갈피 거울</h2>
+        </div>
+        <p class="note">서재의 책/다이어리 맥락이 가장 강합니다. 단, 거울이라는 인지는 약할 수 있습니다.</p>
+        <div class="spec">권장 크기: 256x256<br>팔레트: 가죽 갈색, 금속 테두리, 붉은 그림자</div>
+      </article>
+
+      <article class="card">
+        <div class="sprite-stage">
+          <div class="sprite s4">
+            <div class="frame"></div>
+            <div class="glass"></div>
+            <div class="glint"></div>
+          </div>
+        </div>
+        <div class="label">
+          <h2>4. 성물 파편거울</h2>
+        </div>
+        <p class="note">기묘하고 의식적인 느낌이 강합니다. 호러성은 좋지만 UI 아이템으로는 형태가 살짝 복잡합니다.</p>
+        <div class="spec">권장 크기: 256x256<br>팔레트: 창백한 은색, 심해색 유리, 날카로운 실루엣</div>
+      </article>
+
+      <article class="card">
+        <div class="sprite-stage">
+          <div class="sprite s5">
+            <div class="glass"></div>
+            <div class="crack"></div>
+            <div class="glint"></div>
+          </div>
+        </div>
+        <div class="label">
+          <h2>5. 깨진 원형 거울</h2>
+        </div>
+        <p class="note">불길한 느낌은 제일 강합니다. 다만 균열이 숫자 7337 가독성을 방해하지 않게 약하게 처리해야 합니다.</p>
+        <div class="spec">권장 크기: 256x256<br>팔레트: 어두운 청흑색, 탁한 금속, 미세 균열</div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

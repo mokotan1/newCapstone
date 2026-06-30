@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using Fungus;
+using Godlotto.ModalInput;
 
 public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 {
@@ -41,6 +42,7 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     private ResolutionAudioSettings _resolutionAudio;
     private bool isPanelOpen = false;
+    private Image settingsRaycastBlocker;
 
     public bool IsOpen => isPanelOpen;
 
@@ -58,9 +60,11 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
     void Start()
     {
         _resolutionAudio = new ResolutionAudioSettings(audioMixer);
+        EnsureUiReferences();
         LoadSettings();
         AssignListeners();
-        _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+        if (resolutionDropdown != null)
+            _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
     }
 
     void Update()
@@ -96,17 +100,50 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     private void LoadSettings()
     {
-        bgmSlider.value = _resolutionAudio.GetPersistedBgmLinear();
-        sfxSlider.value = _resolutionAudio.GetPersistedSfxLinear();
-        fullscreenToggle.isOn = _resolutionAudio.GetPersistedFullscreen();
-        _resolutionAudio.ApplyAudioFromLinear(bgmSlider.value, sfxSlider.value);
+        EnsureUiReferences();
+
+        if (bgmSlider != null)
+            bgmSlider.value = _resolutionAudio.GetPersistedBgmLinear();
+        if (sfxSlider != null)
+            sfxSlider.value = _resolutionAudio.GetPersistedSfxLinear();
+        if (fullscreenToggle != null)
+            fullscreenToggle.isOn = _resolutionAudio.GetPersistedFullscreen();
+
+        _resolutionAudio.ApplyAudioFromLinear(
+            bgmSlider != null ? bgmSlider.value : _resolutionAudio.GetPersistedBgmLinear(),
+            sfxSlider != null ? sfxSlider.value : _resolutionAudio.GetPersistedSfxLinear());
     }
 
     private void AssignListeners()
     {
-        bgmSlider.onValueChanged.AddListener(SetBgmVolume);
-        sfxSlider.onValueChanged.AddListener(SetSfxVolume);
-        fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        if (bgmSlider != null)
+        {
+            bgmSlider.onValueChanged.RemoveListener(SetBgmVolume);
+            bgmSlider.onValueChanged.AddListener(SetBgmVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.RemoveListener(SetSfxVolume);
+            sfxSlider.onValueChanged.AddListener(SetSfxVolume);
+        }
+
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.RemoveListener(SetFullscreen);
+            fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        }
+    }
+
+    private void EnsureUiReferences()
+    {
+        if (settingPanel == null)
+            return;
+
+        SettingDisplayControlsFactory.EnsureDisplayControls(
+            settingPanel.transform,
+            ref resolutionDropdown,
+            ref fullscreenToggle);
     }
 
     public void ToggleSettingPanel()
@@ -126,12 +163,23 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
         if (isPanelOpen)
         {
+            EnsureUiReferences();
+            LoadSettings();
+            if (resolutionDropdown != null)
+                _resolutionAudio.InitializeResolutionDropdown(resolutionDropdown);
+            AssignListeners();
             EnsureSettingsCanvasSortsAboveSayDialog();
             SettingPanelWorldInputBlocker.Begin(settingPanel);
+            ModalInputGate.Begin(this, settingPanel, blocksHud: true, blocksWorld: true);
+            // 설정 패널 밖 UI 클릭을 EventSystem 레벨에서 소비하는 투명 차단막(공통 처리).
+            settingsRaycastBlocker = ModalRaycastBlocker.Create(settingPanel.transform);
             Time.timeScale = 0f;
         }
         else
         {
+            ModalInputGate.End(this);
+            ModalRaycastBlocker.Remove(settingsRaycastBlocker);
+            settingsRaycastBlocker = null;
             if (ModalGamePause.ShouldEndWorldInputBlocker())
                 SettingPanelWorldInputBlocker.End();
             Time.timeScale = ModalGamePause.ResolveTimeScaleOnClose();
@@ -309,6 +357,9 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     protected override void OnDestroy()
     {
+        ModalInputGate.End(this);
+        ModalRaycastBlocker.Remove(settingsRaycastBlocker);
+        settingsRaycastBlocker = null;
         SettingPanelWorldInputBlocker.End();
         base.OnDestroy();
     }

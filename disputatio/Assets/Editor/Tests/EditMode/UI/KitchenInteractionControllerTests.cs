@@ -110,6 +110,12 @@ public class KitchenInteractionControllerTests
                 bottleDragged: false);
         }
 
+        if (interactionId == KitchenParretInteractionGate.ParretInteractionId)
+        {
+            AddBooleanVariable(flowchart, FungusVariableKeys.ComeParret, true);
+            puzzleState.SetParretFlagsForTests(comeParret: true, parretClicked: false);
+        }
+
         string executedBlock = null;
         FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
         {
@@ -137,6 +143,77 @@ public class KitchenInteractionControllerTests
         controller.OnInteraction("bottle_drag");
 
         Assert.IsFalse(executed);
+    }
+
+    [Test]
+    public void OnInteraction_Parret_WhenComeParretFalse_DoesNotExecuteBlock()
+    {
+        puzzleState.SetParretFlagsForTests(comeParret: false, parretClicked: false);
+
+        bool executed = false;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, __) =>
+        {
+            executed = true;
+            return true;
+        };
+
+        controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
+
+        Assert.IsFalse(executed);
+    }
+
+    [Test]
+    public void OnInteraction_Parret_WhenAlreadyClicked_DoesNotExecuteBlock()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.ComeParret, true);
+        puzzleState.SetParretFlagsForTests(comeParret: true, parretClicked: true);
+
+        bool executed = false;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, __) =>
+        {
+            executed = true;
+            return true;
+        };
+
+        controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
+
+        Assert.IsFalse(executed);
+    }
+
+    [Test]
+    public void OnInteraction_Parret_WhenEligible_ExecutesOnceAndConsumesClick()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.ComeParret, true);
+        puzzleState.SetParretFlagsForTests(comeParret: true, parretClicked: false);
+
+        var parretCollider = new GameObject("ParretCollider").AddComponent<BoxCollider2D>();
+        SetPrivateField(controller, "worldClicks", new[]
+        {
+            new WorldClickBinding
+            {
+                interactionId = KitchenParretInteractionGate.ParretInteractionId,
+                collider = parretCollider,
+            },
+        });
+
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
+        Assert.AreEqual(KitchenParretInteractionGate.ParretBlockName, executedBlock);
+        Assert.IsTrue(puzzleState.ParretClicked);
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.ParretClicked));
+        Assert.IsFalse(parretCollider.enabled);
+
+        executedBlock = null;
+        controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
+        Assert.IsNull(executedBlock);
+
+        Object.DestroyImmediate(parretCollider.gameObject);
     }
 
     [Test]

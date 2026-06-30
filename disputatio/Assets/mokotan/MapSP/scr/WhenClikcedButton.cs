@@ -111,6 +111,11 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
 
     public void OnOpenMapClick()
     {
+        // 모달 UI(설정·로그·체셔/튜터 패널·책 등)가 열려 HUD 입력을 막는 동안에는
+        // 지도 열기를 무시합니다(패널 뒤 버튼 클릭 방지, fail-safe).
+        if (ModalInputGate.IsBlockingHudInput)
+            return;
+
         if (IsJumpscareBlockingMap())
             return;
 
@@ -151,6 +156,10 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
 
     public void MoveScene(string sceneName)
     {
+        // 지도 위에 다른 모달이 겹쳐 HUD 입력을 막는 경우 이동을 무시합니다(fail-safe).
+        if (ModalInputGate.IsBlockingHudInput && !ModalInputGate.IsAllowed(gameObject))
+            return;
+
         if (MapSceneNavigationGuard.ShouldBlockSceneLoad(SceneManager.GetActiveScene().name, sceneName))
         {
             currentLocationSayDialogNotebook =

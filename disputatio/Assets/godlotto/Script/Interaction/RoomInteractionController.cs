@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Fungus;
+using Godlotto.ModalInput;
 using UnityEngine;
 
 namespace Godlotto.Interaction
@@ -71,18 +72,38 @@ namespace Godlotto.Interaction
                 if (!binding.collider.OverlapPoint(ScreenToWorldOnGameplayPlane(screenPosition)))
                     continue;
 
-                OnInteraction(binding.interactionId);
+                OnInteraction(binding.interactionId, binding.collider.gameObject);
                 return;
             }
         }
 
         protected virtual bool ShouldProcessWorldClickBinding(WorldClickBinding binding, Vector2 screenPosition) => true;
 
+        protected void SetWorldClickColliderEnabled(string interactionId, bool enabled)
+        {
+            if (string.IsNullOrWhiteSpace(interactionId))
+                return;
+
+            for (int i = 0; i < worldClicks.Length; i++)
+            {
+                WorldClickBinding binding = worldClicks[i];
+                if (binding.interactionId != interactionId || binding.collider == null)
+                    continue;
+
+                binding.collider.enabled = enabled;
+                return;
+            }
+        }
+
         /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
         public virtual void OnInteraction(string interactionId)
         {
-            Debug.LogError($"[RoomInteraction] OnInteraction entered: '{interactionId}'");
+            OnInteraction(interactionId, null);
+        }
 
+        /// <summary>UI·드롭존·백스페이스 등에서 호출하는 공통 진입점.</summary>
+        public virtual void OnInteraction(string interactionId, GameObject inputSource)
+        {
             if (string.IsNullOrWhiteSpace(interactionId))
                 return;
 
@@ -92,18 +113,16 @@ namespace Godlotto.Interaction
                 return;
             }
 
-            Debug.LogError($"[RoomInteraction] Route mapped: '{interactionId}' -> '{blockName}'");
+            if (ShouldBlockForModalInput(inputSource))
+            {
+                LogIgnored($"Modal input gate blocked '{interactionId}' -> '{blockName}'.");
+                return;
+            }
 
             if (ShouldUseSceneInteractionGate(interactionId, blockName))
             {
                 if (!SceneInteractionController.TryInteract(interactionId))
                     return;
-
-                Debug.LogError($"[RoomInteraction] SceneInteractionController passed: '{interactionId}'");
-            }
-            else
-            {
-                Debug.LogError($"[RoomInteraction] SceneInteractionController bypassed: '{interactionId}'");
             }
 
             if (!ShouldExecuteInteraction(interactionId, blockName))
@@ -112,14 +131,21 @@ namespace Godlotto.Interaction
                 return;
             }
 
-            Debug.LogError($"[RoomInteraction] ShouldExecuteInteraction passed: '{interactionId}' -> '{blockName}'");
-
             PrepareInteractionExecution(interactionId, blockName);
-
-            Debug.LogError($"[RoomInteraction] ExecuteBlockSafely calling: '{blockName}' for '{interactionId}'");
 
             if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, blockName))
                 LogIgnored($"Failed to execute block '{blockName}' for '{interactionId}'.");
+        }
+
+        protected virtual bool ShouldBlockForModalInput(GameObject inputSource)
+        {
+            if (!ModalInputGate.IsBlockingWorldInput && !ModalInputGate.IsBlockingHudInput)
+                return false;
+
+            if (inputSource != null)
+                return !ModalInputGate.IsAllowed(inputSource);
+
+            return false;
         }
 
         /// <summary>SceneInteractionController(Fungus 대사/메뉴 차단) 적용 여부. UI 드롭 등은 씬별로 우회.</summary>
@@ -180,7 +206,10 @@ namespace Godlotto.Interaction
         protected virtual void ApplyBlockOutcome(Block block, BlockOutcome outcome)
         {
             if (outcome.openPanel != null)
+            {
+                EnsureModalInputScope(outcome.openPanel);
                 outcome.openPanel.SetActive(true);
+            }
 
             if (outcome.resetIsClicked)
                 ResetIsClicked();
@@ -199,6 +228,14 @@ namespace Godlotto.Interaction
                 if (!RequestSceneTransition(outcome.sceneName))
                     DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
             }
+        }
+
+        static void EnsureModalInputScope(GameObject panel)
+        {
+            if (panel == null || panel.GetComponent<ModalInputScope>() != null)
+                return;
+
+            panel.AddComponent<ModalInputScope>();
         }
 
         void ResetIsClicked()

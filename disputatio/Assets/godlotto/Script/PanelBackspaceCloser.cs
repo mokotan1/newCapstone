@@ -66,6 +66,11 @@ public class PanelBackspaceCloser : MonoBehaviour
         return transform.parent != null ? transform.parent.gameObject : null;
     }
 
+    public bool TargetsPanel(GameObject panel)
+    {
+        return panel != null && ResolveTargetPanel() == panel;
+    }
+
     private void ExecuteCloseBlock()
     {
         if (string.IsNullOrWhiteSpace(executeBlockName))

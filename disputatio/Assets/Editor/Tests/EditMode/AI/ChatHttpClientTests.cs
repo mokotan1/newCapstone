@@ -1,9 +1,18 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using Godlotto.Interaction;
 using NUnit.Framework;
 
 [TestFixture]
 public class ChatHttpClientTests
 {
+    [TearDown]
+    public void TearDown()
+    {
+        InteractionInputGate.ResetForTests();
+    }
+
     // ---------------------------------------------------------------
     //  TryNormalizePromptForChatApi
     // ---------------------------------------------------------------
@@ -91,13 +100,36 @@ public class ChatHttpClientTests
     }
 
     [Test]
-    public void ResolveChatClientUserId_InEditor_ReturnsEditorId()
+    public void ResolveChatClientUserId_ReturnsAnonymousStableId()
     {
-#if UNITY_EDITOR
-        Assert.AreEqual("unity-editor", ChatHttpClient.ResolveChatClientUserId());
-#else
-        Assert.Pass("Skipped: not running in editor.");
-#endif
+        ChatHttpClient.ResetAnonymousUserIdForTest();
+
+        string first = ChatHttpClient.ResolveChatClientUserId();
+        string second = ChatHttpClient.ResolveChatClientUserId();
+
+        Assert.IsTrue(first.StartsWith("anon-"));
+        Assert.AreEqual(first, second);
+        Assert.AreEqual(41, first.Length);
+    }
+
+    [Test]
+    public void GetChatApiTokenHeader_EmptyToken_ReturnsFalse()
+    {
+        bool hasHeader = ChatHttpClient.TryGetChatApiTokenHeader("", out string headerName, out string headerValue);
+
+        Assert.IsFalse(hasHeader);
+        Assert.AreEqual("", headerName);
+        Assert.AreEqual("", headerValue);
+    }
+
+    [Test]
+    public void GetChatApiTokenHeader_Token_ReturnsAuthorizationBearer()
+    {
+        bool hasHeader = ChatHttpClient.TryGetChatApiTokenHeader("  secret-token  ", out string headerName, out string headerValue);
+
+        Assert.IsTrue(hasHeader);
+        Assert.AreEqual("Authorization", headerName);
+        Assert.AreEqual("Bearer secret-token", headerValue);
     }
 
     // ---------------------------------------------------------------
@@ -144,6 +176,31 @@ public class ChatHttpClientTests
         Assert.AreEqual(expectedUrl, client.ResolvedServerUrl);
     }
 
+    [Test]
+    public void BaseChatbotRequestInProgress_BlocksAndUnblocksSceneInteractions()
+    {
+        var go = new UnityEngine.GameObject("TestChatbot");
+
+        try
+        {
+            var chatbot = go.AddComponent<TestChatbot>();
+            var callbacks = (IChatHttpCallbacks)chatbot;
+
+            callbacks.IsRequestInProgress = true;
+
+            Assert.IsTrue(InteractionInputGate.IsBlocked);
+            Assert.IsFalse(SceneInteractionController.TryInteract("kitchen_parret"));
+
+            callbacks.IsRequestInProgress = false;
+
+            Assert.IsFalse(InteractionInputGate.IsBlocked);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
     // ---------------------------------------------------------------
     //  Minimal stub for IChatHttpCallbacks (constructor tests only)
     // ---------------------------------------------------------------
@@ -163,6 +220,18 @@ public class ChatHttpClientTests
         public System.Collections.IEnumerator HandleChatbotResponse(
             string responseMessage,
             System.Collections.Generic.List<FunctionCallData> functionCalls)
+        {
+            yield break;
+        }
+    }
+
+    private sealed class TestChatbot : BaseChatbot
+    {
+        protected override string BuildFinalSystemPrompt() => "";
+
+        protected override IEnumerator HandleChatbotResponse(
+            string responseMessage,
+            List<FunctionCallData> functionCalls)
         {
             yield break;
         }

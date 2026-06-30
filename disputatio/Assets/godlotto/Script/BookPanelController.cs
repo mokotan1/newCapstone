@@ -193,6 +193,19 @@ public class BookPanelController : MonoBehaviour
 
     private int currentPageIndex = 0;
     private bool _isTurning = false;
+
+    /// <summary>0-based index of the page currently shown in the puzzle book overlay.</summary>
+    public int CurrentPageIndex => currentPageIndex;
+
+    private int PageCount
+    {
+        get
+        {
+            int visualPages = pages != null ? pages.Length : 0;
+            int textPages = _cookbookSplitPages != null ? _cookbookSplitPages.Length : 0;
+            return Mathf.Max(visualPages, textPages, 1);
+        }
+    }
     private string PREF_KEY;
     private CookbookPagePair[] _cookbookSplitPages;
     private string[] _scrapbookLegacyBodies;
@@ -327,7 +340,7 @@ public class BookPanelController : MonoBehaviour
 
     public void NextPage()
     {
-        if (_isTurning || currentPageIndex >= pages.Length - 1) return;
+        if (_isTurning || currentPageIndex >= PageCount - 1) return;
         int next = currentPageIndex + 1;
         StartCoroutine(TurnPage(next, forward: true));
     }
@@ -395,7 +408,7 @@ public class BookPanelController : MonoBehaviour
 
     private void ShowPageImmediate(int index)
     {
-        index = Mathf.Clamp(index, 0, pages.Length - 1);
+        index = Mathf.Clamp(index, 0, PageCount - 1);
         for (int i = 0; i < pages.Length; i++)
         {
             // 자기 자신이 pages[]에 들어간 단일 페이지 모드면 SetActive 스킵

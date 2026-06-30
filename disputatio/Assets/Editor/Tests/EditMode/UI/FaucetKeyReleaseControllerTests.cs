@@ -23,9 +23,11 @@ public class FaucetKeyReleaseControllerTests
         controller = root.AddComponent<FaucetKeyReleaseController>();
 
         AddBooleanVariable(flowchart, "FaucetClicked", false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
 
         SetPrivateField(controller, "targetFlowchart", flowchart);
         SetPrivateField(controller, "faucetBoolName", "FaucetClicked");
+        SetPrivateField(controller, "bottleDraggedBoolName", FungusVariableKeys.BottleDragged);
         SetPrivateField(controller, "keySpawnBlockName", "addKey");
         SetPrivateField(controller, "delaySeconds", 0f);
     }
@@ -48,10 +50,40 @@ public class FaucetKeyReleaseControllerTests
     }
 
     [Test]
-    public void TryTriggerKeySpawn_WhenFaucetClickedTrue_ExecutesAddKey()
+    public void TryTriggerKeySpawn_WhenFaucetClickedAndBottleDragged_ExecutesAddKey()
     {
         flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
 
+        controller.TryTriggerKeySpawnForTests();
+
+        Assert.AreEqual("addKey", executedBlockName);
+        Assert.IsTrue(controller.HasTriggeredForTests);
+    }
+
+    [Test]
+    public void TryTriggerKeySpawn_WhenBottleNotDragged_DoesNotExecuteAddKey()
+    {
+        flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, false);
+
+        controller.TryTriggerKeySpawnForTests();
+
+        Assert.IsNull(executedBlockName);
+        Assert.IsFalse(controller.HasTriggeredForTests);
+    }
+
+    [Test]
+    public void TryTriggerKeySpawn_WhenFaucetAlreadyClicked_ExecutesAfterBottleDragged()
+    {
+        flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, false);
+
+        controller.TryTriggerKeySpawnForTests();
+        Assert.IsNull(executedBlockName);
+        Assert.IsFalse(controller.HasTriggeredForTests);
+
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
         controller.TryTriggerKeySpawnForTests();
 
         Assert.AreEqual("addKey", executedBlockName);
@@ -65,6 +97,7 @@ public class FaucetKeyReleaseControllerTests
         keyObject.SetActive(false);
         SetPrivateField(controller, "keyObject", keyObject);
         flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
 
         controller.TryTriggerKeySpawnForTests();
 
@@ -83,6 +116,7 @@ public class FaucetKeyReleaseControllerTests
         SetPrivateField(controller, "keyObject", null);
         SetPrivateField(controller, "keyObjectName", "MaidRoomKey");
         flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
 
         controller.TryTriggerKeySpawnForTests();
 
@@ -98,6 +132,7 @@ public class FaucetKeyReleaseControllerTests
     {
         AddBooleanVariable(flowchart, FungusVariableKeys.HaveMaidKey, true);
         flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
 
         LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex(
             @"\[FaucetKeyReleaseController\] addKey will SetActive MaidRoomKey but ItemPickup\.Start may suppress"));
@@ -120,6 +155,7 @@ public class FaucetKeyReleaseControllerTests
         Assert.IsTrue(puzzleState.FaucetClicked);
         Assert.IsTrue(flowchart.GetBooleanVariable("FaucetClicked"));
 
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
         controller.TryTriggerKeySpawnForTests();
         Assert.AreEqual("addKey", executedBlockName);
 

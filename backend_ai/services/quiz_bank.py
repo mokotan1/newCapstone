@@ -30,7 +30,7 @@ class QuizBank:
     @classmethod
     def load(cls, path: Path) -> QuizBank:
         if not path.is_file():
-            logger.warning("Quiz bank CSV not found: %s — using empty bank", path)
+            logger.warning("Quiz bank CSV not found: %s - using empty bank", path)
             return cls({})
 
         rows: dict[str, QuizRow] = {}
@@ -55,14 +55,13 @@ class QuizBank:
         return self._rows.get(question_id.strip())
 
     def format_bank_context_block(self, row: QuizRow) -> str:
-        """Injected into tutor system prompt — question text must match bank; do not reveal answers."""
+        """Injected into tutor system prompt: question text must match bank; do not reveal answers."""
         return (
-            "[문제 은행 — 반드시 준수]\n"
+            "[튜터 퀴즈 출제 컨텍스트]\n"
             f"- question_id: {row.question_id}\n"
-            "- **대사 순서(매 응답 공통)**: (1) 시스템의 [현재 진행 상황]과 **같은 숫자**로 누적 정답 안내 한 줄 "
-            "(예: 「현재 N/5…」) 또는 직전 답에 대한 정오·격려 (2) 짧은 전환 한 마디 (3) **그 다음에만** 아래 질문 문장을 "
-            "**글자·띄어쓰기까지 동일하게** 한 줄로 말합니다. (3)만 단독으로 내거나 질문만 던지면 **금지**입니다.\n"
-            f"- 질문(은행 원문, 변경 금지): {row.question_ko}\n"
-            f"- 참고(출처 요지, 플레이어에게 그대로 읽어 주지 말 것): {row.reference_snippet}\n"
-            "- 정답 후보 목록은 비밀이며 대사에 절대 포함하지 마세요. 정오는 참고 자료·은행 의도에 맞게 판단하세요."
+            f"- 질문 원문(변경 금지): {row.question_ko}\n"
+            f"- 참고 힌트(정답처럼 읽지 말 것): {row.reference_snippet}\n"
+            "- 출제할 때는 질문 원문 한 번만 말합니다.\n"
+            "- 정답, 정답 후보, 채점 기준은 절대 말하지 않습니다.\n"
+            "- 직전 대사에 같은 질문이 이미 있으면 반복하지 말고 짧은 반응 뒤 다음 질문만 말합니다."
         )

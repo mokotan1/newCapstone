@@ -33,10 +33,24 @@ public static class DeveloperModeItemCategoryResolver
 
         if (string.Equals(normalized, "HolyGrail", StringComparison.OrdinalIgnoreCase)
             || string.Equals(normalized, "FilterCard", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "BookmarkMirror", StringComparison.OrdinalIgnoreCase)
             || string.Equals(normalized, "IllustratedBible", StringComparison.OrdinalIgnoreCase))
             return DeveloperModeItemCategory.Quest;
 
         return DeveloperModeItemCategory.Other;
+    }
+
+    public static string GetItemDisplayName(Item item)
+    {
+        if (item == null)
+            return string.Empty;
+
+        string normalized = string.IsNullOrWhiteSpace(item.itemName) ? item.name : item.itemName.Trim();
+
+        if (string.Equals(normalized, "BookmarkMirror", StringComparison.OrdinalIgnoreCase))
+            return "책갈피 거울";
+
+        return normalized;
     }
 
     public static string GetDisplayName(DeveloperModeItemCategory category)
