@@ -9,6 +9,11 @@ from models.requests import ChatRequest
 from models.responses import ChatResponse, FunctionCallResult, SSEEvent
 from providers.base import AIProvider
 from services.answer_grader import grade_user_answer
+from services.hint_rewrite import (
+    HINT_REWRITE_SERVER_INSTRUCTION,
+    apply_hint_rewrite_fallback,
+    build_hint_rewrite_external_document,
+)
 from services.quiz_bank import QuizBank
 from services.tutor_rag_service import TutorRAGService
 from tools.registry import ToolRegistry
@@ -73,6 +78,11 @@ class ChatService:
 
     def _gather_external_documents(self, request: ChatRequest) -> list[tuple[str, str]]:
         docs: list[tuple[str, str]] = []
+        if request.hint_rewrite is not None:
+            docs.append((
+                "hint_rewrite",
+                build_hint_rewrite_external_document(request.hint_rewrite),
+            ))
         if request.rag_profile != "tutor":
             return docs
         if self._app_settings is None:
@@ -98,7 +108,12 @@ class ChatService:
     def _build_messages(self, request: ChatRequest) -> list[dict]:
         mp, ms, mx = self._limits()
         external = self._gather_external_documents(request)
-        tool_inst = self._TOOL_INSTRUCTION if request.use_tools and len(self._registry) > 0 else None
+        server_instructions: list[str] = []
+        if request.use_tools and len(self._registry) > 0:
+            server_instructions.append(self._TOOL_INSTRUCTION)
+        if request.hint_rewrite is not None:
+            server_instructions.append(HINT_REWRITE_SERVER_INSTRUCTION)
+        tool_inst = "\n\n".join(server_instructions) if server_instructions else None
         return build_llm_messages(
             client_system_raw=request.system,
             user_prompt_raw=request.prompt,
@@ -217,5 +232,7 @@ class ChatService:
                 full_text_parts = [event.full_text]
 
         response_text = "".join(full_text_parts) if full_text_parts else (error_text or "")
+        if request.hint_rewrite is not None:
+            response_text = apply_hint_rewrite_fallback(response_text, request.hint_rewrite)
         result = ChatResponse(response=response_text, function_calls=function_calls)
         return self._apply_tutor_quiz_override(request, result)

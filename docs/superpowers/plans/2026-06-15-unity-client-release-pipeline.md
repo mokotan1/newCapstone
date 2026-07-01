@@ -13,10 +13,13 @@
 ## File Structure
 
 - Create: `.github/workflows/unity-client-build.yml`
-  - Builds `disputatio` with GameCI.
+  - Runs Unity EditMode and PlayMode tests with GameCI.
+  - Builds `disputatio` with GameCI after tests pass.
   - Zips the build output.
   - Uploads an Actions artifact.
   - Publishes the zip to GitHub Releases only on `v*` tags.
+- Create: `disputatio/Assets/Tests/PlayMode/ClientPlayModeSmokeTests.cs`
+  - Ensures PlayMode test automation has a minimal, deterministic test.
 - Create: `docs/superpowers/specs/2026-06-15-unity-client-release-pipeline-design.md`
   - Records the approved design and release model.
 
@@ -64,9 +67,55 @@ env:
   ARTIFACT_NAME: The-Unholy-of-Mention-Windows
 
 jobs:
+  unity-tests:
+    name: Unity ${{ matrix.testMode }} tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode:
+          - EditMode
+          - PlayMode
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT_PATH }}/Library
+          key: Library-${{ env.PROJECT_PATH }}-${{ matrix.testMode }}-${{ hashFiles('disputatio/Assets/**', 'disputatio/Packages/**', 'disputatio/ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ env.PROJECT_PATH }}-${{ matrix.testMode }}-
+            Library-${{ env.PROJECT_PATH }}-
+
+      - name: Run Unity ${{ matrix.testMode }} tests
+        id: unity-tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: ${{ matrix.testMode }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Unity ${{ matrix.testMode }} test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity-${{ matrix.testMode }}-Test-Results-${{ github.run_id }}
+          path: ${{ steps.unity-tests.outputs.artifactsPath }}
+          retention-days: 14
+
   build-windows:
     name: Build Windows client
     runs-on: ubuntu-latest
+    needs: unity-tests
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -166,7 +215,7 @@ UNITY_PASSWORD
 
 Run the `Unity Client Build` workflow with `workflow_dispatch`.
 
-Expected: the workflow builds successfully and uploads a `The-Unholy-of-Mention-Windows-*` artifact.
+Expected: the workflow runs EditMode tests, runs PlayMode tests, builds successfully, and uploads a `The-Unholy-of-Mention-Windows-*` artifact.
 
 - [ ] **Step 3: Test a release tag**
 
