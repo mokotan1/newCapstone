@@ -38,6 +38,29 @@ public class SSEEventData
 }
 
 [Serializable]
+public class HintRewritePayload
+{
+    public string hint_id;
+    public string item_id;
+    public string hint_target;
+    public string hint_level;
+    public string base_hint;
+    public List<string> required_terms = new List<string>();
+    public List<string> forbidden_terms = new List<string>();
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string fallback_line;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string narrative_seed;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string interaction_type;
+
+    public bool allow_highlight = true;
+}
+
+[Serializable]
 public class LocalLlamaPayload
 {
     public string prompt;
@@ -56,6 +79,9 @@ public class LocalLlamaPayload
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public string current_question_id;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public HintRewritePayload hint_rewrite;
 }
 
 /// <summary>

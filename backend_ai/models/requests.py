@@ -5,6 +5,24 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
+class HintRewritePayload(BaseModel):
+    """Optional client-provided hint data for server-controlled Cheshire rewrites."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    hint_id: str = Field(..., min_length=1, max_length=128)
+    item_id: str = Field(..., min_length=1, max_length=128)
+    hint_target: str = Field(..., min_length=1, max_length=128)
+    hint_level: str = Field(..., min_length=1, max_length=64)
+    base_hint: str = Field(..., min_length=1, max_length=1000)
+    required_terms: list[str] = Field(default_factory=list, max_length=16)
+    forbidden_terms: list[str] = Field(default_factory=list, max_length=32)
+    fallback_line: str | None = Field(default=None, max_length=1000)
+    narrative_seed: str | None = Field(default=None, max_length=1000)
+    interaction_type: str | None = Field(default=None, max_length=128)
+    allow_highlight: bool = True
+
+
 class ChatRequest(BaseModel):
     """POST /chat 본문. 일부 배포(Gains 등)는 `message`·`user_id`를 요구하므로 호환 필드를 둡니다."""
 
@@ -21,6 +39,7 @@ class ChatRequest(BaseModel):
     rag_query: str | None = Field(None, max_length=4096)
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
+    hint_rewrite: HintRewritePayload | None = None
 
     @model_validator(mode="before")
     @classmethod

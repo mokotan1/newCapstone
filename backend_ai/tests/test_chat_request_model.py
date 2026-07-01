@@ -31,3 +31,43 @@ def test_extra_fields_ignored() -> None:
 def test_empty_prompt_and_message_raises() -> None:
     with pytest.raises(Exception):
         ChatRequest.model_validate({"system": "s", "prompt": "", "message": ""})
+
+
+def test_hint_rewrite_payload_is_accepted() -> None:
+    r = ChatRequest.model_validate(
+        {
+            "prompt": "이 병 어디다 써?",
+            "system": "client scene",
+            "hint_rewrite": {
+                "hint_id": "opaque_bottle_sink_use",
+                "item_id": "opaque_bottle",
+                "hint_target": "kitchen_sink",
+                "hint_level": "direct",
+                "base_hint": "이 병은 주방 싱크대에서 사용할 수 있다.",
+                "required_terms": ["병", "싱크대"],
+                "forbidden_terms": ["열쇠"],
+                "fallback_line": "그 병은 주방 싱크대에서 물을 채워볼 수 있다.",
+            },
+        }
+    )
+
+    assert r.hint_rewrite is not None
+    assert r.hint_rewrite.hint_id == "opaque_bottle_sink_use"
+    assert r.hint_rewrite.required_terms == ["병", "싱크대"]
+    assert r.hint_rewrite.forbidden_terms == ["열쇠"]
+
+
+def test_hint_rewrite_rejects_empty_base_hint() -> None:
+    with pytest.raises(ValueError):
+        ChatRequest.model_validate(
+            {
+                "prompt": "힌트",
+                "hint_rewrite": {
+                    "hint_id": "h",
+                    "item_id": "i",
+                    "hint_target": "t",
+                    "hint_level": "direct",
+                    "base_hint": "",
+                },
+            }
+        )

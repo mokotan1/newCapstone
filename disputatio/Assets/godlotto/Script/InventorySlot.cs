@@ -262,6 +262,28 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
 
 
+            LockPanelMagnifierDropZone lockPanelMagnifierDropZone =
+
+                dropTarget.GetComponent<LockPanelMagnifierDropZone>()
+
+                ?? dropTarget.GetComponentInParent<LockPanelMagnifierDropZone>();
+
+            if (lockPanelMagnifierDropZone != null)
+
+            {
+
+                LogDrag("OnEndDrag handled by UI LockPanelMagnifierDropZone");
+
+                lockPanelMagnifierDropZone.OnDrop(eventData);
+
+                FinishDrag();
+
+                return;
+
+            }
+
+
+
             if (dropTarget.GetComponent<WorldItemDropZone>() != null
 
                 || dropTarget.GetComponentInParent<WorldItemDropZone>() != null)
