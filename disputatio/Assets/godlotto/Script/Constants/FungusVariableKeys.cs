@@ -18,6 +18,7 @@ public static class FungusVariableKeys
     public const string GetFood = "GetFood";
     public const string GetFilterCard = "GetFilterCard";
     public const string GetBookmarkMirror = "GetBookmarkMirror";
+    public const string GetBibleCommentary = "GetBibleCommentary";
     public const string HaveMaidKey = "HaveMaidKey";
     public const string HaveBasementKey = "HaveBasementKey";
     public const string HasBible = "HasBible";

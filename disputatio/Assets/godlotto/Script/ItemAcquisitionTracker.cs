@@ -23,6 +23,7 @@ public static class ItemAcquisitionTracker
         new AcquisitionBoolMapping(FungusVariableKeys.GetFood, 2),
         new AcquisitionBoolMapping(FungusVariableKeys.GetFilterCard, 4),
         new AcquisitionBoolMapping(FungusVariableKeys.GetBookmarkMirror, 17),
+        new AcquisitionBoolMapping(FungusVariableKeys.GetBibleCommentary, 21),
         new AcquisitionBoolMapping(FungusVariableKeys.HaveMaidKey, 8),
         new AcquisitionBoolMapping(FungusVariableKeys.HaveBasementKey, 12),
         new AcquisitionBoolMapping(FungusVariableKeys.HasBible, 19),

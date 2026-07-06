@@ -17,6 +17,7 @@ public class ItemPickupSuppressTests
         var flowchart = flowchartObject.AddComponent<Flowchart>();
         AddIntegerVariable(flowchart, ItemAcquisitionTracker.FungusVariableKey, 0);
         AddBooleanVariable(flowchart, FungusVariableKeys.HaveMaidKey, true);
+        AddBooleanVariable(flowchart, FungusVariableKeys.GetBibleCommentary, false);
 
         testItem = ScriptableObject.CreateInstance<Item>();
         testItem.itemId = 8;
@@ -64,6 +65,23 @@ public class ItemPickupSuppressTests
         InvokeStart(pickupObject.GetComponent<ItemPickup>());
 
         Assert.IsTrue(pickupObject == null, "MaidRoomKey should be destroyed when itemId is already acquired.");
+    }
+
+    [Test]
+    public void PickUpDirect_WhenAddToInventoryFalse_MarksAcquiredOnly()
+    {
+        var flowchart = flowchartObject.GetComponent<Flowchart>();
+        var pickup = pickupObject.GetComponent<ItemPickup>();
+
+        testItem.itemId = 21;
+        testItem.itemName = "BibleCommentary";
+        pickup.fungusVariableName = FungusVariableKeys.GetBibleCommentary;
+        SetPrivateField(pickup, "addToInventory", false);
+
+        pickup.PickUpDirect();
+
+        Assert.IsTrue(ItemAcquisitionTracker.IsAcquired(flowchart, 21));
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.GetBibleCommentary));
     }
 
     static void InvokeStart(ItemPickup pickup)
