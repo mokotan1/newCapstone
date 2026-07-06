@@ -582,9 +582,10 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     {
 
-        if (item != null)
+        if (item == null)
+            return;
 
-            InventoryManager.instance.SelectItem(item);
+        InventoryManager.instance.SelectItem(item);
 
     }
 

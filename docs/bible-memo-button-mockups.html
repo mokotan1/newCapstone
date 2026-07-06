@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>성경 메모 버튼 디자인 견본</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #14100f;
+      --wall: #43382f;
+      --panel: #1d1715;
+      --panel-2: #2a201c;
+      --wood: #6b4730;
+      --wood-dark: #3d261d;
+      --paper: #d6bd91;
+      --paper-dark: #9c7a55;
+      --ink: #241915;
+      --gold: #c7a35a;
+      --gold-soft: #e0c889;
+      --red: #8d2b25;
+      --red-dark: #4a1816;
+      --green: #596857;
+      --line: #241817;
+      --muted: #aa9981;
+      --text: #eadbc2;
+      --shadow: rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(30, 23, 21, 0.55) 0 2px, transparent 2px 54px),
+        linear-gradient(0deg, rgba(30, 23, 21, 0.55) 0 2px, transparent 2px 54px),
+        radial-gradient(circle at 50% 0%, rgba(224, 200, 137, 0.12), transparent 28%),
+        linear-gradient(90deg, #241c19, #120e0d 52%, #271e1a);
+      background-size: 54px 54px, 54px 54px, auto, auto;
+      color: var(--text);
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 52px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(224, 200, 137, 0.18);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      line-height: 1.25;
+      color: #f0dfbd;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      border: 2px solid var(--line);
+      background: #211816;
+      color: var(--gold-soft);
+      padding: 9px 12px;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.32);
+      font-size: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 28px 0 14px;
+      color: #ecd5a4;
+      font-size: 17px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(var(--gold), var(--red));
+      box-shadow: 2px 2px 0 #0c0808;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .actual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .mock {
+      border: 2px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(55, 43, 36, 0.92), rgba(24, 18, 16, 0.98)),
+        var(--panel);
+      box-shadow: 0 14px 0 rgba(0, 0, 0, 0.18), 0 22px 38px var(--shadow);
+      overflow: hidden;
+    }
+
+    .mock-head {
+      min-height: 94px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(224, 200, 137, 0.16);
+    }
+
+    .mock-head h3 {
+      margin: 0 0 6px;
+      color: #f0dfbd;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .mock-head p,
+    .notes p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .preview {
+      min-height: 420px;
+      padding: 22px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(90deg, transparent 0 30%, rgba(35, 25, 23, 0.5) 30% 31%, transparent 31% 65%, rgba(35, 25, 23, 0.46) 65% 66%, transparent 66%),
+        linear-gradient(0deg, #75100b 0 88px, transparent 88px),
+        linear-gradient(90deg, #4b4030, #6f6345 50%, #44392d);
+    }
+
+    .puzzle {
+      position: relative;
+      width: min(430px, 100%);
+      min-height: 330px;
+      border: 4px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(224, 200, 137, 0.07), transparent 18%),
+        linear-gradient(180deg, #30231f, #171110);
+      box-shadow:
+        inset 0 0 0 2px rgba(224, 200, 137, 0.08),
+        10px 14px 0 rgba(0, 0, 0, 0.32);
+      padding: 22px;
+    }
+
+    .actual-panel {
+      position: relative;
+      width: min(460px, 100%);
+      min-height: 280px;
+      border: 0;
+      background: rgba(15, 12, 11, 0.78);
+      box-shadow:
+        1px -1px 0 rgba(237, 209, 158, 0.32),
+        10px 14px 0 rgba(0, 0, 0, 0.32);
+      padding: 28px;
+    }
+
+    .parchment-plate {
+      position: absolute;
+      left: 50%;
+      bottom: 34px;
+      width: min(330px, calc(100% - 52px));
+      min-height: 88px;
+      transform: translateX(-50%);
+      background: rgba(232, 207, 158, 0.96);
+      color: #543a29;
+      box-shadow: 1px -1px 0 rgba(237, 209, 158, 0.32);
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .parchment-plate strong {
+      display: block;
+      color: #21170f;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .actual-title {
+      color: #ead8b7;
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 0 78px 16px 0;
+    }
+
+    .actual-lock-display {
+      width: 220px;
+      height: 48px;
+      border: 2px solid #090706;
+      background: #120d0c;
+      color: #dfc991;
+      display: grid;
+      place-items: center;
+      font-family: Consolas, monospace;
+      font-size: 22px;
+      letter-spacing: 5px;
+    }
+
+    .puzzle-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid rgba(224, 200, 137, 0.16);
+      color: #efd7a9;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .display {
+      height: 52px;
+      margin: 20px 0 16px;
+      border: 3px solid #120c0b;
+      background: #0f0b0a;
+      color: #d9caa8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Consolas, monospace;
+      font-size: 26px;
+      letter-spacing: 6px;
+      box-shadow: inset 0 0 0 2px rgba(224, 200, 137, 0.08);
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 230px;
+    }
+
+    .key {
+      height: 42px;
+      border: 2px solid #17100f;
+      background: linear-gradient(#47362e, #251b18);
+      color: #e8d6b9;
+      display: grid;
+      place-items: center;
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.32);
+      font-weight: 700;
+    }
+
+    .hint-pop {
+      position: absolute;
+      right: 22px;
+      bottom: 22px;
+      width: 158px;
+      border: 3px solid #251715;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 18px, rgba(72, 45, 29, 0.12) 18px 19px),
+        linear-gradient(135deg, #d8bf90, #b99565);
+      color: var(--ink);
+      padding: 12px;
+      box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.28);
+      transform: rotate(-1deg);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hint-pop b {
+      color: var(--red);
+      font-size: 18px;
+    }
+
+    .bible-btn {
+      appearance: none;
+      border: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      image-rendering: pixelated;
+    }
+
+    .book-icon {
+      position: relative;
+      width: 20px;
+      height: 24px;
+      flex: 0 0 auto;
+      background:
+        linear-gradient(90deg, #271817 0 4px, #5b332c 4px 16px, #2a1816 16px 20px);
+      border: 2px solid #1b100f;
+      box-shadow: inset 0 0 0 2px rgba(199, 163, 90, 0.18);
+    }
+
+    .book-icon::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 4px;
+      width: 8px;
+      height: 12px;
+      border: 1px solid var(--gold);
+    }
+
+    .book-icon::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 7px;
+      width: 4px;
+      height: 7px;
+      background:
+        linear-gradient(90deg, transparent 0 1px, #e6d5a8 1px 3px, transparent 3px),
+        linear-gradient(0deg, transparent 0 3px, #e6d5a8 3px 5px, transparent 5px);
+    }
+
+    .variant-a {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      height: 42px;
+      min-width: 118px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 3px solid #1a100f;
+      background: linear-gradient(#3a2924, #211715);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.38);
+      color: #ead8b7;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .variant-a::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(199, 163, 90, 0.34);
+      pointer-events: none;
+    }
+
+    .actual-corner-note {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 64px;
+      height: 64px;
+      border: 0;
+      background: #c79249;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      box-shadow: 1px 1px 0 rgba(237, 209, 158, 0.32);
+    }
+
+    .actual-corner-note::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: 9px;
+      width: 24px;
+      height: 28px;
+      background:
+        linear-gradient(90deg, #261817 0 5px, #63352d 5px 20px, #281817 20px 24px);
+      border: 2px solid #21140f;
+    }
+
+    .actual-corner-note::after {
+      content: "?";
+      position: absolute;
+      left: 18px;
+      top: 11px;
+      color: #f5e5b9;
+      font-weight: 900;
+      font-size: 19px;
+    }
+
+    .actual-bottom-key {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 132px;
+      height: 42px;
+      transform: translateX(-50%);
+      border: 0;
+      background: rgba(13, 11, 10, 0.86);
+      color: #f5e0bd;
+      box-shadow: 1px -1px 0 rgba(237, 209, 158, 0.32);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .actual-side-note {
+      position: absolute;
+      right: -56px;
+      top: 78px;
+      width: 56px;
+      height: 138px;
+      border: 0;
+      background: rgba(232, 207, 158, 0.96);
+      color: #21170f;
+      box-shadow: 1px -1px 0 rgba(237, 209, 158, 0.32);
+      writing-mode: vertical-rl;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .variant-b {
+      position: absolute;
+      right: -4px;
+      top: 76px;
+      width: 54px;
+      height: 92px;
+      padding: 8px 6px;
+      border: 3px solid #1a100f;
+      background: linear-gradient(#caa96d, #8e663e);
+      box-shadow: 5px 6px 0 rgba(0, 0, 0, 0.34);
+      color: #281713;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .variant-b::before {
+      content: "";
+      position: absolute;
+      left: 9px;
+      bottom: 8px;
+      width: 30px;
+      height: 20px;
+      background: var(--red);
+      clip-path: polygon(0 0, 100% 0, 100% 66%, 50% 100%, 0 66%);
+      box-shadow: inset 0 0 0 2px var(--red-dark);
+    }
+
+    .variant-c {
+      position: absolute;
+      left: 22px;
+      bottom: 18px;
+      min-width: 104px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 10px;
+      border: 3px solid #1b100f;
+      background:
+        linear-gradient(90deg, var(--red-dark) 0 8px, transparent 8px),
+        linear-gradient(#d7bd8b, #a88255);
+      color: #281713;
+      box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.34);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .variant-c .book-icon {
+      width: 17px;
+      height: 22px;
+      background:
+        linear-gradient(90deg, #2b1a18 0 4px, #55312c 4px 14px, #2b1a18 14px 17px);
+    }
+
+    .variant-d {
+      position: absolute;
+      right: 20px;
+      top: 132px;
+      width: 46px;
+      height: 46px;
+      border: 3px solid #1b100f;
+      background: radial-gradient(circle, #a83a30 0 36%, #6a201c 37% 68%, #2a1412 69%);
+      box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.38);
+    }
+
+    .variant-d::before {
+      content: "?";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #f1dba8;
+      font-weight: 900;
+      font-size: 24px;
+    }
+
+    .variant-d::after {
+      content: "성경";
+      position: absolute;
+      right: 52px;
+      top: 8px;
+      width: 48px;
+      color: #ead8b7;
+      font-size: 12px;
+      text-align: right;
+      opacity: 0.86;
+    }
+
+    .variant-e {
+      position: absolute;
+      left: 22px;
+      top: 86px;
+      width: 190px;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 2px solid rgba(199, 163, 90, 0.42);
+      background: rgba(0, 0, 0, 0.22);
+      color: #ead8b7;
+      font-size: 12px;
+    }
+
+    .variant-e strong {
+      color: var(--gold-soft);
+      font-size: 13px;
+    }
+
+    .variant-f {
+      position: absolute;
+      right: 22px;
+      top: 86px;
+      width: 74px;
+      height: 74px;
+      border: 3px solid #1b100f;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%),
+        linear-gradient(#2a211d, #140f0e);
+      box-shadow: 5px 6px 0 rgba(0, 0, 0, 0.38);
+      display: grid;
+      place-items: center;
+    }
+
+    .variant-f .book-icon {
+      transform: scale(1.25);
+    }
+
+    .variant-f span {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: 5px;
+      color: #d9caa8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .recommend {
+      outline: 3px solid rgba(199, 163, 90, 0.5);
+      outline-offset: -8px;
+    }
+
+    .notes {
+      margin-top: 18px;
+      border: 2px solid var(--line);
+      background: rgba(0, 0, 0, 0.22);
+      padding: 16px;
+    }
+
+    .notes h2 {
+      margin: 0 0 10px;
+      color: #ecd5a4;
+      font-size: 17px;
+    }
+
+    .notes ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .notes b {
+      color: var(--gold-soft);
+    }
+
+    @media (max-width: 980px) {
+      header,
+      .grid,
+      .actual-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 18px, 1280px);
+        padding-top: 18px;
+      }
+
+      .preview {
+        padding: 12px;
+      }
+
+      .puzzle {
+        min-height: 360px;
+        padding: 16px;
+      }
+
+      .keys {
+        width: 180px;
+      }
+
+      .hint-pop {
+        right: 16px;
+        bottom: 16px;
+        width: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>성경 메모 버튼 디자인 견본</h1>
+        <p class="lead">
+          안주인의 방 비밀번호 패널 안에서, 플레이어가 인벤토리를 다시 열지 않고도 성경 해석본의 핵심 단서를 확인할 수 있게 하는 버튼 후보입니다.
+          모든 후보는 어두운 목재 UI, 금색 픽셀 테두리, 붉은 잉크 메모 톤을 기준으로 맞췄습니다.
+        </p>
+      </div>
+      <div class="badge">Puzzle Panel / Hint Recall</div>
+    </header>
+
+    <h2 class="section-title">버튼 후보</h2>
+    <section class="actual-grid">
+      <article class="mock recommend">
+        <div class="mock-head">
+          <h3>실제 패널형 1. 좌상단 접힌 메모</h3>
+          <p>추천안. 우상단 닫기 버튼과 충돌하지 않도록 왼쪽 위에 둡니다. 기존 접힌 모서리 문법은 유지하되, 성경 메모 호출 전용으로 방향만 반전합니다.</p>
+        </div>
+        <div class="preview">
+          <div class="actual-panel">
+            <h3 class="actual-title" style="margin-left:72px;">안주인의 방 잠금장치</h3>
+            <button class="bible-btn actual-corner-note" aria-label="성경 메모 열기"></button>
+            <div class="actual-lock-display">15 _ _ _ _</div>
+            <div class="parchment-plate">
+              <strong>날짜 입력</strong>
+              달력과 오래된 기록이 맞물려 있다. 필요한 단서는 이미 읽은 문서 안에 있다.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>실제 패널형 2. 하단 키 버튼</h3>
+          <p>InteractionPanel_BottomKey 계열과 맞습니다. 버튼 존재감은 낮지만 기존 “하단 키” 패널 문법과 일관됩니다.</p>
+        </div>
+        <div class="preview">
+          <div class="actual-panel">
+            <h3 class="actual-title">안주인의 방 잠금장치</h3>
+            <div class="actual-lock-display">15 _ _ _ _</div>
+            <button class="bible-btn actual-bottom-key" aria-label="성경 메모 열기">성경 메모</button>
+            <div class="parchment-plate">
+              <strong>날짜 입력</strong>
+              버튼을 누르면 작은 메모 팝업으로 04 / 05만 재확인한다.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>실제 패널형 3. 양피지 사이드 탭</h3>
+          <p>밝은 설명판 색을 그대로 가져온 탭입니다. 의미는 분명하지만 패널 밖으로 튀어나와서 배치 여유가 필요합니다.</p>
+        </div>
+        <div class="preview">
+          <div class="actual-panel">
+            <h3 class="actual-title">안주인의 방 잠금장치</h3>
+            <button class="bible-btn actual-side-note" aria-label="성경 메모 열기">성경 메모</button>
+            <div class="actual-lock-display">15 _ _ _ _</div>
+            <div class="parchment-plate">
+              <strong>날짜 입력</strong>
+              기존 설명판과 같은 색이라 게임 패널 안에 자연스럽게 붙는다.
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <h2 class="section-title">초기 확장 후보</h2>
+    <section class="grid">
+      <article class="mock recommend">
+        <div class="mock-head">
+          <h3>A. 책 아이콘 + “성경 메모” 라벨</h3>
+          <p>가장 추천. 의미가 명확하고 클릭 영역이 충분해서 패널 안에서 찾기 쉽습니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-a" aria-label="성경 메모 열기">
+              <span class="book-icon"></span>
+              성경 메모
+            </button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">성경 해석본<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>B. 오른쪽 책갈피 탭</h3>
+          <p>지도 탭처럼 패널 가장자리에 붙습니다. 공간을 덜 먹지만 처음엔 버튼인지 살짝 덜 명확합니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-b" aria-label="성경 메모 열기">성경 메모</button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">붉은 메모<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>C. 종이 메모 조각 버튼</h3>
+          <p>힌트 성격이 가장 강합니다. 단, 배경 종이 오브젝트와 겹치면 일반 장식처럼 보일 수 있습니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-c" aria-label="성경 메모 열기">
+              <span class="book-icon"></span>
+              메모 확인
+            </button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">월과 일을 나란히<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>D. 붉은 봉인 물음표</h3>
+          <p>아주 작고 눈에 띕니다. 하지만 “성경 해석본”이라는 맥락은 약해서 보조 라벨이 필요합니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-d" aria-label="성경 메모 열기"></button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">성경 주석<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>E. 패널 안쪽 안내 줄</h3>
+          <p>“관련 단서 있음”을 가장 친절하게 보여줍니다. 대신 퍼즐 패널이 약간 설명적으로 보일 수 있습니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-e" aria-label="성경 메모 열기">
+              <span class="book-icon"></span>
+              <span><strong>성경 메모</strong><br>날짜 단서를 다시 본다</span>
+            </button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">2015년 부활절<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="mock">
+        <div class="mock-head">
+          <h3>F. 정사각 아이콘 버튼</h3>
+          <p>모바일/패드 조작에 안정적입니다. 라벨은 작아서 hover tooltip이나 하단 설명과 같이 쓰는 편이 좋습니다.</p>
+        </div>
+        <div class="preview">
+          <div class="puzzle">
+            <div class="puzzle-title">안주인의 방 잠금장치 <span>DATE</span></div>
+            <button class="bible-btn variant-f" aria-label="성경 메모 열기">
+              <span class="book-icon"></span>
+              <span>성경</span>
+            </button>
+            <div class="display">15 _ _ _ _</div>
+            <div class="keys">
+              <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+              <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+              <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+              <div class="key">←</div><div class="key">0</div><div class="key">OK</div>
+            </div>
+            <div class="hint-pop">붉은 잉크<br><b>04 / 05</b></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="notes">
+      <h2>추천안</h2>
+      <p>
+        실제 구현은 <b>실제 패널형 1. 좌상단 접힌 메모</b>를 추천합니다.
+        우상단은 패널 닫기 버튼 자리로 남겨두고, 성경 메모는 좌상단 접힌 모서리로 분리하는 편이 조작 충돌이 없습니다.
+      </p>
+      <ul>
+        <li>버튼 위치: 패널 왼쪽 위. 우상단 닫기 버튼과 역할이 겹치지 않고, 보조 단서 버튼으로 분리됩니다.</li>
+        <li>활성 조건: 성경 해석본 획득 후 표시. 획득 전에는 숨기거나 비활성으로 두지 않는 편이 깔끔합니다.</li>
+        <li>클릭 결과: 전체 책 패널이 아니라 작은 메모 팝업으로 “2015년 부활절 = 04 / 05”만 보여주는 것이 반복 확인 UX에 좋습니다.</li>
+        <li>시각 톤: 어두운 반투명 패널, 밝은 양피지 판, 금색 좌상단 접힌 모서리, 작은 책 아이콘. 실제 Backspace/InteractionPanel 계열과 맞춥니다.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

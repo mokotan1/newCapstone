@@ -7,11 +7,16 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
     [Header("아이템 데이터")]
     public Item item;
 
+    [Header("Inventory")]
+    [SerializeField] private bool addToInventory = true;
+
     [Header("Fungus 연동 (선택사항)")]
     [Tooltip("비우면 FlowchartLocator(Variablemanager)를 사용합니다.")]
     [SerializeField] private Flowchart targetFlowchart;
     public string fungusVariableName;
     public string executeBlockName;
+
+    private bool hasPickedUp;
 
     private void Start()
     {
@@ -50,6 +55,11 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
         PickUp();
     }
 
+    private void OnMouseDown()
+    {
+        PickUp();
+    }
+
     [ContextMenu("PickUp (Manual Test)")]
     public void PickUpDirect()
     {
@@ -58,6 +68,11 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
 
     private void PickUp()
     {
+        if (hasPickedUp)
+            return;
+
+        hasPickedUp = true;
+
         Flowchart fc = FlowchartLocator.Resolve(targetFlowchart);
         if (fc != null)
         {
@@ -74,7 +89,15 @@ public class ItemPickup : MonoBehaviour, IPointerClickHandler
             }
         }
 
-        if (InventoryManager.instance != null && item != null)
+        if (item != null && !addToInventory)
+        {
+            if (fc != null)
+                ItemAcquisitionTracker.MarkAcquired(fc, item);
+
+            BibleCommentaryPanelHintRuntime.RefreshAll();
+            GameLog.Log($"[ItemPickup] {item.name} acquisition recorded without adding to inventory.");
+        }
+        else if (InventoryManager.instance != null && item != null)
         {
             InventoryManager.instance.AddItem(item);
             GameLog.Log($"[ItemPickup] {item.name} 아이템을 인벤토리에 추가했습니다.");
