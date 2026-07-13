@@ -71,3 +71,22 @@ def test_hint_rewrite_rejects_empty_base_hint() -> None:
                 },
             }
         )
+
+
+def test_chat_request_accepts_locale_en() -> None:
+    req = ChatRequest(prompt="hi", locale="en-US")
+    assert req.locale == "en"
+
+
+def test_chat_request_omitted_locale_defaults_ko() -> None:
+    req = ChatRequest(prompt="hi")
+    assert req.locale == "ko"
+
+
+@pytest.mark.parametrize(
+    "raw",
+    ["JA", "JP", "ja-JP", "Japanese", "japanese"],
+)
+def test_chat_request_japanese_aliases_normalize_to_ja(raw: str) -> None:
+    req = ChatRequest(prompt="hi", locale=raw)
+    assert req.locale == "ja"

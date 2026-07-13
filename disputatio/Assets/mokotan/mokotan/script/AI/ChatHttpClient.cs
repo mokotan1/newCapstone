@@ -71,6 +71,9 @@ public class LocalLlamaPayload
     /// <summary>클라이언트 식별(선택 로그용). Gains 등에서 필수인 경우가 있음.</summary>
     public string user_id;
 
+    /// <summary>Canonical player locale (ko|ja|en). Mirrors CheshireLocaleResolver.</summary>
+    public string locale;
+
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public string rag_profile;
 
@@ -198,10 +201,13 @@ public sealed class ChatHttpClient
         if (_host.IsRequestInProgress) yield break;
         _host.IsRequestInProgress = true;
 
+        // One locale snapshot for player-facing errors and the outbound payload.
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+
         if (!TryNormalizePromptForChatApi(userMessage, out string promptForApi))
         {
             _host.IsRequestInProgress = false;
-            _host.SayLine("내용을 입력해 주세요.", null);
+            _host.SayLine(CheshireUiStrings.EmptyInputPlease(locale), null);
             yield break;
         }
 
@@ -217,7 +223,8 @@ public sealed class ChatHttpClient
             message = promptForApi,
             system = finalSystemPrompt,
             use_tools = useTools,
-            user_id = ResolveChatClientUserId()
+            user_id = ResolveChatClientUserId(),
+            locale = locale,
         };
         _host.AugmentChatPayload(payload, promptForApi);
         string payloadJson = JsonConvert.SerializeObject(payload);
@@ -247,7 +254,7 @@ public sealed class ChatHttpClient
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                chatbotResponse = "연결 오류: " + request.error;
+                chatbotResponse = CheshireUiStrings.ConnectionErrorPrefix(locale) + request.error;
             }
             else
             {
@@ -282,10 +289,13 @@ public sealed class ChatHttpClient
         if (_host.IsRequestInProgress) yield break;
         _host.IsRequestInProgress = true;
 
+        // One locale snapshot for player-facing errors and the outbound payload.
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+
         if (!TryNormalizePromptForChatApi(userMessage, out string promptForApi))
         {
             _host.IsRequestInProgress = false;
-            _host.SayLine("내용을 입력해 주세요.", null);
+            _host.SayLine(CheshireUiStrings.EmptyInputPlease(locale), null);
             yield break;
         }
 
@@ -301,7 +311,8 @@ public sealed class ChatHttpClient
             message = promptForApi,
             system = finalSystemPrompt,
             use_tools = useTools,
-            user_id = ResolveChatClientUserId()
+            user_id = ResolveChatClientUserId(),
+            locale = locale,
         };
         _host.AugmentChatPayload(payload, promptForApi);
         string payloadJson = JsonConvert.SerializeObject(payload);

@@ -1,9 +1,14 @@
+using System.Text.RegularExpressions;
 using Fungus;
 using NUnit.Framework;
 using UnityEngine;
 
 public class ItemAcquisitionTrackerTests
 {
+    private static readonly Regex Hangul = new Regex(
+        @"[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7A3]",
+        RegexOptions.Compiled);
+
     private GameObject flowchartObject;
     private Flowchart flowchart;
 
@@ -41,6 +46,39 @@ public class ItemAcquisitionTrackerTests
 
         Assert.IsTrue(ItemAcquisitionTracker.IsAcquired(flowchart, itemId));
         Assert.IsTrue(flowchart.GetBooleanVariable(boolKey));
+
+        Object.DestroyImmediate(item);
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void BuildPromptSection_EmptyMask_NonKorean_HasNoHangul(string locale)
+    {
+        string section = ItemAcquisitionTracker.BuildPromptSection(flowchart, locale);
+        Assert.IsFalse(Hangul.IsMatch(section), section);
+        Assert.IsFalse(section.Contains("[진행]"), section);
+    }
+
+    [Test]
+    public void BuildPromptSection_EmptyMask_Korean_KeepsProgressLabel()
+    {
+        string section = ItemAcquisitionTracker.BuildPromptSection(
+            flowchart, CheshireLocaleResolver.Korean);
+        StringAssert.Contains("[진행]", section);
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void BuildPromptSection_WithItem_NonKorean_HasNoHangulChrome(string locale)
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.GetBottle, false);
+        Item item = CreateItem(1, "Bottle");
+        ItemAcquisitionTracker.MarkAcquired(flowchart, item);
+
+        string section = ItemAcquisitionTracker.BuildPromptSection(flowchart, locale);
+        Assert.IsFalse(Hangul.IsMatch(section), section);
+        StringAssert.Contains("Bottle", section);
+        Assert.IsFalse(section.Contains("[진행 안내]"), section);
 
         Object.DestroyImmediate(item);
     }

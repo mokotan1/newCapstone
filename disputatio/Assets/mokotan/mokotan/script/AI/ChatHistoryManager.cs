@@ -8,7 +8,12 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public sealed class ChatHistoryManager
 {
-    private const string ChesterVoiceCommonResource = "ChesterVoiceCommon";
+    private const string BaseSystemPromptKey = "BaseSystem";
+    private const string ChesterVoiceCommonPromptKey = "ChesterVoiceCommon";
+
+    /// <summary>
+    /// Legacy fallback when <see cref="CheshirePromptCatalog"/> has no Korean BaseSystem asset yet.
+    /// </summary>
     private const string DefaultSystemMessage =
         "당신은 저택의 앵무새 체셔입니다. 방별 지침과 공통 말투 규칙(시스템 끝단)을 모두 따릅니다.";
 
@@ -26,10 +31,15 @@ public sealed class ChatHistoryManager
     public void Initialize()
     {
         _history.Clear();
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        string content = CheshirePromptCatalog.Load(BaseSystemPromptKey, locale);
+        if (string.IsNullOrEmpty(content))
+            content = DefaultSystemMessage;
+
         _history.Add(new OpenAIMessage
         {
             role = "system",
-            content = DefaultSystemMessage
+            content = content
         });
     }
 
@@ -39,22 +49,28 @@ public sealed class ChatHistoryManager
     }
 
     /// <summary>
-    /// 모든 /chat·/chat/stream 요청에 공통으로 붙는 말투 블록(Resources/ChesterVoiceCommon.txt).
+    /// 모든 /chat·/chat/stream 요청에 공통으로 붙는 말투 블록
+    /// (<c>CheshirePrompts/{locale}/ChesterVoiceCommon</c>).
     /// </summary>
     public string ComposeSystemPromptWithCommonRules(string roomSpecificPrompt)
+        => ComposeSystemPromptWithCommonRules(
+            roomSpecificPrompt,
+            CheshireLocaleResolver.ResolveCurrentLocale());
+
+    public string ComposeSystemPromptWithCommonRules(string roomSpecificPrompt, string locale)
     {
         if (!_appendCommonVoice || string.IsNullOrEmpty(roomSpecificPrompt))
             return roomSpecificPrompt;
 
-        TextAsset common = Resources.Load<TextAsset>(ChesterVoiceCommonResource);
-        if (common == null)
+        string common = CheshirePromptCatalog.Load(ChesterVoiceCommonPromptKey, locale);
+        if (string.IsNullOrEmpty(common))
         {
             GameLog.LogWarning(
-                $"[ChatHistoryManager] Resources/{ChesterVoiceCommonResource}.txt 없음 — 공통 말투 생략");
+                $"[ChatHistoryManager] catalog missing '{ChesterVoiceCommonPromptKey}' ({locale}) — 공통 말투 생략");
             return roomSpecificPrompt;
         }
 
-        return roomSpecificPrompt + "\n\n" + common.text;
+        return roomSpecificPrompt + "\n\n" + common;
     }
 
     /// <summary>
@@ -63,9 +79,18 @@ public sealed class ChatHistoryManager
     /// (via the virtual <c>BuildHeuristicSignalInput</c> on <see cref="BaseChatbot"/>).
     /// </summary>
     public string ComposeSystemPromptWithHeuristics(string basePrompt, HeuristicSignalInput signal)
+        => ComposeSystemPromptWithHeuristics(
+            basePrompt,
+            signal,
+            CheshireLocaleResolver.ResolveCurrentLocale());
+
+    public string ComposeSystemPromptWithHeuristics(
+        string basePrompt,
+        HeuristicSignalInput signal,
+        string locale)
     {
         signal = SceneRevisitTracker.Instance.FillRevisitSignals(
             signal, SceneManager.GetActiveScene().name);
-        return PromptInfoBudgetComposer.Compose(basePrompt, signal);
+        return PromptInfoBudgetComposer.Compose(basePrompt, signal, locale);
     }
 }

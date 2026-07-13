@@ -14,7 +14,10 @@ public class TutorQuizBankEditorWindow : EditorWindow
     private const string MenuPath = "Di Tools/Tutor Quiz Bank";
     private const string PrefsCsvPathKey = "TutorQuizBankEditor.CsvAbsolutePath";
     private const string HeaderLine =
-        "question_id,question_ko,acceptable_answers,reference_snippet,difficulty,tags";
+        "question_id,question_ko,question_ja,question_en," +
+        "acceptable_answers_ko,acceptable_answers_ja,acceptable_answers_en," +
+        "reference_snippet_ko,reference_snippet_ja,reference_snippet_en," +
+        "difficulty,tags";
 
     private string _csvAbsolutePath = "";
     private string _orderFileRelative = "Assets/Resources/TutorQuestionOrder.txt";
@@ -32,8 +35,14 @@ public class TutorQuizBankEditorWindow : EditorWindow
     {
         public string question_id = "";
         public string question_ko = "";
-        public string acceptable_answers = "";
-        public string reference_snippet = "";
+        public string question_ja = "";
+        public string question_en = "";
+        public string acceptable_answers_ko = "";
+        public string acceptable_answers_ja = "";
+        public string acceptable_answers_en = "";
+        public string reference_snippet_ko = "";
+        public string reference_snippet_ja = "";
+        public string reference_snippet_en = "";
         public string difficulty = "";
         public string tags = "";
     }
@@ -74,7 +83,8 @@ public class TutorQuizBankEditorWindow : EditorWindow
     {
         EditorGUILayout.LabelField("튜터 룸 문제 은행", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "CSV는 백엔드 RAG·채점에 사용됩니다. 저장 후 필요 시 backend_ai에서 validate / 인덱스 빌드를 실행하세요.",
+            "CSV는 백엔드 RAG·채점에 사용됩니다. JA/EN이 비어 있으면 서버가 KO로 폴백합니다. " +
+            "저장 후 필요 시 backend_ai에서 validate / 인덱스 빌드를 실행하세요.",
             MessageType.None);
 
         EditorGUILayout.Space(4);
@@ -144,9 +154,15 @@ public class TutorQuizBankEditorWindow : EditorWindow
             EditorGUILayout.EndHorizontal();
 
             row.question_id = EditorGUILayout.TextField("question_id", row.question_id);
-            row.question_ko = EditorGUILayout.TextField("question_ko (질문)", row.question_ko);
-            row.acceptable_answers = EditorGUILayout.TextField("acceptable_answers (|구분)", row.acceptable_answers);
-            row.reference_snippet = EditorGUILayout.TextField("reference_snippet", row.reference_snippet);
+            row.question_ko = EditorGUILayout.TextField("question_ko", row.question_ko);
+            row.question_ja = EditorGUILayout.TextField("question_ja (선택)", row.question_ja);
+            row.question_en = EditorGUILayout.TextField("question_en (선택)", row.question_en);
+            row.acceptable_answers_ko = EditorGUILayout.TextField("acceptable_answers_ko (|)", row.acceptable_answers_ko);
+            row.acceptable_answers_ja = EditorGUILayout.TextField("acceptable_answers_ja (선택)", row.acceptable_answers_ja);
+            row.acceptable_answers_en = EditorGUILayout.TextField("acceptable_answers_en (선택)", row.acceptable_answers_en);
+            row.reference_snippet_ko = EditorGUILayout.TextField("reference_snippet_ko", row.reference_snippet_ko);
+            row.reference_snippet_ja = EditorGUILayout.TextField("reference_snippet_ja (선택)", row.reference_snippet_ja);
+            row.reference_snippet_en = EditorGUILayout.TextField("reference_snippet_en (선택)", row.reference_snippet_en);
             row.difficulty = EditorGUILayout.TextField("difficulty (선택)", row.difficulty);
             row.tags = EditorGUILayout.TextField("tags (선택)", row.tags);
             EditorGUILayout.EndVertical();
@@ -276,14 +292,24 @@ public class TutorQuizBankEditorWindow : EditorWindow
 
             var header = table[0];
             int idxId = IndexOfHeader(header, "question_id");
-            int idxQ = IndexOfHeader(header, "question_ko");
-            int idxA = IndexOfHeader(header, "acceptable_answers");
-            int idxR = IndexOfHeader(header, "reference_snippet");
+            int idxQKo = IndexOfHeader(header, "question_ko");
+            int idxQJa = IndexOfHeader(header, "question_ja");
+            int idxQEn = IndexOfHeader(header, "question_en");
+            int idxAKo = FirstHeaderIndex(header, "acceptable_answers_ko", "acceptable_answers");
+            int idxAJa = IndexOfHeader(header, "acceptable_answers_ja");
+            int idxAEn = IndexOfHeader(header, "acceptable_answers_en");
+            int idxRKo = FirstHeaderIndex(header, "reference_snippet_ko", "reference_snippet");
+            int idxRJa = IndexOfHeader(header, "reference_snippet_ja");
+            int idxREn = IndexOfHeader(header, "reference_snippet_en");
             int idxD = IndexOfHeader(header, "difficulty");
             int idxT = IndexOfHeader(header, "tags");
-            if (idxId < 0 || idxQ < 0 || idxA < 0 || idxR < 0)
+            if (idxId < 0 || idxQKo < 0 || idxAKo < 0 || idxRKo < 0)
             {
-                SetStatus("CSV 헤더에 필수 열이 없습니다: question_id, question_ko, acceptable_answers, reference_snippet", MessageType.Error);
+                SetStatus(
+                    "CSV 헤더에 필수 열이 없습니다: question_id, question_ko, " +
+                    "acceptable_answers_ko (또는 acceptable_answers), " +
+                    "reference_snippet_ko (또는 reference_snippet)",
+                    MessageType.Error);
                 return;
             }
 
@@ -296,9 +322,15 @@ public class TutorQuizBankEditorWindow : EditorWindow
                     new QuizBankRow
                     {
                         question_id = GetCell(line, idxId),
-                        question_ko = GetCell(line, idxQ),
-                        acceptable_answers = GetCell(line, idxA),
-                        reference_snippet = GetCell(line, idxR),
+                        question_ko = GetCell(line, idxQKo),
+                        question_ja = GetCell(line, idxQJa),
+                        question_en = GetCell(line, idxQEn),
+                        acceptable_answers_ko = GetCell(line, idxAKo),
+                        acceptable_answers_ja = GetCell(line, idxAJa),
+                        acceptable_answers_en = GetCell(line, idxAEn),
+                        reference_snippet_ko = GetCell(line, idxRKo),
+                        reference_snippet_ja = GetCell(line, idxRJa),
+                        reference_snippet_en = GetCell(line, idxREn),
                         difficulty = idxD >= 0 ? GetCell(line, idxD) : "",
                         tags = idxT >= 0 ? GetCell(line, idxT) : "",
                     });
@@ -318,6 +350,17 @@ public class TutorQuizBankEditorWindow : EditorWindow
         {
             if (string.Equals(header[i].Trim(), name, StringComparison.OrdinalIgnoreCase))
                 return i;
+        }
+        return -1;
+    }
+
+    private static int FirstHeaderIndex(List<string> header, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            int idx = IndexOfHeader(header, name);
+            if (idx >= 0)
+                return idx;
         }
         return -1;
     }
@@ -379,8 +422,14 @@ public class TutorQuizBankEditorWindow : EditorWindow
                         ",",
                         CsvEscape(row.question_id.Trim()),
                         CsvEscape(row.question_ko.Trim()),
-                        CsvEscape(row.acceptable_answers.Trim()),
-                        CsvEscape(row.reference_snippet.Trim()),
+                        CsvEscape(row.question_ja.Trim()),
+                        CsvEscape(row.question_en.Trim()),
+                        CsvEscape(row.acceptable_answers_ko.Trim()),
+                        CsvEscape(row.acceptable_answers_ja.Trim()),
+                        CsvEscape(row.acceptable_answers_en.Trim()),
+                        CsvEscape(row.reference_snippet_ko.Trim()),
+                        CsvEscape(row.reference_snippet_ja.Trim()),
+                        CsvEscape(row.reference_snippet_en.Trim()),
                         CsvEscape(row.difficulty.Trim()),
                         CsvEscape(row.tags.Trim())));
             }
@@ -417,14 +466,14 @@ public class TutorQuizBankEditorWindow : EditorWindow
                 err = $"행 {id}: question_ko가 비어 있습니다.";
                 return false;
             }
-            if (string.IsNullOrWhiteSpace(row.acceptable_answers))
+            if (string.IsNullOrWhiteSpace(row.acceptable_answers_ko))
             {
-                err = $"행 {id}: acceptable_answers가 비어 있습니다.";
+                err = $"행 {id}: acceptable_answers_ko가 비어 있습니다.";
                 return false;
             }
-            if (string.IsNullOrWhiteSpace(row.reference_snippet))
+            if (string.IsNullOrWhiteSpace(row.reference_snippet_ko))
             {
-                err = $"행 {id}: reference_snippet가 비어 있습니다.";
+                err = $"행 {id}: reference_snippet_ko가 비어 있습니다.";
                 return false;
             }
         }

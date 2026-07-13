@@ -16,6 +16,15 @@ namespace Fungus
         [Header("Localization")]
         [SerializeField] private TextAsset dialogueLocalizationCsv;
         [SerializeField] private TextAsset speakerLocalizationCsv;
+
+        [Tooltip(
+            "When false (default), language comes from CheshireLocaleResolver "
+            + "(Fungus SetLanguage / Localization). When true, uses Language Code below.")]
+        [SerializeField] private bool useInspectorLanguageOverride;
+
+        [Tooltip(
+            "Inspector override only. Game authority is Fungus SetLanguage / CheshireLocaleResolver "
+            + "unless Use Inspector Language Override is enabled.")]
         [SerializeField] private string languageCode = "ko";
 
         [Header("Dialogue")]
@@ -33,16 +42,33 @@ namespace Fungus
             StartCoroutine(PlayLines(lines));
         }
 
+        /// <summary>
+        /// Resolves CSV language: CheshireLocaleResolver by default; optional Inspector override.
+        /// </summary>
+        public static string ResolveLanguageCode(bool useInspectorLanguageOverride, string inspectorLanguageCode)
+        {
+            if (useInspectorLanguageOverride)
+                return CheshireLocaleResolver.NormalizeLocale(inspectorLanguageCode);
+
+            return CheshireLocaleResolver.ResolveCurrentLocale();
+        }
+
+        public string ResolveLanguageCode()
+        {
+            return ResolveLanguageCode(useInspectorLanguageOverride, languageCode);
+        }
+
         public ScenarioTalkLine[] BuildLines()
         {
+            string resolvedLanguage = ResolveLanguageCode();
             ScenarioScript script = ScenarioScript.FromJson(scenarioJson != null ? scenarioJson.text : "");
             ScenarioLocalizationTable dialogue = ScenarioLocalizationTable.FromCsv(
                 dialogueLocalizationCsv != null ? dialogueLocalizationCsv.text : "",
-                languageCode,
+                resolvedLanguage,
                 "line_id");
             ScenarioLocalizationTable speakers = ScenarioLocalizationTable.FromCsv(
                 speakerLocalizationCsv != null ? speakerLocalizationCsv.text : "",
-                languageCode,
+                resolvedLanguage,
                 "speaker_id");
 
             return ScenarioBlockResolver.BuildTalkLines(script, blockId, dialogue, speakers);
@@ -89,9 +115,10 @@ namespace Fungus
 
         public override string GetSummary()
         {
+            string lang = ResolveLanguageCode();
             return string.IsNullOrWhiteSpace(blockId)
                 ? "Error: No scenario block id"
-                : $"{blockId} ({languageCode})";
+                : $"{blockId} ({lang})";
         }
 
         public override Color GetButtonColor()

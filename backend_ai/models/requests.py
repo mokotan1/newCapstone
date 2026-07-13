@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class HintRewritePayload(BaseModel):
@@ -40,6 +40,16 @@ class ChatRequest(BaseModel):
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
     hint_rewrite: HintRewritePayload | None = None
+    #: Canonical player locale (``ko``|``ja``|``en``). Aliases normalized via ``normalize_locale``.
+    locale: str = "ko"
+
+    @field_validator("locale", mode="before")
+    @classmethod
+    def _normalize_locale(cls, v: Any) -> str:
+        # Lazy import: services.__init__ pulls ChatService → ChatRequest (cycle).
+        from services.locale_support import normalize_locale
+
+        return normalize_locale(v)
 
     @model_validator(mode="before")
     @classmethod
@@ -65,6 +75,15 @@ class TutorGradeRequest(BaseModel):
     user_answer: str = Field(default="", max_length=4000)
     correct_count_before: int = Field(default=0, ge=0, le=10_000)
     quiz_target: int = Field(default=5, ge=1, le=50)
+    #: Canonical player locale (``ko``|``ja``|``en``). Aliases normalized via ``normalize_locale``.
+    locale: str = "ko"
+
+    @field_validator("locale", mode="before")
+    @classmethod
+    def _normalize_locale(cls, v: Any) -> str:
+        from services.locale_support import normalize_locale
+
+        return normalize_locale(v)
 
 
 # --- Telemetry (play-log ingestion) ----------------------------------------

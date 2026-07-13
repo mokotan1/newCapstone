@@ -20,15 +20,18 @@ def build_llm_messages(
     max_prompt_chars: int,
     max_client_system_chars: int,
     max_external_doc_chars: int,
+    server_response_language_instruction: str | None = None,
 ) -> list[dict[str, str]]:
     """
     Build chat messages with a single trusted system message and enveloped untrusted content.
 
-    - Trusted system: injection meta (+ optional server tool rules only).
+    - Trusted system: injection meta (+ optional response-language / tool rules).
     - Client system / persona: <scene_config> in the user envelope (never a second raw system).
     - RAG / bank text: <external_document>.
     """
     trusted_system_parts: list[str] = [INJECTION_META_KO]
+    if server_response_language_instruction:
+        trusted_system_parts.append(server_response_language_instruction.strip())
     if server_tool_instruction:
         trusted_system_parts.append(server_tool_instruction.strip())
     trusted_system = "\n\n".join(p for p in trusted_system_parts if p)

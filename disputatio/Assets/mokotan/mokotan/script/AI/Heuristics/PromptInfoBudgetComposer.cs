@@ -9,9 +9,12 @@ public static class PromptInfoBudgetComposer
     public static HeuristicDebugSnapshot LastSnapshot => lastSnapshot;
 
     public static string Compose(string currentPrompt, HeuristicSignalInput input)
+        => Compose(currentPrompt, input, CheshireLocaleResolver.ResolveCurrentLocale());
+
+    public static string Compose(string currentPrompt, HeuristicSignalInput input, string locale)
     {
         PlayerSkillProfile profile = PlayerSkillProfileBuilder.Build(input);
-        string policy = HintInformationPolicy.BuildPromptBlock(profile);
+        string policy = HintInformationPolicy.BuildPromptBlock(profile, locale);
 
         lastSnapshot = new HeuristicDebugSnapshot
         {

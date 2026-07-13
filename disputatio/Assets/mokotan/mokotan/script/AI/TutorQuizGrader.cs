@@ -32,13 +32,6 @@ internal sealed class TutorQuizGrader
 {
     public const int MaxTutorGradeAnswerChars = 4000;
 
-    public const string UserPromptAfterCorrectAnswer =
-        "[시스템: 방금 플레이어 답은 서버에서 정답으로 확정되었다. 아주 짧게 격려한 뒤, " +
-        "문제 은행에 적힌 **다음** 질문 문장을 글자 그대로 한 줄로만 말해. 진행 숫자·n/5·몇 문제는 말하지 마. 새 JSON이나 툴은 쓰지 마.]";
-
-    public const string UserPromptMissionComplete =
-        "[시스템: 플레이어가 오늘 퀴즈 미션을 모두 완료했다. 짧게 칭찬하고 마무리 인사만 해. 새 문제는 내지 마.]";
-
     private readonly string _tutorGradeUrlOverride;
     private readonly bool _debug;
     private readonly TutorQuizStateTracker _state;
@@ -56,6 +49,26 @@ internal sealed class TutorQuizGrader
     }
 
     public void SetChatUrl(string chatUrl) => _chatUrl = chatUrl;
+
+    /// <summary>
+    /// Builds the JSON body for <c>POST /tutor/grade</c>. Includes canonical <c>locale</c>.
+    /// </summary>
+    public static Dictionary<string, object> BuildGradeRequestPayload(
+        string questionId,
+        string userAnswer,
+        int correctCountBefore,
+        int quizTarget,
+        string locale)
+    {
+        return new Dictionary<string, object>
+        {
+            ["question_id"] = questionId ?? "",
+            ["user_answer"] = userAnswer ?? "",
+            ["correct_count_before"] = correctCountBefore,
+            ["quiz_target"] = quizTarget,
+            ["locale"] = CheshireLocaleResolver.NormalizeLocale(locale),
+        };
+    }
 
     /// <summary>
     /// <c>…/chat</c> → <c>…/tutor/grade</c>.
@@ -116,13 +129,13 @@ internal sealed class TutorQuizGrader
             answerForGrade = answerForGrade.Substring(0, MaxTutorGradeAnswerChars);
         int ccBefore = Mathf.Clamp(_state.ReadCorrectAnswerCount(), 0, 10_000);
 
-        var payload = new Dictionary<string, object>
-        {
-            ["question_id"] = qid,
-            ["user_answer"] = answerForGrade,
-            ["correct_count_before"] = ccBefore,
-            ["quiz_target"] = TutorQuizStateTracker.TutorQuizTargetCorrectCount,
-        };
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        var payload = BuildGradeRequestPayload(
+            qid,
+            answerForGrade,
+            ccBefore,
+            TutorQuizStateTracker.TutorQuizTargetCorrectCount,
+            locale);
         string jsonBody = JsonConvert.SerializeObject(payload);
 
         TutorGradeResponseDto grade = null;
@@ -189,8 +202,8 @@ internal sealed class TutorQuizGrader
         if (!grade.is_correct || grade.unknown_question)
         {
             string hint = string.IsNullOrWhiteSpace(grade.reference_snippet)
-                ? "아직 정답이 아니야. 다시 생각해 봐!"
-                : $"아직 정답이 아니야. 힌트: {grade.reference_snippet}";
+                ? CheshireUiStrings.WrongAnswerRetry(locale)
+                : CheshireUiStrings.WrongAnswerWithHint(locale, grade.reference_snippet);
             bool hintDone = false;
             host.SayLine(hint, () => hintDone = true);
             yield return new WaitUntil(() => hintDone);
@@ -210,13 +223,13 @@ internal sealed class TutorQuizGrader
         if (_state.IsTutorQuizFinished)
         {
             yield return host.StartHostCoroutine(
-                host.GetGPTResponse(UserPromptMissionComplete));
+                host.GetGPTResponse(CheshireUiStrings.UserPromptMissionComplete(locale)));
             host.HideTutorQuizUiAfterSessionComplete();
         }
         else
         {
             yield return host.StartHostCoroutine(
-                host.GetGPTResponse(UserPromptAfterCorrectAnswer));
+                host.GetGPTResponse(CheshireUiStrings.UserPromptAfterCorrectAnswer(locale)));
         }
 
         if (thinkingHold != null)

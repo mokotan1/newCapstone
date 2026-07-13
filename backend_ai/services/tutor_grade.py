@@ -19,9 +19,10 @@ def grade_tutor_answer(req: TutorGradeRequest, bank: QuizBank, settings: Setting
             unknown_question=True,
         )
 
+    locale = req.locale
     ok = grade_user_answer(
         req.user_answer,
-        row.acceptable_answers,
+        row.acceptable_answers_for(locale),
         fuzzy_ratio=settings.tutor_grade_fuzzy_ratio,
         fuzzy_max_len=settings.tutor_grade_fuzzy_max_len,
     )
@@ -32,7 +33,7 @@ def grade_tutor_answer(req: TutorGradeRequest, bank: QuizBank, settings: Setting
     return TutorGradeResponse(
         is_correct=ok,
         question_id=row.question_id,
-        reference_snippet=row.reference_snippet,
+        reference_snippet=row.reference_snippet_for(locale),
         quiz_complete_after=complete_after,
         unknown_question=False,
     )

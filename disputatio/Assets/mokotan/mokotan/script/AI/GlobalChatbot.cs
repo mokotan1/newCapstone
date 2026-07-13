@@ -13,15 +13,15 @@ public class GlobalChatbot : BaseChatbot
     private const int BottleItemId = 1;
     private const string FallbackSystemPrompt = "당신은 저택의 도우미입니다.";
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
-        TextAsset promptAsset = Resources.Load<TextAsset>("introPrompt");
-        string finalSystemPrompt = promptAsset != null ? promptAsset.text : FallbackSystemPrompt;
+        string roomPrompt = CheshirePromptCatalog.Load("introPrompt", locale);
+        string finalSystemPrompt = !string.IsNullOrEmpty(roomPrompt) ? roomPrompt : FallbackSystemPrompt;
 
         if (globalFlowchart == null)
             return finalSystemPrompt;
 
-        finalSystemPrompt += ItemAcquisitionTracker.BuildPromptSection(globalFlowchart);
+        finalSystemPrompt += ItemAcquisitionTracker.BuildPromptSection(globalFlowchart, locale);
         return finalSystemPrompt;
     }
 
@@ -30,8 +30,10 @@ public class GlobalChatbot : BaseChatbot
         if (globalFlowchart == null)
             return;
 
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
         bool hasBottle = ItemAcquisitionTracker.IsAcquired(globalFlowchart, BottleItemId);
-        if (CheshireHintRewritePlanner.TryBuildBottleUseHint(userMessage, hasBottle, out HintRewritePayload hintRewrite))
+        if (CheshireHintRewritePlanner.TryBuildBottleUseHint(
+                userMessage, hasBottle, locale, out HintRewritePayload hintRewrite))
             payload.hint_rewrite = hintRewrite;
     }
 

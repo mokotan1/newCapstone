@@ -11,12 +11,13 @@ public class SonRoomChatbot : BaseChatbot
     [Header("Son's Room Puzzle Settings")]
     [SerializeField] public Flowchart sonFlowchart;
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
         string finalSystemPrompt = chatHistory[0].content;
 
-        TextAsset promptAsset = Resources.Load<TextAsset>("SonRoomPrompt");
-        if (promptAsset != null) finalSystemPrompt += "\n\n" + promptAsset.text;
+        string roomPrompt = CheshirePromptCatalog.Load("SonRoomPrompt", locale);
+        if (!string.IsNullOrEmpty(roomPrompt))
+            finalSystemPrompt += "\n\n" + roomPrompt;
 
         if (sonFlowchart != null)
         {
@@ -31,15 +32,15 @@ public class SonRoomChatbot : BaseChatbot
 
             if (!hasBible)
             {
-                finalSystemPrompt += "\n\n[현재 목표] 플레이어가 아직 일러스트가 들어간 성경 단서를 못 찾았습니다. 서재 책장 등을 조사하도록 유도하세요.";
+                finalSystemPrompt += CheshireDynamicPromptFragments.SonRoomGoalNeedBible(locale);
             }
             else if (!sealsComplete)
             {
-                finalSystemPrompt += "\n\n[현재 목표] 성경 단서는 확보했으나 칠각형 인장 퍼즐이 미완성입니다. 로마 숫자·인장(봉인) 순서와 씬 안 표식을 맞추라고 짧게 지시하세요.";
+                finalSystemPrompt += CheshireDynamicPromptFragments.SonRoomGoalSealsIncomplete(locale);
             }
             else
             {
-                finalSystemPrompt += "\n\n[현재 목표] 퍼즐이 풀렸습니다. 침대 밑·벽 등에서 감옥 열쇠와 나무 조각을 찾으라고 조롱하듯 말하세요.";
+                finalSystemPrompt += CheshireDynamicPromptFragments.SonRoomGoalComplete(locale);
             }
         }
         return finalSystemPrompt;

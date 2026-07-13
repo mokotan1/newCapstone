@@ -1,0 +1,31 @@
+﻿string_id,ko,en,ja
+EmptyInputPlease,내용을 입력해 주세요.,Please enter a message.,内容を入力してください。
+ConnectionErrorPrefix,연결 오류: ,Connection error: ,接続エラー: 
+WrongAnswerRetry,아직 정답이 아니야. 다시 생각해 봐!,That's not the right answer yet. Think again!,まだ正解じゃないよ。もう一度考えてみて！
+WrongAnswerWithHint,아직 정답이 아니야. 힌트: {0},That's not the right answer yet. Hint: {0},まだ正解じゃないよ。ヒント: {0}
+UserPromptAfterCorrectAnswer,"[시스템: 방금 플레이어 답은 서버에서 정답으로 확정되었다. 아주 짧게 격려한 뒤, 문제 은행에 적힌 **다음** 질문 문장을 글자 그대로 한 줄로만 말해. 진행 숫자·n/5·몇 문제는 말하지 마. 새 JSON이나 툴은 쓰지 마.]","[System: The player's answer was just confirmed correct by the server. Encourage briefly, then speak the **next** question sentence from the question bank verbatim as a single line only. Do not say progress numbers, n/5, or how many questions. Do not emit new JSON or tools.]",[システム: いまのプレイヤーの答えはサーバーで正解と確定した。ごく短く励ましたあと、問題バンクに書かれた**次の**質問文を一字一句そのまま一行だけで言え。進行の数字・n/5・何問かは言うな。新しいJSONやツールは使うな。]
+UserPromptMissionComplete,[시스템: 플레이어가 오늘 퀴즈 미션을 모두 완료했다. 짧게 칭찬하고 마무리 인사만 해. 새 문제는 내지 마.],[System: The player finished today's quiz mission. Praise briefly and give a closing greeting only. Do not ask a new question.],[システム: プレイヤーは今日のクイズミッションをすべて完了した。短く褒めて締めの挨拶だけして。新しい問題は出すな。]
+UserPromptChesterWindowOpen,"[시스템: 플레이어가 체셔(창)와 대화를 막 시작했다. 아주 짧게 인사만 한 뒤, 문제 은행에 적힌 **지금** 퀴즈 질문 문장을 글자 그대로 한 줄로만 말해. 진행 숫자·n/5·몇 문제는 말하지 마. 새 JSON이나 툴은 쓰지 마.]","[System: The player just started talking with Cheshire (the window). Greet very briefly, then speak the **current** quiz question from the question bank verbatim as a single line only. Do not say progress numbers, n/5, or how many questions. Do not emit new JSON or tools.]",[システム: プレイヤーがチェシャー(窓)との会話をちょうど始めた。ごく短く挨拶したあと、問題バンクに書かれた**いまの**クイズ質問文を一字一句そのまま一行だけで言え。進行の数字・n/5・何問かは言うな。新しいJSONやツールは使うな。]
+UserPromptChesterParrotAskQuestionNow,[시스템: 플레이어가 앵무를 방금 눌러 퀴즈를 시작했다. 인사·도입·잡담·추가 문장 금지. 문제 은행의 **지금** 질문 문장만 글자 그대로 한 줄로 말해. 진행 숫자·n/5·따옴표·머리말 금지. 새 JSON이나 툴은 쓰지 마.],"[System: The player just clicked the parrot to start the quiz. No greeting, intro, small talk, or extra sentences. Speak only the **current** question from the bank verbatim as one line. No progress numbers, n/5, quotes, or preamble. Do not emit new JSON or tools.]",[システム: プレイヤーがオウムを押してクイズを始めた。挨拶・導入・雑談・追加の文は禁止。問題バンクの**いまの**質問文だけを一字一句そのまま一行で言え。進行の数字・n/5・引用符・前置き禁止。新しいJSONやツールは使うな。]
+TimerLowTimePrompt,[타이머] 남은 플레이 시간이 얼마 없다는 안내만 짧게 해 줘. 새 퀴즈 문제는 내지 마.,[Timer] Briefly note that little play time remains. Do not ask a new quiz question.,[タイマー] 残りプレイ時間が少ないことだけ短く伝えて。新しいクイズ問題は出すな。
+EmptyPanelAdvancePrompt,[플레이어가 다음 문제로 넘어갔습니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.],"[The player moved on to the next question. React briefly, then ask only the next quiz question.]",[プレイヤーが次の問題へ進みました。短く反応したあと、次のクイズ質問を一つだけ出して。]
+EmptyPanelSkipPrompt,[플레이어가 이 문제를 건너뜁니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.],"[The player is skipping this question. React briefly, then ask only the next quiz question.]",[プレイヤーはこの問題をスキップします。短く反応したあと、次のクイズ質問を一つだけ出して。]
+ThinkingHoldDefault,음… 지금 생각하는 중이야. 조금만 기다려 줘.,Hmm… thinking now. Give me a moment.,うーん…いま考え中だよ。少し待っててね。
+ProgressEmptySection,"
+
+[진행] 아직 획득한 단서 아이템이 없습니다.","
+
+[Progress] No clue items acquired yet.","
+
+[進行] まだ入手した手がかりアイテムはありません。"
+ProgressAcquiredHeader,"
+
+[진행] 획득 아이템: ","
+
+[Progress] Acquired items: ","
+
+[進行] 入手アイテム: "
+ProgressGuideFooter,"
+[진행 안내] 위 목록은 플레이어가 한 번이라도 습득한 아이템입니다. 인벤토리에서 소비했어도 습득 이력은 유지됩니다.","
+[Progress note] The list above is items the player has acquired at least once. Acquisition history remains even if they were consumed from the inventory.","
+[進行案内] 上の一覧はプレイヤーが一度でも入手したアイテムです。インベントリで消費しても入手履歴は残ります。"

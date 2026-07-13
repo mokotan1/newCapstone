@@ -18,21 +18,21 @@ public class StudyRoomChatbot : BaseChatbot
     }
 
     public static string BuildAlreadySolvedInstruction()
-    {
-        return "\n\n[현재 목표] 플레이어는 이미 공부방 문제를 풀었습니다. "
-            + "\"나는 이미 문제를 풀었어\" 형식으로 짧게 말하고, 새 열쇠나 새 보상을 얻는 듯 말하지 마세요.";
-    }
+        => BuildAlreadySolvedInstruction(CheshireLocaleResolver.ResolveCurrentLocale());
 
-    protected override string BuildFinalSystemPrompt()
+    public static string BuildAlreadySolvedInstruction(string locale)
+        => CheshireDynamicPromptFragments.StudyAlreadySolved(locale);
+
+    protected override string BuildFinalSystemPrompt(string locale)
     {
         string finalSystemPrompt = chatHistory[0].content;
 
-        TextAsset promptAsset = Resources.Load<TextAsset>("StudyRoomPrompt");
-        if (promptAsset != null)
-            finalSystemPrompt += "\n\n" + promptAsset.text;
+        string roomPrompt = CheshirePromptCatalog.Load("StudyRoomPrompt", locale);
+        if (!string.IsNullOrEmpty(roomPrompt))
+            finalSystemPrompt += "\n\n" + roomPrompt;
 
         if (IsPuzzleSolved(studyFlowchart))
-            finalSystemPrompt += BuildAlreadySolvedInstruction();
+            finalSystemPrompt += BuildAlreadySolvedInstruction(locale);
 
         return finalSystemPrompt;
     }

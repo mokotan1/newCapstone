@@ -21,7 +21,7 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     private bool _sendImeRetryPending;
 
     /// <summary>
-    /// false면 Resources/ChesterVoiceCommon을 시스템 프롬프트에 붙이지 않음.
+    /// false면 CheshirePrompts 공통 말투 블록을 시스템 프롬프트에 붙이지 않음.
     /// </summary>
     protected virtual bool AppendCommonChesterVoiceBlock => true;
 
@@ -303,12 +303,26 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
         => _httpClient.GetGPTResponseStreaming(userMessage);
 
     protected string ComposeSystemPromptWithCommonRules(string roomSpecificPrompt)
-        => _historyManager.ComposeSystemPromptWithCommonRules(roomSpecificPrompt);
+        => ComposeSystemPromptWithCommonRules(
+            roomSpecificPrompt,
+            CheshireLocaleResolver.ResolveCurrentLocale());
+
+    protected string ComposeSystemPromptWithCommonRules(string roomSpecificPrompt, string locale)
+        => _historyManager.ComposeSystemPromptWithCommonRules(roomSpecificPrompt, locale);
 
     protected string ComposeSystemPromptWithHeuristics(string basePrompt, string userMessage)
+        => ComposeSystemPromptWithHeuristics(
+            basePrompt,
+            userMessage,
+            CheshireLocaleResolver.ResolveCurrentLocale());
+
+    protected string ComposeSystemPromptWithHeuristics(
+        string basePrompt,
+        string userMessage,
+        string locale)
     {
         HeuristicSignalInput signal = BuildHeuristicSignalInput(userMessage);
-        return _historyManager.ComposeSystemPromptWithHeuristics(basePrompt, signal);
+        return _historyManager.ComposeSystemPromptWithHeuristics(basePrompt, signal, locale);
     }
 
     protected static bool TryNormalizePromptForChatApi(string userMessage, out string normalized)
@@ -374,7 +388,11 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     //  Abstract hooks (subclasses must implement)
     // ---------------------------------------------------------------
 
-    protected abstract string BuildFinalSystemPrompt();
+    /// <param name="locale">
+    /// Canonical locale for this request (snapshot from
+    /// <see cref="IChatHttpCallbacks.BuildAndComposeSystemPrompt"/>). Do not re-resolve.
+    /// </param>
+    protected abstract string BuildFinalSystemPrompt(string locale);
     protected abstract IEnumerator HandleChatbotResponse(
         string responseMessage, List<FunctionCallData> functionCalls);
 
@@ -403,8 +421,10 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
 
     string IChatHttpCallbacks.BuildAndComposeSystemPrompt(string userMessage)
     {
-        string prompt = ComposeSystemPromptWithCommonRules(BuildFinalSystemPrompt());
-        return ComposeSystemPromptWithHeuristics(prompt, userMessage);
+        // Single locale snapshot for this request: room build, common rules, and heuristics.
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        string prompt = ComposeSystemPromptWithCommonRules(BuildFinalSystemPrompt(locale), locale);
+        return ComposeSystemPromptWithHeuristics(prompt, userMessage, locale);
     }
 
     void IChatHttpCallbacks.AugmentChatPayload(LocalLlamaPayload payload, string userMessage)
