@@ -8,6 +8,7 @@ from models.requests import ChatRequest
 from models.responses import SSEEvent
 from providers.base import AIProvider
 from services.chat_service import ChatService, _user_visible_ai_error
+from services.locale_support import response_language_instruction, user_visible_ai_error
 from tools.game_tools import GAME_TOOLS
 from tools.registry import ToolRegistry
 
@@ -54,6 +55,99 @@ def test_user_visible_ai_error_rate_limit() -> None:
 
 def test_user_visible_ai_error_generic() -> None:
     assert _user_visible_ai_error(RuntimeError("broken")) == "모든 AI 엔진 실패"
+
+
+def test_user_visible_error_rate_limit_en() -> None:
+    msg = user_visible_ai_error(
+        RuntimeError("Error code: 429 - rate_limit_exceeded"),
+        locale="en",
+    )
+    lower = msg.lower()
+    assert "limit" in lower or "rate" in lower
+
+
+def test_user_visible_error_generic_en() -> None:
+    msg = user_visible_ai_error(RuntimeError("broken"), locale="en")
+    assert "fail" in msg.lower()
+
+
+def test_user_visible_error_rate_limit_ja() -> None:
+    msg = user_visible_ai_error(
+        RuntimeError("Error code: 429 - too many requests"),
+        locale="ja",
+    )
+    assert msg  # non-empty localized Japanese
+    assert "한도" not in msg
+    assert "limit" not in msg.lower()
+
+
+def test_user_visible_error_generic_ja() -> None:
+    msg = user_visible_ai_error(RuntimeError("broken"), locale="ja")
+    assert msg
+    assert "모든 AI" not in msg
+
+
+@pytest.mark.asyncio
+async def test_build_messages_includes_response_language_rule_for_ja() -> None:
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="ok")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+    await service.chat(
+        ChatRequest(
+            prompt="hello",
+            system="UNIQUE_CLIENT_PERSONA_MARKER",
+            locale="ja",
+            use_tools=False,
+        )
+    )
+    assert provider.last_messages is not None
+    system = provider.last_messages[0]["content"]
+    user = provider.last_messages[1]["content"]
+    expected = response_language_instruction("ja")
+    assert expected
+    assert expected in system
+    assert "Japanese" in expected or "日本語" in expected
+    # Untrusted client system must stay out of the trusted system channel.
+    assert "UNIQUE_CLIENT_PERSONA_MARKER" not in system
+    assert "UNIQUE_CLIENT_PERSONA_MARKER" in user
+
+
+@pytest.mark.asyncio
+async def test_tool_instruction_en_uses_english_markers() -> None:
+    """locale=en trusted system must use EN tool-instruction prose, not KO chrome."""
+    provider = _CapturingProvider([SSEEvent(type="done", full_text="ok")])
+    service = ChatService(provider, None, _build_registry())
+    await service.chat(
+        ChatRequest(
+            prompt="hello",
+            system="persona",
+            locale="en",
+            use_tools=True,
+        )
+    )
+    assert provider.last_messages is not None
+    system = provider.last_messages[0]["content"]
+    assert "중요: 응답 방식" not in system
+    assert "반드시 캐릭터" not in system
+    lower = system.lower()
+    assert "tool" in lower or "function" in lower
+    assert "important" in lower or "response" in lower
+
+
+@pytest.mark.asyncio
+async def test_stream_error_localized_for_en() -> None:
+    service = ChatService(
+        primary=_MockProvider("groq", should_fail=True),
+        fallback=None,
+        registry=_build_registry(),
+    )
+    collected = [
+        e async for e in service.stream_chat(ChatRequest(prompt="hi", locale="en"))
+    ]
+    error_events = [e for e in collected if e.type == "error"]
+    assert len(error_events) == 1
+    assert "fail" in (error_events[0].content or "").lower()
 
 
 def _build_registry() -> ToolRegistry:

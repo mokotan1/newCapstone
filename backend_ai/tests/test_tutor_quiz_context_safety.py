@@ -37,8 +37,11 @@ class _CapturingProvider(AIProvider):
 async def test_quiz_bank_prompt_context_does_not_expose_answers(tmp_path: Path) -> None:
     csv_path = tmp_path / "bank.csv"
     csv_path.write_text(
-        "question_id,question_ko,acceptable_answers,reference_snippet,difficulty,tags\n"
-        "Q3,이스라엘을 애굽에서 이끈 인물은?,모세|모세가,홍해를 떠올려 보세요.,1,ot\n",
+        "question_id,question_ko,question_ja,question_en,"
+        "acceptable_answers_ko,acceptable_answers_ja,acceptable_answers_en,"
+        "reference_snippet_ko,reference_snippet_ja,reference_snippet_en,"
+        "difficulty,tags\n"
+        "Q3,이스라엘을 애굽에서 이끈 인물은?,,,모세|모세가,,,홍해를 떠올려 보세요.,,,1,ot\n",
         encoding="utf-8",
     )
     bank = QuizBank.load(csv_path)

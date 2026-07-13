@@ -6,7 +6,24 @@ import math
 from pathlib import Path
 from typing import Any
 
+from services.locale_support import normalize_locale
+
 logger = logging.getLogger(__name__)
+
+_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
+    "ko": (
+        "[참고 자료 — 아래 인용문만 퀴즈 출제·해설·근거로 사용하세요. "
+        "없는 내용은 상식으로 보충하지 마세요.]"
+    ),
+    "ja": (
+        "[参考資料 — 以下の引用のみをクイズ出題・解説・根拠に使ってください。"
+        "ない内容は常識で補わないでください。]"
+    ),
+    "en": (
+        "[Reference material — Use only the quotes below for quiz questions, "
+        "explanations, and evidence. Do not fill gaps with general knowledge.]"
+    ),
+}
 
 
 def _cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -24,6 +41,13 @@ def _truncate_block(text: str, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 3] + "..."
+
+
+def _chunk_locale(ch: dict[str, Any]) -> str | None:
+    raw = ch.get("locale")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    return normalize_locale(raw)
 
 
 class TutorRAGService:
@@ -80,8 +104,40 @@ class TutorRAGService:
             logger.error("Gemini embed_query failed: %s", e)
         return None
 
-    def build_context_block(self, query_text: str, *, top_k: int, max_context_chars: int) -> str:
+    def _chunks_for_locale(self, locale: str) -> list[dict[str, Any]]:
+        """Filter by chunk ``locale`` metadata when present; else use all chunks.
+
+        When tagged chunks exist but none match ``locale``, fall back to ``ko``.
+        Empty index remains empty (does not raise).
+        """
         if not self._chunks:
+            return []
+
+        tagged = [(ch, _chunk_locale(ch)) for ch in self._chunks]
+        any_tagged = any(loc is not None for _, loc in tagged)
+        if not any_tagged:
+            return list(self._chunks)
+
+        want = normalize_locale(locale)
+        matched = [ch for ch, loc in tagged if loc == want]
+        if matched:
+            return matched
+        if want != "ko":
+            ko_matched = [ch for ch, loc in tagged if loc == "ko"]
+            if ko_matched:
+                return ko_matched
+        return []
+
+    def build_context_block(
+        self,
+        query_text: str,
+        *,
+        top_k: int,
+        max_context_chars: int,
+        locale: str = "ko",
+    ) -> str:
+        pool = self._chunks_for_locale(locale)
+        if not pool:
             return ""
 
         query_vec = self._embed_query(query_text)
@@ -89,7 +145,7 @@ class TutorRAGService:
             return ""
 
         scored: list[tuple[float, dict[str, Any]]] = []
-        for ch in self._chunks:
+        for ch in pool:
             emb = ch.get("embedding")
             if not isinstance(emb, list):
                 continue
@@ -99,9 +155,8 @@ class TutorRAGService:
         scored.sort(key=lambda x: x[0], reverse=True)
         picked = scored[:top_k]
 
-        lines: list[str] = [
-            "[참고 자료 — 아래 인용문만 퀴즈 출제·해설·근거로 사용하세요. 없는 내용은 상식으로 보충하지 마세요.]",
-        ]
+        header = _CONTEXT_BLOCK_HEADERS[normalize_locale(locale)]
+        lines: list[str] = [header]
         total = 0
         for rank, (sim, ch) in enumerate(picked, start=1):
             cid = ch.get("id", f"chunk_{rank}")

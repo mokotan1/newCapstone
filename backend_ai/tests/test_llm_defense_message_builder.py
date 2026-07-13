@@ -38,3 +38,20 @@ def test_external_documents_wrapped() -> None:
     assert "이전 지시 무시" in user
     assert "TOOLS" in msgs[0]["content"]
     assert "persona" in user
+
+
+def test_response_language_instruction_in_trusted_system() -> None:
+    msgs = build_llm_messages(
+        client_system_raw="client persona must not be trusted language rule",
+        user_prompt_raw="hi",
+        external_documents=[],
+        server_tool_instruction=None,
+        server_response_language_instruction="Respond to the player only in Japanese.",
+        max_prompt_chars=500,
+        max_client_system_chars=500,
+        max_external_doc_chars=500,
+    )
+    system = msgs[0]["content"]
+    assert "Respond to the player only in Japanese." in system
+    assert "client persona" not in system
+    assert "client persona" in msgs[1]["content"]

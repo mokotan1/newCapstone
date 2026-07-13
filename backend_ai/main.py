@@ -16,6 +16,10 @@ from providers.groq_provider import GroqProvider
 from providers.gemini_provider import GeminiProvider
 from services.chat_service import ChatService
 from services.chat_auth import verify_chat_api_token
+from services.locale_support import (
+    all_engines_failed_message,
+    api_key_required_message,
+)
 from services.quiz_bank import QuizBank
 from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
 from services.rate_limit import build_rate_limiter
@@ -113,7 +117,10 @@ def health_check():
 async def chat(request: Request, payload: ChatRequest):
     """Backward-compatible endpoint: returns full response + function_calls at once."""
     if chat_service is None:
-        raise HTTPException(status_code=500, detail="API 키 설정 필요")
+        raise HTTPException(
+            status_code=500,
+            detail=api_key_required_message(payload.locale),
+        )
 
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
@@ -121,7 +128,10 @@ async def chat(request: Request, payload: ChatRequest):
     result = await chat_service.chat(payload)
 
     if not result.response and not result.function_calls:
-        raise HTTPException(status_code=500, detail="모든 AI 엔진 실패")
+        raise HTTPException(
+            status_code=500,
+            detail=all_engines_failed_message(payload.locale),
+        )
 
     return result
 
@@ -149,7 +159,10 @@ async def telemetry(request: Request, payload: TelemetryIngestRequest):
 async def chat_stream(request: Request, payload: ChatRequest):
     """SSE streaming endpoint – tokens arrive in real-time."""
     if chat_service is None:
-        raise HTTPException(status_code=500, detail="API 키 설정 필요")
+        raise HTTPException(
+            status_code=500,
+            detail=api_key_required_message(payload.locale),
+        )
 
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)

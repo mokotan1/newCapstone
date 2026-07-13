@@ -61,8 +61,9 @@ def _load_corpus_chunks(corpus_dir: Path, max_chars: int) -> list[tuple[str, str
     return out
 
 
-def _load_quiz_chunks(csv_path: Path) -> list[tuple[str, str]]:
-    out: list[tuple[str, str]] = []
+def _load_quiz_chunks(csv_path: Path) -> list[tuple[str, str, str]]:
+    """Return (chunk_id, text, locale) triples for each non-empty locale column set."""
+    out: list[tuple[str, str, str]] = []
     if not csv_path.is_file():
         return out
     with csv_path.open(encoding="utf-8-sig", newline="") as f:
@@ -72,10 +73,21 @@ def _load_quiz_chunks(csv_path: Path) -> list[tuple[str, str]]:
             if not qid:
                 continue
             qko = (r.get("question_ko") or "").strip()
-            ref = (r.get("reference_snippet") or "").strip()
-            body = f"{qko}\n{ref}".strip()
-            if body:
-                out.append((f"quiz:{qid}", body))
+            ref_ko = (
+                r.get("reference_snippet_ko") or r.get("reference_snippet") or ""
+            ).strip()
+            locales: list[tuple[str, str, str]] = [
+                ("ko", qko, ref_ko),
+                ("ja", (r.get("question_ja") or "").strip(), (r.get("reference_snippet_ja") or "").strip()),
+                ("en", (r.get("question_en") or "").strip(), (r.get("reference_snippet_en") or "").strip()),
+            ]
+            for loc, qtext, ref in locales:
+                body = f"{qtext}\n{ref}".strip() if qtext or ref else ""
+                if not body and loc != "ko":
+                    continue
+                if not body:
+                    continue
+                out.append((f"quiz:{qid}:{loc}", body, loc))
     return out
 
 
@@ -118,8 +130,8 @@ def main() -> int:
     quiz_csv = (_BACKEND_DIR / settings.tutor_quiz_csv_path).resolve()
     out_path = (_BACKEND_DIR / settings.tutor_rag_index_path).resolve()
 
-    pairs = _load_corpus_chunks(corpus_dir, args.max_chunk_chars)
-    pairs.extend(_load_quiz_chunks(quiz_csv))
+    corpus_pairs = [(cid, text, "ko") for cid, text in _load_corpus_chunks(corpus_dir, args.max_chunk_chars)]
+    pairs = corpus_pairs + _load_quiz_chunks(quiz_csv)
     if not pairs:
         print("No chunks to index (empty corpus and quiz bank).", file=sys.stderr)
         return 1
@@ -130,13 +142,17 @@ def main() -> int:
     model = settings.tutor_embedding_model
     ids = [p[0] for p in pairs]
     texts = [p[1] for p in pairs]
+    locales = [p[2] for p in pairs]
 
     print(f"Embedding {len(texts)} chunks with {model} ...")
     vectors = _embed_batch(genai, model, texts)
 
     payload = {
         "embedding_model": model,
-        "chunks": [{"id": i, "text": t, "embedding": e} for i, t, e in zip(ids, texts, vectors, strict=True)],
+        "chunks": [
+            {"id": i, "text": t, "locale": loc, "embedding": e}
+            for i, t, loc, e in zip(ids, texts, locales, vectors, strict=True)
+        ],
     }
     out_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     print(f"Wrote {out_path} ({len(vectors)} vectors)")

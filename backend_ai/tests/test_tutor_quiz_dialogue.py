@@ -15,7 +15,12 @@ from services.chat_service import ChatService
 from services.quiz_bank import QuizBank
 from tests.test_chat_service import _build_registry
 
-_CSV_HEADER = "question_id,question_ko,acceptable_answers,reference_snippet,difficulty,tags\n"
+_CSV_HEADER = (
+    "question_id,question_ko,question_ja,question_en,"
+    "acceptable_answers_ko,acceptable_answers_ja,acceptable_answers_en,"
+    "reference_snippet_ko,reference_snippet_ja,reference_snippet_en,"
+    "difficulty,tags\n"
+)
 
 
 class _QueuedSSEProvider(AIProvider):
@@ -74,7 +79,10 @@ def _tutor_service(bank: QuizBank, turns: list[list[SSEEvent]]) -> tuple[ChatSer
 async def test_two_turn_model_wrong_but_csv_correct_overrides(tmp_path: Path) -> None:
     bank = _write_bank(
         tmp_path,
-        "Q1,다윗이 이긴 거인 이름은?,골리앗|골리엇,참고문구,,",
+        "Q1,다윗이 이긴 거인 이름은?,,,"
+        "골리앗|골리엇,,,,"
+        "참고문구,,,,"
+        ",,\n",
     )
     turn_question = [
         SSEEvent(type="text_delta", content="다윗이 이긴 거인 이름은?"),
@@ -122,7 +130,10 @@ async def test_two_turn_model_wrong_but_csv_correct_overrides(tmp_path: Path) ->
 async def test_two_turn_wrong_answer_no_override(tmp_path: Path) -> None:
     bank = _write_bank(
         tmp_path,
-        "Q1,다윗이 이긴 거인 이름은?,골리앗|골리엇,참고,,",
+        "Q1,다윗이 이긴 거인 이름은?,,,"
+        "골리앗|골리엇,,,,"
+        "참고,,,,"
+        ",,\n",
     )
     turn_question = [
         SSEEvent(type="text_delta", content="질문"),
@@ -165,7 +176,10 @@ async def test_two_turn_wrong_answer_no_override(tmp_path: Path) -> None:
 async def test_second_turn_system_includes_quiz_bank_block(tmp_path: Path) -> None:
     bank = _write_bank(
         tmp_path,
-        "Q1,다윗이 이긴 거인 이름은?,골리앗,스니펫,,",
+        "Q1,다윗이 이긴 거인 이름은?,,,"
+        "골리앗,,,,"
+        "스니펫,,,,"
+        ",,\n",
     )
     turn_question = [
         SSEEvent(type="text_delta", content="q"),

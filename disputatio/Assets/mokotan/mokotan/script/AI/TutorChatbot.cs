@@ -43,7 +43,8 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
 
     [Header("UX — 느린 응답·패널 버튼")]
     [SerializeField] private float thinkingHoldDelaySeconds = 3f;
-    [SerializeField] [TextArea(1, 3)] private string thinkingHoldSayMessage = "음… 지금 생각하는 중이야. 조금만 기다려 줘.";
+    [Tooltip("비우면 Fungus 언어(ko/ja/en) 기본 문구를 사용합니다.")]
+    [SerializeField] [TextArea(1, 3)] private string thinkingHoldSayMessage = "";
 
     [Header("Events")]
     public UnityEvent OnAIReponseComplete;
@@ -71,16 +72,6 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
 
     /// <summary>Fungus Writer 기본 writingSpeed(~60)는 글자 단위로 밀어 넣어 한글도 한 글자씩 들어가는 것처럼 보입니다.</summary>
     private const int TutorWriterCharsPerSecond = 4800;
-
-    /// <summary>Fungus가 창(체셔) 클릭 시 빈 문자열로 <see cref="AddPlayerMessageAndGetResponse"/>를 호출할 때 실제 /chat 프롬프트로 씁니다.</summary>
-    private const string UserPromptChesterWindowOpen =
-        "[시스템: 플레이어가 체셔(창)와 대화를 막 시작했다. 아주 짧게 인사만 한 뒤, " +
-        "문제 은행에 적힌 **지금** 퀴즈 질문 문장을 글자 그대로 한 줄로만 말해. 진행 숫자·n/5·몇 문제는 말하지 마. 새 JSON이나 툴은 쓰지 마.]";
-
-    /// <summary>앵무 클릭 직후 첫 /chat — 인사·도입 없이 질문 한 줄만.</summary>
-    private const string UserPromptChesterParrotAskQuestionNow =
-        "[시스템: 플레이어가 앵무를 방금 눌러 퀴즈를 시작했다. 인사·도입·잡담·추가 문장 금지. " +
-        "문제 은행의 **지금** 질문 문장만 글자 그대로 한 줄로 말해. 진행 숫자·n/5·따옴표·머리말 금지. 새 JSON이나 툴은 쓰지 마.]";
 
     // ---- public properties (API unchanged) ----
 
@@ -317,8 +308,8 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             return;
         if (IsTutorQuizFinished)
             return;
-        StartCoroutine(CoTutorPlayerTurn(
-            "[타이머] 남은 플레이 시간이 얼마 없다는 안내만 짧게 해 줘. 새 퀴즈 문제는 내지 마."));
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        StartCoroutine(CoTutorPlayerTurn(CheshireUiStrings.TimerLowTimePrompt(locale)));
     }
 
     /// <summary>답 입력 없이 패널 버튼만 눌렀을 때 — 정답 직후 또는 건너뛰기 직후에만 다음 AI 턴으로 넘깁니다.</summary>
@@ -343,9 +334,10 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
         if (!_quizState.LastGradedWasCorrect)
             _quizState.SkipOrderOffset++;
 
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
         string msg = _quizState.LastGradedWasCorrect
-            ? "[플레이어가 다음 문제로 넘어갔습니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.]"
-            : "[플레이어가 이 문제를 건너뜁니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.]";
+            ? CheshireUiStrings.EmptyPanelAdvancePrompt(locale)
+            : CheshireUiStrings.EmptyPanelSkipPrompt(locale);
 
         if (debugQuizProgress)
             GameLog.Log(
@@ -385,9 +377,10 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             && flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked)
             && !IsTutorQuizFinished)
         {
+            string locale = CheshireLocaleResolver.ResolveCurrentLocale();
             llmUserTurn = _chesterFlow.ImmediateQuestionTurnPending
-                ? UserPromptChesterParrotAskQuestionNow
-                : UserPromptChesterWindowOpen;
+                ? CheshireUiStrings.UserPromptChesterParrotAskQuestionNow(locale)
+                : CheshireUiStrings.UserPromptChesterWindowOpen(locale);
         }
 
         bool immediateParrotQuestion = _chesterFlow.ImmediateQuestionTurnPending;
@@ -476,7 +469,7 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     //  Prompt building
     // ==================================================================
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
         string finalSystemPrompt = chatHistory[0].content;
 
@@ -485,14 +478,14 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             bool windowClicked = flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked);
             if (windowClicked)
             {
-                TextAsset tutorRoomPromptAsset = Resources.Load<TextAsset>("TutorRoomPrompt");
-                if (tutorRoomPromptAsset != null)
+                string tutorRoomPrompt = CheshirePromptCatalog.Load("TutorRoomPrompt", locale);
+                if (!string.IsNullOrEmpty(tutorRoomPrompt))
                 {
-                    finalSystemPrompt += "\n\n" + tutorRoomPromptAsset.text;
+                    finalSystemPrompt += "\n\n" + tutorRoomPrompt;
                 }
                 else
                 {
-                    Debug.LogError("TutorRoomPrompt.txt 파일을 찾을 수 없습니다!");
+                    Debug.LogError($"TutorRoomPrompt (CheshirePrompts/{locale}) 를 찾을 수 없습니다!");
                     finalSystemPrompt += "\n\n[중요 지시]... (TutorRoomPrompt 내용)...";
                 }
             }
@@ -553,7 +546,11 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             chatSayDialog.Stop();
             chatSayDialog.FadeWhenDone = false;
         }
-        Say(thinkingHoldSayMessage, null);
+        Say(
+            CheshireUiStrings.ResolveThinkingHoldMessage(
+                thinkingHoldSayMessage,
+                CheshireLocaleResolver.ResolveCurrentLocale()),
+            null);
     }
 
     // ==================================================================

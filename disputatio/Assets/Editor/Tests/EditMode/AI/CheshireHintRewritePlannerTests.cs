@@ -9,6 +9,7 @@ public class CheshireHintRewritePlannerTests
         bool ok = CheshireHintRewritePlanner.TryBuildBottleUseHint(
             "이 병 어디다 써?",
             hasBottle: true,
+            CheshireLocaleResolver.Korean,
             out HintRewritePayload payload);
 
         Assert.IsTrue(ok);
@@ -25,11 +26,28 @@ public class CheshireHintRewritePlannerTests
     }
 
     [Test]
+    public void TryBuildBottleUseHint_English_DoesNotUseKoreanBaseHint()
+    {
+        bool ok = CheshireHintRewritePlanner.TryBuildBottleUseHint(
+            "where do I use this bottle?",
+            hasBottle: true,
+            CheshireLocaleResolver.English,
+            out HintRewritePayload payload);
+
+        Assert.IsTrue(ok);
+        Assert.IsNotNull(payload);
+        Assert.IsFalse(payload.base_hint.Contains("병"), payload.base_hint);
+        StringAssert.Contains("bottle", payload.base_hint.ToLowerInvariant());
+        StringAssert.Contains("sink", payload.base_hint.ToLowerInvariant());
+    }
+
+    [Test]
     public void TryBuildBottleUseHint_WhenPlayerDoesNotHaveBottle_ReturnsFalse()
     {
         bool ok = CheshireHintRewritePlanner.TryBuildBottleUseHint(
             "이 병 어디다 써?",
             hasBottle: false,
+            CheshireLocaleResolver.Korean,
             out HintRewritePayload payload);
 
         Assert.IsFalse(ok);
@@ -42,6 +60,7 @@ public class CheshireHintRewritePlannerTests
         bool ok = CheshireHintRewritePlanner.TryBuildBottleUseHint(
             "안녕 체셔",
             hasBottle: true,
+            CheshireLocaleResolver.Korean,
             out HintRewritePayload payload);
 
         Assert.IsFalse(ok);

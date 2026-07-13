@@ -74,7 +74,8 @@ newCapstone/
 | `Assets/Scenes/` | **모든 플레이 씬** | 씬 에셋·Flowchart 배치 (로직은 Script에) |
 | `Assets/Editor/Tests/EditMode/` | **EditMode 단위 테스트** | 순수 C# 로직 테스트 |
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
-| `Assets/Resources/` | `ServerConfig`, 프롬프트 txt 등 | 런타임 `Resources.Load` 대상 |
+| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/` | 런타임 `Resources.Load` 대상 |
+| `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
 
@@ -84,10 +85,11 @@ newCapstone/
 | `config.py` | `.env` 로드, 한도·튜터 RAG 설정 |
 | `models/` | `ChatRequest`, `ChatResponse`, `TutorGradeRequest` |
 | `providers/` | Groq / Gemini 어댑터 |
-| `services/` | `chat_service`, RAG, quiz bank, rate limit |
+| `services/` | `chat_service`, RAG, quiz bank, `locale_support`, rate limit |
+| `scripts/` | `validate_quiz_bank.py`, `validate_cheshire_prompts.py`, `build_tutor_rag_index.py` |
 | `tools/` | LLM function schema (`game_tools.py`) |
 | `llm_defense/` | 입력 sanitize, message builder |
-| `data/tutor_quiz/` | `quiz_bank.csv` |
+| `data/tutor_quiz/` | `quiz_bank.csv` (KO/JA/EN 질문·정답·스니펫; 빈 셀은 KO 폴백) |
 | `data/tutor_rag/` | RAG 코퍼스 md/txt |
 | `tests/` | pytest |
 
@@ -178,7 +180,8 @@ sequenceDiagram
 
 - **URL 해석**: `BaseChatbot.Start()` → `localServerUrl` 비어 있으면 `ServerConfig.GetOrCreate().ChatUrl`  
   (`disputatio/Assets/godlotto/Script/Config/ServerConfig.cs`, 기본값 `http://15.134.24.132:8000/chat`)
-- **튜터 채점**: `TutorQuizGrader`가 `/chat` URL에서 `/tutor/grade`로 치환해 `POST` (LLM 없이 CSV 채점)
+- **튜터 채점**: `TutorQuizGrader`가 `/chat` URL에서 `/tutor/grade`로 치환해 `POST` (LLM 없이 CSV 채점). 본문에 Fungus 언어에서 해석한 `locale`(`ko`|`ja`|`en`)을 포함.
+- **플레이어 locale**: `CheshireLocaleResolver`가 Fungus 언어 설정을 `ko`|`ja`|`en`으로 정규화. `ChatHttpClient`가 `/chat`·`/chat/stream` payload에 `locale`을 실어 보내고, 서버 `ChatRequest.locale` / `TutorGradeRequest.locale`이 동일 규칙으로 정규화한다. 동일 authority가 **시나리오 standing dialogue CSV**(`PlayScenarioBlockCommand` → `ScenarioLocalizationTable`)와 **Cheshire UI 문자열 CSV**(`Resources/Scenario/cheshire_ui_strings.csv`, `CheshireUiStrings`)에도 적용된다 (header `id|line_id|string_id,ko,en,ja`, 빈 셀은 KO 폴백).
 
 ---
 
@@ -237,7 +240,7 @@ flowchart LR
 
 **Unity → `/chat` JSON** (`ChatHttpClient.LocalLlamaPayload`):
 
-- `prompt`, `system`, `use_tools`, `message`, `user_id`
+- `prompt`, `system`, `use_tools`, `message`, `user_id`, `locale` (`ko`|`ja`|`en`)
 - 튜터: `rag_profile`, `rag_query`, `current_question_id`
 
 **서버 function tools** (`backend_ai/tools/game_tools.py`):
@@ -272,13 +275,25 @@ flowchart LR
 
 | 클래스 | 역할 |
 |--------|------|
-| `BaseChatbot` | SayDialog, 입력, HTTP coroutine 진입 |
-| `ChatHttpClient` | `/chat`, `/chat/stream` transport |
-| `ChatHistoryManager` | system prompt·히스토리·ChesterVoiceCommon |
+| `BaseChatbot` | SayDialog, 입력, HTTP coroutine 진입; locale별 system prompt 조립 |
+| `ChatHttpClient` | `/chat`, `/chat/stream` transport; payload `locale` |
+| `ChatHistoryManager` | system prompt·히스토리; `CheshirePromptCatalog`로 BaseSystem/ChesterVoiceCommon 로드 |
+| `CheshireLocaleResolver` | Fungus 언어 → canonical `ko`\|`ja`\|`en` (alias/`en-US` 정규화); 시나리오 CSV·UI CSV·AI prompt의 단일 locale authority |
+| `CheshireUiStrings` | `Resources/Scenario/cheshire_ui_strings.csv`를 `ScenarioLocalizationTable`로 로드 (하드코딩 KO/JA/EN은 CSV 부재 시 폴백) |
+| `ScenarioLocalizationTable` | Scenario/dialogue·speaker·UI CSV 공통 파서 (`id` 컬럼 + locale 컬럼, KO 폴백) |
+| `PlayScenarioBlockCommand` | standing dialogue 재생; 기본 언어는 `CheshireLocaleResolver` (Inspector override 선택) |
+| `CheshirePromptCatalog` | `Resources/CheshirePrompts/{locale}/{key}` 로드; 없으면 `ko` 폴백 |
+| `CheshireDynamicPromptFragments` | Kitchen/Study 등 동적 fragment (`Fragment_*` 카탈로그 우선) |
 | `GlobalChatbot` | `give_hint`, `emote` 공통 처리 |
 | `TutorChatbot` | RAG 프로필, 퀴즈, `/tutor/grade` |
 | `*RoomChatbot` | 방별 system prompt·휴리스틱 (`StudyRoomChatbot`, `WifeRoomChatbot`, …) |
 | `ParretPanelChatbotBinder` | 씬별 챗봇 타입 바인딩 |
+
+**프롬프트 Resources** (`Assets/Resources/CheshirePrompts/{ko,ja,en}/`):
+
+- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`, `ParrotPrompt`
+- 선택 키: `HintPolicy_{Novice,Intermediate,Expert}`, `Fragment_*` (세 locale 모두 비어 있지 않은 UTF-8)
+- 검증: `backend_ai/scripts/validate_cheshire_prompts.py` · EditMode `CheshirePromptCatalogTests`
 
 ### 게임 코어 (`godlotto/Script/`)
 
@@ -301,10 +316,11 @@ flowchart LR
 
 | 모듈 | 역할 |
 |------|------|
-| `ChatService` | provider fallback, tool 주입, tutor RAG |
-| `TutorRAGService` | `tutor_rag_index.json` 검색 |
-| `QuizBank` | CSV 로드 |
-| `answer_grader` / `tutor_grade` | `/tutor/grade` |
+| `ChatService` | provider fallback, tool 주입(locale별 `_TOOL_INSTRUCTIONS`), tutor RAG; `response_language_instruction(locale)` |
+| `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |
+| `TutorRAGService` | `tutor_rag_index.json` 검색; chunk `locale` 메타가 있으면 필터, 없으면 전체·없으면 KO 폴백; 컨텍스트 헤더 chrome locale별 |
+| `QuizBank` | CSV 로드; multi-locale 컬럼(`question_*`, `acceptable_answers_*`, `reference_snippet_*`; 빈 셀 → KO); `format_bank_context_block` chrome locale별 |
+| `answer_grader` / `tutor_grade` | `/tutor/grade` (`TutorGradeRequest.locale`) |
 | `rate_limit` + `rate_guard` | Redis 또는 in-process window |
 
 ### 의존성 다이agram (요약)
@@ -362,6 +378,9 @@ graph TB
 | Fungus 커맨드 | `godlotto/Script/FungusCommands/` | 동사형 (`SetBloom`, `PlayRegisteredSfx`); 선택지는 `GlassMenu` (`FungusCommands/Menu/`) |
 | Fungus Menu 마이그레이션 | `godlotto/Script/Editor/GlassMenuMigrator.cs` | `Tools/Godlotto/Migrate/Fungus Menu → Glass Menu` — 연속 `Fungus.Menu` → `GlassMenu.options`, `ClearMenu` 제거 |
 | 방별 AI | `mokotan/mokotan/script/AI/` | `{Room}Chatbot : BaseChatbot` |
+| Cheshire 프롬프트 | `Assets/Resources/CheshirePrompts/{ko,ja,en}/` | `{Key}.txt` + `.meta`; 검증 `validate_cheshire_prompts.py` |
+| Locale 해석 | `mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, `CheshireUiStrings` |
+| Scenario CSV | `Assets/Resources/Scenario/` | `the_unholy_dialogue.csv`, `the_unholy_speakers.csv`, `cheshire_ui_strings.csv` (+ `ScenarioLocalizationTable`) |
 | 상수 | `godlotto/Script/Constants/` | `*Keys`, `SceneNames` |
 | 에디터 마이그레이션 | `godlotto/Script/Editor/` | `*SceneMigrator` |
 | API·서비스 | `backend_ai/services/` | `*_service.py` |
@@ -440,8 +459,9 @@ graph TB
 | **인벤토리 아이템** | `Item` ScriptableObject (`Assets/godlotto/Item/`), 고유 `itemId` 1~30, `ItemAcquisitionTracker` 연동 |
 | **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy → `CheckpointRepositoryTests` |
 | **Fungus 플래그** | `FungusVariableKeys` + Flowchart 변수 선언 + Collector boolean/int/string 배열 |
-| **튜터 퀴즈** | `backend_ai/data/tutor_quiz/quiz_bank.csv` + `validate_quiz_bank.py` |
-| **RAG 문서** | `backend_ai/data/tutor_rag/*.md` + `build_tutor_rag_index.py` |
+| **튜터 퀴즈** | `backend_ai/data/tutor_quiz/quiz_bank.csv` (KO/JA/EN 컬럼) + `validate_quiz_bank.py` |
+| **Cheshire 프롬프트** | `disputatio/Assets/Resources/CheshirePrompts/{ko,ja,en}/` + `validate_cheshire_prompts.py` |
+| **RAG 문서** | `backend_ai/data/tutor_rag/*.md` + `build_tutor_rag_index.py` (chunk에 `locale` 메타) |
 | **LLM tool** | `game_tools.py` + Unity `HandleChatbotResponse` / `ProcessCommonFunctionCalls` |
 
 ---
@@ -460,6 +480,8 @@ graph TB
 | **운영 HTTPS URL** | `ServerConfig` 기본 IP, `deploy/Caddyfile` 도메인은 코드만으로 Unity 클라이언트 최종 URL 불명 | 배포 환경·Inspector ServerConfig 에셋 |
 | **Redis in prod** | `REDIS_URL` 비면 in-process rate limit (멀티 replica 부적합) — 운영 `.env` 미포함 | 서버 `/opt/newcapstone/.env` |
 | **WebGL 빌드** | `deploy/serve_webgl_brotli.py` 존재; 게임 WebGL 배포 파이프라인은 본 문서 범위에서 미검증 | 빌드 타겟·CI 확인 |
+| **Tutor RAG 인덱스 비어 있음** | `backend_ai/data/tutor_rag_index.json`이 `chunks: []` (임베딩 미생성). locale 필터는 동작하나 검색 컨텍스트는 항상 빈 결과 | `build_tutor_rag_index.py`로 인덱스 재생성 후 커밋/배포 |
+| **EN/JA 프롬프트의 KO 제어 태그** | `[진행]`, `[시스템: …]`, `[문제 은행]` 등 일부 대괄호 태그가 EN/JA 본문에 KO로 잔존 (의도적 클라이언트 주입 태그). 본문 서술은 EN/JA | Task 6 이후 주입 prefix 로컬라이즈 여부·태그 키 안정성 점검 |
 
 ---
 
@@ -473,6 +495,8 @@ graph TB
 | 방 클릭 | `disputatio/Assets/godlotto/Script/Interaction/RoomInteractionController.cs` |
 | 체크포인트 저장 | `disputatio/Assets/godlotto/Script/Checkpoint/CheckpointRepository.cs` |
 | AI HTTP | `disputatio/Assets/mokotan/mokotan/script/AI/ChatHttpClient.cs` |
+| Cheshire locale/프롬프트 | `.../AI/Localization/CheshireLocaleResolver.cs`, `CheshirePromptCatalog.cs` |
+| Cheshire 프롬프트 txt | `disputatio/Assets/Resources/CheshirePrompts/` |
 | AI 서버 URL | `disputatio/Assets/godlotto/Script/Config/ServerConfig.cs` |
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
@@ -484,4 +508,4 @@ graph TB
 
 ---
 
-*문서 버전: 저장소 조사 기준 2026-06-06. 변경 시 §8 불일치 항목부터 재검증하세요.*
+*문서 버전: 저장소 조사 기준 2026-07-13 (Cheshire 다국어 locale·프롬프트 카탈로그 반영). 변경 시 §8 불일치 항목부터 재검증하세요.*

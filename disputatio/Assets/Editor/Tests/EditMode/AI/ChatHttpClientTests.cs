@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Godlotto.Interaction;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 [TestFixture]
@@ -176,6 +178,51 @@ public class ChatHttpClientTests
         Assert.AreEqual(expectedUrl, client.ResolvedServerUrl);
     }
 
+    // ---------------------------------------------------------------
+    //  LocalLlamaPayload.locale serialization
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void LocalLlamaPayload_SerializeObject_IncludesLocaleWhenSet()
+    {
+        var payload = new LocalLlamaPayload
+        {
+            prompt = "hi",
+            message = "hi",
+            system = "sys",
+            use_tools = true,
+            user_id = "anon-test",
+            locale = "en",
+        };
+
+        string json = JsonConvert.SerializeObject(payload);
+        JObject obj = JObject.Parse(json);
+
+        Assert.AreEqual("en", (string)obj["locale"]);
+        StringAssert.Contains("\"locale\":\"en\"", json.Replace(" ", ""));
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void EmptyInputAndConnectionError_NonKorean_HaveNoHangul(string locale)
+    {
+        string empty = CheshireUiStrings.EmptyInputPlease(locale);
+        string conn = CheshireUiStrings.ConnectionErrorPrefix(locale);
+        Assert.IsFalse(System.Text.RegularExpressions.Regex.IsMatch(
+            empty + conn, @"[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7A3]"));
+    }
+
+    [Test]
+    public void EmptyInputAndConnectionError_Korean_KeepKnownPhrases()
+    {
+        StringAssert.Contains(
+            "내용을 입력해 주세요",
+            CheshireUiStrings.EmptyInputPlease(CheshireLocaleResolver.Korean));
+        StringAssert.Contains(
+            "연결 오류",
+            CheshireUiStrings.ConnectionErrorPrefix(CheshireLocaleResolver.Korean));
+    }
+
     [Test]
     public void BaseChatbotRequestInProgress_BlocksAndUnblocksSceneInteractions()
     {
@@ -227,7 +274,7 @@ public class ChatHttpClientTests
 
     private sealed class TestChatbot : BaseChatbot
     {
-        protected override string BuildFinalSystemPrompt() => "";
+        protected override string BuildFinalSystemPrompt(string locale) => "";
 
         protected override IEnumerator HandleChatbotResponse(
             string responseMessage,
