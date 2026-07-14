@@ -1418,7 +1418,6 @@ GameObject:
   - component: {fileID: 285511178}
   - component: {fileID: 285511177}
   - component: {fileID: 285511176}
-  - component: {fileID: 285511175}
   - component: {fileID: 285511180}
   - component: {fileID: 285511185}
   - component: {fileID: 285511184}
@@ -1483,7 +1482,6 @@ GameObject:
   - component: {fileID: 285511285}
   - component: {fileID: 285511289}
   - component: {fileID: 285511290}
-  - component: {fileID: 285511291}
   - component: {fileID: 285511292}
   - component: {fileID: 285511294}
   - component: {fileID: 285511293}
@@ -3295,27 +3293,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &285511175
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285511111}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  itemId: 62
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1407025573}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 1
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &285511176
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3340,9 +3317,7 @@ MonoBehaviour:
   blockName: PuzzleBook_SelectYes
   description:
   eventHandler: {fileID: 0}
-  commandList:
-  - {fileID: 285511175}
-  - {fileID: 285511291}
+  commandList: []
   suppressAllAutoSelections: 0
 --- !u!114 &285511177
 MonoBehaviour:
@@ -8563,27 +8538,6 @@ MonoBehaviour:
     booleanRef: {fileID: 0}
     booleanVal: 0
   targetGameObjectOLD: {fileID: 0}
---- !u!114 &285511291
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285511111}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbd8c931f22994b9d90e2037fffaa770, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  itemId: 197
-  indentLevel: 0
-  _targetGameObject:
-    gameObjectRef: {fileID: 0}
-    gameObjectVal: {fileID: 1451222925}
-  activeState:
-    booleanRef: {fileID: 0}
-    booleanVal: 0
-  targetGameObjectOLD: {fileID: 0}
 --- !u!114 &285511292
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -10920,7 +10874,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &720655339
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11636,6 +11590,8 @@ MonoBehaviour:
   turnAnimationImage: {fileID: 1478480061}
   frameDuration: 0.07
   contentSwapFrame: 2
+  nextPageClickArea: {fileID: 1164327270}
+  previousPageClickArea: {fileID: 525271359}
 --- !u!1 &880736099
 GameObject:
   m_ObjectHideFlags: 0
@@ -14758,6 +14714,8 @@ MonoBehaviour:
   turnAnimationImage: {fileID: 0}
   frameDuration: 0.07
   contentSwapFrame: 2
+  nextPageClickArea: {fileID: 0}
+  previousPageClickArea: {fileID: 0}
 --- !u!114 &1407025578
 MonoBehaviour:
   m_ObjectHideFlags: 0

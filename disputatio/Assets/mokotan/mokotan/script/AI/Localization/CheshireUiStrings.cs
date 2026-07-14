@@ -41,6 +41,11 @@ public static class CheshireUiStrings
         return Lookup("ConnectionErrorPrefix", locale);
     }
 
+    public static string ReconnectRetrying(string locale)
+    {
+        return Lookup("ReconnectRetrying", locale);
+    }
+
     public static string WrongAnswerRetry(string locale)
     {
         return Lookup("WrongAnswerRetry", locale);
@@ -164,6 +169,8 @@ public static class CheshireUiStrings
                 return HardcodedEmptyInputPlease(normalizedLocale);
             case "ConnectionErrorPrefix":
                 return HardcodedConnectionErrorPrefix(normalizedLocale);
+            case "ReconnectRetrying":
+                return HardcodedReconnectRetrying(normalizedLocale);
             case "WrongAnswerRetry":
                 return HardcodedWrongAnswerRetry(normalizedLocale);
             case "WrongAnswerWithHint":
@@ -218,6 +225,19 @@ public static class CheshireUiStrings
                 return "Connection error: ";
             default:
                 return "연결 오류: ";
+        }
+    }
+
+    private static string HardcodedReconnectRetrying(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "接続が不安定なため、再試行します…";
+            case CheshireLocaleResolver.English:
+                return "Connection unstable. Retrying…";
+            default:
+                return "연결이 원활하지 않아 다시 시도합니다…";
         }
     }
 

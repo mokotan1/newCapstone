@@ -17,6 +17,7 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
     CanvasGroup hudCanvasGroup;
     RectTransform hudRoot;
     string pendingNextQuestId;
+    float clearTransitionDelaySeconds = QuestTrackerStylePalette.CrossfadeDelayAfterClearSeconds;
     Coroutine introRoutine;
     Coroutine crossfadeRoutine;
 
@@ -114,13 +115,7 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
 
         RefreshFromState(immediate: true);
         if (trackerState.IsQuestCleared)
-        {
-            string nextQuestId = TutorialQuestProgressAdapter.GetNextQuestId(trackerState.CurrentQuestId);
-            if (!string.IsNullOrWhiteSpace(nextQuestId))
-                QueueCrossfadeToQuest(nextQuestId);
-
             HandleQuestCleared();
-        }
 
         return true;
     }
@@ -146,8 +141,12 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
     void HandleQuestCleared()
     {
         hudView?.SetClearedVisuals(true);
-        if (!string.IsNullOrWhiteSpace(pendingNextQuestId))
-            StartCrossfade(QuestTrackerStylePalette.CrossfadeDelayAfterClearSeconds);
+
+        string nextQuestId = TutorialQuestProgressAdapter.GetNextQuestId(trackerState.CurrentQuestId);
+        if (!string.IsNullOrWhiteSpace(nextQuestId))
+            QueueCrossfadeToQuest(nextQuestId, clearTransitionDelaySeconds);
+        else
+            StartFinalDismiss(clearTransitionDelaySeconds);
     }
 
     void StartCrossfade(float delaySeconds)
@@ -156,6 +155,21 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
             StopCoroutine(crossfadeRoutine);
 
         crossfadeRoutine = StartCoroutine(CrossfadeRoutine(delaySeconds));
+    }
+
+    void StartFinalDismiss(float delaySeconds)
+    {
+        if (crossfadeRoutine != null)
+            StopCoroutine(crossfadeRoutine);
+
+        // EditMode 테스트에는 플레이어 루프가 없어 StartCoroutine이 진행되지 않는다.
+        if (!Application.isPlaying)
+        {
+            RunEnumeratorToEnd(FinalDismissRoutine(delaySeconds));
+            return;
+        }
+
+        crossfadeRoutine = StartCoroutine(FinalDismissRoutine(delaySeconds));
     }
 
     IEnumerator IntroRoutine()
@@ -211,6 +225,50 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
         RefreshFromState(immediate: true);
         PlayIntroAnimation();
         crossfadeRoutine = null;
+    }
+
+    IEnumerator FinalDismissRoutine(float delaySeconds)
+    {
+        if (delaySeconds > 0f)
+            yield return new WaitForSecondsRealtime(delaySeconds);
+
+        if (hudCanvasGroup != null)
+        {
+            float elapsed = 0f;
+            float duration = QuestTrackerStylePalette.CrossfadeDurationSeconds;
+            while (elapsed < duration)
+            {
+                float dt = Time.unscaledDeltaTime;
+                if (dt <= 0f)
+                {
+                    elapsed = duration;
+                    break;
+                }
+
+                elapsed += dt;
+                hudCanvasGroup.alpha = 1f - Mathf.Clamp01(elapsed / duration);
+                yield return null;
+            }
+
+            hudCanvasGroup.alpha = 0f;
+        }
+
+        // 완료된 퀘스트 상태는 새 게임 리셋 전까지 유지하고, HUD만 숨긴다.
+        if (hudView != null)
+            hudView.gameObject.SetActive(false);
+
+        crossfadeRoutine = null;
+    }
+
+    static void RunEnumeratorToEnd(IEnumerator enumerator)
+    {
+        if (enumerator == null)
+            return;
+
+        while (enumerator.MoveNext())
+        {
+            // EditMode: yield instruction을 즉시 소진한다.
+        }
     }
 
     /// <summary>
@@ -289,6 +347,11 @@ public sealed class QuestTrackerHudController : SingletonMonoBehaviour<QuestTrac
     internal void DestroyHudVisualForTests()
     {
         DestroyHudVisual();
+    }
+
+    internal void SetClearTransitionDelayForTests(float delaySeconds)
+    {
+        clearTransitionDelaySeconds = Mathf.Max(0f, delaySeconds);
     }
 
     internal static void ResetInstanceForTests()

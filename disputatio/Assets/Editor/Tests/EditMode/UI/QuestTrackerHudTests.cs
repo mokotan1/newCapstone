@@ -121,6 +121,23 @@ public class QuestTrackerHudTests
     }
 
     [Test]
+    public void FinalQuest_WhenCleared_DismissesHudRoot()
+    {
+        controller.SetClearTransitionDelayForTests(0f);
+        Assert.IsTrue(tracker.TrySetCurrentQuest(TutorialQuestIds.BottleKey));
+        controller.RefreshFromState(immediate: true);
+        Assert.IsTrue(controller.HudView.gameObject.activeSelf);
+
+        Assert.IsTrue(controller.AdvanceStep());
+        Assert.IsTrue(controller.AdvanceStep());
+        Assert.IsTrue(controller.AdvanceStep());
+
+        Assert.IsTrue(tracker.IsQuestCleared);
+        Assert.AreEqual(TutorialQuestIds.BottleKey, tracker.CurrentQuestId);
+        Assert.IsFalse(controller.HudView.gameObject.activeSelf);
+    }
+
+    [Test]
     public void KoreanQuestTitle_RendersFromCatalog()
     {
         tracker.TrySetCurrentQuest(TutorialQuestIds.LightTheManor);
