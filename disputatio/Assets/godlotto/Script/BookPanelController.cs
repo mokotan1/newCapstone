@@ -147,6 +147,12 @@ public class BookPanelController : MonoBehaviour
     [Tooltip("페이지 내용이 교체되는 프레임 인덱스 (0부터). 보통 절반 지점.")]
     [SerializeField] private int contentSwapFrame = 2;
 
+    [Header("페이지 넘기기 클릭 영역")]
+    [Tooltip("다음 페이지 클릭 영역. 마지막 페이지에서는 비활성화됩니다.")]
+    [SerializeField] private GameObject nextPageClickArea;
+    [Tooltip("이전 페이지 클릭 영역. 첫 페이지에서는 비활성화됩니다.")]
+    [SerializeField] private GameObject previousPageClickArea;
+
     /// <summary>퍼즐 패널 전용 텍스트 스타일(좌·우 정렬, 오토 사이즈). 레시피북과 분리합니다.</summary>
     private bool UsePuzzlePanelMemoTextStyle(TextMeshProUGUI tmp)
     {
@@ -334,7 +340,11 @@ public class BookPanelController : MonoBehaviour
 
     void OnEnable()
     {
+        if (string.IsNullOrEmpty(PREF_KEY))
+            PREF_KEY = "LastBookPage_" + gameObject.name;
+
         currentPageIndex = PlayerPrefs.GetInt(PREF_KEY, 0);
+        currentPageIndex = Mathf.Clamp(currentPageIndex, 0, PageCount - 1);
         ShowPage(currentPageIndex);
     }
 
@@ -342,6 +352,12 @@ public class BookPanelController : MonoBehaviour
     {
         if (_isTurning || currentPageIndex >= PageCount - 1) return;
         int next = currentPageIndex + 1;
+        if (!HasTurnAnimation())
+        {
+            ApplyPageIndexImmediate(next);
+            return;
+        }
+
         StartCoroutine(TurnPage(next, forward: true));
     }
 
@@ -349,7 +365,27 @@ public class BookPanelController : MonoBehaviour
     {
         if (_isTurning || currentPageIndex <= 0) return;
         int next = currentPageIndex - 1;
+        if (!HasTurnAnimation())
+        {
+            ApplyPageIndexImmediate(next);
+            return;
+        }
+
         StartCoroutine(TurnPage(next, forward: false));
+    }
+
+    private bool HasTurnAnimation()
+    {
+        return turnForwardFrames != null
+            && turnForwardFrames.Length > 0
+            && turnAnimationImage != null;
+    }
+
+    private void ApplyPageIndexImmediate(int nextIndex)
+    {
+        currentPageIndex = nextIndex;
+        ShowPageImmediate(currentPageIndex);
+        SaveCurrentPage();
     }
 
     private IEnumerator TurnPage(int nextIndex, bool forward)
@@ -357,11 +393,9 @@ public class BookPanelController : MonoBehaviour
         _isTurning = true;
 
         // 애니메이션 스프라이트가 없으면 즉시 전환
-        if (turnForwardFrames == null || turnForwardFrames.Length == 0 || turnAnimationImage == null)
+        if (!HasTurnAnimation())
         {
-            currentPageIndex = nextIndex;
-            ShowPageImmediate(currentPageIndex);
-            SaveCurrentPage();
+            ApplyPageIndexImmediate(nextIndex);
             _isTurning = false;
             yield break;
         }
@@ -409,14 +443,33 @@ public class BookPanelController : MonoBehaviour
     private void ShowPageImmediate(int index)
     {
         index = Mathf.Clamp(index, 0, PageCount - 1);
-        for (int i = 0; i < pages.Length; i++)
+        currentPageIndex = index;
+        if (pages != null)
         {
-            // 자기 자신이 pages[]에 들어간 단일 페이지 모드면 SetActive 스킵
-            if (pages[i] == gameObject) continue;
-            pages[i].SetActive(i == index);
+            for (int i = 0; i < pages.Length; i++)
+            {
+                if (pages[i] == null) continue;
+                // 자기 자신이 pages[]에 들어간 단일 페이지 모드면 SetActive 스킵
+                if (pages[i] == gameObject) continue;
+                pages[i].SetActive(i == index);
+            }
         }
         ApplyLayoutForPage(index);
         UpdateScrapbookOverlay(index);
+        RefreshNavigationAreas();
+    }
+
+    /// <summary>
+    /// 현재 페이지 경계에 맞춰 이전/다음 클릭 영역 활성 상태를 갱신합니다.
+    /// 첫 페이지: previous off / next on(페이지가 2장 이상일 때). 마지막: next off.
+    /// </summary>
+    private void RefreshNavigationAreas()
+    {
+        if (previousPageClickArea != null)
+            previousPageClickArea.SetActive(currentPageIndex > 0);
+
+        if (nextPageClickArea != null)
+            nextPageClickArea.SetActive(currentPageIndex < PageCount - 1);
     }
 
     // 기존 ShowPage는 OnEnable 전용으로 유지

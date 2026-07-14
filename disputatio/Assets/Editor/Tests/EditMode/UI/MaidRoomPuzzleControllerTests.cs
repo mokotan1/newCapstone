@@ -156,6 +156,30 @@ public class MaidRoomPuzzleControllerTests
     }
 
     [Test]
+    public void OnBlockEnd_PuzzleBookSelectYes_OpensPuzzlePanelAndHidesDiary()
+    {
+        var puzzlePanel = new GameObject("PuzzlePanel");
+        puzzlePanel.SetActive(false);
+        var diaryPanel = new GameObject("Diary_Panel");
+        diaryPanel.SetActive(true);
+
+        SetPrivateField(controller, "blockOutcomes", new[]
+        {
+            new BlockOutcome { blockName = "PuzzleBook_SelectYes", openPanel = puzzlePanel },
+        });
+        SetPrivateField(controller, "diaryPanelToHideOnBookOpen", diaryPanel);
+        RebuildLookupCaches(controller);
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "PuzzleBook_SelectYes";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsTrue(puzzlePanel.activeSelf);
+        Assert.IsFalse(diaryPanel.activeSelf);
+    }
+
+    [Test]
     public void OnClosePanel_DeactivatesPanelAndResetsIsClicked()
     {
         AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);

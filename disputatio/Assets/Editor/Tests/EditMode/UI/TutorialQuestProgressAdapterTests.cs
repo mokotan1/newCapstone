@@ -120,6 +120,12 @@ public class TutorialQuestProgressAdapterTests
     }
 
     [Test]
+    public void GetNextQuestId_ReturnsNullAfterBottleQuest()
+    {
+        Assert.IsNull(TutorialQuestProgressAdapter.GetNextQuestId(TutorialQuestIds.BottleKey));
+    }
+
+    [Test]
     public void IsTutorialFullyComplete_WhenBottleDragged()
     {
         var flags = new TutorialQuestWorldFlags(SceneNames.Kitchen, true, true, true, true);

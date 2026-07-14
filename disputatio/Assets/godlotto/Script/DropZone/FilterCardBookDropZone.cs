@@ -63,6 +63,7 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
     private bool fallbackDraggingMirror;
     private Vector2 fallbackPointerOffset;
     private bool hasStarted;
+    private bool hasPlacedMirror;
 
     private void Start()
     {
@@ -131,6 +132,7 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
         ResetFilterCardImage();
         SetFilterCardImageActive(true);
         RewireRotateButtons();
+        hasPlacedMirror = true;
 
         bool showRotateButtons = !hideRotateButtonsForDiaryMirror || diaryMirrorPuzzleController == null;
         if (rotateRightButtonObject != null) rotateRightButtonObject.SetActive(showRotateButtons);
@@ -150,8 +152,28 @@ public class FilterCardBookDropZone : MonoBehaviour, IDropHandler
     private void RestoreDiaryMirrorDropPanel()
     {
         fallbackDraggingMirror = false;
-
         EnsureBookOverlay();
+
+        if (hasPlacedMirror)
+        {
+            EnsureFilterCardImage();
+            ResetFilterCardImage();
+            SetFilterCardImageActive(true);
+            RewireRotateButtons();
+
+            bool showRotateButtons = !hideRotateButtonsForDiaryMirror || diaryMirrorPuzzleController == null;
+            if (rotateRightButtonObject != null)
+                rotateRightButtonObject.SetActive(showRotateButtons);
+            if (rotateLeftButtonObject != null)
+                rotateLeftButtonObject.SetActive(showRotateButtons);
+
+            if (diaryMirrorPuzzleController != null)
+                diaryMirrorPuzzleController.NotifyMirrorCardActivated(filterCardImageRect, activeCardRotator);
+
+            KeepCloseButtonOnTop();
+            return;
+        }
+
         HideFilterCardImage();
         SetFilterCardImageActive(false);
 

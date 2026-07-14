@@ -38,12 +38,12 @@ public class InGameSettingsPanelCleanupPolicyTests
     }
 
     [Test]
-    public void CleanupPolicy_PreservesSettingManagersNeededAfterReturningToMainMenu()
+    public void CleanupPolicy_PreservesOnlySettingsPanelAndGlobalSettingManager()
     {
         Assert.IsTrue(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(settingsPanelObject, settingsPanelObject));
         Assert.IsTrue(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(globalSettingsObject, settingsPanelObject));
-        Assert.IsTrue(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(globalVariablesObject, settingsPanelObject));
-        Assert.IsTrue(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(variableManagerObject, settingsPanelObject));
+        Assert.IsFalse(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(globalVariablesObject, settingsPanelObject));
+        Assert.IsFalse(InGameSettingsPanel.ShouldPreserveDontDestroyRoot(variableManagerObject, settingsPanelObject));
     }
 
     [Test]

@@ -340,13 +340,9 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
         if (root == currentSettingsObject)
             return true;
 
-        if (root.GetComponent<GlobalSettingManager>() != null)
-            return true;
-
-        if (root.GetComponent<GlobalVariables>() != null)
-            return true;
-
-        return root.name == "Variablemanager";
+        // Keep audio/video settings across return-to-menu.
+        // Do NOT preserve GlobalVariables / Variablemanager — those carry Fungus gameplay flags.
+        return root.GetComponent<GlobalSettingManager>() != null;
     }
 
     public void ReturnToGame()
