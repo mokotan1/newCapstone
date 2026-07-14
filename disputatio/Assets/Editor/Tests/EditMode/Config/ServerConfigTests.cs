@@ -29,7 +29,7 @@ public class ServerConfigTests
     public void FreshInstance_HasDefaultChatUrl()
     {
         ServerConfig config = ScriptableObject.CreateInstance<ServerConfig>();
-        Assert.AreEqual("http://15.134.24.132:8000/chat", config.ChatUrl);
+        Assert.AreEqual("http://54.156.51.119:8000/chat", config.ChatUrl);
     }
 
     [Test]

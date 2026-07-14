@@ -15,7 +15,7 @@ public sealed class ParretPanelChatbotBinder : MonoBehaviour
     [SerializeField] private string chatSayDialogObjectName = "SayDialogChatbot";
     [SerializeField] private TMP_InputField userInputField;
     [SerializeField] private Button sendButton;
-    [SerializeField] private string localServerUrlOverride = "http://15.134.24.132:8000/chat";
+    [SerializeField] private string localServerUrlOverride = "http://54.156.51.119:8000/chat";
 
     [Header("Flowchart")]
     [SerializeField] private Flowchart sceneFlowchart;

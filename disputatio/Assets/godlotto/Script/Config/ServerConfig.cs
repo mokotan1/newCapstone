@@ -13,7 +13,7 @@ public class ServerConfig : ScriptableObject
 
     [Header("Chat API")]
     [Tooltip("Base chat endpoint (e.g. http://host:port/chat).")]
-    [SerializeField] private string chatUrl = "http://15.134.24.132:8000/chat";
+    [SerializeField] private string chatUrl = "http://54.156.51.119:8000/chat";
 
     [Header("Security")]
     [Tooltip("When true, TLS certificate validation is skipped (dev/staging only).")]

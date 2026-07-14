@@ -179,7 +179,7 @@ sequenceDiagram
 ```
 
 - **URL 해석**: `BaseChatbot.Start()` → `localServerUrl` 비어 있으면 `ServerConfig.GetOrCreate().ChatUrl`  
-  (`disputatio/Assets/godlotto/Script/Config/ServerConfig.cs`, 기본값 `http://15.134.24.132:8000/chat`)
+  (`disputatio/Assets/godlotto/Script/Config/ServerConfig.cs`, 기본값 `http://54.156.51.119:8000/chat`)
 - **튜터 채점**: `TutorQuizGrader`가 `/chat` URL에서 `/tutor/grade`로 치환해 `POST` (LLM 없이 CSV 채점). 본문에 Fungus 언어에서 해석한 `locale`(`ko`|`ja`|`en`)을 포함.
 - **플레이어 locale**: `CheshireLocaleResolver`가 Fungus 언어 설정을 `ko`|`ja`|`en`으로 정규화. `ChatHttpClient`가 `/chat`·`/chat/stream` payload에 `locale`을 실어 보내고, 서버 `ChatRequest.locale` / `TutorGradeRequest.locale`이 동일 규칙으로 정규화한다. 동일 authority가 **시나리오 standing dialogue CSV**(`PlayScenarioBlockCommand` → `ScenarioLocalizationTable`)와 **Cheshire UI 문자열 CSV**(`Resources/Scenario/cheshire_ui_strings.csv`, `CheshireUiStrings`)에도 적용된다 (header `id|line_id|string_id,ko,en,ja`, 빈 셀은 KO 폴백).
 
