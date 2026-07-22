@@ -33,7 +33,8 @@ public class InGameDeveloperOverlay : MonoBehaviour
 
         DeveloperModeGuiTypography.Load();
         pendingFontSize = DeveloperModeGuiTypography.FontSize;
-        ApplyFontSizeIfNeeded(force: true);
+        guiStyles.MarkDirty();
+        ApplyWindowSizeForFont(pendingFontSize);
     }
 
     private void OnDisable()
