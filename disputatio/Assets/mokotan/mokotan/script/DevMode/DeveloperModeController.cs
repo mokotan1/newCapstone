@@ -165,10 +165,17 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
         var profileService = new Godlotto.QA.Profile.QaProfileService(
             Godlotto.QA.Profile.QaFileProfileMarkerStore.CreateDefault());
 
+        // Task 12: same registry the Editor CLI installer wires in (QaEditorCommandGatewayInstaller
+        // .CreateEditorGateway), so a standalone development player's QA panel sees the exact same
+        // registered scenes/targets/presets as qa_list/qa_run.
+        Godlotto.QA.Scenes.QaSceneRegistry sceneRegistry =
+            Godlotto.QA.SceneAdapters.QaSceneAdapterRegistration.BuildRegistry();
+
         return new Godlotto.QA.Gateway.QaCommandGateway(
             recorder,
             () => recorder.RunDirectoryPath,
-            profileService: profileService);
+            profileService: profileService,
+            sceneRegistry: sceneRegistry);
     }
 #endif
 #endif

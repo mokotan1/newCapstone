@@ -7,6 +7,7 @@ using Godlotto.QA.Core;
 using Godlotto.QA.Evidence;
 using Godlotto.QA.Gateway;
 using Godlotto.QA.Profile;
+using Godlotto.QA.Scenes;
 using Newtonsoft.Json.Linq;
 using UnityCliConnector;
 using UnityEditor;
@@ -41,7 +42,17 @@ namespace Godlotto.QA.EditorCli
             // what happens if this is ever omitted.
             var profileService = new QaProfileService(QaFileProfileMarkerStore.CreateDefault());
 
-            return new QaCommandGateway(recorder, () => recorder.RunDirectoryPath, profileService: profileService);
+            // Task 12: the initial scene adapters (MainMenu/Kitchen/Hall/MaidRoom/TutorRoom) live
+            // in Assembly-CSharp for the same circular-reference reason as QaProfileService above
+            // (see QaSceneAdapterRegistration's remarks), so only an assembly that can see both
+            // Assembly-CSharp and Godlotto.QA.Scenes -- like this Editor one -- can wire them in.
+            QaSceneRegistry sceneRegistry = Godlotto.QA.SceneAdapters.QaSceneAdapterRegistration.BuildRegistry();
+
+            return new QaCommandGateway(
+                recorder,
+                () => recorder.RunDirectoryPath,
+                profileService: profileService,
+                sceneRegistry: sceneRegistry);
         }
     }
 

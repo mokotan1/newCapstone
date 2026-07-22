@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "maidroom.food-effect",
+  "scene": "MaidRoom",
+  "steps": [
+    {
+      "id": "click-food-tray",
+      "command": "interaction.pointer",
+      "target": "maidroom.food-tray",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-no-console-errors",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "noNewConsoleError",
+        "description": "Gap (Task 12): MaidRoomQaAdapter is a registration-only stub, so click-food-tray is expected to fail explicitly (documented gap) rather than execute a guessed interaction id; this assertion still runs so the run finishes with full evidence."
+      }
+    }
+  ]
+}
