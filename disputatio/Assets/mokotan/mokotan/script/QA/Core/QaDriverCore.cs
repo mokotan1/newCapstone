@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,8 +15,30 @@ namespace Godlotto.QA.Core
     /// </summary>
     public sealed class QaDriverCore : IQaDriver, IDisposable
     {
+        /// <summary>
+        /// 유효한(만료되지 않은) 활성 <c>QaExecutionLease</c>를 요구하는 mutation 명령 종류.
+        /// 씬 전환/프로필 변경/입력 주입/시나리오 실행처럼 실제 Unity 실행 상태를 바꾸는
+        /// 명령만 포함합니다. <see cref="QaCommandType.StateRead"/> 등 읽기 전용 명령과
+        /// session.* 생애주기 명령은 리스가 없어도 항상 허용됩니다.
+        /// </summary>
+        private static readonly HashSet<QaCommandType> MutationCommandTypesRequiringLease = new HashSet<QaCommandType>
+        {
+            QaCommandType.ProfileReset,
+            QaCommandType.ProfileApplyPreset,
+            QaCommandType.SceneLoad,
+            QaCommandType.SceneWaitReady,
+            QaCommandType.InteractionApi,
+            QaCommandType.InteractionPointer,
+            QaCommandType.InteractionDrag,
+            QaCommandType.InteractionKey,
+            QaCommandType.ScenarioRun,
+            QaCommandType.ScenarioCancel,
+            QaCommandType.ScenarioStatus
+        };
+
         private readonly SemaphoreSlim gate = new SemaphoreSlim(1, 1);
         private readonly Func<DateTime> utcNowProvider;
+        private readonly IQaLeaseGate leaseGate;
 
         private long sequenceNumber;
         private QaRunState runState = QaRunState.Idle;
@@ -35,9 +58,17 @@ namespace Godlotto.QA.Core
         internal Func<QaCommand, Exception> FaultInjectorForTests { get; set; }
 #endif
 
-        public QaDriverCore(Func<DateTime> utcNowProvider = null)
+        /// <param name="utcNowProvider">테스트용 시각 주입 훅. 생략하면 <see cref="DateTime.UtcNow"/> 사용.</param>
+        /// <param name="leaseGate">
+        /// mutation 명령 실행 전 활성 리스를 확인할 게이트. <c>null</c>을 넘기면(기본값)
+        /// 리스 검증을 완전히 생략합니다 — Task 2에서 만들어진 기존 호출자와의 하위 호환을
+        /// 위한 선택적(opt-in) 의존성 주입입니다(DIP: 구체 <c>QaLeaseService</c>가 아닌
+        /// <see cref="IQaLeaseGate"/> 인터페이스에 의존).
+        /// </param>
+        public QaDriverCore(Func<DateTime> utcNowProvider = null, IQaLeaseGate leaseGate = null)
         {
             this.utcNowProvider = utcNowProvider ?? (() => DateTime.UtcNow);
+            this.leaseGate = leaseGate;
         }
 
         /// <summary>현재 run의 불변 스냅샷.</summary>
@@ -116,6 +147,15 @@ namespace Godlotto.QA.Core
 
         private QaCommandResult Dispatch(QaCommand command, long forSequenceNumber)
         {
+            if (leaseGate != null && MutationCommandTypesRequiringLease.Contains(command.Type))
+            {
+                if (!leaseGate.TryAuthorizeMutation(runState.RunId, out string denialReason))
+                {
+                    return BuildResult(command, forSequenceNumber, QaResultCode.LeaseRequired,
+                        denialReason ?? "A valid QA execution lease is required for this command.");
+                }
+            }
+
             switch (command.Type)
             {
                 case QaCommandType.SessionBegin:

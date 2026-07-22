@@ -213,4 +213,107 @@ public class QaDriverCoreTests
         Assert.AreEqual(1, alreadyActiveCount);
         Assert.IsTrue(driver.CurrentRun.IsActive);
     }
+
+    // ---------------------------------------------------------------
+    //  Lease gating (Task 3) - additive, opt-in via constructor injection.
+    //  These are NEW tests; none of the 13 pre-existing tests above were modified because
+    //  QaDriverCore's default constructor still passes leaseGate: null, which fully disables
+    //  lease enforcement and preserves the original Task 2 behavior byte-for-byte.
+    // ---------------------------------------------------------------
+
+    [Test]
+    public async Task ExecuteAsync_MutationCommandWithoutLeaseGate_StillSupportedUnsupportedAsBefore()
+    {
+        // No leaseGate configured (default ctor) => lease checks are skipped entirely, and
+        // SceneLoad still falls through to the pre-existing UnsupportedCommand path.
+        await driver.ExecuteAsync(QaCommand.BeginSession("first"), CancellationToken.None);
+
+        QaCommandResult result = await driver.ExecuteAsync(
+            QaCommand.Create("scene-1", QaCommandType.SceneLoad), CancellationToken.None);
+
+        Assert.AreEqual(QaResultCode.UnsupportedCommand, result.Code);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_MutationCommandWithLeaseGateDenying_ReturnsLeaseRequiredBeforeDispatch()
+    {
+        var leaseGate = new StubLeaseGate(authorize: false, denialReason: "no active lease");
+        using var gatedDriver = new QaDriverCore(leaseGate: leaseGate);
+
+        await gatedDriver.ExecuteAsync(QaCommand.BeginSession("first"), CancellationToken.None);
+
+        QaCommandResult result = await gatedDriver.ExecuteAsync(
+            QaCommand.Create("scene-1", QaCommandType.SceneLoad), CancellationToken.None);
+
+        Assert.AreEqual(QaResultCode.LeaseRequired, result.Code);
+        Assert.AreEqual("no active lease", result.Message);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_MutationCommandWithLeaseGateAuthorizing_BypassesLeaseRejectionAndReachesDispatch()
+    {
+        var leaseGate = new StubLeaseGate(authorize: true, denialReason: null);
+        using var gatedDriver = new QaDriverCore(leaseGate: leaseGate);
+
+        await gatedDriver.ExecuteAsync(QaCommand.BeginSession("first"), CancellationToken.None);
+
+        QaCommandResult result = await gatedDriver.ExecuteAsync(
+            QaCommand.Create("scene-1", QaCommandType.SceneLoad), CancellationToken.None);
+
+        // Authorized past the lease gate, but SceneLoad has no handler yet (later task), so it
+        // still falls through to UnsupportedCommand rather than LeaseRequired.
+        Assert.AreEqual(QaResultCode.UnsupportedCommand, result.Code);
+        Assert.AreEqual(1, leaseGate.CallCount);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_ReadOnlyStateReadWithLeaseGateDenying_IsNeverBlockedByLease()
+    {
+        var leaseGate = new StubLeaseGate(authorize: false, denialReason: "no active lease");
+        using var gatedDriver = new QaDriverCore(leaseGate: leaseGate);
+
+        QaCommandResult result = await gatedDriver.ExecuteAsync(
+            QaCommand.Create("state-1", QaCommandType.StateRead), CancellationToken.None);
+
+        Assert.AreEqual(QaResultCode.UnsupportedCommand, result.Code);
+        Assert.AreEqual(0, leaseGate.CallCount);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_SessionCommandsWithLeaseGateDenying_AreNeverBlockedByLease()
+    {
+        var leaseGate = new StubLeaseGate(authorize: false, denialReason: "no active lease");
+        using var gatedDriver = new QaDriverCore(leaseGate: leaseGate);
+
+        QaCommandResult begin = await gatedDriver.ExecuteAsync(
+            QaCommand.BeginSession("first"), CancellationToken.None);
+        QaCommandResult end = await gatedDriver.ExecuteAsync(
+            QaCommand.EndSession("end-1"), CancellationToken.None);
+
+        Assert.AreEqual(QaResultCode.Success, begin.Code);
+        Assert.AreEqual(QaResultCode.Success, end.Code);
+        Assert.AreEqual(0, leaseGate.CallCount);
+    }
+
+    /// <summary>테스트 전용 <see cref="IQaLeaseGate"/> 더블. 항상 고정된 결과를 반환합니다.</summary>
+    private sealed class StubLeaseGate : IQaLeaseGate
+    {
+        private readonly bool authorize;
+        private readonly string denialReason;
+
+        public int CallCount { get; private set; }
+
+        public StubLeaseGate(bool authorize, string denialReason)
+        {
+            this.authorize = authorize;
+            this.denialReason = denialReason;
+        }
+
+        public bool TryAuthorizeMutation(QaRunId runId, out string denialReasonOut)
+        {
+            CallCount++;
+            denialReasonOut = authorize ? null : denialReason;
+            return authorize;
+        }
+    }
 }

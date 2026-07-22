@@ -13,7 +13,14 @@ namespace Godlotto.QA.Core
         RunAlreadyActive,
         NoActiveRun,
         Cancelled,
-        InternalError
+        InternalError,
+
+        /// <summary>
+        /// Scene/profile/input/scenario 등 mutation 명령이 유효한(만료되지 않은) 활성
+        /// <c>QaExecutionLease</c> 없이 실행되어 거부되었습니다. 자세한 사유는
+        /// <see cref="QaCommandResult.Message"/>를 참고하세요.
+        /// </summary>
+        LeaseRequired
     }
 
     /// <summary>
