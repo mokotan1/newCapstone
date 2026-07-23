@@ -237,13 +237,22 @@ namespace Godlotto.QA.Gateway
         /// <c>Resources.LoadAll&lt;TextAsset&gt;("QA/Scenarios")</c>를 사용합니다(테스트에서는
         /// Unity Resources를 건드리지 않는 인메모리 목록을 주입할 수 있습니다).
         /// </param>
+        /// <param name="captureScreenshotPng">
+        /// <c>evidence.capture</c> 스텝과 <see cref="QaScenarioRunner"/>의 Finalize 직전 안전망이
+        /// 사용할 PNG 캡처 콜백(Task: manifest PASS 근본 원인 수정 — <c>qa_run</c>은 동기적으로
+        /// 끝나므로 실행 종료 후 별도 <c>qa_capture</c> 호출로는 늦습니다). Editor 호출자는
+        /// <c>QaEditorCommandGatewayInstaller</c>에서 실제 Game/Scene view 캡처를 주입합니다.
+        /// 생략하면(<c>null</c>) <c>evidence.capture</c> 스텝은 가짜 evidence를 만들지 않고
+        /// 명시적으로 실패합니다.
+        /// </param>
         public QaCommandGateway(
             IQaEvidenceRecorder evidenceRecorder,
             Func<string> evidenceRunDirectoryProvider = null,
             Func<IReadOnlyList<(string Name, string Json)>> scenarioSourceProvider = null,
             QaSceneRegistry sceneRegistry = null,
             IQaProfileService profileService = null,
-            QaLeaseService leaseService = null)
+            QaLeaseService leaseService = null,
+            Func<byte[]> captureScreenshotPng = null)
         {
             this.evidenceRecorder = evidenceRecorder ?? throw new ArgumentNullException(nameof(evidenceRecorder));
             this.evidenceRunDirectoryProvider = evidenceRunDirectoryProvider;
@@ -262,7 +271,8 @@ namespace Godlotto.QA.Gateway
                 this.inputDriver,
                 this.evidenceRecorder,
                 captureSnapshot: () => new QaStateProbe().Capture(),
-                ownerId: DefaultOwnerId);
+                ownerId: DefaultOwnerId,
+                captureScreenshotPng: captureScreenshotPng);
         }
 
         // -----------------------------------------------------------------------------------

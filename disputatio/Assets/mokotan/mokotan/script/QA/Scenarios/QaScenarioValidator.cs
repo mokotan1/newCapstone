@@ -209,6 +209,12 @@ namespace Godlotto.QA.Scenarios
                 case QaScenarioCommandKind.StateAssert:
                     ValidateAssertion(step.Assertion, label, errors);
                     break;
+                case QaScenarioCommandKind.EvidenceCapture:
+                case QaScenarioCommandKind.EvidenceConsole:
+                    // Deliberately no additional fields to validate: these steps never touch a
+                    // target/assertion, they only ask the runner to record evidence about
+                    // whatever state already exists at this point in the scenario.
+                    break;
             }
         }
 

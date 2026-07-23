@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Godlotto.QA.Core;
@@ -161,6 +162,7 @@ namespace Godlotto.QA.Scenarios
     public sealed class QaScenarioRunner
     {
         private const string DefaultOwnerId = "QaScenarioRunner";
+        private const string AutoCaptureCommandId = "auto-finalize-safety-net";
         private static readonly TimeSpan DefaultLeaseTtl = TimeSpan.FromMinutes(10);
 
         private readonly IQaDriver driver;
@@ -171,6 +173,7 @@ namespace Godlotto.QA.Scenarios
         private readonly IQaEvidenceRecorder evidenceRecorder;
         private readonly Func<QaDriverSnapshot> captureSnapshot;
         private readonly Func<DateTime> utcNowProvider;
+        private readonly Func<byte[]> captureScreenshotPng;
         private readonly string ownerId;
         private readonly TimeSpan leaseTtl;
 
@@ -188,6 +191,12 @@ namespace Godlotto.QA.Scenarios
         /// <param name="ownerId">리스 발급 시 사용할 소유자 식별자. 생략하면 고정 기본값을 사용합니다.</param>
         /// <param name="leaseTtl">리스 TTL. 생략하면 10분을 사용합니다.</param>
         /// <param name="utcNowProvider">테스트용 시각 주입 훅. 생략하면 <see cref="DateTime.UtcNow"/> 사용.</param>
+        /// <param name="captureScreenshotPng">
+        /// <c>evidence.capture</c> 스텝과 Finalize 직전 안전망이 사용할 PNG 스크린샷 캡처 콜백
+        /// (Task: manifest PASS 근본 원인 수정). 생략하면(<c>null</c>) <c>evidence.capture</c>
+        /// 스텝은 가짜 evidence를 만들어내지 않고 명시적으로 실패하며, 안전망도 아무 것도 하지
+        /// 않습니다 — provider가 없다는 사실 자체를 절대 숨기지 않습니다(Fail-Safe).
+        /// </param>
         public QaScenarioRunner(
             IQaDriver driver,
             QaSceneRegistry sceneRegistry,
@@ -198,7 +207,8 @@ namespace Godlotto.QA.Scenarios
             Func<QaDriverSnapshot> captureSnapshot,
             string ownerId = null,
             TimeSpan? leaseTtl = null,
-            Func<DateTime> utcNowProvider = null)
+            Func<DateTime> utcNowProvider = null,
+            Func<byte[]> captureScreenshotPng = null)
         {
             this.driver = driver ?? throw new ArgumentNullException(nameof(driver));
             this.sceneRegistry = sceneRegistry ?? throw new ArgumentNullException(nameof(sceneRegistry));
@@ -210,6 +220,7 @@ namespace Godlotto.QA.Scenarios
             this.ownerId = string.IsNullOrWhiteSpace(ownerId) ? DefaultOwnerId : ownerId;
             this.leaseTtl = leaseTtl ?? DefaultLeaseTtl;
             this.utcNowProvider = utcNowProvider ?? (() => DateTime.UtcNow);
+            this.captureScreenshotPng = captureScreenshotPng;
         }
 
         /// <summary>
@@ -276,6 +287,13 @@ namespace Godlotto.QA.Scenarios
             }
 
             QaDriverSnapshot endSnapshot = SafeCaptureSnapshot() ?? lastSnapshot;
+
+            // Safety net (root-cause fix for manifest PASS): outcomeCode here is always one of
+            // Passed/Failed/Interrupted (RunAsync never reaches this line otherwise), so a
+            // scenario that forgot an explicit evidence.capture step still gets one screenshot +
+            // console snapshot attempt before the evidence run is sealed by Finalize. This never
+            // fabricates evidence -- if no provider was injected, it is a deliberate no-op.
+            SafeAutoCaptureEvidenceBeforeFinalize(endSnapshot);
             SafeFinalizeEvidence(endSnapshot);
 
             QaCommandType sessionCloseType = outcomeCode == QaScenarioRunOutcomeCode.Passed
@@ -415,6 +433,10 @@ namespace Godlotto.QA.Scenarios
                     return await ExecuteKeyAsync(step, timeout, cancellationToken).ConfigureAwait(false);
                 case QaScenarioCommandKind.StateAssert:
                     return await ExecuteAssertAsync(step, timeout, cancellationToken).ConfigureAwait(false);
+                case QaScenarioCommandKind.EvidenceCapture:
+                    return await ExecuteEvidenceCaptureAsync(step).ConfigureAwait(false);
+                case QaScenarioCommandKind.EvidenceConsole:
+                    return await ExecuteEvidenceConsoleAsync(step).ConfigureAwait(false);
                 default:
                     return QaScenarioStepOutcome.Failed(step.Id, "Command '" + step.Command + "' is not executable yet.");
             }
@@ -535,6 +557,141 @@ namespace Godlotto.QA.Scenarios
                         step.Id,
                         waitResult.LastAssertionResult?.Message ?? "Assertion timed out after " + timeout + ".",
                         waitResult.FinalSnapshot);
+            }
+        }
+
+        /// <summary>
+        /// <c>evidence.capture</c> 스텝: 주입된 <see cref="captureScreenshotPng"/>를 호출해 PNG
+        /// 바이트를 얻고, <see cref="evidenceRecorder"/>에 첨부합니다. Provider가 없거나 빈
+        /// 데이터를 반환하면 이 스텝은 명시적으로 실패합니다 — "스크린샷이 없다"는 사실을
+        /// 절대 성공으로 위장하지 않습니다(증거 기반 verdict 원칙, <see cref="QaRunManifest"/>).
+        /// </summary>
+        private Task<QaScenarioStepOutcome> ExecuteEvidenceCaptureAsync(QaScenarioStepDefinition step)
+        {
+            if (captureScreenshotPng == null)
+            {
+                return Task.FromResult(QaScenarioStepOutcome.Failed(
+                    step.Id,
+                    "No screenshot provider was injected into this QaScenarioRunner; evidence.capture " +
+                    "cannot run without one (see QaCommandGateway's captureScreenshotPng parameter)."));
+            }
+
+            byte[] pngBytes;
+            try
+            {
+                pngBytes = captureScreenshotPng();
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(QaScenarioStepOutcome.Failed(
+                    step.Id, "Screenshot provider threw " + ex.GetType().Name + "."));
+            }
+
+            if (pngBytes == null || pngBytes.Length == 0)
+            {
+                return Task.FromResult(QaScenarioStepOutcome.Failed(
+                    step.Id, "Screenshot provider returned no data; refusing to fabricate evidence."));
+            }
+
+            QaEvidenceOperationResult result;
+            try
+            {
+                result = evidenceRecorder.AttachScreenshot(step.Id, pngBytes, step.Id);
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(QaScenarioStepOutcome.Failed(
+                    step.Id, "Evidence recorder threw " + ex.GetType().Name + " while attaching a screenshot."));
+            }
+
+            return Task.FromResult(result.IsSuccess
+                ? QaScenarioStepOutcome.Success(step.Id, result.Message)
+                : QaScenarioStepOutcome.Failed(step.Id, result.Message));
+        }
+
+        /// <summary>
+        /// <c>evidence.console</c> 스텝: 원본 Console 로그 텍스트 소스는 아직 이 러너에 연결되어
+        /// 있지 않으므로(Task 8 <see cref="QaDriverSnapshot"/>은 <c>ConsoleErrorCount</c>만 허용목록에
+        /// 둠), 현재 스냅샷의 오류 개수를 사람이 읽을 수 있는 요약으로 기록합니다 — 존재하지
+        /// 않는 원본 로그를 지어내지 않으면서도 "Console 상태가 이 시점에 기록되었다"는 사실
+        /// 자체는 evidence에 남깁니다.
+        /// </summary>
+        private Task<QaScenarioStepOutcome> ExecuteEvidenceConsoleAsync(QaScenarioStepDefinition step)
+        {
+            QaDriverSnapshot snapshot = SafeCaptureSnapshot();
+            string logText = BuildConsoleSummary(snapshot, "step '" + step.Id + "'");
+
+            QaEvidenceOperationResult result;
+            try
+            {
+                result = evidenceRecorder.RecordConsole(logText);
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(QaScenarioStepOutcome.Failed(
+                    step.Id, "Evidence recorder threw " + ex.GetType().Name + " while recording console output."));
+            }
+
+            return Task.FromResult(result.IsSuccess
+                ? QaScenarioStepOutcome.Success(step.Id, result.Message)
+                : QaScenarioStepOutcome.Failed(step.Id, result.Message));
+        }
+
+        private static string BuildConsoleSummary(QaDriverSnapshot snapshot, string whenLabel)
+        {
+            string errorCount = snapshot != null
+                ? snapshot.ConsoleErrorCount.ToString(CultureInfo.InvariantCulture)
+                : "unknown";
+            return "ConsoleErrorCount=" + errorCount + " at " + whenLabel + ".";
+        }
+
+        /// <summary>
+        /// Finalize 직전 안전망(Task: manifest PASS 근본 원인 수정). 시나리오 JSON이
+        /// <c>evidence.capture</c> 스텝을 깜빡했더라도, 스크린샷 provider가 주입되어 있다면
+        /// 마지막으로 스크린샷 한 장과 Console 요약을 한 번 더 시도합니다. provider가 없으면
+        /// (주입되지 않았으면) 아무 것도 하지 않습니다 — 이 메서드 자체는
+        /// <see cref="QaRunManifest.AggregateVerdict"/>의 규칙을 절대 우회하거나 완화하지
+        /// 않으며, 오직 "정상적으로 첨부될 수 있었던 증거"를 하나 더 시도할 뿐입니다.
+        /// </summary>
+        private void SafeAutoCaptureEvidenceBeforeFinalize(QaDriverSnapshot endSnapshot)
+        {
+            if (captureScreenshotPng == null)
+            {
+                return;
+            }
+
+            try
+            {
+                byte[] pngBytes = captureScreenshotPng();
+                if (pngBytes != null && pngBytes.Length > 0)
+                {
+                    QaEvidenceOperationResult result = evidenceRecorder.AttachScreenshot(
+                        AutoCaptureCommandId, pngBytes, AutoCaptureCommandId);
+                    if (!result.IsSuccess)
+                    {
+                        AppendNoteSafely(AutoCaptureCommandId,
+                            "Auto safety-net screenshot capture did not succeed: " + result.Message);
+                    }
+                }
+                else
+                {
+                    AppendNoteSafely(AutoCaptureCommandId, "Auto safety-net screenshot provider returned no data.");
+                }
+            }
+            catch (Exception ex)
+            {
+                AppendNoteSafely(AutoCaptureCommandId,
+                    "Auto safety-net screenshot capture threw " + ex.GetType().Name + ".");
+            }
+
+            try
+            {
+                evidenceRecorder.RecordConsole(BuildConsoleSummary(endSnapshot, "run finalize"));
+            }
+            catch (Exception ex)
+            {
+                AppendNoteSafely(AutoCaptureCommandId,
+                    "Auto safety-net console capture threw " + ex.GetType().Name + ".");
             }
         }
 

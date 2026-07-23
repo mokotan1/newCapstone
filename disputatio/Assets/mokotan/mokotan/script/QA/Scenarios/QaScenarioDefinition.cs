@@ -16,7 +16,21 @@ namespace Godlotto.QA.Scenarios
         InteractionPointer,
         InteractionDrag,
         InteractionKey,
-        StateAssert
+        StateAssert,
+
+        /// <summary>
+        /// 실행 중(mid-run) 스크린샷을 캡처해 evidence에 첨부합니다(Task: QA manifest PASS 근본
+        /// 원인 수정). 대상(target)이 필요 없습니다 — <see cref="QaScenarioRunner"/>에 주입된
+        /// 스크린샷 provider가 없으면 이 스텝은 명시적으로 실패합니다(가짜 evidence를 절대
+        /// 만들어내지 않음).
+        /// </summary>
+        EvidenceCapture,
+
+        /// <summary>
+        /// 실행 중 Console 진단(현재 <see cref="Evidence.QaDriverSnapshot.ConsoleErrorCount"/> 요약)을
+        /// evidence에 기록합니다. <see cref="EvidenceCapture"/>와 마찬가지로 대상이 필요 없습니다.
+        /// </summary>
+        EvidenceConsole
     }
 
     /// <summary>
@@ -35,6 +49,16 @@ namespace Godlotto.QA.Scenarios
         public const string CommandInteractionKey = "interaction.key";
         public const string CommandStateAssert = "state.assert";
 
+        /// <summary>
+        /// 실행 중 스크린샷을 evidence에 첨부하는 명령(Task: manifest PASS 근본 원인 수정).
+        /// <c>qa_run</c>이 동기적으로 끝나 별도 <c>qa_capture</c> 호출이 불가능했던 문제를,
+        /// 시나리오 JSON 자체에 캡처 체크포인트를 선언할 수 있게 하여 해결합니다.
+        /// </summary>
+        public const string CommandEvidenceCapture = "evidence.capture";
+
+        /// <summary>실행 중 Console 진단 요약을 evidence에 기록하는 명령(선택, 저비용).</summary>
+        public const string CommandEvidenceConsole = "evidence.console";
+
         /// <summary>JSON 명령 문자열 → 실행 가능한 <see cref="QaScenarioCommandKind"/>.</summary>
         public static readonly IReadOnlyDictionary<string, QaScenarioCommandKind> CommandKindsByName =
             new Dictionary<string, QaScenarioCommandKind>(StringComparer.Ordinal)
@@ -42,7 +66,9 @@ namespace Godlotto.QA.Scenarios
                 [CommandInteractionPointer] = QaScenarioCommandKind.InteractionPointer,
                 [CommandInteractionDrag] = QaScenarioCommandKind.InteractionDrag,
                 [CommandInteractionKey] = QaScenarioCommandKind.InteractionKey,
-                [CommandStateAssert] = QaScenarioCommandKind.StateAssert
+                [CommandStateAssert] = QaScenarioCommandKind.StateAssert,
+                [CommandEvidenceCapture] = QaScenarioCommandKind.EvidenceCapture,
+                [CommandEvidenceConsole] = QaScenarioCommandKind.EvidenceConsole
             };
 
         /// <summary>

@@ -234,6 +234,61 @@ public class QaScenarioValidatorTests
     }
 
     // ---------------------------------------------------------------
+    //  Root-cause fix: evidence.capture is an accepted command with no required fields
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void Validate_EvidenceCaptureStep_Succeeds()
+    {
+        QaScenarioDefinition scenario = ValidScenario();
+        scenario.Steps.Add(new QaScenarioStepDefinition
+        {
+            Id = "captureStep",
+            Command = QaScenarioSchema.CommandEvidenceCapture,
+            TimeoutMs = 5000
+        });
+
+        QaScenarioValidationResult result = validator.Validate(scenario);
+
+        Assert.IsTrue(result.IsValid, string.Join("; ", result.Errors));
+    }
+
+    [Test]
+    public void Validate_EvidenceConsoleStep_Succeeds()
+    {
+        QaScenarioDefinition scenario = ValidScenario();
+        scenario.Steps.Add(new QaScenarioStepDefinition
+        {
+            Id = "consoleStep",
+            Command = QaScenarioSchema.CommandEvidenceConsole,
+            TimeoutMs = 5000
+        });
+
+        QaScenarioValidationResult result = validator.Validate(scenario);
+
+        Assert.IsTrue(result.IsValid, string.Join("; ", result.Errors));
+    }
+
+    [Test]
+    public void Validate_EvidenceCaptureStepWithNonPositiveTimeout_StillRejectsBadTimeout()
+    {
+        // evidence.capture needs no target/assertion, but the universal timeoutMs rule must
+        // still apply to it like every other command.
+        QaScenarioDefinition scenario = ValidScenario();
+        scenario.Steps.Add(new QaScenarioStepDefinition
+        {
+            Id = "captureStep",
+            Command = QaScenarioSchema.CommandEvidenceCapture,
+            TimeoutMs = 0
+        });
+
+        QaScenarioValidationResult result = validator.Validate(scenario);
+
+        Assert.IsFalse(result.IsValid);
+        AssertAnyErrorContains(result, "timeoutMs");
+    }
+
+    // ---------------------------------------------------------------
     //  Step 1: reject duplicate step id
     // ---------------------------------------------------------------
 

@@ -151,14 +151,18 @@ public sealed class July15RegressionScenarioTests
         var inputDriver = new QaApiInputDriver(targetId => ResolveInteractable(registry, targetId));
         var probe = new MutableProbe { InputGateLocked = false };
 
-        var runner = new QaScenarioRunner(driver, registry, profile, lease, inputDriver, evidence, probe.Capture);
+        var runner = new QaScenarioRunner(
+            driver, registry, profile, lease, inputDriver, evidence, probe.Capture,
+            captureScreenshotPng: FakePngProvider);
 
         Task<QaScenarioRunOutcome> task = runner.RunAsync(scenario);
         yield return ToCoroutine(task);
 
         QaScenarioRunOutcome outcome = task.Result;
         Assert.AreEqual(QaScenarioRunOutcomeCode.Passed, outcome.Code, outcome.Message);
-        Assert.AreEqual(3, outcome.StepOutcomes.Count);
+        // 3 original steps (click, inputUnlocked assert, noNewConsoleError assert) + the
+        // evidence.capture checkpoint added by the QA manifest PASS root-cause fix.
+        Assert.AreEqual(4, outcome.StepOutcomes.Count);
         foreach (QaScenarioStepOutcome stepOutcome in outcome.StepOutcomes)
         {
             Assert.IsTrue(stepOutcome.IsSuccess, stepOutcome.StepId + ": " + stepOutcome.Message);
@@ -183,13 +187,23 @@ public sealed class July15RegressionScenarioTests
         var inputDriver = new QaApiInputDriver(targetId => ResolveInteractable(registry, targetId));
         var probe = new MutableProbe { InputGateLocked = false };
 
-        var runner = new QaScenarioRunner(driver, registry, profile, lease, inputDriver, evidence, probe.Capture);
+        var runner = new QaScenarioRunner(
+            driver, registry, profile, lease, inputDriver, evidence, probe.Capture,
+            captureScreenshotPng: FakePngProvider);
 
         Task<QaScenarioRunOutcome> task = runner.RunAsync(scenario);
         yield return ToCoroutine(task);
 
         QaScenarioRunOutcome outcome = task.Result;
         Assert.AreEqual(QaScenarioRunOutcomeCode.Passed, outcome.Code, outcome.Message);
+
+        // Root-cause fix: the manifest verdict aggregated by Finalize (not just the runner's own
+        // outcome code) must actually reach Pass now that a screenshot provider is wired in and
+        // the JSON declares an evidence.capture checkpoint.
+        Assert.IsNotNull(evidence.LastManifest, "Finalize must produce a manifest.");
+        Assert.AreEqual(
+            QaRunVerdictCode.Pass, evidence.LastManifest.Verdict, evidence.LastManifest.VerdictReason);
+        Assert.GreaterOrEqual(evidence.LastManifest.ScreenshotCount, 1);
 
         AssertRunnerAlwaysCleansUp(profile, lease, evidence);
     }
@@ -231,6 +245,16 @@ public sealed class July15RegressionScenarioTests
     // -----------------------------------------------------------------------------------
     //  Helpers
     // -----------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Minimal non-empty PNG-shaped byte stub for the fake evidence recorder -- these tests never
+    /// decode the bytes as a real image, they only assert that a non-empty payload reached
+    /// <see cref="IQaEvidenceRecorder.AttachScreenshot"/>.
+    /// </summary>
+    private static byte[] FakePngProvider()
+    {
+        return new byte[] { 0x89, 0x50, 0x4E, 0x47 };
+    }
 
     private static IQaApiInteractable ResolveInteractable(QaSceneRegistry registry, QaTargetId targetId)
     {
@@ -367,6 +391,13 @@ public sealed class July15RegressionScenarioTests
 
         public List<QaEvidenceEvent> Events { get; } = new List<QaEvidenceEvent>();
 
+        /// <summary>
+        /// Manifest produced by the most recent <see cref="Finalize"/> call -- exposed so tests can
+        /// assert against <see cref="QaRunManifest.Verdict"/> directly, the same value
+        /// <c>QaCommandGateway</c> writes into <c>manifest.json</c> for a real <c>qa_run</c>.
+        /// </summary>
+        public QaRunManifest LastManifest { get; private set; }
+
         public QaEvidenceOperationResult BeginRun(string runId, QaDriverSnapshot startSnapshot = null)
         {
             BeginRunCalled = true;
@@ -381,11 +412,19 @@ public sealed class July15RegressionScenarioTests
 
         public QaEvidenceOperationResult AttachScreenshot(string commandId, byte[] pngBytes, string fileNameHint = null)
         {
+            if (pngBytes == null || pngBytes.Length == 0)
+            {
+                return QaEvidenceOperationResult.Invalid("pngBytes must not be null or empty.");
+            }
+
+            Events.Add(QaEvidenceEvent.Create(
+                QaEvidenceEventType.ScreenshotAttached, commandId: commandId, message: "Fake screenshot attached."));
             return QaEvidenceOperationResult.Success();
         }
 
         public QaEvidenceOperationResult RecordConsole(string logText)
         {
+            Events.Add(QaEvidenceEvent.Create(QaEvidenceEventType.ConsoleRecorded, message: "Fake console recorded."));
             return QaEvidenceOperationResult.Success();
         }
 
@@ -395,6 +434,7 @@ public sealed class July15RegressionScenarioTests
             QaRunManifest manifest = QaRunManifest.Create(
                 "fake-run", "fake-dir", DateTime.UtcNow, DateTime.UtcNow, Events,
                 "events.jsonl", "console.log", "screenshots", "report.md");
+            LastManifest = manifest;
             return QaEvidenceFinalizeResult.Success(manifest, "fake-dir");
         }
     }

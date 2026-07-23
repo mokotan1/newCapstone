@@ -26,6 +26,14 @@ namespace Godlotto.QA.EditorCli
     [InitializeOnLoad]
     internal static class QaEditorCommandGatewayInstaller
     {
+        // Deliberately smaller than QaCapture's qa_capture default (1920x1080): this provider can
+        // fire once per evidence.capture step plus once more in QaScenarioRunner's pre-Finalize
+        // safety net, so a smaller render target keeps mid-run captures cheap while still being a
+        // legible evidence screenshot.
+        private const int MidRunCaptureWidth = 1280;
+        private const int MidRunCaptureHeight = 720;
+        private const string MidRunCaptureView = "game";
+
         static QaEditorCommandGatewayInstaller()
         {
             QaCommandGatewayHost.InstallFactory(CreateEditorGateway);
@@ -52,7 +60,27 @@ namespace Godlotto.QA.EditorCli
                 recorder,
                 () => recorder.RunDirectoryPath,
                 profileService: profileService,
-                sceneRegistry: sceneRegistry);
+                sceneRegistry: sceneRegistry,
+                captureScreenshotPng: CaptureMidRunScreenshotPng);
+        }
+
+        /// <summary>
+        /// Root-cause fix (manifest PASS): <c>qa_run</c> awaits <see cref="QaCommandGateway.RunScenarioAsync"/>
+        /// to completion before the Unity CLI tool returns, so a separate follow-up <c>qa_capture</c>
+        /// call always arrives after the run (and its evidence recorder) has already closed. Wiring
+        /// this provider into <see cref="QaScenarioRunner"/> lets <c>evidence.capture</c> steps (and
+        /// the runner's pre-Finalize safety net) attach a real screenshot <em>during</em> the run.
+        ///
+        /// This reuses <see cref="QaCapture"/>'s render-to-texture procedure (see that type's
+        /// remarks) so there is exactly one PNG-capture implementation to keep correct. Every
+        /// caller in this codebase -- CLI dispatch for qa_run/qa_capture, and this installer -- runs
+        /// on the Editor main thread without ever truly parking on a background thread (see
+        /// QaScenarioRunner/QaDriverCore: every awaited operation on this path completes
+        /// synchronously), so no extra thread marshaling is required for Camera.Render/ReadPixels.
+        /// </summary>
+        private static byte[] CaptureMidRunScreenshotPng()
+        {
+            return QaCapture.CapturePngBytes(MidRunCaptureView, MidRunCaptureWidth, MidRunCaptureHeight);
         }
     }
 
@@ -378,8 +406,13 @@ namespace Godlotto.QA.EditorCli
         /// 절차를 재사용하되, 파일로 쓰지 않고 PNG 바이트를 그대로 반환합니다 — 실제 저장은
         /// <see cref="IQaEvidenceRecorder.AttachScreenshot"/>가 evidence run 디렉터리 아래에서
         /// 전담합니다(SRP: 이 메서드는 "어떻게 캡처하는가"만 책임).
+        ///
+        /// <c>internal</c>인 이유: <see cref="QaEditorCommandGatewayInstaller"/>가 이 동일한 절차를
+        /// <see cref="QaCommandGateway"/>의 <c>captureScreenshotPng</c> provider로 재사용하여,
+        /// PNG 캡처 구현이 <c>qa_capture</c>와 mid-run <c>evidence.capture</c> 사이에서 하나만
+        /// 존재하도록 합니다(중복 구현 금지).
         /// </summary>
-        private static byte[] CapturePngBytes(string view, int width, int height)
+        internal static byte[] CapturePngBytes(string view, int width, int height)
         {
             Camera camera = null;
 
