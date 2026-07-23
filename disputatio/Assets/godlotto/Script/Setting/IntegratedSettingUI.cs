@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Fungus;
@@ -241,6 +242,7 @@ public class IntegratedSettingUI : MonoBehaviour
         
         if (uiMode == UIMode.StandaloneScene)
         {
+            CleanupDontDestroyGameplayRoots();
             SceneManager.LoadScene(mainMenuSceneName);
         }
         else
@@ -258,7 +260,12 @@ public class IntegratedSettingUI : MonoBehaviour
 
         Flowchart fcMenu = FlowchartLocator.Resolve(targetFlowchart);
         if (fcMenu != null) fcMenu.SetBooleanVariable(fungusVariableName, false);
-        
+
+        // InGameSettingsPanel의 "메인메뉴로" 버튼과 동일한 DDOL 정리를 수행한다.
+        // 그렇지 않으면 팝업 설정 UI로 나간 회차의 Fungus/퀘스트 상태가 다음
+        // New Game까지 살아남는다.
+        CleanupDontDestroyGameplayRoots();
+
         yield return null;
 
         SceneManager.LoadScene(mainMenuSceneName);
@@ -270,22 +277,25 @@ public class IntegratedSettingUI : MonoBehaviour
         SettingPanelWorldInputBlocker.End();
     }
 
-    private void CleanupDontDestroyObjects()
+    /// <summary>
+    /// Runtime entry point: discovers every current DontDestroyOnLoad root and
+    /// wipes the ones not covered by <see cref="DontDestroyGameplayCleanup.ShouldPreserveRoot"/>
+    /// (GlobalSettingManager and this object are preserved; Fungus globals and
+    /// quest tracker systems are not).
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots()
     {
-        var temp = new GameObject("TempSceneProbe");
-        DontDestroyOnLoad(temp);
-        var ddScene = temp.scene;
-        Destroy(temp);
+        CleanupDontDestroyGameplayRoots(DontDestroyGameplayCleanup.FindDontDestroyOnLoadRoots());
+    }
 
-        var roots = new List<GameObject>();
-        ddScene.GetRootGameObjects(roots);
-
-        foreach (var obj in roots)
-        {
-            if (obj == gameObject) continue;
-            if (obj.GetComponent<GlobalSettingManager>() != null) continue;
-            Destroy(obj);
-        }
+    /// <summary>
+    /// EditMode-testable overload: applies the shared cleanup policy to an
+    /// explicit root list with an injectable destroy callback instead of the
+    /// Play-Mode-only DontDestroyOnLoad discovery.
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots(IList<GameObject> roots, Action<GameObject> destroyRoot = null)
+    {
+        DontDestroyGameplayCleanup.DestroyUnpreservedRoots(roots, gameObject, destroyRoot);
     }
 
     private void HandleKeyboardInput()

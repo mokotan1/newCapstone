@@ -303,6 +303,7 @@ flowchart LR
 | `Item` / `ItemPickup` | ScriptableObject 아이템, `itemId` 1~30 |
 | `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색 |
 | `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` |
+| `DontDestroyGameplayCleanup` | 메인메뉴 복귀 시 DDOL 게임플레이 루트(Fungus 전역 변수·퀘스트 트래커) 정리 정책의 단일 소유자. `GlobalSettingManager`(BGM/SFX/전체화면/해상도)와 호출자 자신만 보존. `InGameSettingsPanel`·`EndSceneManager`·`IntegratedSettingUI`·`SettingPanelButtonActions`의 모든 "메인메뉴로" 진입점이 공유 |
 | `AudioController` | BGM 등 (`SingletonMonoBehaviour`) |
 | `OpeningMentionController` | 오프닝 씬 Bell/Fence (Interaction 패턴 예시) |
 | `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
@@ -498,6 +499,7 @@ graph TB
 | Cheshire locale/프롬프트 | `.../AI/Localization/CheshireLocaleResolver.cs`, `CheshirePromptCatalog.cs` |
 | Cheshire 프롬프트 txt | `disputatio/Assets/Resources/CheshirePrompts/` |
 | AI 서버 URL | `disputatio/Assets/godlotto/Script/Config/ServerConfig.cs` |
+| 메인메뉴 복귀 시 DDOL 정리 | `disputatio/Assets/godlotto/Script/DontDestroyGameplayCleanup.cs` (모든 "메인메뉴로" 버튼이 공유) |
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (C#) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
