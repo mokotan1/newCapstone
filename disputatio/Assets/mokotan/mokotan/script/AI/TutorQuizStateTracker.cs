@@ -19,6 +19,8 @@ internal sealed class TutorQuizStateTracker
     private readonly bool _debug;
     private readonly UnityEvent _onQuizCompletedEvent;
     private readonly Action _onQuizSessionFinalized;
+    private readonly TutorQuizSessionSelector _sessionSelector;
+    private readonly string _insufficientQuestionsError;
 
     private int _skipOrderOffset;
     private bool _quizCompletionEventFired;
@@ -32,14 +34,27 @@ internal sealed class TutorQuizStateTracker
         TextAsset tutorQuestionOrderAsset,
         bool debugQuizProgress,
         UnityEvent onQuizCompletedEvent,
-        Action onQuizSessionFinalized)
+        Action onQuizSessionFinalized,
+        TutorQuizSessionSelector sessionSelector = null,
+        string insufficientQuestionsError = null)
     {
         _flowchart = flowchart;
         _questionOrderAsset = tutorQuestionOrderAsset;
         _debug = debugQuizProgress;
         _onQuizCompletedEvent = onQuizCompletedEvent;
         _onQuizSessionFinalized = onQuizSessionFinalized;
+        _sessionSelector = sessionSelector;
+        _insufficientQuestionsError = insufficientQuestionsError;
     }
+
+    /// <summary>
+    /// True when the session could not be built with enough unique valid questions
+    /// (design §4: fewer than 5 valid questions → localized error, input unlocked — never stuck "thinking").
+    /// </summary>
+    public bool HasInsufficientQuestions => !string.IsNullOrEmpty(_insufficientQuestionsError);
+
+    /// <summary>Diagnostic detail behind <see cref="HasInsufficientQuestions"/> (file/row context); null when healthy.</summary>
+    public string InsufficientQuestionsError => _insufficientQuestionsError;
 
     public bool ExpectingQuizAnswer
     {
@@ -102,11 +117,24 @@ internal sealed class TutorQuizStateTracker
         return FungusVariableKeys.CorrectAnswerCount;
     }
 
-    /// <summary>출제 순서 파일에서 CorrectAnswerCount 인덱스의 question_id를 가져옵니다.</summary>
+    /// <summary>
+    /// CorrectAnswerCount(+ 건너뛰기 오프셋) 인덱스의 현재 세션 question_id.
+    /// <see cref="TutorQuizSessionSelector"/>가 있으면 그 고정 5문제를 우선 사용하고,
+    /// 없으면(레거시) <c>TutorQuestionOrder.txt</c> 순차 워크로 폴백합니다.
+    /// </summary>
     public string ResolveCurrentQuestionIdFromOrderAsset()
     {
         if (_flowchart == null)
             return null;
+
+        if (_sessionSelector != null)
+        {
+            IReadOnlyList<string> sessionIds = _sessionSelector.SessionQuestionIds;
+            if (sessionIds == null || sessionIds.Count == 0)
+                return null;
+            int selectorIdx = Mathf.Clamp(ReadCorrectAnswerCount() + _skipOrderOffset, 0, sessionIds.Count - 1);
+            return sessionIds[selectorIdx];
+        }
 
         TextAsset asset = _questionOrderAsset != null
             ? _questionOrderAsset

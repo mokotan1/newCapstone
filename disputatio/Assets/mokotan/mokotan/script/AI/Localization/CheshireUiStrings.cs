@@ -130,6 +130,15 @@ public static class CheshireUiStrings
         return Lookup("ProgressGuideFooter", locale);
     }
 
+    /// <summary>
+    /// Shown when the TutorRoom quiz bank has fewer than the required unique valid questions for a
+    /// session (design §4). Input must unlock right after this — never stay stuck "thinking".
+    /// </summary>
+    public static string TutorInsufficientQuestions(string locale)
+    {
+        return Lookup("TutorInsufficientQuestions", locale);
+    }
+
     private static string Lookup(string stringId, string locale)
     {
         string normalized = CheshireLocaleResolver.NormalizeLocale(locale);
@@ -197,6 +206,8 @@ public static class CheshireUiStrings
                 return HardcodedProgressAcquiredHeader(normalizedLocale);
             case "ProgressGuideFooter":
                 return HardcodedProgressGuideFooter(normalizedLocale);
+            case "TutorInsufficientQuestions":
+                return HardcodedTutorInsufficientQuestions(normalizedLocale);
             default:
                 return string.Empty;
         }
@@ -418,6 +429,19 @@ public static class CheshireUiStrings
                 return "\n\n[Progress] Acquired items: ";
             default:
                 return "\n\n[진행] 획득 아이템: ";
+        }
+    }
+
+    private static string HardcodedTutorInsufficientQuestions(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "問題を準備できませんでした。もう一度部屋に入ってみてね。";
+            case CheshireLocaleResolver.English:
+                return "I couldn't prepare a quiz right now. Please try entering this room again.";
+            default:
+                return "지금은 문제를 준비할 수 없어. 방에 다시 들어와 줘.";
         }
     }
 

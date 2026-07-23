@@ -68,4 +68,19 @@ public class TutorQuizGraderTests
         Assert.IsFalse(Hangul.IsMatch(CheshireUiStrings.UserPromptAfterCorrectAnswer(locale)));
         Assert.IsFalse(Hangul.IsMatch(CheshireUiStrings.UserPromptMissionComplete(locale)));
     }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void TutorInsufficientQuestions_NonKorean_HaveNoHangul(string locale)
+    {
+        Assert.IsFalse(Hangul.IsMatch(CheshireUiStrings.TutorInsufficientQuestions(locale)));
+    }
+
+    [Test]
+    public void TutorInsufficientQuestions_Korean_KeepsKnownPhrase()
+    {
+        StringAssert.Contains(
+            "문제를 준비할 수 없어",
+            CheshireUiStrings.TutorInsufficientQuestions(CheshireLocaleResolver.Korean));
+    }
 }
