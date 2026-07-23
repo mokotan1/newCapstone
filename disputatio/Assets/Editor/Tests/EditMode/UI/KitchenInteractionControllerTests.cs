@@ -58,6 +58,7 @@ public class KitchenInteractionControllerTests
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.FaucetClicked, false);
         AddBooleanVariable(flowchart, FungusVariableKeys.BottleDragged, false);
+        AddBooleanVariable(flowchart, FungusVariableKeys.ParretClicked, false);
         SetPrivateField(controller, "flowchart", flowchart);
         SetPrivateField(controller, "puzzleState", puzzleState);
         SetPrivateField(controller, "routes", KitchenSceneMigrationSpecs.AllInteractionRoutes()
@@ -181,7 +182,7 @@ public class KitchenInteractionControllerTests
     }
 
     [Test]
-    public void OnInteraction_Parret_WhenEligible_ExecutesOnceAndConsumesClick()
+    public void OnInteraction_Parret_WhenEligible_ExecutesOnceAndKeepsColliderEnabledForLaterClicks()
     {
         AddBooleanVariable(flowchart, FungusVariableKeys.ComeParret, true);
         puzzleState.SetParretFlagsForTests(comeParret: true, parretClicked: false);
@@ -204,16 +205,73 @@ public class KitchenInteractionControllerTests
         };
 
         controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
-        Assert.AreEqual(KitchenParretInteractionGate.ParretBlockName, executedBlock);
-        Assert.IsTrue(puzzleState.ParretClicked);
-        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.ParretClicked));
-        Assert.IsFalse(parretCollider.enabled);
+        Assert.AreEqual(KitchenParretInteractionGate.ParretBlockName, executedBlock, "block should execute on first eligible click");
+        Assert.IsTrue(puzzleState.ParretClicked, "puzzleState.ParretClicked should flip true");
+        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.ParretClicked), "Fungus mirror should flip true");
+
+        // Regression guard: the one-shot Fungus gate must not permanently disable the
+        // world-click collider. Later clicks still need to dispatch so they can reach
+        // the general chat fallback instead of going dead.
+        Assert.IsTrue(parretCollider.enabled, "collider must remain enabled after the first click");
 
         executedBlock = null;
         controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
-        Assert.IsNull(executedBlock);
+        Assert.IsNull(executedBlock, "Second click must not re-run the one-shot Fungus 'parret' block.");
 
         Object.DestroyImmediate(parretCollider.gameObject);
+    }
+
+    [Test]
+    public void OnInteraction_Parret_AfterFirstClick_OpensGeneralChatWithoutReRunningFungusBlock()
+    {
+        AddBooleanVariable(flowchart, FungusVariableKeys.ComeParret, true);
+        puzzleState.SetParretFlagsForTests(comeParret: true, parretClicked: true);
+
+        var registryGo = new GameObject("Registry");
+        var registry = registryGo.AddComponent<KitchenPanelRegistry>();
+        var parrotPanel = CreatePanel("Parret", active: false);
+        SetRegistryField(registry, "parrotPanel", parrotPanel);
+        SetPrivateField(controller, "panelRegistry", registry);
+
+        string executedBlock = null;
+        FungusDialogueBridge.ExecuteBlockHandlerForTests = (_, blockName) =>
+        {
+            executedBlock = blockName;
+            return true;
+        };
+
+        controller.OnInteraction(KitchenParretInteractionGate.ParretInteractionId);
+
+        Assert.IsNull(executedBlock, "Subsequent parret clicks must not re-run the Fungus intro block.");
+        Assert.IsTrue(parrotPanel.activeSelf, "Subsequent parret clicks must open the general chat entry point.");
+
+        Object.DestroyImmediate(registryGo);
+        Object.DestroyImmediate(parrotPanel);
+    }
+
+    [Test]
+    public void OnInteractionGateBlocked_WhenParretNotYetClicked_DoesNotOpenGeneralChat()
+    {
+        // Gate can also block because Parret hasn't "arrived" yet (ComeParret == false).
+        // The general-chat fallback must only fire for the already-clicked case, not this
+        // one. Exercised directly against the protected hook (bypassing OnInteraction's
+        // Fungus round-trip) so this test stays independent of Fungus global-variable state.
+        puzzleState.SetParretFlagsForTests(comeParret: false, parretClicked: false);
+
+        var registryGo = new GameObject("Registry");
+        var registry = registryGo.AddComponent<KitchenPanelRegistry>();
+        var parrotPanel = CreatePanel("Parret", active: false);
+        SetRegistryField(registry, "parrotPanel", parrotPanel);
+        SetPrivateField(controller, "panelRegistry", registry);
+
+        InvokeOnInteractionGateBlocked(
+            KitchenParretInteractionGate.ParretInteractionId,
+            KitchenParretInteractionGate.ParretBlockName);
+
+        Assert.IsFalse(parrotPanel.activeSelf);
+
+        Object.DestroyImmediate(registryGo);
+        Object.DestroyImmediate(parrotPanel);
     }
 
     [Test]
@@ -425,6 +483,14 @@ public class KitchenInteractionControllerTests
     {
         typeof(KitchenInteractionController).GetMethod(
             "PrepareInteractionExecution",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            ?.Invoke(controller, new object[] { interactionId, blockName });
+    }
+
+    void InvokeOnInteractionGateBlocked(string interactionId, string blockName)
+    {
+        typeof(KitchenInteractionController).GetMethod(
+            "OnInteractionGateBlocked",
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             ?.Invoke(controller, new object[] { interactionId, blockName });
     }
