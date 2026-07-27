@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "roomId": "kitchen",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["Kitchen"],
+  "implementationStatus": "PARTIAL",
+  "entryPreset": "kitchen.faucet.preset.before-faucet",
+  "requiredCapabilities": [
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.click",
+    "kitchen.faucet.probe",
+    "kitchen.faucet.assert-clicked",
+    "kitchen.faucet.capture"
+  ],
+  "scenarios": [
+    "room.kitchen.smoke",
+    "room.kitchen.happy-path",
+    "room.kitchen.guard.wrong-item",
+    "room.kitchen.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": ["maid-room-key"],
+    "flags": {"HaveMaidKey": true},
+    "unlocks": ["maid-room"]
+  }
+}
