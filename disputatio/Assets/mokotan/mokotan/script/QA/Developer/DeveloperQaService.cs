@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Godlotto.QA.Core;
+using Godlotto.QA.Profile;
 
 namespace Godlotto.QA.Developer
 {
@@ -13,16 +15,27 @@ namespace Godlotto.QA.Developer
             "capability", "preset", "scene", "interaction", "state", "evidence", "scenario"
         };
 
+        private const string ProfileUnavailableMessage = "QA profile service unavailable";
+
         private readonly DeveloperQaCapabilityRegistry _registry;
+        private readonly IQaProfileService _profileService;
 
         public DeveloperQaService()
-            : this(new DeveloperQaCapabilityRegistry())
+            : this(new DeveloperQaCapabilityRegistry(), null)
         {
         }
 
         public DeveloperQaService(DeveloperQaCapabilityRegistry registry)
+            : this(registry, null)
+        {
+        }
+
+        public DeveloperQaService(
+            DeveloperQaCapabilityRegistry registry,
+            IQaProfileService profileService)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+            _profileService = profileService;
         }
 
         public Task<DeveloperQaResult> ExecuteAsync(
@@ -72,6 +85,17 @@ namespace Godlotto.QA.Developer
                 return Task.FromResult(InvokeInteraction(command.TargetId));
             }
 
+            if (command.Family == "scenario" && command.Name == "run")
+            {
+                return Task.FromResult(BeginScenarioProfileSession(command));
+            }
+
+            if (command.Family == "scenario" &&
+                (command.Name == "cancel" || command.Name == "abort"))
+            {
+                return Task.FromResult(RestoreScenarioProfileSession());
+            }
+
             return Task.FromResult(new DeveloperQaResult(
                 DeveloperQaResultCode.UnsupportedCommand,
                 $"{command.Family}.{command.Name} not implemented yet."));
@@ -90,6 +114,81 @@ namespace Godlotto.QA.Developer
         public IReadOnlyCollection<DeveloperQaCapability> ListCapabilities()
         {
             return _registry.List();
+        }
+
+        private DeveloperQaResult BeginScenarioProfileSession(DeveloperQaCommand command)
+        {
+            if (_profileService == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    ProfileUnavailableMessage);
+            }
+
+            QaRunId runId = ResolveRunId(command);
+            QaProfileOperationResult profileResult = _profileService.BeginQaProfile(runId);
+            if (!profileResult.IsSuccess)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    string.IsNullOrWhiteSpace(profileResult.Message)
+                        ? "Failed to begin QA profile."
+                        : profileResult.Message);
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "QA profile session begun.",
+                data: DeveloperQaMaps.From(new Dictionary<string, string>
+                {
+                    ["run_id"] = runId.ToString(),
+                    ["command_id"] = command.Id
+                }));
+        }
+
+        private DeveloperQaResult RestoreScenarioProfileSession()
+        {
+            if (_profileService == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    ProfileUnavailableMessage);
+            }
+
+            QaProfileOperationResult profileResult = _profileService.RestorePreviousProfile();
+            if (!profileResult.IsSuccess)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    string.IsNullOrWhiteSpace(profileResult.Message)
+                        ? "Failed to restore previous QA profile."
+                        : profileResult.Message);
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "QA profile session restored.");
+        }
+
+        /// <summary>
+        /// Prefer Parameters["run_id"], then command.Id when Guid-parseable; else <see cref="QaRunId.NewId"/>.
+        /// </summary>
+        private static QaRunId ResolveRunId(DeveloperQaCommand command)
+        {
+            if (command.Parameters != null &&
+                command.Parameters.TryGetValue("run_id", out string fromParam) &&
+                QaRunId.TryParse(fromParam, out QaRunId parsedFromParam) &&
+                !parsedFromParam.IsNone)
+            {
+                return parsedFromParam;
+            }
+
+            if (QaRunId.TryParse(command.Id, out QaRunId parsedFromId) && !parsedFromId.IsNone)
+            {
+                return parsedFromId;
+            }
+
+            return QaRunId.NewId();
         }
 
         private DeveloperQaResult DescribeCapability(string targetId)
@@ -119,7 +218,7 @@ namespace Godlotto.QA.Developer
                 return CreateMissingCapability(targetId);
             }
 
-            // Known capability without an adapter yet (Task 3+).
+            // Known capability without an adapter yet (Task 4+).
             return new DeveloperQaResult(
                 DeveloperQaResultCode.UnsupportedCommand,
                 $"interaction.invoke for '{targetId}' not implemented yet.");

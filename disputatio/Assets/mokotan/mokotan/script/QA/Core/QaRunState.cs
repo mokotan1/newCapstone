@@ -29,6 +29,19 @@ namespace Godlotto.QA.Core
             return new QaRunId(Guid.NewGuid());
         }
 
+        /// <summary>영속 마커·명령 파라미터 등 외부 문자열 표현으로부터 안전하게 복원합니다.</summary>
+        public static bool TryParse(string text, out QaRunId runId)
+        {
+            if (!string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out Guid parsed))
+            {
+                runId = new QaRunId(parsed);
+                return true;
+            }
+
+            runId = None;
+            return false;
+        }
+
         public bool Equals(QaRunId other)
         {
             return value.Equals(other.value);
