@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 /// <summary>
-/// Wave 1 Task 4: Kitchen and MainMenu capability autorun scenarios load from Resources.
+/// Wave 1/2: multi-room capability autorun scenarios load from Resources.
 /// </summary>
 [TestFixture]
 public sealed class MultiRoomAutorunScenarioTests
@@ -22,6 +22,22 @@ public sealed class MultiRoomAutorunScenarioTests
         TextAsset json = Resources.Load<TextAsset>("QA/Scenarios/mainmenu-start-autorun");
         Assert.IsNotNull(json);
         Assert.IsTrue(json.text.Contains("mainmenu.start.click"));
+    }
+
+    [Test]
+    public void MaidRoomFoodAutorun_Json_LoadsAndHasClickStep()
+    {
+        TextAsset json = Resources.Load<TextAsset>("QA/Scenarios/maidroom-food-autorun");
+        Assert.IsNotNull(json);
+        Assert.IsTrue(json.text.Contains("maidroom.food.click-tray"));
+    }
+
+    [Test]
+    public void HallNavAutorun_Json_LoadsAndHasClickStep()
+    {
+        TextAsset json = Resources.Load<TextAsset>("QA/Scenarios/hall-nav-autorun");
+        Assert.IsNotNull(json);
+        Assert.IsTrue(json.text.Contains("hall.nav.click-kitchen-entry"));
     }
 }
 #endif
