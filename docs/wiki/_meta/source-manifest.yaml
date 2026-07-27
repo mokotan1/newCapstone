@@ -1,557 +1,709 @@
 schema_version: 1
 inputs:
   roots:
-    - 시나리오
-    - 기획서
-    - 보고서
-    - docs
+  - 시나리오
+  - 기획서
+  - 보고서
+  - docs
   root_sources:
-    - 미니게임_구현_리포트.md
-    - report.pdf
+  - 미니게임_구현_리포트.md
+  - report.pdf
   technical_sources:
-    - docs/architecture.md
-    - docs/fungus-migration-audit.md
-    - docs/fungus-room-migration-plan.md
-    - docs/glass-choice-menu-usage.md
-    - docs/play-log-analysis.md
-    - docs/play-log-pipeline.md
-    - docs/play-log-sheets-upload.md
-    - docs/qa/2026-07-14-regression-playtest.md
-    - docs/quest-tracker-manual-verification.md
-    - docs/security/llm-abuse-defense-plan.md
-    - docs/security/llm-defense-play-test-guide.md
+  - docs/architecture.md
+  - docs/fungus-migration-audit.md
+  - docs/fungus-room-migration-plan.md
+  - docs/glass-choice-menu-usage.md
+  - docs/play-log-analysis.md
+  - docs/play-log-pipeline.md
+  - docs/play-log-sheets-upload.md
+  - docs/qa/2026-07-14-regression-playtest.md
+  - docs/quest-tracker-manual-verification.md
+  - docs/security/llm-abuse-defense-plan.md
+  - docs/security/llm-defense-play-test-guide.md
   included_extensions:
-    - hwp
-    - md
-    - pdf
-    - pptx
-    - txt
+  - hwp
+  - md
+  - pdf
+  - pptx
+  - txt
   exclusions:
-    - docs/wiki/** (generated wiki, manifests, transcripts, and RAG output)
-    - docs/superpowers/** (agent plans and specifications)
-    - docs/scenario_extracts/** (previous generated extraction references)
-    - docs/generated/** (generated outputs)
-    - tools/** (dependencies, fixtures, tests, and tooling)
-    - disputatio/** (Unity project and vendor assets)
-    - unlisted docs/** (technical sources require explicit allowlisting)
+  - docs/wiki/** (generated wiki, manifests, transcripts, and RAG output)
+  - docs/superpowers/** (agent plans and specifications)
+  - docs/scenario_extracts/** (previous generated extraction references)
+  - docs/generated/** (generated outputs)
+  - tools/** (dependencies, fixtures, tests, and tooling)
+  - disputatio/** (Unity project and vendor assets)
+  - unlisted docs/** (technical sources require explicit allowlisting)
 sources:
-  - source_id: technical:884df6c5b462
-    source_path: docs/architecture.md
-    source_sha256: 884df6c5b462b2b3263ade35d6619831f653e3ea6f92d6b46328e705ab682892
-    source_type: md
-    category: technical
-    title: architecture
-    transcript_path: docs/wiki/sources/technical/architecture--884df6c5b462.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:architecture
-  - source_id: technical:d232bf9f3f1a
-    source_path: docs/fungus-migration-audit.md
-    source_sha256: d232bf9f3f1a212002d62e9f78879d3bfaa6fd5d99f6677a88db0aa48abdcd86
-    source_type: md
-    category: technical
-    title: fungus-migration-audit
-    transcript_path: docs/wiki/sources/technical/fungus-migration-audit--d232bf9f3f1a.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:fungus-migration-audit
-  - source_id: technical:85fdfa8e3425
-    source_path: docs/fungus-room-migration-plan.md
-    source_sha256: 85fdfa8e342510c07ad08ffd988c9636a3b2ebc2fcd5ef22bc888ae2575bfadb
-    source_type: md
-    category: technical
-    title: fungus-room-migration-plan
-    transcript_path: docs/wiki/sources/technical/fungus-room-migration-plan--85fdfa8e3425.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:fungus-room-migration-plan
-  - source_id: technical:fa5a4b6c3594
-    source_path: docs/glass-choice-menu-usage.md
-    source_sha256: fa5a4b6c3594bb92b793ba66a124cd4f1d3d63c12441c05ba689876448032c80
-    source_type: md
-    category: technical
-    title: glass-choice-menu-usage
-    transcript_path: docs/wiki/sources/technical/glass-choice-menu-usage--fa5a4b6c3594.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:glass-choice-menu-usage
-  - source_id: technical:703aa0cef602
-    source_path: docs/play-log-analysis.md
-    source_sha256: 703aa0cef602f978bbf7a14271be1a7de8cf6de8a60d09b57f380caee032edb6
-    source_type: md
-    category: technical
-    title: play-log-analysis
-    transcript_path: docs/wiki/sources/technical/play-log-analysis--703aa0cef602.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:play-log-analysis
-  - source_id: technical:bbb4cc9beefd
-    source_path: docs/play-log-pipeline.md
-    source_sha256: bbb4cc9beefd02c4d9c005ceeea7e7d95834b9128e1ea914ba47de585c700d5e
-    source_type: md
-    category: technical
-    title: play-log-pipeline
-    transcript_path: docs/wiki/sources/technical/play-log-pipeline--bbb4cc9beefd.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:play-log-pipeline
-  - source_id: technical:45fe7f23c613
-    source_path: docs/play-log-sheets-upload.md
-    source_sha256: 45fe7f23c6136e723a05ad4a06aa2af8162a1bf5750f411290a7f96f932bd34c
-    source_type: md
-    category: technical
-    title: play-log-sheets-upload
-    transcript_path: docs/wiki/sources/technical/play-log-sheets-upload--45fe7f23c613.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:play-log-sheets-upload
-  - source_id: technical:c2f05e2172e0
-    source_path: docs/qa/2026-07-14-regression-playtest.md
-    source_sha256: c2f05e2172e0df2621dcf7464565ec25e6c27eabfc6596a54da9200d6141553e
-    source_type: md
-    category: technical
-    title: 2026-07-14-regression-playtest
-    transcript_path: docs/wiki/sources/technical/2026-07-14-regression-playtest--c2f05e2172e0.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:2026-07-14-regression-playtest
-  - source_id: technical:9db1ee420efd
-    source_path: docs/quest-tracker-manual-verification.md
-    source_sha256: 9db1ee420efd63fc1fa6aec8208afe73c81c07b3f1870c3bb81588e230a48aa5
-    source_type: md
-    category: technical
-    title: quest-tracker-manual-verification
-    transcript_path: docs/wiki/sources/technical/quest-tracker-manual-verification--9db1ee420efd.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:quest-tracker-manual-verification
-  - source_id: technical:03a736ea3ab1
-    source_path: docs/security/llm-abuse-defense-plan.md
-    source_sha256: 03a736ea3ab18785f694fb9a053675789654f642784a4d4044f01397a21e45cd
-    source_type: md
-    category: technical
-    title: llm-abuse-defense-plan
-    transcript_path: docs/wiki/sources/technical/llm-abuse-defense-plan--03a736ea3ab1.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:llm-abuse-defense-plan
-  - source_id: technical:99ee8a511c6f
-    source_path: docs/security/llm-defense-play-test-guide.md
-    source_sha256: 99ee8a511c6f240a0115ea15331b69938b05e4e8fd31680da43385634be694e4
-    source_type: md
-    category: technical
-    title: llm-defense-play-test-guide
-    transcript_path: docs/wiki/sources/technical/llm-defense-play-test-guide--99ee8a511c6f.md
-    status: pending
-    rag_eligible: true
-    canonical_group: technical:llm-defense-play-test-guide
-  - source_id: report:b8eacd76e0a1
-    source_path: report.pdf
-    source_sha256: b8eacd76e0a18fc0f3a73c0b5c38052d3503810af2fadce734afe30ab56a53d6
-    source_type: pdf
-    category: report
-    title: report
-    transcript_path: docs/wiki/sources/report/report--b8eacd76e0a1.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:report
-  - source_id: planning:b98bbfbdb019
-    source_path: 기획서/.민원번호 33의 챗봇 개발 기획.pdf
-    source_sha256: b98bbfbdb0193206c3fb7d2c589ca5da630173e2aef81cd5bd6b57794b8503fb
-    source_type: pdf
-    category: planning
-    title: .민원번호 33의 챗봇 개발 기획
-    transcript_path: docs/wiki/sources/planning/민원번호-33의-챗봇-개발-기획--b98bbfbdb019.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:민원번호-33의-챗봇-개발-기획
-  - source_id: planning:5656494d4c10
-    source_path: 기획서/.민원번호 33의 챗봇 개발 기획.pptx
-    source_sha256: 5656494d4c1085a96eb56b566fe77a2aa658bdda88ebafdc8c0d933398702116
-    source_type: pptx
-    category: planning
-    title: .민원번호 33의 챗봇 개발 기획
-    transcript_path: docs/wiki/sources/planning/민원번호-33의-챗봇-개발-기획--5656494d4c10.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:민원번호-33의-챗봇-개발-기획
-  - source_id: planning:a54025e67028
-    source_path: 기획서/2층 복도 기획.pdf
-    source_sha256: a54025e67028165563f99be8a5f062e872df9b3e5bfea159251729a6cef3aa45
-    source_type: pdf
-    category: planning
-    title: 2층 복도 기획
-    transcript_path: docs/wiki/sources/planning/2층-복도-기획--a54025e67028.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:2층-복도-기획
-  - source_id: planning:23235ab919ae
-    source_path: 기획서/2층 복도 기획.pptx
-    source_sha256: 23235ab919ae065b9f6e80b5bd53c038ba87112cfc6edae0b68a4493c5f3d1f9
-    source_type: pptx
-    category: planning
-    title: 2층 복도 기획
-    transcript_path: docs/wiki/sources/planning/2층-복도-기획--23235ab919ae.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:2층-복도-기획
-  - source_id: planning:189dba1942da
-    source_path: 기획서/The unholy of mention_컨셉 기획서.pptx
-    source_sha256: 189dba1942daf20f55a3455c34715f27ec65832aa587e519b272c0a0abd9b333
-    source_type: pptx
-    category: planning
-    title: The unholy of mention_컨셉 기획서
-    transcript_path: docs/wiki/sources/planning/the-unholy-of-mention_컨셉-기획서--189dba1942da.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:the-unholy-of-mention_컨셉-기획서
-  - source_id: planning:35ada8161577
-    source_path: 기획서/The unholy of mention_컨셉 기획서.pptx.pdf
-    source_sha256: 35ada81615779733400ec7c485e37efbff873687d2bd2c3e7d120faa81595f6d
-    source_type: pdf
-    category: planning
-    title: The unholy of mention_컨셉 기획서
-    transcript_path: docs/wiki/sources/planning/the-unholy-of-mention_컨셉-기획서--35ada8161577.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:the-unholy-of-mention_컨셉-기획서
-  - source_id: planning:46be221ef692
-    source_path: 기획서/UI 컨셉 기획.pdf
-    source_sha256: 46be221ef692fb43b0acefda612baa0185f59987edfa28d23b2c356de85ec0af
-    source_type: pdf
-    category: planning
-    title: UI 컨셉 기획
-    transcript_path: docs/wiki/sources/planning/ui-컨셉-기획--46be221ef692.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:ui-컨셉-기획
-  - source_id: planning:d55dcff2ee6b
-    source_path: 기획서/UI 컨셉 기획.pptx
-    source_sha256: d55dcff2ee6bfdcdae63878af982b53c57920321cefea9cf9246f47882555ea4
-    source_type: pptx
-    category: planning
-    title: UI 컨셉 기획
-    transcript_path: docs/wiki/sources/planning/ui-컨셉-기획--d55dcff2ee6b.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:ui-컨셉-기획
-  - source_id: planning:0f17719c09f2
-    source_path: 기획서/disputatio_초기 계획안.hwp
-    source_sha256: 0f17719c09f2cf99afa178b6ef9c9801cad0cc5965db311c5d9cfa403d745b8d
-    source_type: hwp
-    category: planning
-    title: disputatio_초기 계획안
-    transcript_path: docs/wiki/sources/planning/disputatio_초기-계획안--0f17719c09f2.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:disputatio_초기-계획안
-  - source_id: planning:9d4611de3ae3
-    source_path: 기획서/disputatio_초기 계획안.pdf
-    source_sha256: 9d4611de3ae38f1673c3f0b38774769ebd1044e1518fed8e81c4c04e09ae1aa0
-    source_type: pdf
-    category: planning
-    title: disputatio_초기 계획안
-    transcript_path: docs/wiki/sources/planning/disputatio_초기-계획안--9d4611de3ae3.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:disputatio_초기-계획안
-  - source_id: planning:d716468cdf00
-    source_path: 기획서/공부방(2층) 기획서.pdf
-    source_sha256: d716468cdf0050bf05f96a5ae84fc6c02196cbc7ddbbb3cbcb258d56db61dff1
-    source_type: pdf
-    category: planning
-    title: 공부방(2층) 기획서
-    transcript_path: docs/wiki/sources/planning/공부방-2층-기획서--d716468cdf00.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:공부방-2층-기획서
-  - source_id: planning:d6e66a02a4b8
-    source_path: 기획서/공부방(2층) 기획서.pptx
-    source_sha256: d6e66a02a4b843e5e5609bc47135e9c17a1dd97b165d87c5b95c301974d5cbc1
-    source_type: pptx
-    category: planning
-    title: 공부방(2층) 기획서
-    transcript_path: docs/wiki/sources/planning/공부방-2층-기획서--d6e66a02a4b8.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:공부방-2층-기획서
-  - source_id: planning:2c99a6b50413
-    source_path: 기획서/서재 개발 기획.pdf
-    source_sha256: 2c99a6b5041306d76e5a4196cb23576cc7b77a0bf8aa77bf0460e7f29522c5ca
-    source_type: pdf
-    category: planning
-    title: 서재 개발 기획
-    transcript_path: docs/wiki/sources/planning/서재-개발-기획--2c99a6b50413.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:서재-개발-기획
-  - source_id: planning:1a7c6222ad99
-    source_path: 기획서/서재 개발 기획.pptx
-    source_sha256: 1a7c6222ad99819481b4b4176461f0fc834ffffc1d115260bd9fee461eae2cc1
-    source_type: pptx
-    category: planning
-    title: 서재 개발 기획
-    transcript_path: docs/wiki/sources/planning/서재-개발-기획--1a7c6222ad99.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:서재-개발-기획
-  - source_id: planning:af96b05baf10
-    source_path: 기획서/아내 방 기획.pdf
-    source_sha256: af96b05baf107fa86ff6297f68b8c034b99026f7cc0f70c812c17d24e76aa61d
-    source_type: pdf
-    category: planning
-    title: 아내 방 기획
-    transcript_path: docs/wiki/sources/planning/아내-방-기획--af96b05baf10.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:아내-방-기획
-  - source_id: planning:d61aadd7dd90
-    source_path: 기획서/아내 방 기획.pptx
-    source_sha256: d61aadd7dd90ba2beb33d38ce5e66f6c510d3e7e7620af61382fd07c639b12f1
-    source_type: pptx
-    category: planning
-    title: 아내 방 기획
-    transcript_path: docs/wiki/sources/planning/아내-방-기획--d61aadd7dd90.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:아내-방-기획
-  - source_id: planning:f142e62e4abf
-    source_path: 기획서/아들 방 기획.pdf
-    source_sha256: f142e62e4abfe71e0bb41f5204ebe3901e073d7fc6d96efccfcdbec0aba781aa
-    source_type: pdf
-    category: planning
-    title: 아들 방 기획
-    transcript_path: docs/wiki/sources/planning/아들-방-기획--f142e62e4abf.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:아들-방-기획
-  - source_id: planning:0cdfdc88add7
-    source_path: 기획서/안방 기획.pdf
-    source_sha256: 0cdfdc88add7a5ea72624ce2b70324e0b8ae49a93247c06357de78d56216f91d
-    source_type: pdf
-    category: planning
-    title: 안방 기획
-    transcript_path: docs/wiki/sources/planning/안방-기획--0cdfdc88add7.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:안방-기획
-  - source_id: planning:3f167ea617e5
-    source_path: 기획서/안방 기획.pptx
-    source_sha256: 3f167ea617e5417bc71c9095d4d58f21684b249a23bb0b61045b1de77099b117
-    source_type: pptx
-    category: planning
-    title: 안방 기획
-    transcript_path: docs/wiki/sources/planning/안방-기획--3f167ea617e5.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:안방-기획
-  - source_id: planning:e4e36660bb79
-    source_path: 기획서/오프닝 개발 기획서.pdf
-    source_sha256: e4e36660bb79e685d625b07bcfda4251bb8fe4cd667d8968a1c0c853c7bcb1fe
-    source_type: pdf
-    category: planning
-    title: 오프닝 개발 기획서
-    transcript_path: docs/wiki/sources/planning/오프닝-개발-기획서--e4e36660bb79.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:오프닝-개발-기획서
-  - source_id: planning:11bd8b014e77
-    source_path: 기획서/오프닝 개발 기획서.pptx
-    source_sha256: 11bd8b014e77f424027938ad8a00d4404a99016d2a21d4ee6a44f7ef9854e5e0
-    source_type: pptx
-    category: planning
-    title: 오프닝 개발 기획서
-    transcript_path: docs/wiki/sources/planning/오프닝-개발-기획서--11bd8b014e77.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:오프닝-개발-기획서
-  - source_id: planning:47f3be566f34
-    source_path: 기획서/지하 연구실 기획.pdf
-    source_sha256: 47f3be566f348dba8f142acda1ded0894d57d2457159769425ad90f143532e28
-    source_type: pdf
-    category: planning
-    title: 지하 연구실 기획
-    transcript_path: docs/wiki/sources/planning/지하-연구실-기획--47f3be566f34.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:지하-연구실-기획
-  - source_id: planning:e7ee91d062a2
-    source_path: 기획서/지하 연구실 기획.pptx
-    source_sha256: e7ee91d062a267416d565fc4ba41ad1b45e7ca8fb63ba2f3f63b4e4e8af6eb3c
-    source_type: pptx
-    category: planning
-    title: 지하 연구실 기획
-    transcript_path: docs/wiki/sources/planning/지하-연구실-기획--e7ee91d062a2.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:지하-연구실-기획
-  - source_id: planning:ea29b35cc87e
-    source_path: 기획서/첫 장면 기획.pdf
-    source_sha256: ea29b35cc87e88f0c5ed4bb7386bee34b272e9d11a0511ff8e6e41df8d10e40d
-    source_type: pdf
-    category: planning
-    title: 첫 장면 기획
-    transcript_path: docs/wiki/sources/planning/첫-장면-기획--ea29b35cc87e.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:첫-장면-기획
-  - source_id: planning:e16101da266f
-    source_path: 기획서/첫 장면 기획.pptx
-    source_sha256: e16101da266f1705d5b4c8e51218b80de83e930384d14b0d45a18b5a48e4d680
-    source_type: pptx
-    category: planning
-    title: 첫 장면 기획
-    transcript_path: docs/wiki/sources/planning/첫-장면-기획--e16101da266f.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:첫-장면-기획
-  - source_id: planning:53ed77ef462a
-    source_path: 기획서/현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가.pdf
-    source_sha256: 53ed77ef462a21b443758db590353c19594f7db3563f2d9e0ec4ff53768bc298
-    source_type: pdf
-    category: planning
-    title: 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가
-    transcript_path: docs/wiki/sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--53ed77ef462a.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:현재-플로우-직관성-맵-제작-복도-기믹-추가
-  - source_id: planning:acafc91a0413
-    source_path: 기획서/현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가.pptx
-    source_sha256: acafc91a041341b628d13634524da0ad46c5091f3a9426aec96fec1274e425d9
-    source_type: pptx
-    category: planning
-    title: 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가
-    transcript_path: docs/wiki/sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--acafc91a0413.md
-    status: pending
-    rag_eligible: true
-    canonical_group: planning:현재-플로우-직관성-맵-제작-복도-기믹-추가
-  - source_id: report:72ed55d40f51
-    source_path: 미니게임_구현_리포트.md
-    source_sha256: 72ed55d40f514d581d76084af5e38472d650b3039f06f45f09dc445f3f4835d7
-    source_type: md
-    category: report
-    title: 미니게임_구현_리포트
-    transcript_path: docs/wiki/sources/report/미니게임_구현_리포트--72ed55d40f51.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:미니게임_구현_리포트
-  - source_id: report:9ecff7fce708
-    source_path: 보고서/오합지졸_캡스톤디자인 프로젝트 주간 보고서(김태협 3.30).hwp
-    source_sha256: 9ecff7fce7080bb106f5feb2fe12cecf54dec4207bcb593b908c2eb28c187ab5
-    source_type: hwp
-    category: report
-    title: 오합지졸_캡스톤디자인 프로젝트 주간 보고서(김태협 3.30)
-    transcript_path: docs/wiki/sources/report/오합지졸_캡스톤디자인-프로젝트-주간-보고서-김태협-3-30--9ecff7fce708.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:오합지졸_캡스톤디자인-프로젝트-주간-보고서-김태협-3-30
-  - source_id: report:c7b7c636ae7a
-    source_path: 보고서/오합지졸_캡스톤디자인 프로젝트 주간 보고서(어준선) (1).hwp
-    source_sha256: c7b7c636ae7ac2df64528663c8e60ab938494d6c233e32d317ded46704605c74
-    source_type: hwp
-    category: report
-    title: 오합지졸_캡스톤디자인 프로젝트 주간 보고서(어준선) (1)
-    transcript_path: docs/wiki/sources/report/오합지졸_캡스톤디자인-프로젝트-주간-보고서-어준선-1--c7b7c636ae7a.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:오합지졸_캡스톤디자인-프로젝트-주간-보고서-어준선-1
-  - source_id: report:1d87fa1b554a
-    source_path: 보고서/캡스톤디자인 주간보고서(양식) (2).hwp
-    source_sha256: 1d87fa1b554ab1d29d9c54f17f9add081844f9959a751e7d8a2cb3577945b266
-    source_type: hwp
-    category: report
-    title: 캡스톤디자인 주간보고서(양식) (2)
-    transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서-양식-2--1d87fa1b554a.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:캡스톤디자인-주간보고서-양식-2
-  - source_id: report:9bed5ad2952b
-    source_path: 보고서/캡스톤디자인 주간보고서_김기석_20260406.hwp
-    source_sha256: 9bed5ad2952b784fb436a0ee86a0c782895ede8a0acddb7e7bc33794f2cb535c
-    source_type: hwp
-    category: report
-    title: 캡스톤디자인 주간보고서_김기석_20260406
-    transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_김기석_20260406--9bed5ad2952b.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:캡스톤디자인-주간보고서_김기석_20260406
-  - source_id: report:0b9a5e184f69
-    source_path: 보고서/캡스톤디자인 주간보고서_김태협_20260406.hwp
-    source_sha256: 0b9a5e184f69dc53ef5747977054dda6daf51df88c4650a7d30a59c49c030005
-    source_type: hwp
-    category: report
-    title: 캡스톤디자인 주간보고서_김태협_20260406
-    transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_김태협_20260406--0b9a5e184f69.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:캡스톤디자인-주간보고서_김태협_20260406
-  - source_id: report:83c56ec21f2f
-    source_path: 보고서/캡스톤디자인 주간보고서_어준선_20260406.hwp
-    source_sha256: 83c56ec21f2f96bee4d79aab9a15955331291c1f21ac4025eb563fdaf2e6216d
-    source_type: hwp
-    category: report
-    title: 캡스톤디자인 주간보고서_어준선_20260406
-    transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_어준선_20260406--83c56ec21f2f.md
-    status: pending
-    rag_eligible: false
-    canonical_group: report:캡스톤디자인-주간보고서_어준선_20260406
-  - source_id: scenario:93cff884e57e
-    source_path: 시나리오/The unholy of mention 세계관.pdf
-    source_sha256: 93cff884e57e57ec17d857745007755d1ad3df4f8040febf42bcbafef93bf418
-    source_type: pdf
-    category: scenario
-    title: The unholy of mention 세계관
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-세계관--93cff884e57e.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-세계관
-  - source_id: scenario:a73346ecb3d9
-    source_path: 시나리오/The unholy of mention 최종 시나리오.md
-    source_sha256: a73346ecb3d9d5ca0629b189d613e61bb375c8ef39ffe806607449bac21d8e8f
-    source_type: md
-    category: scenario
-    title: The unholy of mention 최종 시나리오
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-최종-시나리오--a73346ecb3d9.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-최종-시나리오
-  - source_id: scenario:f905409b92e5
-    source_path: 시나리오/The unholy of mention 플롯 1막.pdf
-    source_sha256: f905409b92e5f09956aadafc6d2c9ab5e691d28e716e1ada52464f40942e319d
-    source_type: pdf
-    category: scenario
-    title: The unholy of mention 플롯 1막
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-1막--f905409b92e5.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-플롯-1막
-  - source_id: scenario:4dc9203c1c6b
-    source_path: 시나리오/The unholy of mention 플롯 3막.pdf
-    source_sha256: 4dc9203c1c6be27ff9d90a6380171a6a64a9ebf04a94a44f0211f16295843399
-    source_type: pdf
-    category: scenario
-    title: The unholy of mention 플롯 3막
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-3막--4dc9203c1c6b.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-플롯-3막
-  - source_id: scenario:2148f646a4c5
-    source_path: 시나리오/The unholy of mention 플롯 4막.pdf
-    source_sha256: 2148f646a4c5e518bb02d8c1d2b38601278c4a991f25c3e1dfdb2754468c15aa
-    source_type: pdf
-    category: scenario
-    title: The unholy of mention 플롯 4막
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-4막--2148f646a4c5.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-플롯-4막
-  - source_id: scenario:6547e2e5db43
-    source_path: 시나리오/the unholy of mention 플롯 2막.pdf
-    source_sha256: 6547e2e5db43bb236db2e4fe576706883a1515b6163d02d2f6bd0584bcfcb4c4
-    source_type: pdf
-    category: scenario
-    title: the unholy of mention 플롯 2막
-    transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-2막--6547e2e5db43.md
-    status: pending
-    rag_eligible: true
-    canonical_group: scenario:the-unholy-of-mention-플롯-2막
+- source_id: technical:884df6c5b462
+  source_path: docs/architecture.md
+  source_sha256: 884df6c5b462b2b3263ade35d6619831f653e3ea6f92d6b46328e705ab682892
+  source_type: md
+  category: technical
+  title: architecture
+  transcript_path: docs/wiki/sources/technical/architecture--884df6c5b462.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:architecture
+- source_id: technical:d232bf9f3f1a
+  source_path: docs/fungus-migration-audit.md
+  source_sha256: d232bf9f3f1a212002d62e9f78879d3bfaa6fd5d99f6677a88db0aa48abdcd86
+  source_type: md
+  category: technical
+  title: fungus-migration-audit
+  transcript_path: docs/wiki/sources/technical/fungus-migration-audit--d232bf9f3f1a.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:fungus-migration-audit
+- source_id: technical:85fdfa8e3425
+  source_path: docs/fungus-room-migration-plan.md
+  source_sha256: 85fdfa8e342510c07ad08ffd988c9636a3b2ebc2fcd5ef22bc888ae2575bfadb
+  source_type: md
+  category: technical
+  title: fungus-room-migration-plan
+  transcript_path: docs/wiki/sources/technical/fungus-room-migration-plan--85fdfa8e3425.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:fungus-room-migration-plan
+- source_id: technical:fa5a4b6c3594
+  source_path: docs/glass-choice-menu-usage.md
+  source_sha256: fa5a4b6c3594bb92b793ba66a124cd4f1d3d63c12441c05ba689876448032c80
+  source_type: md
+  category: technical
+  title: glass-choice-menu-usage
+  transcript_path: docs/wiki/sources/technical/glass-choice-menu-usage--fa5a4b6c3594.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:glass-choice-menu-usage
+- source_id: technical:703aa0cef602
+  source_path: docs/play-log-analysis.md
+  source_sha256: 703aa0cef602f978bbf7a14271be1a7de8cf6de8a60d09b57f380caee032edb6
+  source_type: md
+  category: technical
+  title: play-log-analysis
+  transcript_path: docs/wiki/sources/technical/play-log-analysis--703aa0cef602.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:play-log-analysis
+- source_id: technical:bbb4cc9beefd
+  source_path: docs/play-log-pipeline.md
+  source_sha256: bbb4cc9beefd02c4d9c005ceeea7e7d95834b9128e1ea914ba47de585c700d5e
+  source_type: md
+  category: technical
+  title: play-log-pipeline
+  transcript_path: docs/wiki/sources/technical/play-log-pipeline--bbb4cc9beefd.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:play-log-pipeline
+- source_id: technical:45fe7f23c613
+  source_path: docs/play-log-sheets-upload.md
+  source_sha256: 45fe7f23c6136e723a05ad4a06aa2af8162a1bf5750f411290a7f96f932bd34c
+  source_type: md
+  category: technical
+  title: play-log-sheets-upload
+  transcript_path: docs/wiki/sources/technical/play-log-sheets-upload--45fe7f23c613.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:play-log-sheets-upload
+- source_id: technical:c2f05e2172e0
+  source_path: docs/qa/2026-07-14-regression-playtest.md
+  source_sha256: c2f05e2172e0df2621dcf7464565ec25e6c27eabfc6596a54da9200d6141553e
+  source_type: md
+  category: technical
+  title: 2026-07-14-regression-playtest
+  transcript_path: docs/wiki/sources/technical/2026-07-14-regression-playtest--c2f05e2172e0.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:2026-07-14-regression-playtest
+- source_id: technical:9db1ee420efd
+  source_path: docs/quest-tracker-manual-verification.md
+  source_sha256: 9db1ee420efd63fc1fa6aec8208afe73c81c07b3f1870c3bb81588e230a48aa5
+  source_type: md
+  category: technical
+  title: quest-tracker-manual-verification
+  transcript_path: docs/wiki/sources/technical/quest-tracker-manual-verification--9db1ee420efd.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:quest-tracker-manual-verification
+- source_id: technical:03a736ea3ab1
+  source_path: docs/security/llm-abuse-defense-plan.md
+  source_sha256: 03a736ea3ab18785f694fb9a053675789654f642784a4d4044f01397a21e45cd
+  source_type: md
+  category: technical
+  title: llm-abuse-defense-plan
+  transcript_path: docs/wiki/sources/technical/llm-abuse-defense-plan--03a736ea3ab1.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:llm-abuse-defense-plan
+- source_id: technical:99ee8a511c6f
+  source_path: docs/security/llm-defense-play-test-guide.md
+  source_sha256: 99ee8a511c6f240a0115ea15331b69938b05e4e8fd31680da43385634be694e4
+  source_type: md
+  category: technical
+  title: llm-defense-play-test-guide
+  transcript_path: docs/wiki/sources/technical/llm-defense-play-test-guide--99ee8a511c6f.md
+  status: pending
+  rag_eligible: true
+  canonical_group: technical:llm-defense-play-test-guide
+- source_id: report:b8eacd76e0a1
+  source_path: report.pdf
+  source_sha256: b8eacd76e0a18fc0f3a73c0b5c38052d3503810af2fadce734afe30ab56a53d6
+  source_type: pdf
+  category: report
+  title: report
+  transcript_path: docs/wiki/sources/report/report--b8eacd76e0a1.md
+  status: extracted
+  rag_eligible: false
+  canonical_group: report:report
+  warnings: []
+- source_id: planning:b98bbfbdb019
+  source_path: 기획서/.민원번호 33의 챗봇 개발 기획.pdf
+  source_sha256: b98bbfbdb0193206c3fb7d2c589ca5da630173e2aef81cd5bd6b57794b8503fb
+  source_type: pdf
+  category: planning
+  title: .민원번호 33의 챗봇 개발 기획
+  transcript_path: docs/wiki/sources/planning/민원번호-33의-챗봇-개발-기획--b98bbfbdb019.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:민원번호-33의-챗봇-개발-기획
+  warnings: []
+- source_id: planning:5656494d4c10
+  source_path: 기획서/.민원번호 33의 챗봇 개발 기획.pptx
+  source_sha256: 5656494d4c1085a96eb56b566fe77a2aa658bdda88ebafdc8c0d933398702116
+  source_type: pptx
+  category: planning
+  title: .민원번호 33의 챗봇 개발 기획
+  transcript_path: docs/wiki/sources/planning/민원번호-33의-챗봇-개발-기획--5656494d4c10.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:민원번호-33의-챗봇-개발-기획
+  warnings: []
+- source_id: planning:a54025e67028
+  source_path: 기획서/2층 복도 기획.pdf
+  source_sha256: a54025e67028165563f99be8a5f062e872df9b3e5bfea159251729a6cef3aa45
+  source_type: pdf
+  category: planning
+  title: 2층 복도 기획
+  transcript_path: docs/wiki/sources/planning/2층-복도-기획--a54025e67028.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:2층-복도-기획
+  warnings: []
+- source_id: planning:23235ab919ae
+  source_path: 기획서/2층 복도 기획.pptx
+  source_sha256: 23235ab919ae065b9f6e80b5bd53c038ba87112cfc6edae0b68a4493c5f3d1f9
+  source_type: pptx
+  category: planning
+  title: 2층 복도 기획
+  transcript_path: docs/wiki/sources/planning/2층-복도-기획--23235ab919ae.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:2층-복도-기획
+  warnings:
+  - pptx_visual_asset:slide_5:shape_4
+  - pptx_visual_asset:slide_6:shape_4
+  - pptx_visual_asset:slide_7:shape_4
+  - pptx_visual_asset:slide_8:shape_4
+  - pptx_visual_asset:slide_9:shape_4
+  - pptx_visual_asset:slide_10:shape_5
+  - pptx_visual_asset:slide_11:shape_5
+- source_id: planning:189dba1942da
+  source_path: 기획서/The unholy of mention_컨셉 기획서.pptx
+  source_sha256: 189dba1942daf20f55a3455c34715f27ec65832aa587e519b272c0a0abd9b333
+  source_type: pptx
+  category: planning
+  title: The unholy of mention_컨셉 기획서
+  transcript_path: docs/wiki/sources/planning/the-unholy-of-mention_컨셉-기획서--189dba1942da.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:the-unholy-of-mention_컨셉-기획서
+  warnings:
+  - pptx_visual_asset:slide_5:shape_7
+  - pptx_visual_asset:slide_6:shape_6
+  - pptx_visual_asset:slide_7:shape_5
+  - pptx_visual_asset:slide_11:shape_6
+  - pptx_visual_asset:slide_12:shape_7
+  - pptx_visual_asset:slide_13:shape_7
+  - pptx_visual_asset:slide_14:shape_7
+  - pptx_visual_asset:slide_15:shape_5
+  - pptx_visual_asset:slide_15:shape_7
+- source_id: planning:35ada8161577
+  source_path: 기획서/The unholy of mention_컨셉 기획서.pptx.pdf
+  source_sha256: 35ada81615779733400ec7c485e37efbff873687d2bd2c3e7d120faa81595f6d
+  source_type: pdf
+  category: planning
+  title: The unholy of mention_컨셉 기획서
+  transcript_path: docs/wiki/sources/planning/the-unholy-of-mention_컨셉-기획서--35ada8161577.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:the-unholy-of-mention_컨셉-기획서
+  warnings: []
+- source_id: planning:46be221ef692
+  source_path: 기획서/UI 컨셉 기획.pdf
+  source_sha256: 46be221ef692fb43b0acefda612baa0185f59987edfa28d23b2c356de85ec0af
+  source_type: pdf
+  category: planning
+  title: UI 컨셉 기획
+  transcript_path: docs/wiki/sources/planning/ui-컨셉-기획--46be221ef692.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:ui-컨셉-기획
+  warnings: []
+- source_id: planning:d55dcff2ee6b
+  source_path: 기획서/UI 컨셉 기획.pptx
+  source_sha256: d55dcff2ee6bfdcdae63878af982b53c57920321cefea9cf9246f47882555ea4
+  source_type: pptx
+  category: planning
+  title: UI 컨셉 기획
+  transcript_path: docs/wiki/sources/planning/ui-컨셉-기획--d55dcff2ee6b.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:ui-컨셉-기획
+  warnings:
+  - pptx_visual_asset:slide_2:shape_4
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_5:shape_3
+- source_id: planning:0f17719c09f2
+  source_path: 기획서/disputatio_초기 계획안.hwp
+  source_sha256: 0f17719c09f2cf99afa178b6ef9c9801cad0cc5965db311c5d9cfa403d745b8d
+  source_type: hwp
+  category: planning
+  title: disputatio_초기 계획안
+  transcript_path: docs/wiki/sources/planning/disputatio_초기-계획안--0f17719c09f2.md
+  status: pending
+  rag_eligible: true
+  canonical_group: planning:disputatio_초기-계획안
+- source_id: planning:9d4611de3ae3
+  source_path: 기획서/disputatio_초기 계획안.pdf
+  source_sha256: 9d4611de3ae38f1673c3f0b38774769ebd1044e1518fed8e81c4c04e09ae1aa0
+  source_type: pdf
+  category: planning
+  title: disputatio_초기 계획안
+  transcript_path: docs/wiki/sources/planning/disputatio_초기-계획안--9d4611de3ae3.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:disputatio_초기-계획안
+  warnings: []
+- source_id: planning:d716468cdf00
+  source_path: 기획서/공부방(2층) 기획서.pdf
+  source_sha256: d716468cdf0050bf05f96a5ae84fc6c02196cbc7ddbbb3cbcb258d56db61dff1
+  source_type: pdf
+  category: planning
+  title: 공부방(2층) 기획서
+  transcript_path: docs/wiki/sources/planning/공부방-2층-기획서--d716468cdf00.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:공부방-2층-기획서
+  warnings: []
+- source_id: planning:d6e66a02a4b8
+  source_path: 기획서/공부방(2층) 기획서.pptx
+  source_sha256: d6e66a02a4b843e5e5609bc47135e9c17a1dd97b165d87c5b95c301974d5cbc1
+  source_type: pptx
+  category: planning
+  title: 공부방(2층) 기획서
+  transcript_path: docs/wiki/sources/planning/공부방-2층-기획서--d6e66a02a4b8.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:공부방-2층-기획서
+  warnings:
+  - pptx_visual_asset:slide_3:shape_3
+  - pptx_visual_asset:slide_3:shape_5
+  - pptx_visual_asset:slide_3:shape_7
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_2
+  - pptx_visual_asset:slide_7:shape_3
+  - pptx_visual_asset:slide_8:shape_2
+  - pptx_visual_asset:slide_9:shape_2
+  - pptx_visual_asset:slide_10:shape_3
+- source_id: planning:2c99a6b50413
+  source_path: 기획서/서재 개발 기획.pdf
+  source_sha256: 2c99a6b5041306d76e5a4196cb23576cc7b77a0bf8aa77bf0460e7f29522c5ca
+  source_type: pdf
+  category: planning
+  title: 서재 개발 기획
+  transcript_path: docs/wiki/sources/planning/서재-개발-기획--2c99a6b50413.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:서재-개발-기획
+  warnings: []
+- source_id: planning:1a7c6222ad99
+  source_path: 기획서/서재 개발 기획.pptx
+  source_sha256: 1a7c6222ad99819481b4b4176461f0fc834ffffc1d115260bd9fee461eae2cc1
+  source_type: pptx
+  category: planning
+  title: 서재 개발 기획
+  transcript_path: docs/wiki/sources/planning/서재-개발-기획--1a7c6222ad99.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:서재-개발-기획
+  warnings:
+  - pptx_visual_asset:slide_6:shape_9
+  - pptx_visual_asset:slide_6:shape_11
+  - pptx_visual_asset:slide_7:shape_9
+  - pptx_visual_asset:slide_7:shape_11
+  - pptx_visual_asset:slide_8:shape_3
+  - pptx_visual_asset:slide_8:shape_5
+  - pptx_visual_asset:slide_14:shape_4
+- source_id: planning:af96b05baf10
+  source_path: 기획서/아내 방 기획.pdf
+  source_sha256: af96b05baf107fa86ff6297f68b8c034b99026f7cc0f70c812c17d24e76aa61d
+  source_type: pdf
+  category: planning
+  title: 아내 방 기획
+  transcript_path: docs/wiki/sources/planning/아내-방-기획--af96b05baf10.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:아내-방-기획
+  warnings: []
+- source_id: planning:d61aadd7dd90
+  source_path: 기획서/아내 방 기획.pptx
+  source_sha256: d61aadd7dd90ba2beb33d38ce5e66f6c510d3e7e7620af61382fd07c639b12f1
+  source_type: pptx
+  category: planning
+  title: 아내 방 기획
+  transcript_path: docs/wiki/sources/planning/아내-방-기획--d61aadd7dd90.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:아내-방-기획
+  warnings:
+  - pptx_visual_asset:slide_2:shape_2
+  - pptx_visual_asset:slide_3:shape_2
+  - pptx_visual_asset:slide_3:shape_4
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_4:shape_6
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_3
+  - pptx_visual_asset:slide_7:shape_2
+  - pptx_visual_asset:slide_8:shape_2
+  - pptx_visual_asset:slide_9:shape_3
+  - pptx_visual_asset:slide_10:shape_4
+  - pptx_visual_asset:slide_10:shape_6
+  - pptx_visual_asset:slide_10:shape_7
+  - pptx_visual_asset:slide_11:shape_4
+  - pptx_visual_asset:slide_11:shape_6
+  - pptx_visual_asset:slide_11:shape_7
+  - pptx_visual_asset:slide_12:shape_4
+  - pptx_visual_asset:slide_12:shape_6
+  - pptx_visual_asset:slide_12:shape_7
+  - pptx_visual_asset:slide_13:shape_4
+  - pptx_visual_asset:slide_13:shape_6
+  - pptx_visual_asset:slide_14:shape_4
+  - pptx_visual_asset:slide_14:shape_6
+  - pptx_visual_asset:slide_15:shape_1
+  - pptx_visual_asset:slide_21:shape_2
+  - pptx_visual_asset:slide_22:shape_2
+- source_id: planning:f142e62e4abf
+  source_path: 기획서/아들 방 기획.pdf
+  source_sha256: f142e62e4abfe71e0bb41f5204ebe3901e073d7fc6d96efccfcdbec0aba781aa
+  source_type: pdf
+  category: planning
+  title: 아들 방 기획
+  transcript_path: docs/wiki/sources/planning/아들-방-기획--f142e62e4abf.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:아들-방-기획
+  warnings: []
+- source_id: planning:0cdfdc88add7
+  source_path: 기획서/안방 기획.pdf
+  source_sha256: 0cdfdc88add7a5ea72624ce2b70324e0b8ae49a93247c06357de78d56216f91d
+  source_type: pdf
+  category: planning
+  title: 안방 기획
+  transcript_path: docs/wiki/sources/planning/안방-기획--0cdfdc88add7.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:안방-기획
+  warnings: []
+- source_id: planning:3f167ea617e5
+  source_path: 기획서/안방 기획.pptx
+  source_sha256: 3f167ea617e5417bc71c9095d4d58f21684b249a23bb0b61045b1de77099b117
+  source_type: pptx
+  category: planning
+  title: 안방 기획
+  transcript_path: docs/wiki/sources/planning/안방-기획--3f167ea617e5.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:안방-기획
+  warnings:
+  - pptx_visual_asset:slide_2:shape_2
+  - pptx_visual_asset:slide_3:shape_3
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_3
+  - pptx_visual_asset:slide_7:shape_3
+  - pptx_visual_asset:slide_8:shape_3
+  - pptx_visual_asset:slide_9:shape_3
+  - pptx_visual_asset:slide_10:shape_3
+  - pptx_visual_asset:slide_11:shape_3
+  - pptx_visual_asset:slide_12:shape_3
+  - pptx_visual_asset:slide_13:shape_3
+- source_id: planning:e4e36660bb79
+  source_path: 기획서/오프닝 개발 기획서.pdf
+  source_sha256: e4e36660bb79e685d625b07bcfda4251bb8fe4cd667d8968a1c0c853c7bcb1fe
+  source_type: pdf
+  category: planning
+  title: 오프닝 개발 기획서
+  transcript_path: docs/wiki/sources/planning/오프닝-개발-기획서--e4e36660bb79.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:오프닝-개발-기획서
+  warnings: []
+- source_id: planning:11bd8b014e77
+  source_path: 기획서/오프닝 개발 기획서.pptx
+  source_sha256: 11bd8b014e77f424027938ad8a00d4404a99016d2a21d4ee6a44f7ef9854e5e0
+  source_type: pptx
+  category: planning
+  title: 오프닝 개발 기획서
+  transcript_path: docs/wiki/sources/planning/오프닝-개발-기획서--11bd8b014e77.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:오프닝-개발-기획서
+  warnings:
+  - pptx_visual_asset:slide_2:shape_2
+  - pptx_visual_asset:slide_3:shape_3
+  - pptx_visual_asset:slide_4:shape_2
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_3
+  - pptx_visual_asset:slide_7:shape_1
+  - pptx_visual_asset:slide_8:shape_3
+  - pptx_visual_asset:slide_9:shape_2
+- source_id: planning:47f3be566f34
+  source_path: 기획서/지하 연구실 기획.pdf
+  source_sha256: 47f3be566f348dba8f142acda1ded0894d57d2457159769425ad90f143532e28
+  source_type: pdf
+  category: planning
+  title: 지하 연구실 기획
+  transcript_path: docs/wiki/sources/planning/지하-연구실-기획--47f3be566f34.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:지하-연구실-기획
+  warnings: []
+- source_id: planning:e7ee91d062a2
+  source_path: 기획서/지하 연구실 기획.pptx
+  source_sha256: e7ee91d062a267416d565fc4ba41ad1b45e7ca8fb63ba2f3f63b4e4e8af6eb3c
+  source_type: pptx
+  category: planning
+  title: 지하 연구실 기획
+  transcript_path: docs/wiki/sources/planning/지하-연구실-기획--e7ee91d062a2.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:지하-연구실-기획
+  warnings:
+  - pptx_visual_asset:slide_2:shape_3
+  - pptx_visual_asset:slide_3:shape_3
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_4:shape_4
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_5:shape_4
+  - pptx_visual_asset:slide_6:shape_3
+  - pptx_visual_asset:slide_7:shape_3
+  - pptx_visual_asset:slide_8:shape_2
+  - pptx_visual_asset:slide_9:shape_4
+  - pptx_visual_asset:slide_10:shape_3
+  - pptx_visual_asset:slide_11:shape_3
+  - pptx_visual_asset:slide_12:shape_3
+  - pptx_visual_asset:slide_13:shape_3
+  - pptx_visual_asset:slide_14:shape_3
+  - pptx_visual_asset:slide_14:shape_5
+  - pptx_visual_asset:slide_15:shape_3
+- source_id: planning:ea29b35cc87e
+  source_path: 기획서/첫 장면 기획.pdf
+  source_sha256: ea29b35cc87e88f0c5ed4bb7386bee34b272e9d11a0511ff8e6e41df8d10e40d
+  source_type: pdf
+  category: planning
+  title: 첫 장면 기획
+  transcript_path: docs/wiki/sources/planning/첫-장면-기획--ea29b35cc87e.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:첫-장면-기획
+  warnings: []
+- source_id: planning:e16101da266f
+  source_path: 기획서/첫 장면 기획.pptx
+  source_sha256: e16101da266f1705d5b4c8e51218b80de83e930384d14b0d45a18b5a48e4d680
+  source_type: pptx
+  category: planning
+  title: 첫 장면 기획
+  transcript_path: docs/wiki/sources/planning/첫-장면-기획--e16101da266f.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:첫-장면-기획
+  warnings:
+  - pptx_visual_asset:slide_2:shape_2
+  - pptx_visual_asset:slide_3:shape_2
+  - pptx_visual_asset:slide_4:shape_2
+  - pptx_visual_asset:slide_4:shape_5
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_3
+  - pptx_visual_asset:slide_6:shape_4
+  - pptx_visual_asset:slide_7:shape_2
+  - pptx_visual_asset:slide_8:shape_2
+- source_id: planning:53ed77ef462a
+  source_path: 기획서/현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가.pdf
+  source_sha256: 53ed77ef462a21b443758db590353c19594f7db3563f2d9e0ec4ff53768bc298
+  source_type: pdf
+  category: planning
+  title: 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가
+  transcript_path: docs/wiki/sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--53ed77ef462a.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: planning:현재-플로우-직관성-맵-제작-복도-기믹-추가
+  warnings: []
+- source_id: planning:acafc91a0413
+  source_path: 기획서/현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가.pptx
+  source_sha256: acafc91a041341b628d13634524da0ad46c5091f3a9426aec96fec1274e425d9
+  source_type: pptx
+  category: planning
+  title: 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가
+  transcript_path: docs/wiki/sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--acafc91a0413.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: planning:현재-플로우-직관성-맵-제작-복도-기믹-추가
+  warnings:
+  - pptx_visual_asset:slide_4:shape_3
+  - pptx_visual_asset:slide_5:shape_3
+  - pptx_visual_asset:slide_6:shape_4
+  - pptx_visual_asset:slide_7:shape_4
+  - pptx_visual_asset:slide_8:shape_4
+  - pptx_visual_asset:slide_8:shape_5
+  - pptx_visual_asset:slide_9:shape_4
+  - pptx_visual_asset:slide_9:shape_6
+  - pptx_visual_asset:slide_9:shape_8
+  - pptx_visual_asset:slide_10:shape_3
+  - pptx_visual_asset:slide_11:shape_3
+- source_id: report:72ed55d40f51
+  source_path: 미니게임_구현_리포트.md
+  source_sha256: 72ed55d40f514d581d76084af5e38472d650b3039f06f45f09dc445f3f4835d7
+  source_type: md
+  category: report
+  title: 미니게임_구현_리포트
+  transcript_path: docs/wiki/sources/report/미니게임_구현_리포트--72ed55d40f51.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:미니게임_구현_리포트
+- source_id: report:9ecff7fce708
+  source_path: 보고서/오합지졸_캡스톤디자인 프로젝트 주간 보고서(김태협 3.30).hwp
+  source_sha256: 9ecff7fce7080bb106f5feb2fe12cecf54dec4207bcb593b908c2eb28c187ab5
+  source_type: hwp
+  category: report
+  title: 오합지졸_캡스톤디자인 프로젝트 주간 보고서(김태협 3.30)
+  transcript_path: docs/wiki/sources/report/오합지졸_캡스톤디자인-프로젝트-주간-보고서-김태협-3-30--9ecff7fce708.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:오합지졸_캡스톤디자인-프로젝트-주간-보고서-김태협-3-30
+- source_id: report:c7b7c636ae7a
+  source_path: 보고서/오합지졸_캡스톤디자인 프로젝트 주간 보고서(어준선) (1).hwp
+  source_sha256: c7b7c636ae7ac2df64528663c8e60ab938494d6c233e32d317ded46704605c74
+  source_type: hwp
+  category: report
+  title: 오합지졸_캡스톤디자인 프로젝트 주간 보고서(어준선) (1)
+  transcript_path: docs/wiki/sources/report/오합지졸_캡스톤디자인-프로젝트-주간-보고서-어준선-1--c7b7c636ae7a.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:오합지졸_캡스톤디자인-프로젝트-주간-보고서-어준선-1
+- source_id: report:1d87fa1b554a
+  source_path: 보고서/캡스톤디자인 주간보고서(양식) (2).hwp
+  source_sha256: 1d87fa1b554ab1d29d9c54f17f9add081844f9959a751e7d8a2cb3577945b266
+  source_type: hwp
+  category: report
+  title: 캡스톤디자인 주간보고서(양식) (2)
+  transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서-양식-2--1d87fa1b554a.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:캡스톤디자인-주간보고서-양식-2
+- source_id: report:9bed5ad2952b
+  source_path: 보고서/캡스톤디자인 주간보고서_김기석_20260406.hwp
+  source_sha256: 9bed5ad2952b784fb436a0ee86a0c782895ede8a0acddb7e7bc33794f2cb535c
+  source_type: hwp
+  category: report
+  title: 캡스톤디자인 주간보고서_김기석_20260406
+  transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_김기석_20260406--9bed5ad2952b.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:캡스톤디자인-주간보고서_김기석_20260406
+- source_id: report:0b9a5e184f69
+  source_path: 보고서/캡스톤디자인 주간보고서_김태협_20260406.hwp
+  source_sha256: 0b9a5e184f69dc53ef5747977054dda6daf51df88c4650a7d30a59c49c030005
+  source_type: hwp
+  category: report
+  title: 캡스톤디자인 주간보고서_김태협_20260406
+  transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_김태협_20260406--0b9a5e184f69.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:캡스톤디자인-주간보고서_김태협_20260406
+- source_id: report:83c56ec21f2f
+  source_path: 보고서/캡스톤디자인 주간보고서_어준선_20260406.hwp
+  source_sha256: 83c56ec21f2f96bee4d79aab9a15955331291c1f21ac4025eb563fdaf2e6216d
+  source_type: hwp
+  category: report
+  title: 캡스톤디자인 주간보고서_어준선_20260406
+  transcript_path: docs/wiki/sources/report/캡스톤디자인-주간보고서_어준선_20260406--83c56ec21f2f.md
+  status: pending
+  rag_eligible: false
+  canonical_group: report:캡스톤디자인-주간보고서_어준선_20260406
+- source_id: scenario:93cff884e57e
+  source_path: 시나리오/The unholy of mention 세계관.pdf
+  source_sha256: 93cff884e57e57ec17d857745007755d1ad3df4f8040febf42bcbafef93bf418
+  source_type: pdf
+  category: scenario
+  title: The unholy of mention 세계관
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-세계관--93cff884e57e.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-세계관
+  warnings: []
+- source_id: scenario:a73346ecb3d9
+  source_path: 시나리오/The unholy of mention 최종 시나리오.md
+  source_sha256: a73346ecb3d9d5ca0629b189d613e61bb375c8ef39ffe806607449bac21d8e8f
+  source_type: md
+  category: scenario
+  title: The unholy of mention 최종 시나리오
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-최종-시나리오--a73346ecb3d9.md
+  status: pending
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-최종-시나리오
+- source_id: scenario:f905409b92e5
+  source_path: 시나리오/The unholy of mention 플롯 1막.pdf
+  source_sha256: f905409b92e5f09956aadafc6d2c9ab5e691d28e716e1ada52464f40942e319d
+  source_type: pdf
+  category: scenario
+  title: The unholy of mention 플롯 1막
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-1막--f905409b92e5.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-플롯-1막
+  warnings: []
+- source_id: scenario:4dc9203c1c6b
+  source_path: 시나리오/The unholy of mention 플롯 3막.pdf
+  source_sha256: 4dc9203c1c6be27ff9d90a6380171a6a64a9ebf04a94a44f0211f16295843399
+  source_type: pdf
+  category: scenario
+  title: The unholy of mention 플롯 3막
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-3막--4dc9203c1c6b.md
+  status: needs_review
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-플롯-3막
+  warnings:
+  - pdf_text_empty_page:9
+- source_id: scenario:2148f646a4c5
+  source_path: 시나리오/The unholy of mention 플롯 4막.pdf
+  source_sha256: 2148f646a4c5e518bb02d8c1d2b38601278c4a991f25c3e1dfdb2754468c15aa
+  source_type: pdf
+  category: scenario
+  title: The unholy of mention 플롯 4막
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-4막--2148f646a4c5.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-플롯-4막
+  warnings: []
+- source_id: scenario:6547e2e5db43
+  source_path: 시나리오/the unholy of mention 플롯 2막.pdf
+  source_sha256: 6547e2e5db43bb236db2e4fe576706883a1515b6163d02d2f6bd0584bcfcb4c4
+  source_type: pdf
+  category: scenario
+  title: the unholy of mention 플롯 2막
+  transcript_path: docs/wiki/sources/scenario/the-unholy-of-mention-플롯-2막--6547e2e5db43.md
+  status: extracted
+  rag_eligible: true
+  canonical_group: scenario:the-unholy-of-mention-플롯-2막
+  warnings: []
