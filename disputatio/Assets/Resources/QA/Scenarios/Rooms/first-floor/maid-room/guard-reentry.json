@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.maid-room.guard.reentry",
+  "roomId": "maid-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "maidroom.food.click-tray",
+    "maidroom.food.probe",
+    "maidroom.food.assert-effect"
+  ],
+  "steps": [
+    {
+      "id": "click-tray",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.click-tray"
+    },
+    {
+      "id": "assert-effect",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.assert-effect"
+    },
+    {
+      "id": "probe-after-reentry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.probe"
+    }
+  ]
+}
