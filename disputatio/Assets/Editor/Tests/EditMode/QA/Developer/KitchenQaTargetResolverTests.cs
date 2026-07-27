@@ -59,5 +59,46 @@ public sealed class KitchenQaTargetResolverTests
 
         Assert.AreSame(forwarderGo, resolved);
     }
+
+    [Test]
+    public void TryResolve_SinkDropzone_FindsActiveObjectNamedSinkDropzone()
+    {
+        _root = new GameObject("KitchenQaTargetResolverFixture");
+        var dropzoneGo = new GameObject("SinkDropzone");
+        dropzoneGo.transform.SetParent(_root.transform, false);
+
+        GameObject resolved = KitchenQaTargetResolver.TryResolve(
+            QaTargetId.Create(KitchenQaAdapter.SinkDropzoneTargetIdValue));
+
+        Assert.AreSame(dropzoneGo, resolved);
+    }
+
+    [Test]
+    public void TryResolve_MaidKey_FindsActiveMaidRoomKey()
+    {
+        _root = new GameObject("KitchenQaTargetResolverFixture");
+        var keyGo = new GameObject("MaidRoomKey");
+        keyGo.transform.SetParent(_root.transform, false);
+        keyGo.AddComponent<ItemPickup>();
+
+        GameObject resolved = KitchenQaTargetResolver.TryResolve(
+            QaTargetId.Create(KitchenQaAdapter.MaidKeyTargetIdValue));
+
+        Assert.AreSame(keyGo, resolved);
+    }
+
+    [Test]
+    public void TryResolve_MaidKey_InactiveObject_ReturnsNull()
+    {
+        _root = new GameObject("KitchenQaTargetResolverFixture");
+        var keyGo = new GameObject("MaidRoomKey");
+        keyGo.transform.SetParent(_root.transform, false);
+        keyGo.SetActive(false);
+
+        GameObject resolved = KitchenQaTargetResolver.TryResolve(
+            QaTargetId.Create(KitchenQaAdapter.MaidKeyTargetIdValue));
+
+        Assert.IsNull(resolved);
+    }
 }
 #endif

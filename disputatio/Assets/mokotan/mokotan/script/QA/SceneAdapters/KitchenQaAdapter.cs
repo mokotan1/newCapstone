@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using System.Collections.Generic;
+using Fungus;
 using Godlotto.Interaction;
 using Godlotto.QA.Developer;
 using Godlotto.QA.Input;
@@ -10,34 +11,21 @@ using UnityEngine;
 namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
-    /// Kitchen scene QA adapter (Task 12 + Wave 1 faucet capabilities). Drives two real,
-    /// already-shipped interaction routes through
-    /// <see cref="KitchenInteractionController.OnInteraction(string)"/> (inherited from
-    /// <see cref="RoomInteractionController"/>, the exact entry point a player click/tap uses):
-    /// the sink faucet (<see cref="KitchenSinkInteractionGate.FaucetInteractionId"/>) and the
-    /// Cheshire "parret" world click (<see cref="KitchenParretInteractionGate.ParretInteractionId"/>).
-    /// Setup/reset uses only the public mutators already exposed by <see cref="KitchenPuzzleState"/>
-    /// (<see cref="KitchenPuzzleState.SetFaucetClicked"/>, <see cref="KitchenPuzzleState.SetParretClicked"/>)
-    /// -- no private reflection. Force-solve is intentionally not exposed as a PASS path.
-    ///
-    /// Placement/assembly note: see <see cref="QaSceneAdapterRegistration"/> remarks (same rationale
-    /// as <see cref="MainMenuQaAdapter"/> -- default assembly only, mirrors the QaProfileService split).
-    ///
-    /// Known gap (Task 12): <see cref="RoomInteractionController.OnInteraction(string)"/> is
-    /// deliberately fire-and-forget -- an unknown interaction id, a puzzle-state gate, or a modal
-    /// input block are all silently logged (never thrown, never returned as a failure) by design.
-    /// <see cref="TryClick"/> therefore reports success as soon as the owning controller is found
-    /// in the active scene, matching the real public contract exactly; it cannot distinguish
-    /// "block executed" from "gated/no-op" without further state-probe wiring
-    /// (<c>QaStateProbe</c> has no Kitchen-specific providers yet -- see class remarks in
-    /// <c>QaCommandGateway</c>). Scenario JSON compensates with explicit <c>state.assert</c> steps.
+    /// Kitchen scene QA adapter. Faucet capabilities plus bottle→key exit contract
+    /// (<see cref="SinkBeforeBottleFillPresetCapabilityId"/> … <see cref="ExitAssertCapabilityId"/>).
+    /// Uses public seams only: <see cref="KitchenPuzzleState"/> setters,
+    /// <see cref="KitchenInteractionController.OnInteraction"/>, <see cref="ItemPickup.PickUpDirect"/>,
+    /// inventory AddItem / itemId probes. Never ForceSolve; never fake HaveMaidKey for PASS.
     /// </summary>
     public sealed class KitchenQaAdapter : IQaSceneAdapter, IQaApiInteractable
     {
         public const string FaucetTargetIdValue = "kitchen.sink.faucet";
         public const string ParretTargetIdValue = "kitchen.parret";
+        public const string SinkDropzoneTargetIdValue = "kitchen.sink.dropzone";
+        public const string MaidKeyTargetIdValue = "kitchen.maid-key";
         public const string BeforeFaucetPresetId = "before-faucet";
         public const string BeforeParretPresetId = "before-parret";
+        public const string BeforeBottleFillPresetId = "before-bottle-fill";
 
         public const string FaucetPresetCapabilityId = "kitchen.faucet.preset.before-faucet";
         public const string FaucetClickCapabilityId = "kitchen.faucet.click";
@@ -46,14 +34,32 @@ namespace Godlotto.QA.SceneAdapters
         public const string FaucetCaptureCapabilityId = "kitchen.faucet.capture";
         public const string FaucetResetCapabilityId = "kitchen.faucet.reset";
 
+        public const string SinkBeforeBottleFillPresetCapabilityId = "kitchen.sink.preset.before-bottle-fill";
+        public const string SinkFillBottleCapabilityId = "kitchen.sink.fill-bottle";
+        public const string KeyProbeCapabilityId = "kitchen.key.probe";
+        public const string KeyClickCapabilityId = "kitchen.key.click";
+        public const string ExitAssertCapabilityId = "kitchen.exit.assert";
+
+        public const int BottleItemId = 1;
+        public const int MaidRoomKeyItemId = 8;
+        public const string MaidRoomKeyAlias = "maid-room-key";
+        public const string BottleItemName = "Bottle";
+        public const string MaidRoomKeyItemName = "MaidRoom_Key";
+
         private static readonly QaTargetId FaucetTargetId = QaTargetId.Create(FaucetTargetIdValue);
         private static readonly QaTargetId ParretTargetId = QaTargetId.Create(ParretTargetIdValue);
 
         private static readonly IReadOnlyCollection<QaTargetId> DeclaredTargetIds =
-            new List<QaTargetId> { FaucetTargetId, ParretTargetId };
+            new List<QaTargetId>
+            {
+                FaucetTargetId,
+                ParretTargetId,
+                QaTargetId.Create(SinkDropzoneTargetIdValue),
+                QaTargetId.Create(MaidKeyTargetIdValue)
+            };
 
         private static readonly IReadOnlyCollection<string> DeclaredPresetIds =
-            new List<string> { BeforeFaucetPresetId, BeforeParretPresetId };
+            new List<string> { BeforeFaucetPresetId, BeforeParretPresetId, BeforeBottleFillPresetId };
 
         public string SceneName
         {
@@ -71,9 +77,7 @@ namespace Godlotto.QA.SceneAdapters
         }
 
         /// <summary>
-        /// Registers Kitchen faucet developer capabilities and their handlers.
-        /// Handlers thin-wrap <see cref="ApplyPreset"/>, <see cref="TryClick"/>, and
-        /// <see cref="CaptureSnapshot"/> — never force-solve.
+        /// Registers Kitchen faucet + bottle/key exit developer capabilities.
         /// </summary>
         public static void RegisterCapabilities(DeveloperQaCapabilityRegistry registry)
         {
@@ -118,7 +122,7 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Probe,
                     "{}",
-                    "{faucetClicked:bool}"),
+                    "{faucetClicked:bool,bottleDragged:bool}"),
                 _ => MapSnapshot(adapter, assertClicked: false));
 
             registry.Register(
@@ -127,7 +131,7 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Probe,
                     "{}",
-                    "{faucetClicked:bool}"),
+                    "{faucetClicked:bool,bottleDragged:bool}"),
                 _ => MapSnapshot(adapter, assertClicked: false));
 
             registry.Register(
@@ -136,14 +140,60 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Assertion,
                     "{}",
-                    "{faucetClicked:bool}"),
+                    "{faucetClicked:bool,bottleDragged:bool}"),
                 _ => MapSnapshot(adapter, assertClicked: true));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    SinkBeforeBottleFillPresetCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Preset,
+                    "{}",
+                    "{hasBottle:bool,bottleDragged:bool,faucetClicked:bool,haveMaidKey:bool}"),
+                _ => HandleBeforeBottleFillPreset(adapter));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    SinkFillBottleCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{filled:bool,bottleDragged:bool}"),
+                _ => HandleFillBottle(adapter));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    KeyProbeCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Probe,
+                    "{}",
+                    "{maidKeyActive:bool,haveMaidKey:bool,bottleDragged:bool,faucetClicked:bool}"),
+                _ => HandleKeyProbe());
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    KeyClickCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{clicked:bool,haveMaidKey:bool}"),
+                _ => HandleKeyClick());
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    ExitAssertCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Assertion,
+                    "{}",
+                    "{haveMaidKey:bool,inventoryHasMaidRoomKey:bool}"),
+                _ => HandleExitAssert());
         }
 
         public QaScenePresetResult ApplyPreset(string presetId)
         {
             KitchenPuzzleState puzzleState = ResolvePuzzleState();
-            if (puzzleState == null)
+            if (puzzleState == null
+                && !string.Equals(presetId, BeforeBottleFillPresetId, StringComparison.Ordinal))
             {
                 return QaScenePresetResult.Failed(
                     "KitchenPuzzleState not found in the active scene. This preset only works " +
@@ -152,20 +202,28 @@ namespace Godlotto.QA.SceneAdapters
 
             if (string.Equals(presetId, BeforeFaucetPresetId, StringComparison.Ordinal))
             {
-                // Idempotent baseline: the faucet has not been clicked yet in this run.
                 puzzleState.SetFaucetClicked(false);
                 return QaScenePresetResult.Success("Kitchen faucet baseline reset (FaucetClicked=false).");
             }
 
             if (string.Equals(presetId, BeforeParretPresetId, StringComparison.Ordinal))
             {
-                // Idempotent baseline for repeat testing: only ParretClicked is reset via the
-                // real public setter. ComeParret is Fungus-driven (RefreshComeParretFromFungus)
-                // and has no public setter, so this preset cannot force it -- if ComeParret is
-                // still false, KitchenParretInteractionGate silently no-ops the click (see class
-                // remarks); that is a real, documented gap, not something this preset can paper over.
                 puzzleState.SetParretClicked(false);
                 return QaScenePresetResult.Success("Kitchen parret baseline reset (ParretClicked=false).");
+            }
+
+            if (string.Equals(presetId, BeforeBottleFillPresetId, StringComparison.Ordinal))
+            {
+                DeveloperQaResult result = HandleBeforeBottleFillPreset(this);
+                if (result.Code == DeveloperQaResultCode.Ok)
+                {
+                    return QaScenePresetResult.Success(result.Message);
+                }
+
+                return QaScenePresetResult.Failed(
+                    string.IsNullOrEmpty(result.Message)
+                        ? "Kitchen before-bottle-fill preset failed."
+                        : result.Message);
             }
 
             return QaScenePresetResult.UnknownPreset(presetId);
@@ -174,10 +232,17 @@ namespace Godlotto.QA.SceneAdapters
         public QaSceneSnapshot CaptureSnapshot()
         {
             KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState != null)
+            {
+                puzzleState.HydrateFromFungus();
+            }
+
             var values = new Dictionary<string, string>
             {
                 ["puzzleStateFound"] = (puzzleState != null).ToString(),
                 ["faucetClicked"] = puzzleState != null ? puzzleState.FaucetClicked.ToString() : "unknown",
+                ["bottleDragged"] = puzzleState != null ? puzzleState.BottleDragged.ToString() : "unknown",
+                ["hasBottle"] = puzzleState != null ? puzzleState.HasBottle.ToString() : "unknown",
                 ["comeParret"] = puzzleState != null ? puzzleState.ComeParret.ToString() : "unknown",
                 ["parretClicked"] = puzzleState != null ? puzzleState.ParretClicked.ToString() : "unknown"
             };
@@ -187,7 +252,6 @@ namespace Godlotto.QA.SceneAdapters
 
         /// <summary>
         /// Resolves a Kitchen target id to a pointer-capable <see cref="GameObject"/> for RealInput.
-        /// Delegates to <see cref="KitchenQaTargetResolver"/>; returns <c>null</c> when unresolved.
         /// </summary>
         public static GameObject TryResolveTargetGameObject(QaTargetId targetId)
         {
@@ -232,6 +296,230 @@ namespace Godlotto.QA.SceneAdapters
         {
             error = "KitchenQaAdapter does not support key interactions for target '" + targetId + "'.";
             return false;
+        }
+
+        private static DeveloperQaResult HandleBeforeBottleFillPreset(KitchenQaAdapter adapter)
+        {
+            if (adapter == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "KitchenQaAdapter instance is required for before-bottle-fill.");
+            }
+
+            KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "KitchenPuzzleState not found; before-bottle-fill requires the Kitchen Play Mode scene.");
+            }
+
+            InventoryManager inventory = InventoryManager.Instance;
+            if (inventory == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "InventoryManager not found; cannot grant Bottle for before-bottle-fill.");
+            }
+
+            Item bottle = ItemLookup.FindById(BottleItemId);
+            if (bottle == null)
+            {
+                bottle = FindInventoryItemByName(inventory, BottleItemName);
+            }
+
+            if (bottle == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "Bottle item (id 1) not found via ItemLookup; cannot grant Bottle.");
+            }
+
+            if (!InventoryContainsItemId(inventory, BottleItemId)
+                && !InventoryContainsItemName(inventory, BottleItemName))
+            {
+                inventory.AddItem(bottle);
+            }
+
+            Flowchart flowchart = FlowchartLocator.Find();
+            if (flowchart != null)
+            {
+                EnsureBoolean(flowchart, FungusVariableKeys.GetBottle, true);
+                // Clear exit flag for a clean bottle→key run; do not force-set true for PASS.
+                EnsureBoolean(flowchart, FungusVariableKeys.HaveMaidKey, false);
+            }
+
+            puzzleState.SetBottleDragged(false);
+            puzzleState.SetFaucetClicked(false);
+            puzzleState.HydrateFromFungus();
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen before-bottle-fill: Bottle ensured; BottleDragged/FaucetClicked/HaveMaidKey cleared.",
+                data: BuildKeyProbeData(puzzleState, flowchart));
+        }
+
+        private static DeveloperQaResult HandleFillBottle(KitchenQaAdapter adapter)
+        {
+            if (adapter == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "KitchenQaAdapter instance is required for fills-bottle.");
+            }
+
+            KitchenInteractionController controller = ResolveController();
+            if (controller == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "KitchenInteractionController not found; fills-bottle requires Kitchen Play Mode.");
+            }
+
+            KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState != null)
+            {
+                EnsureBottleFlagSynced(puzzleState);
+            }
+
+            if (!IsBottlePresentForFill(puzzleState))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "Bottle not present (GetBottle/inventory/drag). Apply kitchen.sink.preset.before-bottle-fill first.",
+                    data: new Dictionary<string, string>
+                    {
+                        ["filled"] = "False",
+                        ["bottleDragged"] = puzzleState != null
+                            ? puzzleState.BottleDragged.ToString()
+                            : "unknown"
+                    });
+            }
+
+            controller.OnInteraction(KitchenSinkInteractionGate.BottleDragInteractionId);
+
+            puzzleState = ResolvePuzzleState();
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen fills-bottle dispatched OnInteraction(\"bottle_drag\").",
+                data: new Dictionary<string, string>
+                {
+                    ["filled"] = "True",
+                    ["bottleDragged"] = puzzleState != null
+                        ? puzzleState.BottleDragged.ToString()
+                        : "unknown"
+                });
+        }
+
+        private static DeveloperQaResult HandleKeyProbe()
+        {
+            KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState != null)
+            {
+                puzzleState.HydrateFromFungus();
+            }
+
+            Flowchart flowchart = FlowchartLocator.Find();
+            Dictionary<string, string> data = BuildKeyProbeData(puzzleState, flowchart);
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen key probe snapshot captured.",
+                data: data);
+        }
+
+        private static DeveloperQaResult HandleKeyClick()
+        {
+            GameObject keyGo = KitchenQaTargetResolver.TryResolve(
+                QaTargetId.Create(MaidKeyTargetIdValue));
+            if (keyGo == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "MaidRoomKey not active/resolvable. Wait for FaucetClicked∧BottleDragged spawn, or probe first.",
+                    data: new Dictionary<string, string>
+                    {
+                        ["clicked"] = "False",
+                        ["haveMaidKey"] = ReadHaveMaidKey().ToString()
+                    });
+            }
+
+            ItemPickup pickup = keyGo.GetComponent<ItemPickup>();
+            if (pickup == null)
+            {
+                pickup = keyGo.GetComponentInChildren<ItemPickup>();
+            }
+
+            if (pickup == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "MaidRoomKey GameObject has no ItemPickup; cannot use PickUpDirect public API.",
+                    data: new Dictionary<string, string>
+                    {
+                        ["clicked"] = "False",
+                        ["haveMaidKey"] = ReadHaveMaidKey().ToString()
+                    });
+            }
+
+            // Documented public path (ContextMenu PickUpDirect) — does not force-set HaveMaidKey.
+            pickup.PickUpDirect();
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen key click via ItemPickup.PickUpDirect on MaidRoomKey.",
+                data: new Dictionary<string, string>
+                {
+                    ["clicked"] = "True",
+                    ["haveMaidKey"] = ReadHaveMaidKey().ToString()
+                });
+        }
+
+        private static DeveloperQaResult HandleExitAssert()
+        {
+            Flowchart flowchart = FlowchartLocator.Find();
+            InventoryManager inventory = InventoryManager.Instance;
+            bool haveMaidKey = false;
+            bool flowchartFound = flowchart != null;
+            if (flowchartFound)
+            {
+                haveMaidKey = flowchart.GetBooleanVariable(FungusVariableKeys.HaveMaidKey);
+            }
+
+            bool inventoryHasKey = InventoryContainsItemId(inventory, MaidRoomKeyItemId)
+                || InventoryContainsItemName(inventory, MaidRoomKeyItemName)
+                || InventoryContainsAlias(inventory, MaidRoomKeyAlias);
+
+            var data = new Dictionary<string, string>
+            {
+                ["flowchartFound"] = flowchartFound.ToString(),
+                ["haveMaidKey"] = flowchartFound ? haveMaidKey.ToString() : "unknown",
+                ["inventoryHasMaidRoomKey"] = inventoryHasKey.ToString(),
+                ["maidRoomKeyItemId"] = MaidRoomKeyItemId.ToString(),
+                ["maidRoomKeyAlias"] = MaidRoomKeyAlias
+            };
+
+            if (!flowchartFound && inventory == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "Cannot assert kitchen exit: Flowchart(Variablemanager) and InventoryManager both missing.",
+                    data: data);
+            }
+
+            // Exit contract: HaveMaidKey true AND/OR inventory contains itemId 8 (maid-room-key).
+            if (!haveMaidKey && !inventoryHasKey)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.AssertionFailed,
+                    "Kitchen exit assert failed: HaveMaidKey is false and inventory lacks MaidRoom_Key (id 8).",
+                    data: data);
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen exit assert passed (HaveMaidKey and/or maid-room-key inventory).",
+                data: data);
         }
 
         private static DeveloperQaResult MapPreset(QaScenePresetResult presetResult)
@@ -325,6 +613,158 @@ namespace Godlotto.QA.SceneAdapters
                     ? "Kitchen faucet assert-clicked passed."
                     : "Kitchen faucet snapshot captured.",
                 data: data);
+        }
+
+        private static Dictionary<string, string> BuildKeyProbeData(
+            KitchenPuzzleState puzzleState,
+            Flowchart flowchart)
+        {
+            bool maidKeyActive = KitchenQaTargetResolver.TryResolve(
+                    QaTargetId.Create(MaidKeyTargetIdValue))
+                != null;
+            string haveMaidKey = flowchart != null
+                ? flowchart.GetBooleanVariable(FungusVariableKeys.HaveMaidKey).ToString()
+                : "unknown";
+
+            return new Dictionary<string, string>
+            {
+                ["maidKeyActive"] = maidKeyActive.ToString(),
+                ["haveMaidKey"] = haveMaidKey,
+                ["bottleDragged"] = puzzleState != null
+                    ? puzzleState.BottleDragged.ToString()
+                    : "unknown",
+                ["faucetClicked"] = puzzleState != null
+                    ? puzzleState.FaucetClicked.ToString()
+                    : "unknown",
+                ["hasBottle"] = puzzleState != null
+                    ? puzzleState.HasBottle.ToString()
+                    : "unknown"
+            };
+        }
+
+        private static void EnsureBottleFlagSynced(KitchenPuzzleState puzzleState)
+        {
+            if (puzzleState == null)
+            {
+                return;
+            }
+
+            puzzleState.HydrateFromFungus();
+            if (puzzleState.HasBottle || KitchenSinkInteractionGate.PlayerHasBottle(puzzleState))
+            {
+                return;
+            }
+
+            if (!InventoryContainsItemId(InventoryManager.Instance, BottleItemId)
+                && !InventoryContainsItemName(InventoryManager.Instance, BottleItemName))
+            {
+                return;
+            }
+
+            Flowchart flowchart = FlowchartLocator.Find();
+            if (flowchart != null)
+            {
+                EnsureBoolean(flowchart, FungusVariableKeys.GetBottle, true);
+            }
+
+            puzzleState.HydrateFromFungus();
+        }
+
+        private static bool IsBottlePresentForFill(KitchenPuzzleState puzzleState)
+        {
+            if (KitchenSinkInteractionGate.PlayerHasBottle(puzzleState))
+            {
+                return true;
+            }
+
+            if (puzzleState != null && puzzleState.HasBottle)
+            {
+                return true;
+            }
+
+            return InventoryContainsItemId(InventoryManager.Instance, BottleItemId)
+                || InventoryContainsItemName(InventoryManager.Instance, BottleItemName);
+        }
+
+        private static bool ReadHaveMaidKey()
+        {
+            Flowchart flowchart = FlowchartLocator.Find();
+            return flowchart != null && flowchart.GetBooleanVariable(FungusVariableKeys.HaveMaidKey);
+        }
+
+        private static void EnsureBoolean(Flowchart flowchart, string key, bool value)
+        {
+            if (flowchart == null || string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+
+            if (!flowchart.HasVariable(key))
+            {
+                var variable = flowchart.gameObject.AddComponent<BooleanVariable>();
+                variable.Key = key;
+                variable.Scope = VariableScope.Public;
+                variable.Value = value;
+                flowchart.Variables.Add(variable);
+                return;
+            }
+
+            flowchart.SetBooleanVariable(key, value);
+        }
+
+        private static bool InventoryContainsItemId(InventoryManager inventory, int itemId)
+        {
+            if (inventory == null || inventory.Items == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < inventory.Items.Count; i++)
+            {
+                Item item = inventory.Items[i];
+                if (item != null && item.itemId == itemId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool InventoryContainsItemName(InventoryManager inventory, string itemName)
+        {
+            return FindInventoryItemByName(inventory, itemName) != null;
+        }
+
+        private static bool InventoryContainsAlias(InventoryManager inventory, string alias)
+        {
+            if (string.Equals(alias, MaidRoomKeyAlias, StringComparison.OrdinalIgnoreCase))
+            {
+                return InventoryContainsItemId(inventory, MaidRoomKeyItemId)
+                    || InventoryContainsItemName(inventory, MaidRoomKeyItemName);
+            }
+
+            return false;
+        }
+
+        private static Item FindInventoryItemByName(InventoryManager inventory, string itemName)
+        {
+            if (inventory == null || inventory.Items == null || string.IsNullOrEmpty(itemName))
+            {
+                return null;
+            }
+
+            for (int i = 0; i < inventory.Items.Count; i++)
+            {
+                Item item = inventory.Items[i];
+                if (item != null
+                    && string.Equals(item.itemName, itemName, StringComparison.Ordinal))
+                {
+                    return item;
+                }
+            }
+
+            return null;
         }
 
         private static KitchenInteractionController ResolveController()

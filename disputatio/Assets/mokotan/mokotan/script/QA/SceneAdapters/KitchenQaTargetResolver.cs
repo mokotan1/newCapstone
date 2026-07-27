@@ -1,5 +1,7 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Generic;
+using Fungus;
 using Godlotto.Interaction;
 using Godlotto.QA.Scenes;
 using UnityEngine;
@@ -10,15 +12,15 @@ namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
     /// Resolves Kitchen QA target ids to clickable scene <see cref="GameObject"/>s for
-    /// <see cref="Godlotto.QA.Input.QaEventSystemInputDriver"/> (RealInput). Prefers
-    /// <see cref="RoomUiClickForwarder"/> wired to <see cref="KitchenSinkInteractionGate.FaucetInteractionId"/>,
-    /// then the player-visible Button named <c>Faucet</c> / <c>FaucetOpen</c> used by the Kitchen sink UI.
-    /// Returns <c>null</c> when nothing resolvable is present (caller maps to UnknownTarget /
-    /// EnvironmentBlocked — never fake Ok).
+    /// <see cref="Godlotto.QA.Input.QaEventSystemInputDriver"/> (RealInput).
+    /// Supports faucet, sink dropzone, and active MaidRoomKey. Returns <c>null</c> when
+    /// unresolved (caller maps to UnknownTarget / EnvironmentBlocked — never fake Ok).
     /// </summary>
     public static class KitchenQaTargetResolver
     {
         private static readonly string[] FaucetButtonObjectNames = { "Faucet", "FaucetOpen" };
+        private const string SinkDropzoneObjectName = "SinkDropzone";
+        private const string MaidRoomKeyObjectName = "MaidRoomKey";
 
         /// <summary>
         /// Resolves <paramref name="targetId"/> to a pointer-capable GameObject, or <c>null</c>.
@@ -36,6 +38,97 @@ namespace Godlotto.QA.SceneAdapters
                     StringComparison.Ordinal))
             {
                 return TryResolveFaucetClickTarget();
+            }
+
+            if (string.Equals(
+                    targetId.Value,
+                    KitchenQaAdapter.SinkDropzoneTargetIdValue,
+                    StringComparison.Ordinal))
+            {
+                return TryResolveNamedActiveObject(SinkDropzoneObjectName);
+            }
+
+            if (string.Equals(
+                    targetId.Value,
+                    KitchenQaAdapter.MaidKeyTargetIdValue,
+                    StringComparison.Ordinal))
+            {
+                return TryResolveMaidKey();
+            }
+
+            return null;
+        }
+
+        private static GameObject TryResolveMaidKey()
+        {
+            ItemPickup[] pickups = UnityEngine.Object.FindObjectsByType<ItemPickup>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            for (int i = 0; i < pickups.Length; i++)
+            {
+                ItemPickup pickup = pickups[i];
+                if (pickup == null || !pickup.isActiveAndEnabled)
+                {
+                    continue;
+                }
+
+                if (string.Equals(pickup.gameObject.name, MaidRoomKeyObjectName, StringComparison.Ordinal))
+                {
+                    return pickup.gameObject;
+                }
+
+                if (pickup.item != null
+                    && pickup.item.itemId == KitchenQaAdapter.MaidRoomKeyItemId)
+                {
+                    return pickup.gameObject;
+                }
+            }
+
+            return TryResolveNamedActiveObject(MaidRoomKeyObjectName);
+        }
+
+        private static GameObject TryResolveNamedActiveObject(string objectName)
+        {
+            GameObject[] roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            for (int i = 0; i < roots.Length; i++)
+            {
+                GameObject found = FindNamedActiveDescendant(roots[i].transform, objectName);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            // Fallback: name search across loaded objects (active only).
+            GameObject byName = GameObject.Find(objectName);
+            if (byName != null && byName.activeInHierarchy)
+            {
+                return byName;
+            }
+
+            return null;
+        }
+
+        private static GameObject FindNamedActiveDescendant(Transform root, string objectName)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+
+            if (string.Equals(root.name, objectName, StringComparison.Ordinal)
+                && root.gameObject.activeInHierarchy)
+            {
+                return root.gameObject;
+            }
+
+            for (int i = 0; i < root.childCount; i++)
+            {
+                GameObject found = FindNamedActiveDescendant(root.GetChild(i), objectName);
+                if (found != null)
+                {
+                    return found;
+                }
             }
 
             return null;
