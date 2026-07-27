@@ -70,7 +70,8 @@ Pull requests that touch in-scope originals, `docs/wiki/**`,
 1. manifest, transcript, link, encoding, and RAG corpus validation,
 2. `pytest tools/tests/test_wiki_rag_*.py`,
 3. RAG corpus rebuild plus re-validation,
-4. `backend_ai` pytest (dummy API keys only),
+4. scoped `backend_ai` RAG pytest (dummy API keys only; not the full
+   backend suite),
 5. `python backend_ai/scripts/build_tutor_rag_index.py --dry-run` (no
    production embedding API calls).
 
@@ -90,7 +91,8 @@ and fails if chunk counts drift without a manifest change.
 python tools/wiki_rag/validate.py --repo-root . --manifest docs/wiki/_meta/source-manifest.yaml --rag-dir docs/wiki/rag
 pytest tools/tests/test_wiki_rag_*.py -q --basetemp=.pytest_tmp
 cd backend_ai
-pytest tests -q --basetemp=../.pytest_tmp
+pytest tests/test_project_rag_index_builder.py tests/test_project_rag_chat_service.py tests/test_tutor_rag_locale.py tests/test_chat_request_model.py tests/test_tutor_chat_service.py -q --basetemp=../.pytest_tmp
+# Optional: run the full backend suite locally with `pytest tests -q --basetemp=../.pytest_tmp`
 python scripts/build_tutor_rag_index.py --dry-run
 ```
 

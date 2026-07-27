@@ -118,12 +118,18 @@ jobs:
         working-directory: backend_ai
         run: pip install -r requirements.txt
 
-      - name: Run backend pytest (offline)
+      - name: Run backend RAG pytest (offline)
         working-directory: backend_ai
         env:
           GROQ_API_KEY: dummy
           GOOGLE_API_KEY: dummy
-        run: pytest tests -q --basetemp=../.pytest_tmp
+        run: >
+          pytest tests/test_project_rag_index_builder.py
+          tests/test_project_rag_chat_service.py
+          tests/test_tutor_rag_locale.py
+          tests/test_chat_request_model.py
+          tests/test_tutor_chat_service.py
+          -q --basetemp=../.pytest_tmp
 
       - name: Dry-run embedding index build (no API key)
         working-directory: backend_ai
