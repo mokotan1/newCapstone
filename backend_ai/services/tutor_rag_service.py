@@ -10,7 +10,7 @@ from services.locale_support import normalize_locale
 
 logger = logging.getLogger(__name__)
 
-_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
+_TUTOR_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
     "ko": (
         "[참고 자료 — 아래 인용문만 퀴즈 출제·해설·근거로 사용하세요. "
         "없는 내용은 상식으로 보충하지 마세요.]"
@@ -22,6 +22,22 @@ _CONTEXT_BLOCK_HEADERS: dict[str, str] = {
     "en": (
         "[Reference material — Use only the quotes below for quiz questions, "
         "explanations, and evidence. Do not fill gaps with general knowledge.]"
+    ),
+}
+
+_PROJECT_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
+    "ko": (
+        "[프로젝트 참고 자료 — 아래 인용문만 세계관·기획·구현 사실의 근거로 사용하세요. "
+        "없는 내용은 상식으로 보충하지 마세요.]"
+    ),
+    "ja": (
+        "[プロジェクト参考資料 — 以下の引用のみを世界観・企画・実装の根拠に使ってください。"
+        "ない内容は常識で補わないでください。]"
+    ),
+    "en": (
+        "[Project reference — Use only the quotes below as evidence for "
+        "world-building, design, and implementation facts. "
+        "Do not fill gaps with general knowledge.]"
     ),
 }
 
@@ -151,6 +167,7 @@ class TutorRAGService:
         max_context_chars: int,
         locale: str = "ko",
         min_similarity: float | None = None,
+        rag_profile: str = "tutor",
     ) -> str:
         pool = self._chunks_for_locale(locale)
         if not pool:
@@ -177,7 +194,11 @@ class TutorRAGService:
         scored.sort(key=lambda x: x[0], reverse=True)
         picked = scored[:top_k]
 
-        header = _CONTEXT_BLOCK_HEADERS[normalize_locale(locale)]
+        loc = normalize_locale(locale)
+        if rag_profile == "project":
+            header = _PROJECT_CONTEXT_BLOCK_HEADERS[loc]
+        else:
+            header = _TUTOR_CONTEXT_BLOCK_HEADERS[loc]
         lines: list[str] = [header]
         total = len(header)
         for rank, (sim, ch) in enumerate(picked, start=1):

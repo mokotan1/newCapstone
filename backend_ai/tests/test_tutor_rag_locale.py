@@ -126,3 +126,25 @@ def test_min_similarity_threshold_returns_empty_block(tmp_path: Path) -> None:
     block = svc.build_context_block("q", top_k=3, max_context_chars=2000, locale="ko")
     assert block == ""
 
+
+def test_project_profile_uses_project_headers_not_quiz(tmp_path: Path) -> None:
+    idx = tmp_path / "project.json"
+    _write_index(
+        idx,
+        [
+            _sample_chunk(text="world lore body"),
+        ],
+    )
+    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.0)
+    svc._embed_query = lambda text: [1.0, 0.0]  # type: ignore[method-assign]
+    block = svc.build_context_block(
+        "q",
+        top_k=3,
+        max_context_chars=2000,
+        locale="ko",
+        rag_profile="project",
+    )
+    assert "프로젝트 참고 자료" in block
+    assert "퀴즈 출제" not in block
+    assert "source_id=scenario:abc123" in block
+

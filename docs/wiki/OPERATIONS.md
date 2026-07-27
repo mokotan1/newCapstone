@@ -24,6 +24,23 @@ This page documents the local project-knowledge pipeline order.
    retrieval.
 8. **Local backend test** — run FastAPI tests and a smoke chat against the
    refreshed index.
+   - Tutor room: `rag_profile: "tutor"` with `current_question_id`.
+   - Project wiki Q&A: `rag_profile: "project"` (no quiz bank, no answer
+     override). Example body:
+
+     ```json
+     {
+       "prompt": "세계관 핵심 설정은?",
+       "system": "프로젝트 위키 도우미",
+       "use_tools": false,
+       "rag_profile": "project",
+       "locale": "ko"
+     }
+     ```
+
+     Expect retrieved chunks to cite `source_id` / `source_path`. Report
+     sources remain excluded from the corpus; HWP originals stay out of scope
+     until converted.
 9. **Deployment** — publish backend images and compose stack after local
    validation passes.
 
