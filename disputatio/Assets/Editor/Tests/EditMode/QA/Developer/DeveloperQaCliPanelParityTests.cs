@@ -52,6 +52,14 @@ public sealed class DeveloperQaCliPanelParityTests
     }
 
     [Test]
+    public void Factory_RegistersKitchenAndMainMenuProbeCapabilities()
+    {
+        var ids = System.Linq.Enumerable.Select(sharedService.ListCapabilities(), c => c.Id);
+        CollectionAssert.Contains(ids, KitchenQaAdapter.FaucetProbeCapabilityId);
+        CollectionAssert.Contains(ids, MainMenuQaAdapter.StartProbeCapabilityId);
+    }
+
+    [Test]
     public void BuildCommandForCli_Grant_MatchesPanelPayload()
     {
         DeveloperQaCommand panel = DeveloperQaPanelBridge.BuildGrantBookmarkCommand("parity-grant");
@@ -171,6 +179,58 @@ public sealed class DeveloperQaCliPanelParityTests
     }
 
     [Test]
+    public async Task ExecuteAsync_KitchenFaucetProbe_Describe_CliAndPanel_EqualResultCode()
+    {
+        await AssertDescribeParityAsync(
+            "kitchen-probe-describe",
+            KitchenQaAdapter.FaucetProbeCapabilityId);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_MainMenuStartProbe_Describe_CliAndPanel_EqualResultCode()
+    {
+        await AssertDescribeParityAsync(
+            "mainmenu-probe-describe",
+            MainMenuQaAdapter.StartProbeCapabilityId);
+    }
+
+    [Test]
+    public async Task ExecuteAsync_KitchenFaucetProbe_Invoke_CliAndPanel_EqualResultCode()
+    {
+        await AssertParityAsync(
+            DeveloperQaCommand.Create(
+                "kitchen-probe-invoke",
+                "interaction",
+                "invoke",
+                KitchenQaAdapter.FaucetProbeCapabilityId),
+            new JObject
+            {
+                ["command_id"] = "kitchen-probe-invoke",
+                ["family"] = "interaction",
+                ["name"] = "invoke",
+                ["target"] = KitchenQaAdapter.FaucetProbeCapabilityId
+            });
+    }
+
+    [Test]
+    public async Task ExecuteAsync_MainMenuStartProbe_Invoke_CliAndPanel_EqualResultCode()
+    {
+        await AssertParityAsync(
+            DeveloperQaCommand.Create(
+                "mainmenu-probe-invoke",
+                "interaction",
+                "invoke",
+                MainMenuQaAdapter.StartProbeCapabilityId),
+            new JObject
+            {
+                ["command_id"] = "mainmenu-probe-invoke",
+                ["family"] = "interaction",
+                ["name"] = "invoke",
+                ["target"] = MainMenuQaAdapter.StartProbeCapabilityId
+            });
+    }
+
+    [Test]
     public void CreateProductionService_InjectsEvidenceRecorder_EvidenceCaptureNotEnvironmentBlocked()
     {
         string tempRoot = System.IO.Path.Combine(
@@ -212,6 +272,19 @@ public sealed class DeveloperQaCliPanelParityTests
                 // Best-effort cleanup.
             }
         }
+    }
+
+    private static async Task AssertDescribeParityAsync(string commandId, string targetId)
+    {
+        await AssertParityAsync(
+            DeveloperQaCommand.Create(commandId, "capability", "describe", targetId),
+            new JObject
+            {
+                ["command_id"] = commandId,
+                ["family"] = "capability",
+                ["name"] = "describe",
+                ["target"] = targetId
+            });
     }
 
     private static async Task AssertParityAsync(DeveloperQaCommand panelCommand, JObject cliParams)
