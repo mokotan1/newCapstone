@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "roomId": "utility-room",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["UtilityRoom"],
+  "implementationStatus": "NOT_IMPLEMENTED",
+  "entryPreset": "utility-room.stub",
+  "requiredCapabilities": [],
+  "scenarios": [
+    "room.utility-room.smoke",
+    "room.utility-room.happy-path",
+    "room.utility-room.guard.wrong-item",
+    "room.utility-room.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}
