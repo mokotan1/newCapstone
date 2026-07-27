@@ -6,14 +6,15 @@ using Godlotto.QA.Profile;
 namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
-    /// Shared production wiring for <see cref="DeveloperQaService"/> (Task 8).
-    /// Panel bridge and CLI bridge both create services through this factory so StudyRoom
-    /// capabilities (and optional profile/evidence) are registered exactly once in one place.
+    /// Shared production wiring for <see cref="DeveloperQaService"/> (Task 8 + Wave 1).
+    /// Panel bridge and CLI bridge both create services through this factory so multi-room
+    /// capabilities (StudyRoom, Kitchen, MainMenu) and optional profile/evidence are
+    /// registered exactly once in one place.
     /// </summary>
     public static class DeveloperQaServiceFactory
     {
         /// <summary>
-        /// Creates a service with StudyRoom capabilities registered.
+        /// Creates a service with StudyRoom, Kitchen, and MainMenu capabilities registered.
         /// Pass <paramref name="evidenceRecorder"/> (e.g. Editor <c>docs/qa/runs</c> recorder)
         /// for production evidence.capture; omit in unit tests that inject their own recorder.
         /// </summary>
@@ -23,6 +24,8 @@ namespace Godlotto.QA.SceneAdapters
         {
             var registry = new DeveloperQaCapabilityRegistry();
             StudyRoomQaAdapter.RegisterCapabilities(registry);
+            KitchenQaAdapter.RegisterCapabilities(registry);
+            MainMenuQaAdapter.RegisterCapabilities(registry);
             return new DeveloperQaService(registry, profileService, evidenceRecorder);
         }
     }
