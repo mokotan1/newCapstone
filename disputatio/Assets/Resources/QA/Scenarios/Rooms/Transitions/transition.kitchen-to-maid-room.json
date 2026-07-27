@@ -3,7 +3,7 @@
   "id": "transition.kitchen-to-maid-room",
   "sourceRegion": "kitchen",
   "destinationRegion": "maid-room",
-  "entryPreset": "kitchen.before-bottle-fill",
+  "entryPreset": "kitchen.sink.preset.before-bottle-fill",
   "prerequisites": ["inventory.opaque-bottle"],
   "lockedAssertions": ["door.maid.locked"],
   "sourceExitContract": ["inventory.maid-room-key", "flag.HaveMaidKey"],

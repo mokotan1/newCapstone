@@ -36,18 +36,24 @@ public sealed class KitchenRealInputHappyPathTests
         Assert.AreEqual("room.kitchen.happy-path", result.Scenario.Id);
 
         IList<DeveloperQaScenarioStepDefinition> steps = result.Scenario.Steps;
+        int beforeFillIndex = IndexOfTarget(steps, "kitchen.sink.preset.before-bottle-fill");
+        int fillIndex = IndexOfTarget(steps, "kitchen.sink.fill-bottle");
         int pointerIndex = IndexOf(steps, "interaction", "pointer");
-        int resetIndex = IndexOfTarget(steps, "kitchen.faucet.reset");
+        int exitIndex = IndexOfTarget(steps, "kitchen.exit.assert");
         int apiClickIndex = IndexOfTarget(steps, "kitchen.faucet.click");
         int evidenceIndex = IndexOf(steps, "evidence", "capture");
 
+        Assert.GreaterOrEqual(beforeFillIndex, 0, "Expected before-bottle-fill preset.");
+        Assert.GreaterOrEqual(fillIndex, 0, "Expected kitchen.sink.fill-bottle.");
         Assert.GreaterOrEqual(pointerIndex, 0, "Expected interaction.pointer RealInput step.");
-        Assert.GreaterOrEqual(resetIndex, 0, "Expected kitchen.faucet.reset after RealInput.");
+        Assert.GreaterOrEqual(exitIndex, 0, "Expected kitchen.exit.assert.");
         Assert.GreaterOrEqual(apiClickIndex, 0, "Expected kitchen.faucet.click API invoke.");
         Assert.GreaterOrEqual(evidenceIndex, 0, "Expected evidence.capture.");
 
-        Assert.Less(pointerIndex, resetIndex, "RealInput pointer must precede reset.");
-        Assert.Less(resetIndex, apiClickIndex, "Reset must precede API invoke.");
+        Assert.Less(beforeFillIndex, fillIndex, "before-bottle-fill must precede fills-bottle.");
+        Assert.Less(fillIndex, pointerIndex, "fills-bottle must precede RealInput faucet.");
+        Assert.Less(pointerIndex, exitIndex, "RealInput faucet must precede exit.assert.");
+        Assert.Less(pointerIndex, apiClickIndex, "RealInput pointer must precede API faucet click.");
         Assert.Less(apiClickIndex, evidenceIndex, "API invoke must precede evidence.capture.");
 
         DeveloperQaScenarioStepDefinition pointer = steps[pointerIndex];

@@ -1,73 +1,111 @@
-{
-  "schemaVersion": 1,
-  "id": "room.kitchen.happy-path",
-  "roomId": "kitchen",
-  "scene": "Kitchen",
-  "tier": "happy-path",
-  "requiredCapabilities": [
-    "kitchen.faucet.preset.before-faucet",
-    "kitchen.faucet.reset",
-    "kitchen.faucet.click",
-    "kitchen.faucet.probe",
-    "kitchen.faucet.assert-clicked",
-    "kitchen.faucet.capture"
-  ],
-  "steps": [
-    {
-      "id": "apply-before-faucet",
-      "family": "preset",
-      "name": "apply",
-      "targetId": "kitchen.faucet.preset.before-faucet"
-    },
-    {
-      "id": "click-faucet-real",
-      "family": "interaction",
-      "name": "pointer",
-      "targetId": "kitchen.sink.faucet",
-      "parameters": {
-        "mode": "realInput"
-      }
-    },
-    {
-      "id": "assert-clicked-after-real",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.assert-clicked"
-    },
-    {
-      "id": "probe-after-real",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.probe"
-    },
-    {
-      "id": "reset-faucet",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.reset"
-    },
-    {
-      "id": "click-faucet-api",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.click"
-    },
-    {
-      "id": "assert-clicked-after-api",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.assert-clicked"
-    },
-    {
-      "id": "capture-faucet",
-      "family": "interaction",
-      "name": "invoke",
-      "targetId": "kitchen.faucet.capture"
-    },
-    {
-      "id": "evidence-capture",
-      "family": "evidence",
-      "name": "capture"
-    }
-  ]
-}
+{
+  "schemaVersion": 1,
+  "id": "room.kitchen.happy-path",
+  "roomId": "kitchen",
+  "scene": "Kitchen",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "kitchen.sink.preset.before-bottle-fill",
+    "kitchen.sink.fill-bottle",
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.reset",
+    "kitchen.faucet.click",
+    "kitchen.faucet.probe",
+    "kitchen.faucet.assert-clicked",
+    "kitchen.faucet.capture",
+    "kitchen.key.probe",
+    "kitchen.key.click",
+    "kitchen.exit.assert"
+  ],
+  "steps": [
+    {
+      "id": "before-bottle-fill",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.sink.preset.before-bottle-fill"
+    },
+    {
+      "id": "fills-bottle",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.sink.fill-bottle"
+    },
+    {
+      "id": "click-faucet-real",
+      "family": "interaction",
+      "name": "pointer",
+      "targetId": "kitchen.sink.faucet",
+      "parameters": {
+        "mode": "realInput"
+      }
+    },
+    {
+      "id": "assert-faucet-clicked",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.assert-clicked"
+    },
+    {
+      "id": "probe-key-spawn",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.key.probe"
+    },
+    {
+      "id": "click-key-real",
+      "family": "interaction",
+      "name": "pointer",
+      "targetId": "kitchen.maid-key",
+      "parameters": {
+        "mode": "realInput"
+      }
+    },
+    {
+      "id": "exit-assert",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.exit.assert"
+    },
+    {
+      "id": "reset-then-api-fills",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.sink.preset.before-bottle-fill"
+    },
+    {
+      "id": "fills-bottle-api",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.sink.fill-bottle"
+    },
+    {
+      "id": "click-faucet-api",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.click"
+    },
+    {
+      "id": "key-click-api",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.key.click"
+    },
+    {
+      "id": "exit-assert-after-api",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.exit.assert"
+    },
+    {
+      "id": "capture-faucet",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}
