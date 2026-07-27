@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.bed-room.guard.reentry",
+  "roomId": "bed-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "bedroom.book.click",
+    "bedroom.book.probe",
+    "bedroom.book.assert-controller"
+  ],
+  "steps": [
+    {
+      "id": "click-book",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.click"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.assert-controller"
+    },
+    {
+      "id": "probe-after-reentry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.probe"
+    }
+  ]
+}
