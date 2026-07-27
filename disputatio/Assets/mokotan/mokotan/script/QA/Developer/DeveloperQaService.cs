@@ -80,9 +80,9 @@ namespace Godlotto.QA.Developer
                 return Task.FromResult(DescribeCapability(command.TargetId));
             }
 
-            if (command.Family == "interaction" && command.Name == "invoke")
+            if (IsCapabilityDispatchCommand(command.Family, command.Name))
             {
-                return Task.FromResult(InvokeInteraction(command.TargetId));
+                return Task.FromResult(DispatchCapability(command));
             }
 
             if (command.Family == "scenario" && command.Name == "run")
@@ -114,6 +114,62 @@ namespace Godlotto.QA.Developer
         public IReadOnlyCollection<DeveloperQaCapability> ListCapabilities()
         {
             return _registry.List();
+        }
+
+        private static bool IsCapabilityDispatchCommand(string family, string name)
+        {
+            if (family == "interaction" && name == "invoke")
+            {
+                return true;
+            }
+
+            if (family == "preset" && name == "apply")
+            {
+                return true;
+            }
+
+            if (family == "state" && (name == "assert" || name == "capture"))
+            {
+                return true;
+            }
+
+            if (family == "evidence" && name == "capture")
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private DeveloperQaResult DispatchCapability(DeveloperQaCommand command)
+        {
+            string targetId = command.TargetId;
+            if (string.IsNullOrWhiteSpace(targetId) || !_registry.TryGet(targetId, out _))
+            {
+                return CreateMissingCapability(targetId);
+            }
+
+            if (!_registry.TryGetHandler(targetId, out DeveloperQaCapabilityHandler handler) ||
+                handler == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.UnsupportedCommand,
+                    $"{command.Family}.{command.Name} for '{targetId}' has no handler yet.");
+            }
+
+            try
+            {
+                DeveloperQaResult result = handler(command);
+                return result ?? new DeveloperQaResult(
+                    DeveloperQaResultCode.InternalError,
+                    $"Handler for '{targetId}' returned null.");
+            }
+            catch (Exception ex)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InternalError,
+                    $"Handler for '{targetId}' failed: {ex.GetType().Name}.");
+            }
         }
 
         private DeveloperQaResult BeginScenarioProfileSession(DeveloperQaCommand command)
@@ -209,19 +265,6 @@ namespace Godlotto.QA.Developer
                     ["input_schema"] = capability.InputSchema,
                     ["output_schema"] = capability.OutputSchema
                 }));
-        }
-
-        private DeveloperQaResult InvokeInteraction(string targetId)
-        {
-            if (string.IsNullOrWhiteSpace(targetId) || !_registry.TryGet(targetId, out _))
-            {
-                return CreateMissingCapability(targetId);
-            }
-
-            // Known capability without an adapter yet (Task 4+).
-            return new DeveloperQaResult(
-                DeveloperQaResultCode.UnsupportedCommand,
-                $"interaction.invoke for '{targetId}' not implemented yet.");
         }
 
         private DeveloperQaResult CreateMissingCapability(string missingId)

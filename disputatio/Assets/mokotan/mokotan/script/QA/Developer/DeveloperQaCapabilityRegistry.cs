@@ -6,18 +6,24 @@ using System.Linq;
 namespace Godlotto.QA.Developer
 {
     /// <summary>
-    /// In-memory catalog of developer-QA capabilities. Version bumps on each successful Register.
+    /// In-memory catalog of developer-QA capabilities and optional handlers.
+    /// Version bumps on each successful Register.
     /// </summary>
     public sealed class DeveloperQaCapabilityRegistry
     {
         private readonly Dictionary<string, DeveloperQaCapability> _byId =
             new Dictionary<string, DeveloperQaCapability>(StringComparer.Ordinal);
 
+        private readonly Dictionary<string, DeveloperQaCapabilityHandler> _handlers =
+            new Dictionary<string, DeveloperQaCapabilityHandler>(StringComparer.Ordinal);
+
         private int _versionNumber;
 
         public string Version => _versionNumber.ToString();
 
-        public void Register(DeveloperQaCapability capability)
+        public void Register(
+            DeveloperQaCapability capability,
+            DeveloperQaCapabilityHandler handler = null)
         {
             if (capability == null)
             {
@@ -30,6 +36,15 @@ namespace Godlotto.QA.Developer
             }
 
             _byId[capability.Id] = capability;
+            if (handler != null)
+            {
+                _handlers[capability.Id] = handler;
+            }
+            else
+            {
+                _handlers.Remove(capability.Id);
+            }
+
             _versionNumber++;
         }
 
@@ -47,6 +62,17 @@ namespace Godlotto.QA.Developer
             }
 
             return _byId.TryGetValue(id, out capability);
+        }
+
+        public bool TryGetHandler(string id, out DeveloperQaCapabilityHandler handler)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                handler = null;
+                return false;
+            }
+
+            return _handlers.TryGetValue(id, out handler);
         }
 
         public string FormatCurrentCapabilityIds()

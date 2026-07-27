@@ -6,9 +6,10 @@ using NUnit.Framework;
 using UnityEngine;
 
 /// <summary>
-/// Task 12 §Step 1: written before touching any scene asset. Verifies (a) the five initial scene
-/// adapters (<see cref="MainMenuQaAdapter"/>, <see cref="KitchenQaAdapter"/>,
-/// <see cref="HallQaAdapter"/>, <see cref="MaidRoomQaAdapter"/>, <see cref="TutorRoomQaAdapter"/>)
+/// Task 12 §Step 1 (+ Task 4 StudyRoom): written before touching any scene asset. Verifies (a) the
+/// initial scene adapters (<see cref="MainMenuQaAdapter"/>, <see cref="KitchenQaAdapter"/>,
+/// <see cref="HallQaAdapter"/>, <see cref="MaidRoomQaAdapter"/>, <see cref="TutorRoomQaAdapter"/>,
+/// <see cref="StudyRoomQaAdapter"/>)
 /// declare well-formed, non-conflicting, already-lowercase-dotted <see cref="QaTargetId"/>s and
 /// register cleanly into a fresh <see cref="QaSceneRegistry"/> via
 /// <see cref="QaSceneAdapterRegistration"/>, and (b) the six real scenario JSON resources under
@@ -24,7 +25,7 @@ public sealed class InitialSceneAdapterSerializationTests
 {
     private static readonly string[] ExpectedSceneNames =
     {
-        "MainMenuScene", "Kitchen", "Hall_playerble", "MaidRoom", "TutorRoom"
+        "MainMenuScene", "Kitchen", "Hall_playerble", "MaidRoom", "TutorRoom", "StudyRoom"
     };
 
     private static readonly (string SceneName, string RawTargetId)[] ExpectedTargets =
@@ -52,7 +53,7 @@ public sealed class InitialSceneAdapterSerializationTests
     // -----------------------------------------------------------------------------------
 
     [Test]
-    public void RegisterAll_RegistersExactlyTheFiveExpectedScenesWithNoConflicts()
+    public void RegisterAll_RegistersExactlyTheExpectedScenesWithNoConflicts()
     {
         var registry = new QaSceneRegistry();
 
@@ -124,7 +125,7 @@ public sealed class InitialSceneAdapterSerializationTests
     }
 
     [Test]
-    public void AllFiveAdapters_CaptureSnapshotOutsidePlayMode_NeverThrows()
+    public void AllRegisteredAdapters_CaptureSnapshotOutsidePlayMode_NeverThrows()
     {
         // CaptureSnapshot must be safe to call even when the declared scene is not currently
         // loaded (EditMode has no Play Mode scene at all) -- adapters must report "not found"
