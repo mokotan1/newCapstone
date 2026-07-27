@@ -27,7 +27,7 @@ Remaining catalog gaps (out of first-floor scope): `second-floor.hall`, `tutor-r
 | hall.left | NOT_IMPLEMENTED | manifest + smoke stub | Empty smoke; no PASS claim |
 | hall.right | NOT_IMPLEMENTED | manifest + smoke stub | Empty smoke; no PASS claim |
 | utility-room | NOT_IMPLEMENTED | manifest + smoke stub | Empty smoke; no PASS claim |
-| kitchen | PARTIAL | full pack | Happy-path encodes RealInput (`interaction.pointer` / `kitchen.sink.faucet`) then reset then API (`kitchen.faucet.click`) per design §6.2; bottle→key exit / maid-key still PARTIAL; no force-solve PASS |
+| kitchen | PARTIAL | full pack | Bottle→key exit capabilities wired (`before-bottle-fill`, `fills-bottle`, `key.*`, `exit.assert`); happy-path encodes §6.2 RealInput faucet + maid-key pointer then exit.assert; notes: exit asserts wired, PlayMode pending; smoke remains faucet-only; no force-solve PASS |
 | maid-room | PARTIAL | full pack | Uses `maidroom.food.*` |
 | study-room | PARTIAL | full pack | Uses `studyroom.mirror.*` |
 | study-bookcases | NOT_IMPLEMENTED | manifest + smoke stub | Empty smoke; no PASS claim |
