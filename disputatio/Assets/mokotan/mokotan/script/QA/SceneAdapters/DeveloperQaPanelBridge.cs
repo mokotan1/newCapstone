@@ -7,10 +7,11 @@ using Godlotto.QA.Developer;
 namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
-    /// Thin StudyRoom developer-panel bridge (Task 5). Builds the same
-    /// <see cref="DeveloperQaCommand"/> payloads the CLI will send
+    /// Thin StudyRoom developer-panel bridge (Tasks 5 + 8). Builds the same
+    /// <see cref="DeveloperQaCommand"/> payloads the CLI sends
     /// (<c>interaction.invoke</c> / <c>state.capture</c> + StudyRoom capability ids)
     /// and routes them through <see cref="IDeveloperQaService"/>.
+    /// Default service creation uses <see cref="DeveloperQaServiceFactory"/> (shared with CLI).
     ///
     /// Placement: default assembly under <c>SceneAdapters/</c> (Kitchen pattern) because
     /// <c>Godlotto.QA.UI</c> cannot reference Assembly-CSharp DevMode / StudyRoom types
@@ -149,9 +150,9 @@ namespace Godlotto.QA.SceneAdapters
                 return false;
             }
 
-            var registry = new DeveloperQaCapabilityRegistry();
-            StudyRoomQaAdapter.RegisterCapabilities(registry);
-            service = new DeveloperQaService(registry);
+            // Shared factory: StudyRoom capabilities registered in one place (Task 8).
+            // Editor installer may already have Configure'd a production service with evidence.
+            service = DeveloperQaServiceFactory.Create();
             resolved = service;
             return true;
         }
