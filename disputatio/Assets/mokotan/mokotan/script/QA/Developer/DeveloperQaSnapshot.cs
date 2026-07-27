@@ -22,7 +22,7 @@ namespace Godlotto.QA.Developer
             ActiveSceneId = activeSceneId ?? string.Empty;
             QaProfileId = qaProfileId ?? string.Empty;
             CapabilityRegistryVersion = capabilityRegistryVersion ?? "0";
-            State = state ?? new Dictionary<string, string>();
+            State = DeveloperQaMaps.AsReadOnly(state);
         }
     }
 }

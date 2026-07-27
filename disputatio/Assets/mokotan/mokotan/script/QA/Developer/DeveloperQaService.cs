@@ -55,11 +55,11 @@ namespace Godlotto.QA.Developer
                 return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.Ok,
                     count == 0 ? "empty" : $"count={count}",
-                    data: new Dictionary<string, string>
+                    data: DeveloperQaMaps.From(new Dictionary<string, string>
                     {
                         ["count"] = count.ToString(),
                         ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
-                    }));
+                    })));
             }
 
             if (command.Family == "capability" && command.Name == "describe")
@@ -84,7 +84,7 @@ namespace Godlotto.QA.Developer
                 string.Empty,
                 string.Empty,
                 _registry.Version,
-                new Dictionary<string, string>());
+                DeveloperQaMaps.Empty);
         }
 
         public IReadOnlyCollection<DeveloperQaCapability> ListCapabilities()
@@ -102,14 +102,14 @@ namespace Godlotto.QA.Developer
             return new DeveloperQaResult(
                 DeveloperQaResultCode.Ok,
                 $"Described '{capability.Id}'.",
-                data: new Dictionary<string, string>
+                data: DeveloperQaMaps.From(new Dictionary<string, string>
                 {
                     ["id"] = capability.Id,
                     ["scene_id"] = capability.SceneId,
                     ["kind"] = capability.Kind.ToString(),
                     ["input_schema"] = capability.InputSchema,
                     ["output_schema"] = capability.OutputSchema
-                });
+                }));
         }
 
         private DeveloperQaResult InvokeInteraction(string targetId)
@@ -128,10 +128,11 @@ namespace Godlotto.QA.Developer
         private DeveloperQaResult CreateMissingCapability(string missingId)
         {
             string id = string.IsNullOrWhiteSpace(missingId) ? string.Empty : missingId;
-            var data = new Dictionary<string, string>
-            {
-                ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
-            };
+            IReadOnlyDictionary<string, string> data = DeveloperQaMaps.From(
+                new Dictionary<string, string>
+                {
+                    ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
+                });
 
             return new DeveloperQaResult(
                 DeveloperQaResultCode.MissingCapability,

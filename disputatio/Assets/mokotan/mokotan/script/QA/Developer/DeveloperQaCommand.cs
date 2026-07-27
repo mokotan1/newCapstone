@@ -22,7 +22,7 @@ namespace Godlotto.QA.Developer
             Family = family;
             Name = name;
             TargetId = targetId;
-            Parameters = parameters ?? new Dictionary<string, string>();
+            Parameters = DeveloperQaMaps.AsReadOnly(parameters);
         }
 
         public static DeveloperQaCommand Create(

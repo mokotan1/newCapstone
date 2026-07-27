@@ -22,7 +22,7 @@ namespace Godlotto.QA.Developer
             Message = message ?? string.Empty;
             MissingCapabilityId = missingCapabilityId;
             CheckpointId = checkpointId;
-            Data = data ?? new Dictionary<string, string>();
+            Data = DeveloperQaMaps.AsReadOnly(data);
         }
     }
 }
