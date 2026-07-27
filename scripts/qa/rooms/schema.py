@@ -156,9 +156,40 @@ def validate_room_scenario(data: Mapping[str, Any] | Any) -> None:
     caps = payload["requiredCapabilities"]
     if not isinstance(caps, list) or any(not isinstance(item, str) for item in caps):
         raise SchemaError("scenario.requiredCapabilities must be a list of strings")
-    if not isinstance(payload["steps"], list):
+    steps = payload["steps"]
+    if not isinstance(steps, list):
         raise SchemaError("scenario.steps must be a list")
+    for index, step in enumerate(steps):
+        _validate_room_scenario_step(step, index)
 
+
+def _validate_room_scenario_step(step: Any, index: int) -> None:
+    label = f"scenario.steps[{index}]"
+    mapping = _require_mapping(step, label)
+    for key in ("id", "family", "name"):
+        if key not in mapping or not isinstance(mapping[key], str) or not mapping[key].strip():
+            raise SchemaError(f"{label}.{key} must be a non-empty string")
+    family = mapping["family"]
+    name = mapping["name"]
+    target = mapping.get("targetId")
+    needs_target = (family == "interaction" and name in {"invoke", "pointer"}) or (
+        family == "preset" and name == "apply"
+    )
+    if needs_target and (not isinstance(target, str) or not target.strip()):
+        raise SchemaError(f"{label}.targetId is required for {family}.{name}")
+    parameters = mapping.get("parameters")
+    if parameters is not None and not isinstance(parameters, Mapping):
+        raise SchemaError(f"{label}.parameters must be an object when present")
+    if (
+        family == "interaction"
+        and name == "pointer"
+        and isinstance(parameters, Mapping)
+        and "mode" in parameters
+        and parameters["mode"] not in (None, "realInput", "api")
+    ):
+        raise SchemaError(
+            f"{label}.parameters.mode must be 'realInput' or 'api' when present"
+        )
 
 def validate_transition(data: Mapping[str, Any] | Any) -> None:
     """Validate a transition scenario against design §7."""
