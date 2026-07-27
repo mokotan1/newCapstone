@@ -176,7 +176,7 @@ namespace Godlotto.QA.Developer
 
         private static bool RequiresTargetId(string family, string name)
         {
-            if (family == "interaction" && name == "invoke")
+            if (family == "interaction" && (name == "invoke" || name == "pointer"))
             {
                 return true;
             }

@@ -1,7 +1,10 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using Godlotto.QA.Developer;
 using Godlotto.QA.Evidence;
+using Godlotto.QA.Input;
 using Godlotto.QA.Profile;
+using Godlotto.QA.Scenes;
+using UnityEngine.EventSystems;
 
 namespace Godlotto.QA.SceneAdapters
 {
@@ -10,6 +13,8 @@ namespace Godlotto.QA.SceneAdapters
     /// Panel bridge and CLI bridge both create services through this factory so multi-room
     /// capabilities (StudyRoom, Kitchen, MainMenu, MaidRoom, Hall, ChildRoom, WifeRoom,
     /// BedRoom) and optional profile/evidence are registered exactly once in one place.
+    /// When <see cref="EventSystem.current"/> is present, injects a Kitchen-aware RealInput
+    /// driver so <c>interaction.pointer</c> steps can exercise the EventSystem path (§6.2).
     /// </summary>
     public static class DeveloperQaServiceFactory
     {
@@ -32,7 +37,33 @@ namespace Godlotto.QA.SceneAdapters
             ChildRoomQaAdapter.RegisterCapabilities(registry);
             WifeRoomQaAdapter.RegisterCapabilities(registry);
             BedRoomQaAdapter.RegisterCapabilities(registry);
-            return new DeveloperQaService(registry, profileService, evidenceRecorder);
+            return new DeveloperQaService(
+                registry,
+                profileService,
+                evidenceRecorder,
+                TryCreateRealInputDriver());
+        }
+
+        /// <summary>
+        /// Builds a RealInput driver when EventSystem is available; otherwise <c>null</c>
+        /// (pointer steps then report EnvironmentBlocked — never fake Ok).
+        /// </summary>
+        public static IQaInputDriver TryCreateRealInputDriver()
+        {
+            EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null)
+            {
+                return null;
+            }
+
+            return new QaEventSystemInputDriver(eventSystem, ResolveTargetGameObject);
+        }
+
+        private static UnityEngine.GameObject ResolveTargetGameObject(QaTargetId targetId)
+        {
+            // Kitchen faucet first; future room adapters register here.
+            UnityEngine.GameObject kitchen = KitchenQaTargetResolver.TryResolve(targetId);
+            return kitchen;
         }
     }
 }

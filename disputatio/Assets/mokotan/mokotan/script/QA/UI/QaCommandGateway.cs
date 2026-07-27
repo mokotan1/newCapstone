@@ -245,6 +245,16 @@ namespace Godlotto.QA.Gateway
         /// 생략하면(<c>null</c>) <c>evidence.capture</c> 스텝은 가짜 evidence를 만들지 않고
         /// 명시적으로 실패합니다.
         /// </param>
+        /// <param name="inputDriver">
+        /// Optional override for the scenario runner input driver. When omitted, uses API mode.
+        /// Pass a RealInput (<see cref="QaEventSystemInputDriver"/>) driver when pointer steps
+        /// must exercise EventSystem (design §6.2); callers may use
+        /// <see cref="SceneAdapters.DeveloperQaServiceFactory.TryCreateRealInputDriver"/>.
+        /// </param>
+        /// <param name="realInputDriver">
+        /// Optional RealInput driver retained for diagnostics/status; when <paramref name="inputDriver"/>
+        /// is null and this is non-null, the runner uses RealInput instead of API.
+        /// </param>
         public QaCommandGateway(
             IQaEvidenceRecorder evidenceRecorder,
             Func<string> evidenceRunDirectoryProvider = null,
@@ -252,7 +262,9 @@ namespace Godlotto.QA.Gateway
             QaSceneRegistry sceneRegistry = null,
             IQaProfileService profileService = null,
             QaLeaseService leaseService = null,
-            Func<byte[]> captureScreenshotPng = null)
+            Func<byte[]> captureScreenshotPng = null,
+            IQaInputDriver inputDriver = null,
+            IQaInputDriver realInputDriver = null)
         {
             this.evidenceRecorder = evidenceRecorder ?? throw new ArgumentNullException(nameof(evidenceRecorder));
             this.evidenceRunDirectoryProvider = evidenceRunDirectoryProvider;
@@ -262,7 +274,9 @@ namespace Godlotto.QA.Gateway
             this.leaseService = leaseService ?? new QaLeaseService(QaFileLeaseRecoveryStore.CreateDefault());
             this.driver = new QaDriverCore(leaseGate: this.leaseService);
             this.scenarioValidator = new QaScenarioValidator(this.sceneRegistry);
-            this.inputDriver = new QaApiInputDriver(ResolveInteractable);
+            this.inputDriver = inputDriver
+                ?? realInputDriver
+                ?? new QaApiInputDriver(ResolveInteractable);
             this.scenarioRunner = new QaScenarioRunner(
                 this.driver,
                 this.sceneRegistry,

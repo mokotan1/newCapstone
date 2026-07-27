@@ -5,7 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Godlotto.QA.Core;
 using Godlotto.QA.Evidence;
+using Godlotto.QA.Input;
 using Godlotto.QA.Profile;
+using Godlotto.QA.Scenes;
 
 namespace Godlotto.QA.Developer
 {
@@ -18,26 +20,31 @@ namespace Godlotto.QA.Developer
 
         private const string ProfileUnavailableMessage = "QA profile service unavailable";
         private const string EvidenceUnavailableMessage = "QA evidence recorder unavailable";
+        private const string RealInputUnavailableMessage =
+            "RealInput driver unavailable (EventSystem/resolver missing).";
+        private const string RealInputModeKey = "mode";
+        private const string RealInputModeValue = "realInput";
 
         private readonly DeveloperQaCapabilityRegistry _registry;
         private readonly IQaProfileService _profileService;
         private readonly IQaEvidenceRecorder _evidenceRecorder;
+        private readonly IQaInputDriver _realInputDriver;
         private readonly DeveloperQaScenarioRunner _scenarioRunner;
 
         public DeveloperQaService()
-            : this(new DeveloperQaCapabilityRegistry(), null, null)
+            : this(new DeveloperQaCapabilityRegistry(), null, null, null)
         {
         }
 
         public DeveloperQaService(DeveloperQaCapabilityRegistry registry)
-            : this(registry, null, null)
+            : this(registry, null, null, null)
         {
         }
 
         public DeveloperQaService(
             DeveloperQaCapabilityRegistry registry,
             IQaProfileService profileService)
-            : this(registry, profileService, null)
+            : this(registry, profileService, null, null)
         {
         }
 
@@ -45,10 +52,20 @@ namespace Godlotto.QA.Developer
             DeveloperQaCapabilityRegistry registry,
             IQaProfileService profileService,
             IQaEvidenceRecorder evidenceRecorder)
+            : this(registry, profileService, evidenceRecorder, null)
+        {
+        }
+
+        public DeveloperQaService(
+            DeveloperQaCapabilityRegistry registry,
+            IQaProfileService profileService,
+            IQaEvidenceRecorder evidenceRecorder,
+            IQaInputDriver realInputDriver)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _profileService = profileService;
             _evidenceRecorder = evidenceRecorder;
+            _realInputDriver = realInputDriver;
             _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteStepCommand);
         }
 
@@ -92,6 +109,11 @@ namespace Godlotto.QA.Developer
             if (command.Family == "capability" && command.Name == "describe")
             {
                 return Task.FromResult(DescribeCapability(command.TargetId));
+            }
+
+            if (command.Family == "interaction" && command.Name == "pointer")
+            {
+                return Task.FromResult(ExecutePointer(command));
             }
 
             if (IsCapabilityDispatchCommand(command.Family, command.Name))
@@ -441,6 +463,11 @@ namespace Godlotto.QA.Developer
                 return DescribeCapability(command.TargetId);
             }
 
+            if (command.Family == "interaction" && command.Name == "pointer")
+            {
+                return ExecutePointer(command);
+            }
+
             if (IsCapabilityDispatchCommand(command.Family, command.Name))
             {
                 return DispatchCapability(command);
@@ -454,6 +481,124 @@ namespace Godlotto.QA.Developer
             return new DeveloperQaResult(
                 DeveloperQaResultCode.UnsupportedCommand,
                 $"{command.Family}.{command.Name} not implemented yet.");
+        }
+
+        /// <summary>
+        /// Player-visible pointer click via injected RealInput driver (design §6.2).
+        /// Never reports fake Ok when the driver/EventSystem/resolver is missing.
+        /// </summary>
+        private DeveloperQaResult ExecutePointer(DeveloperQaCommand command)
+        {
+            if (string.IsNullOrWhiteSpace(command.TargetId))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InvalidCommand,
+                    "interaction.pointer requires targetId.");
+            }
+
+            string mode = RealInputModeValue;
+            if (command.Parameters != null
+                && command.Parameters.TryGetValue(RealInputModeKey, out string modeText)
+                && !string.IsNullOrWhiteSpace(modeText))
+            {
+                mode = modeText.Trim();
+            }
+
+            if (!string.Equals(mode, RealInputModeValue, StringComparison.OrdinalIgnoreCase))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.UnsupportedCommand,
+                    "interaction.pointer mode '" + mode + "' is not supported (expected realInput).");
+            }
+
+            if (_realInputDriver == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    RealInputUnavailableMessage);
+            }
+
+            if (!QaTargetId.TryCreate(command.TargetId, out QaTargetId targetId, out string targetError))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InvalidCommand,
+                    "Invalid targetId for interaction.pointer: " + targetError);
+            }
+
+            QaInputResult inputResult;
+            try
+            {
+                inputResult = _realInputDriver
+                    .ClickAsync(targetId, CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (Exception ex)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InternalError,
+                    "RealInput click failed: " + ex.GetType().Name + ".");
+            }
+
+            return MapInputResult(inputResult);
+        }
+
+        private static DeveloperQaResult MapInputResult(QaInputResult inputResult)
+        {
+            if (inputResult == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InternalError,
+                    "RealInput driver returned null.");
+            }
+
+            var data = new Dictionary<string, string>
+            {
+                ["input_mode"] = inputResult.Mode.ToString(),
+                ["input_code"] = inputResult.Code.ToString(),
+                ["target_id"] = inputResult.TargetId.Value
+            };
+
+            if (inputResult.IsSuccess)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.Ok,
+                    string.IsNullOrEmpty(inputResult.Message)
+                        ? "RealInput pointer click succeeded."
+                        : inputResult.Message,
+                    data: DeveloperQaMaps.From(data));
+            }
+
+            switch (inputResult.Code)
+            {
+                case QaInputResultCode.Cancelled:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.Cancelled,
+                        inputResult.Message,
+                        data: DeveloperQaMaps.From(data));
+                case QaInputResultCode.InvalidArgument:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.InvalidCommand,
+                        inputResult.Message,
+                        data: DeveloperQaMaps.From(data));
+                case QaInputResultCode.UnknownTarget:
+                case QaInputResultCode.InputLayerFailure:
+                case QaInputResultCode.ApiInteractionFailed:
+                case QaInputResultCode.UnsupportedInteraction:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.EnvironmentBlocked,
+                        string.IsNullOrEmpty(inputResult.Message)
+                            ? "RealInput pointer blocked."
+                            : inputResult.Message,
+                        data: DeveloperQaMaps.From(data));
+                default:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.InternalError,
+                        string.IsNullOrEmpty(inputResult.Message)
+                            ? "RealInput pointer failed."
+                            : inputResult.Message,
+                        data: DeveloperQaMaps.From(data));
+            }
         }
 
         private DeveloperQaResult EnsureEvidenceRunBegun(QaRunId runId, string commandId)
