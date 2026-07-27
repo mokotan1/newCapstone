@@ -8,19 +8,19 @@ status: needs_review
 rag_eligible: true
 ---
 
-# # Slide 1
+## Slide 1
 
 아내 방 기획
 
 작성자 김기석
 
-# # Slide 2
+## Slide 2
 
 아내방 전체 구도와 컨셉 이미지
 
 > Visual asset present: slide 2, shape 2; inspect original PPTX/PDF.
 
-# # Slide 3
+## Slide 3
 
 아내방 전체 구도와 컨셉 이미지
 
@@ -38,7 +38,7 @@ rag_eligible: true
 
 > Visual asset present: slide 3, shape 4; inspect original PPTX/PDF.
 
-# # Slide 4
+## Slide 4
 
 아내방 전체 구도와 컨셉 이미지
 
@@ -60,7 +60,7 @@ rag_eligible: true
 
 [커튼 이미지]
 
-# # Slide 5
+## Slide 5
 
 필요 에셋
 
@@ -70,7 +70,7 @@ rag_eligible: true
 
 시간 == 3시 45분으로 설정 (시계 멈춤)
 
-# # Slide 6
+## Slide 6
 
 필요 에셋
 
@@ -87,7 +87,7 @@ rag_eligible: true
 -> 시계 패널 안에 백 스페이스
     -> 백 스페이스를 클릭 하면 패널 false
 
-# # Slide 7
+## Slide 7
 
 아내 방에 들어왔을 때
 
@@ -97,7 +97,7 @@ Fade in 0.75초
 
 클릭 처리를 위한 isCalled = false
 
-# # Slide 8
+## Slide 8
 
 시계 클릭
 
@@ -109,7 +109,7 @@ Fade in 0.75초
 
 -다음 페이지 참고
 
-# # Slide 9
+## Slide 9
 
 필요 에셋
 
@@ -126,7 +126,7 @@ Fade in 0.75초
 -> 시계 패널 안에 백 스페이스
     -> 백 스페이스를 클릭 하면 패널 false
 
-# # Slide 10
+## Slide 10
 
 필요 에셋
 
@@ -148,7 +148,7 @@ Fade in 0.75초
 
 아래의 문이 여닫이 문으로 화살표 처럼 나오도록
 
-# # Slide 11
+## Slide 11
 
 필요 에셋
 
@@ -168,7 +168,7 @@ Fade in 0.75초
 
 아래의 문이 여닫이 문으로 화살표 처럼 나오도록
 
-# # Slide 12
+## Slide 12
 
 필요 에셋
 
@@ -188,7 +188,7 @@ Fade in 0.75초
 
 아래의 문이 여닫이 문으로 화살표 처럼 나오도록
 
-# # Slide 13
+## Slide 13
 
 필요 에셋
 
@@ -211,7 +211,7 @@ Fade in 0.75초
 
 [자물쇠 이미지]
 
-# # Slide 14
+## Slide 14
 
 필요 에셋
 
@@ -236,7 +236,7 @@ Fade in 0.75초
 
 [자물쇠 이미지]
 
-# # Slide 15
+## Slide 15
 
 > Visual asset present: slide 15, shape 1; inspect original PPTX/PDF.
 
@@ -247,15 +247,15 @@ Fade in 0.75초
 
 “화장대이다. 위에는 사용감이 있는 화장품들이 올려져 있다＂
 
-# # Slide 16
+## Slide 16
 
 옷 방
 
-# # Slide 17
+## Slide 17
 
 옷 방 컨셉 이미지
 
-# # Slide 18
+## Slide 18
 
 옷 방 컨셉 이미지
 
@@ -263,7 +263,7 @@ Fade in 0.75초
 
 행거의 1층에는 바지나 여러가지 하의
 
-# # Slide 19
+## Slide 19
 
 필요 에셋
 
@@ -275,7 +275,7 @@ Fade in 0.75초
 
 -문
 
-# # Slide 20
+## Slide 20
 
 필요 기능
 
@@ -291,7 +291,7 @@ Fade in 0.75초
 -> 클릭 했을 때 아내 방으로 이동
 -> fade out =0.75초
 
-# # Slide 21
+## Slide 21
 
 달력 이미지 수정사항
 
@@ -303,7 +303,7 @@ Fade in 0.75초
 명절 ex) 크리스마스 같은 날은 붉은색으로 표시
 격자 무늬를 넣어 칸을 만듦
 
-# # Slide 22
+## Slide 22
 
 필요 기능
 

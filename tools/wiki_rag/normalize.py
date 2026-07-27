@@ -9,7 +9,7 @@ from typing import Any
 from .extractors import ExtractionResult
 from .models import SourceRecord
 
-_HEADING_WITHOUT_SPACE = re.compile(r"^(#{1,6})(?=\S)", flags=re.MULTILINE)
+_HEADING_WITHOUT_SPACE = re.compile(r"^(#{1,6})([^\s#])", flags=re.MULTILINE)
 _YAML_UNSAFE_PREFIXES = frozenset("-?:,[]{}#&*!|>'\"%@`")
 _YAML_RESERVED = frozenset(
     {"null", "true", "false", "yes", "no", "on", "off", "~"}
@@ -38,7 +38,7 @@ def _normalize_markdown(value: str) -> str:
     normalized = value.replace("\r\n", "\n").replace("\r", "\n")
     normalized = normalized.replace("\t", "    ")
     normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
-    normalized = _HEADING_WITHOUT_SPACE.sub(r"\1 ", normalized)
+    normalized = _HEADING_WITHOUT_SPACE.sub(r"\1 \2", normalized)
     return normalized.strip()
 
 

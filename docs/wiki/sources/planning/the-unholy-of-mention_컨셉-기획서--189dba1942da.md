@@ -8,14 +8,14 @@ status: needs_review
 rag_eligible: true
 ---
 
-# # Slide 1
+## Slide 1
 
 Chapstone Design 프로젝트
 초기 계획안
 
 김기석
 
-# # Slide 2
+## Slide 2
 
 1
 
@@ -33,7 +33,7 @@ Chapstone Design 프로젝트
 
 레퍼런스 게임 조사
 
-# # Slide 3
+## Slide 3
 
 2
 
@@ -50,7 +50,7 @@ Chapstone Design 프로젝트
 
 시나리오를 따라가는 선형적인 스토리 전개
 
-# # Slide 4
+## Slide 4
 
 3
 
@@ -67,7 +67,7 @@ Chapstone Design 프로젝트
 실체: 신원이 불분명한 노숙자들을 납치하여 인신 공양 제물로 삼으며, 이를 통해 신체 재생이나 사자 부활 의식을 연구합니다.
 조직 등급: 1~5등급의 피라미드 구조이며, 3등급이 되려면 노숙자 5명을 저택으로 유인해야 하고, 2등급부터는 직접 인신 공양 의식에 참여해야 합니다.
 
-# # Slide 5
+## Slide 5
 
 3
 
@@ -83,7 +83,7 @@ Chapstone Design 프로젝트
 
 유사한 게임으로 선정한 이유 : 저택을 돌아다니면서 퍼즐을 풀고 저택을 벗어나면서 스토리를 진행 시키는 점에서 게임의 주요 시스템이 저택을 탐험하면서 수집하는 물건들로 퍼즐을 해결하는 것이 유사하다고 생각합니다.
 
-# # Slide 6
+## Slide 6
 
 컨셉 스케치
 
@@ -105,7 +105,7 @@ Chapstone Design 프로젝트
 
 퍼즐 부분 : 번역 해야 할 단어
 
-# # Slide 7
+## Slide 7
 
 컨셉 스케치
 
@@ -121,7 +121,7 @@ Chapstone Design 프로젝트
 
 책에서 배운 육망성 발견 책에서의 문양을 그려 넣어 체력을 회복하는 등 필드를 탐색하면서 얻은 정보나 아이템을 사용하여 보상 체계를 주어 플레이어가 필드를 돌아다니는 동기를 만들어주는 예시
 
-# # Slide 8
+## Slide 8
 
 컨셉 스케치
 
@@ -137,7 +137,7 @@ Chapstone Design 프로젝트
 
 수수께끼의 정답을 직접 타이핑하기, 특정 증거에 대해 앵무새 키워드로 질문하기, 잠긴 문에 암호를 입력하기 등
 
-# # Slide 9
+## Slide 9
 
 핵심 기능
 
@@ -155,7 +155,7 @@ Chapstone Design 프로젝트
 열쇠 및 아이템 사용: 특정 열쇠를 얻어야 문을 열거나(2층 복도), 일기장을 확인할 수 있는 기능.
 순차적 트리거: 특정 편지를 읽거나 아이템을 획득해야 다음 퍼즐(예: 서재의 금고 열기)이 활성화되는 로직.
 
-# # Slide 10
+## Slide 10
 
 핵심 기능
 
@@ -171,7 +171,7 @@ Chapstone Design 프로젝트
 아이템 수집 및 확인: 획득한 열쇠, 서류, 증거물 등을 보관하고 필요할 때 다시 확인할 수 있는 인벤토리 창.
 진행 상황 저장: 각 구역(서재, 아내 방 등)의 퍼즐 해결 여부를 기록하고 다음 구역으로 넘어가게 하는 상태 관리
 
-# # Slide 11
+## Slide 11
 
 컨셉 스케치 (캐릭터 컨셉)
 
@@ -188,7 +188,7 @@ Chapstone Design 프로젝트
 
 > Visual asset present: slide 11, shape 6; inspect original PPTX/PDF.
 
-# # Slide 12
+## Slide 12
 
 컨셉 스케치 (캐릭터 컨셉)
 
@@ -210,7 +210,7 @@ Chapstone Design 프로젝트
 
 > Visual asset present: slide 12, shape 7; inspect original PPTX/PDF.
 
-# # Slide 13
+## Slide 13
 
 컨셉 스케치 (캐릭터 컨셉)
 
@@ -232,7 +232,7 @@ Chapstone Design 프로젝트
 
 > Visual asset present: slide 13, shape 7; inspect original PPTX/PDF.
 
-# # Slide 14
+## Slide 14
 
 컨셉 스케치 (캐릭터 컨셉)
 
@@ -242,7 +242,7 @@ Chapstone Design 프로젝트
 
 > Visual asset present: slide 14, shape 7; inspect original PPTX/PDF.
 
-# # Slide 15
+## Slide 15
 
 컨셉 스케치 (캐릭터 컨셉)
 

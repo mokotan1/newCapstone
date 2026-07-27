@@ -7,6 +7,8 @@ from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches
 from wiki_rag.extractors.pptx import extract_pptx
+from wiki_rag.models import SourceRecord
+from wiki_rag.normalize import normalize_transcript
 
 
 @pytest.fixture
@@ -92,3 +94,27 @@ def test_pptx_visual_assets_emit_inspection_placeholder(
         "inspect original PPTX/PDF."
     ) in result.markdown
     assert "pptx_visual_asset:slide_1:shape_3" in result.warnings
+
+
+def test_normalized_pptx_preserves_slide_headings(
+    pptx_fixture: Path,
+) -> None:
+    record = SourceRecord(
+        source_id="planning:test123",
+        source_path="기획서/발표 자료.pptx",
+        source_sha256="test123",
+        source_type="pptx",
+        category="planning",
+        title="발표 자료",
+        transcript_path="docs/wiki/sources/planning/발표-자료--test123.md",
+        status="pending",
+        rag_eligible=True,
+        canonical_group="planning:발표-자료",
+    )
+
+    transcript = normalize_transcript(record, extract_pptx(pptx_fixture))
+
+    assert "## Slide 1" in transcript
+    assert "### Speaker notes" in transcript
+    assert "# # Slide" not in transcript
+    assert "## # Speaker notes" not in transcript

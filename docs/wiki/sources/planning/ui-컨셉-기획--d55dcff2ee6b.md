@@ -8,13 +8,13 @@ status: needs_review
 rag_eligible: true
 ---
 
-# # Slide 1
+## Slide 1
 
 UI 컨셉 기획
 
 작성자 : 김기석
 
-# # Slide 2
+## Slide 2
 
 방에 들어가는 경우
 
@@ -26,7 +26,7 @@ UI 컨셉 기획
 
 > Visual asset present: slide 2, shape 4; inspect original PPTX/PDF.
 
-# # Slide 3
+## Slide 3
 
 앵무새 체셔와의 상호작용 시
 
@@ -38,7 +38,7 @@ UI 컨셉 기획
 
 붉은 네모 칸에 플레이어의 대사를 적을 input field
 
-# # Slide 4
+## Slide 4
 
 전체적인 밝기 (불 키기 전)
 
@@ -51,7 +51,7 @@ UI 컨셉 기획
 
 > Visual asset present: slide 4, shape 3; inspect original PPTX/PDF.
 
-# # Slide 5
+## Slide 5
 
 전체적인 밝기 (불을 킨 이후)
 
