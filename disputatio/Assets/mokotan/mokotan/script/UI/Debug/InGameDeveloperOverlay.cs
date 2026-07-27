@@ -1,4 +1,8 @@
 using Godlotto.Interaction;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+using Godlotto.QA.Developer;
+using Godlotto.QA.SceneAdapters;
+#endif
 using UnityEngine;
 
 public class InGameDeveloperOverlay : MonoBehaviour
@@ -211,25 +215,60 @@ public class InGameDeveloperOverlay : MonoBehaviour
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("책갈피 거울 지급", guiStyles.Button))
-            cachedDeveloperModeController?.RequestGrantBookmarkMirror();
+            RequestStudyRoomGrantBookmark();
         if (GUILayout.Button("퍼즐 초기화", guiStyles.Button))
-            cachedDeveloperModeController?.RequestResetStudyRoomPuzzle();
+            RequestStudyRoomReset();
         if (GUILayout.Button("강제 성공", guiStyles.Button))
             cachedDeveloperModeController?.RequestForceSolveStudyRoomPuzzle();
         GUILayout.EndHorizontal();
 
-        StudyRoomPuzzleDebugInfo info = StudyRoomPuzzleDevTool.CaptureDebugInfo();
+        DrawStudyRoomProbeDisplay();
 
+        GUILayout.Space(guiStyles.ScaledHeight(6f));
+    }
+
+    private void RequestStudyRoomGrantBookmark()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (DeveloperQaPanelBridge.TryGrantBookmark(out _))
+            return;
+#endif
+        cachedDeveloperModeController?.RequestGrantBookmarkMirror();
+    }
+
+    private void RequestStudyRoomReset()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (DeveloperQaPanelBridge.TryReset(out _))
+            return;
+#endif
+        cachedDeveloperModeController?.RequestResetStudyRoomPuzzle();
+    }
+
+    private void DrawStudyRoomProbeDisplay()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Prefer CLI-parity probe payload for the bool rows; placement intensity still needs DevTool.
+        if (TryDrawStudyRoomProbeFromBridge())
+        {
+            StudyRoomPuzzleDebugInfo placementInfo = StudyRoomPuzzleDevTool.CaptureDebugInfo();
+            DrawStudyRoomPlacementDetail(placementInfo);
+            return;
+        }
+#endif
+        StudyRoomPuzzleDebugInfo info = StudyRoomPuzzleDevTool.CaptureDebugInfo();
         GUILayout.Label($"BookmarkMirror 보유: {Mark(info.HasBookmarkMirror)}", guiStyles.Label);
 
         if (!info.IsStudyRoomScene)
-        {
             GUILayout.Label("현재 StudyRoom 씬이 아닙니다. (변수 상태만 표시)", guiStyles.Label);
-        }
 
         GUILayout.Label($"DiarySolved: {Mark(info.DiarySolved)}", guiStyles.Label);
         GUILayout.Label($"HaveTutorKey: {Mark(info.HaveTutorKey)}", guiStyles.Label);
+        DrawStudyRoomPlacementDetail(info);
+    }
 
+    private void DrawStudyRoomPlacementDetail(StudyRoomPuzzleDebugInfo info)
+    {
         if (info.HasPlacement)
         {
             MirrorPlacementDebug p = info.Placement;
@@ -242,9 +281,42 @@ public class InGameDeveloperOverlay : MonoBehaviour
         {
             GUILayout.Label("거울 카드 미배치: 판정 상태 없음", guiStyles.Label);
         }
-
-        GUILayout.Space(guiStyles.ScaledHeight(6f));
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private bool TryDrawStudyRoomProbeFromBridge()
+    {
+        if (!DeveloperQaPanelBridge.TryProbe(out DeveloperQaResult probe) ||
+            probe == null ||
+            probe.Code != DeveloperQaResultCode.Ok ||
+            probe.Data == null ||
+            !TryReadProbeBool(probe, StudyRoomMirrorQaHelpers.DataKeyHasBookmarkMirror, out bool hasBookmark) ||
+            !TryReadProbeBool(probe, StudyRoomMirrorQaHelpers.DataKeyDiarySolved, out bool diarySolved) ||
+            !TryReadProbeBool(probe, StudyRoomMirrorQaHelpers.DataKeyHaveTutorKey, out bool haveTutorKey) ||
+            !TryReadProbeBool(probe, StudyRoomMirrorQaHelpers.DataKeyIsStudyRoomScene, out bool isStudyRoom))
+        {
+            return false;
+        }
+
+        GUILayout.Label($"BookmarkMirror 보유: {Mark(hasBookmark)}", guiStyles.Label);
+        if (!isStudyRoom)
+            GUILayout.Label("현재 StudyRoom 씬이 아닙니다. (변수 상태만 표시)", guiStyles.Label);
+        GUILayout.Label($"DiarySolved: {Mark(diarySolved)}", guiStyles.Label);
+        GUILayout.Label($"HaveTutorKey: {Mark(haveTutorKey)}", guiStyles.Label);
+        return true;
+    }
+
+    private static bool TryReadProbeBool(
+        DeveloperQaResult probe,
+        string key,
+        out bool value)
+    {
+        value = false;
+        if (probe?.Data == null || !probe.Data.TryGetValue(key, out string raw))
+            return false;
+        return bool.TryParse(raw, out value);
+    }
+#endif
 
     private static string Mark(bool value) => value ? "O" : "X";
 
