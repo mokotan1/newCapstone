@@ -637,8 +637,12 @@ def _render_operations() -> str:
             "   manifest `source_id`.",
             "5. **Wiki build** — regenerate navigation pages:",
             f"   `{_BUILD_COMMAND}`",
-            "6. **RAG corpus build** — (Task 6) emit citation-bearing chunks for",
-            "   `rag_eligible: true` sources only.",
+            "6. **RAG corpus build** — emit citation-bearing documents for eligible sources:",
+            "   `python tools/wiki_rag/build_rag_corpus.py --repo-root . "
+            "--manifest docs/wiki/_meta/source-manifest.yaml --output-dir docs/wiki/rag`",
+            "   Then validate corpus coverage:",
+            "   `python tools/wiki_rag/validate.py --repo-root . "
+            "--manifest docs/wiki/_meta/source-manifest.yaml --rag-dir docs/wiki/rag`",
             "7. **Embedding index build** — (Task 7+) index the RAG corpus for backend",
             "   retrieval.",
             "8. **Local backend test** — run FastAPI tests and a smoke chat against the",

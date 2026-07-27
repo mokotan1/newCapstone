@@ -15,10 +15,20 @@ import yaml
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from wiki_rag.build_rag_corpus import (
+        CorpusBuildError,
+        expected_rag_source_ids,
+        rag_output_filename,
+    )
     from wiki_rag.models import SourceRecord
     from wiki_rag.paths import resolve_inside as _resolve_inside
     from wiki_rag.paths import sha256 as _sha256
 else:
+    from .build_rag_corpus import (
+        CorpusBuildError,
+        expected_rag_source_ids,
+        rag_output_filename,
+    )
     from .models import SourceRecord
     from .paths import resolve_inside as _resolve_inside
     from .paths import sha256 as _sha256
@@ -37,6 +47,7 @@ _REQUIRED_FRONT_MATTER_KEYS = frozenset(
         "rag_eligible",
     }
 )
+_REQUIRED_RAG_FRONT_MATTER_KEYS = _REQUIRED_FRONT_MATTER_KEYS | frozenset({"title"})
 _MANIFEST_CROSS_CHECK_KEYS = (
     "source_id",
     "source_path",
@@ -241,6 +252,89 @@ def _record_from_mapping(source: Mapping[str, Any]) -> SourceRecord:
     )
 
 
+def _collect_rag_document_errors(
+    rag_path: Path,
+    *,
+    expected_source_ids: frozenset[str],
+) -> set[str]:
+    errors: set[str] = set()
+
+    if not rag_path.is_file():
+        errors.add("missing_rag_document")
+        return errors
+
+    try:
+        content = rag_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        errors.add("invalid_utf8")
+        return errors
+
+    metadata, body = _parse_front_matter(content)
+    missing_keys = _REQUIRED_RAG_FRONT_MATTER_KEYS.difference(metadata)
+    if missing_keys:
+        errors.add("invalid_rag_front_matter")
+
+    source_id = str(metadata.get("source_id", ""))
+    if source_id not in expected_source_ids:
+        errors.add("unexpected_rag_document")
+
+    category = str(metadata.get("category", ""))
+    source_type = str(metadata.get("source_type", "")).casefold()
+    if category == "report":
+        errors.add("rag_report_leak")
+    if source_type == "hwp":
+        errors.add("rag_hwp_leak")
+    if metadata.get("rag_eligible") is not True:
+        errors.add("rag_ineligible_leak")
+
+    if _meaningful_text_length(body) < _MIN_EXTRACTED_TEXT_CHARS:
+        errors.add("missing_meaningful_text")
+
+    if "\ufffd" in body:
+        errors.add("unicode_replacement_character")
+
+    return errors
+
+
+def validate_rag_corpus(
+    manifest_path: Path,
+    repo_root: Path,
+    rag_dir: Path,
+) -> ValidationReport:
+    """Validate generated RAG corpus files against manifest eligibility."""
+
+    resolved_root = repo_root.resolve()
+    resolved_rag_dir = rag_dir.resolve()
+    try:
+        expected_source_ids = expected_rag_source_ids(
+            manifest_path,
+            repo_root=resolved_root,
+        )
+    except CorpusBuildError:
+        return ValidationReport(error_codes=frozenset({"rag_corpus_build_failed"}))
+
+    errors: set[str] = set()
+    for source_id in expected_source_ids:
+        rag_path = resolved_rag_dir / rag_output_filename(source_id)
+        errors.update(
+            _collect_rag_document_errors(
+                rag_path,
+                expected_source_ids=expected_source_ids,
+            )
+        )
+
+    if resolved_rag_dir.is_dir():
+        for rag_path in sorted(resolved_rag_dir.glob("*.md")):
+            metadata, _ = _parse_front_matter(
+                rag_path.read_text(encoding="utf-8")
+            )
+            source_id = str(metadata.get("source_id", ""))
+            if source_id not in expected_source_ids:
+                errors.add("unexpected_rag_document")
+
+    return ValidationReport(error_codes=frozenset(errors))
+
+
 def validate_manifest(
     manifest_path: Path,
     repo_root: Path,
@@ -383,6 +477,11 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
         type=Path,
         help="Repository-relative or absolute coverage report output path.",
     )
+    parser.add_argument(
+        "--rag-dir",
+        type=Path,
+        help="Optional generated RAG corpus directory to validate.",
+    )
     return parser.parse_args(arguments)
 
 
@@ -396,6 +495,16 @@ def main(arguments: Sequence[str] | None = None) -> int:
         manifest_path = repo_root / manifest_path
 
     report = validate_manifest(manifest_path, repo_root)
+    if args.rag_dir is not None:
+        rag_dir = args.rag_dir
+        if not rag_dir.is_absolute():
+            rag_dir = repo_root / rag_dir
+        rag_report = validate_rag_corpus(manifest_path, repo_root, rag_dir)
+        report = ValidationReport(
+            error_codes=report.error_codes | rag_report.error_codes,
+            rows=report.rows,
+            warnings=report.warnings,
+        )
     if args.write_report is not None:
         output_path = args.write_report
         if not output_path.is_absolute():
