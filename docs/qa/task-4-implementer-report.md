@@ -40,6 +40,7 @@ Capability IDs: `grant-bookmark`, `reset`, `probe`, `assert-solved`, `capture`. 
 
 ## Commit
 
+- SHA: `0f15cd32`
 - Message: `feat(qa): add StudyRoom mirror capability adapter`
 - Scope: StudyRoom adapter/helpers, Developer handler dispatch, EditMode tests, this report
 - Push: not performed (per instructions)
