@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "bedroom-book-autorun",
+  "scene": "BedRoom",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "bedroom.book.click" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "bedroom.book.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "bedroom.book.assert-controller" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "bedroom.book.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}
