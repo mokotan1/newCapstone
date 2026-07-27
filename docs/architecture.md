@@ -74,7 +74,8 @@ newCapstone/
 | `Assets/Scenes/` | **모든 플레이 씬** | 씬 에셋·Flowchart 배치 (로직은 Script에) |
 | `Assets/Editor/Tests/EditMode/` | **EditMode 단위 테스트** | 순수 C# 로직 테스트 |
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
-| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/` | 런타임 `Resources.Load` 대상 |
+| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
+| `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)

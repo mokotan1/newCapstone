@@ -22,6 +22,7 @@ namespace Godlotto.QA.Developer
         private readonly DeveloperQaCapabilityRegistry _registry;
         private readonly IQaProfileService _profileService;
         private readonly IQaEvidenceRecorder _evidenceRecorder;
+        private readonly DeveloperQaScenarioRunner _scenarioRunner;
 
         public DeveloperQaService()
             : this(new DeveloperQaCapabilityRegistry(), null, null)
@@ -48,6 +49,7 @@ namespace Godlotto.QA.Developer
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _profileService = profileService;
             _evidenceRecorder = evidenceRecorder;
+            _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteStepCommand);
         }
 
         public Task<DeveloperQaResult> ExecuteAsync(
@@ -104,13 +106,23 @@ namespace Godlotto.QA.Developer
 
             if (command.Family == "scenario" && command.Name == "run")
             {
-                return Task.FromResult(BeginScenarioProfileSession(command));
+                return Task.FromResult(BeginScenario(command));
+            }
+
+            if (command.Family == "scenario" && command.Name == "resume")
+            {
+                return Task.FromResult(_scenarioRunner.Resume());
+            }
+
+            if (command.Family == "scenario" && command.Name == "status")
+            {
+                return Task.FromResult(_scenarioRunner.Status());
             }
 
             if (command.Family == "scenario" &&
                 (command.Name == "cancel" || command.Name == "abort"))
             {
-                return Task.FromResult(RestoreScenarioProfileSession());
+                return Task.FromResult(CancelScenario());
             }
 
             return Task.FromResult(new DeveloperQaResult(
@@ -224,6 +236,118 @@ namespace Godlotto.QA.Developer
                 }));
         }
 
+        private DeveloperQaResult BeginScenario(DeveloperQaCommand command)
+        {
+            DeveloperQaResult sessionBegin = BeginScenarioProfileSession(command);
+            if (sessionBegin.Code != DeveloperQaResultCode.Ok)
+            {
+                return sessionBegin;
+            }
+
+            bool hasScenario =
+                (command.Parameters != null
+                 && ((command.Parameters.ContainsKey("scenario_id")
+                      && !string.IsNullOrWhiteSpace(command.Parameters["scenario_id"]))
+                     || (command.Parameters.ContainsKey("scenario_path")
+                         && !string.IsNullOrWhiteSpace(command.Parameters["scenario_path"]))))
+                || !string.IsNullOrWhiteSpace(command.TargetId);
+
+            if (!hasScenario)
+            {
+                // Backward compatible: scenario.run without JSON still opens the QA profile.
+                return sessionBegin;
+            }
+
+            bool executeSteps = true;
+            if (command.Parameters != null
+                && command.Parameters.TryGetValue("execute", out string executeText)
+                && !string.IsNullOrWhiteSpace(executeText)
+                && bool.TryParse(executeText, out bool parsed))
+            {
+                executeSteps = parsed;
+            }
+
+            DeveloperQaResult runnerResult = _scenarioRunner.Begin(command, executeSteps);
+            if (runnerResult.Code == DeveloperQaResultCode.InvalidCommand
+                || runnerResult.Code == DeveloperQaResultCode.InternalError
+                || runnerResult.Code == DeveloperQaResultCode.UnsupportedCommand)
+            {
+                // Profile was opened for the run; roll it back when JSON/load is invalid.
+                RestoreScenarioProfileSession();
+                return runnerResult;
+            }
+
+            // Merge profile/evidence keys with runner status keys.
+            var merged = new Dictionary<string, string>(StringComparer.Ordinal);
+            if (sessionBegin.Data != null)
+            {
+                foreach (KeyValuePair<string, string> pair in sessionBegin.Data)
+                {
+                    merged[pair.Key] = pair.Value;
+                }
+            }
+
+            if (runnerResult.Data != null)
+            {
+                foreach (KeyValuePair<string, string> pair in runnerResult.Data)
+                {
+                    merged[pair.Key] = pair.Value;
+                }
+            }
+
+            if (runnerResult.Code == DeveloperQaResultCode.Ok
+                && executeSteps
+                && runnerResult.Data != null
+                && runnerResult.Data.TryGetValue("state", out string state)
+                && state == DeveloperQaScenarioStates.Completed)
+            {
+                DeveloperQaResult restore = RestoreScenarioProfileSession();
+                if (restore.Code != DeveloperQaResultCode.Ok)
+                {
+                    return restore;
+                }
+            }
+
+            return new DeveloperQaResult(
+                runnerResult.Code,
+                string.IsNullOrEmpty(runnerResult.Message)
+                    ? sessionBegin.Message
+                    : runnerResult.Message,
+                missingCapabilityId: runnerResult.MissingCapabilityId,
+                checkpointId: runnerResult.CheckpointId,
+                data: DeveloperQaMaps.From(merged));
+        }
+
+        private DeveloperQaResult CancelScenario()
+        {
+            DeveloperQaResult cancelResult = _scenarioRunner.Cancel();
+            DeveloperQaResult restoreResult = RestoreScenarioProfileSession();
+            if (restoreResult.Code != DeveloperQaResultCode.Ok
+                && restoreResult.Code != DeveloperQaResultCode.EnvironmentBlocked)
+            {
+                return restoreResult;
+            }
+
+            // Prefer profile restore failure when the profile service is missing
+            // (keeps Task 3 contract), otherwise return cancel status data.
+            if (restoreResult.Code == DeveloperQaResultCode.EnvironmentBlocked
+                && _profileService == null)
+            {
+                return restoreResult;
+            }
+
+            if (restoreResult.Code != DeveloperQaResultCode.Ok)
+            {
+                return restoreResult;
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                cancelResult.Message,
+                checkpointId: cancelResult.CheckpointId,
+                data: cancelResult.Data);
+        }
+
         private DeveloperQaResult BeginScenarioProfileSession(DeveloperQaCommand command)
         {
             if (_profileService == null)
@@ -269,6 +393,67 @@ namespace Godlotto.QA.Developer
                 DeveloperQaResultCode.Ok,
                 "QA profile session begun.",
                 data: DeveloperQaMaps.From(data));
+        }
+
+        /// <summary>
+        /// Executes one scenario step without re-entering <c>scenario.*</c> commands
+        /// (avoids recursive run/resume/cancel from JSON steps).
+        /// </summary>
+        private DeveloperQaResult ExecuteStepCommand(DeveloperQaCommand command)
+        {
+            if (command == null || string.IsNullOrWhiteSpace(command.Id))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InvalidCommand,
+                    "Command id is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(command.Family) ||
+                !KnownFamilies.Contains(command.Family))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.UnsupportedCommand,
+                    $"Unknown family '{command.Family}'.");
+            }
+
+            if (command.Family == "scenario")
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InvalidCommand,
+                    "Nested scenario.* steps are not allowed.");
+            }
+
+            if (command.Family == "capability" && command.Name == "list")
+            {
+                int count = _registry.List().Count;
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.Ok,
+                    count == 0 ? "empty" : $"count={count}",
+                    data: DeveloperQaMaps.From(new Dictionary<string, string>
+                    {
+                        ["count"] = count.ToString(),
+                        ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
+                    }));
+            }
+
+            if (command.Family == "capability" && command.Name == "describe")
+            {
+                return DescribeCapability(command.TargetId);
+            }
+
+            if (IsCapabilityDispatchCommand(command.Family, command.Name))
+            {
+                return DispatchCapability(command);
+            }
+
+            if (command.Family == "evidence" && command.Name == "capture")
+            {
+                return CaptureEvidence(command);
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.UnsupportedCommand,
+                $"{command.Family}.{command.Name} not implemented yet.");
         }
 
         private DeveloperQaResult EnsureEvidenceRunBegun(QaRunId runId, string commandId)
