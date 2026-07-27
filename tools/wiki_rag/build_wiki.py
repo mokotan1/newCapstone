@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import sys
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,15 +29,21 @@ _BUILD_COMMAND = (
     "--manifest docs/wiki/_meta/source-manifest.yaml "
     "--wiki-root docs/wiki"
 )
-
-
-@dataclass(frozen=True)
-class SourceCitation:
-    """One grounded wiki citation tied to a manifest record."""
-
-    source_id: str
-    transcript_href: str
-    label: str
+_CURATED_CITATION_IDS: frozenset[str] = frozenset(
+    {
+        "planning:35ada8161577",
+        "scenario:a73346ecb3d9",
+        "scenario:93cff884e57e",
+        "planning:e4e36660bb79",
+        "planning:a54025e67028",
+        "planning:47f3be566f34",
+        "technical:85fdfa8e3425",
+        "planning:b98bbfbdb019",
+        "technical:884df6c5b462",
+        "technical:03a736ea3ab1",
+        "planning:9d4611de3ae3",
+    }
+)
 
 
 def _record_from_mapping(source: Mapping[str, Any]) -> SourceRecord:
@@ -89,13 +94,31 @@ def _cite(record: SourceRecord) -> str:
     return f"([source_id: {record.source_id}]({href}))"
 
 
+def _validate_curated_citations(
+    records_by_id: Mapping[str, SourceRecord],
+) -> None:
+    missing_ids = sorted(
+        source_id
+        for source_id in _CURATED_CITATION_IDS
+        if source_id not in records_by_id
+    )
+    if missing_ids:
+        joined = ", ".join(missing_ids)
+        raise ValueError(
+            "Curated wiki claims reference source_id values missing from the "
+            f"manifest: {joined}"
+        )
+
+
 def _citation_from_id(
     records_by_id: Mapping[str, SourceRecord],
     source_id: str,
-) -> str | None:
+) -> str:
     record = records_by_id.get(source_id)
     if record is None:
-        return None
+        raise ValueError(
+            f"Curated wiki claim references missing source_id: {source_id}"
+        )
     return _cite(record)
 
 
@@ -118,7 +141,7 @@ def _render_source_index(
     lines = [
         f"# Source Index — {label}",
         "",
-        f"Back to [Home](Home.md).",
+        "Back to [Home](Home.md).",
         "",
         "| Title | Type | Status | Canonical group | Transcript | Original |",
         "| --- | --- | --- | --- | --- | --- |",
@@ -172,14 +195,16 @@ def _render_home(
         "  HWP originals, and blocked conversions.",
         "- **HWP:** owner-skipped; not converted in this pipeline.",
         "",
-        f"- **Manifest records:** {len(records)} total, "
-        f"{len(public_records)} listed below.",
+        (
+            f"- **Manifest records:** {len(records)} total, "
+            f"{len(public_records)} listed below."
+        ),
         "",
         "## Update command",
         "",
         "After inventory, conversion, or validation changes, regenerate this wiki:",
         "",
-        f"```powershell",
+        "```powershell",
         f"{_BUILD_COMMAND}",
         "```",
         "",
@@ -235,33 +260,33 @@ def _render_game_overview(records_by_id: Mapping[str, SourceRecord]) -> str:
         "The game is a 2025 Korea-set mystery thriller in a cult leader's mansion "
         "where the player gathers information, solves puzzles, and escapes."
     )
-    cite = _citation_from_id(records_by_id, "planning:35ada8161577")
-    if cite:
-        claims.append(f"- {concept} {cite}")
+    claims.append(
+        f"- {concept} {_citation_from_id(records_by_id, 'planning:35ada8161577')}"
+    )
 
     goal = (
         "The player goal is to explore the mansion, solve puzzles, uncover the "
         "mystery, and find an exit."
     )
-    cite = _citation_from_id(records_by_id, "planning:35ada8161577")
-    if cite:
-        claims.append(f"- {goal} {cite}")
+    claims.append(
+        f"- {goal} {_citation_from_id(records_by_id, 'planning:35ada8161577')}"
+    )
 
     loop = (
         "Core loop: room exploration, evidence and puzzle combination, and "
         "linear story progression guided by scenario beats."
     )
-    cite = _citation_from_id(records_by_id, "planning:35ada8161577")
-    if cite:
-        claims.append(f"- {loop} {cite}")
+    claims.append(
+        f"- {loop} {_citation_from_id(records_by_id, 'planning:35ada8161577')}"
+    )
 
     genre = (
         "Genre positioning: mystery thriller, occult horror, and exploration "
         "adventure."
     )
-    cite = _citation_from_id(records_by_id, "scenario:a73346ecb3d9")
-    if cite:
-        claims.append(f"- {genre} {cite}")
+    claims.append(
+        f"- {genre} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+    )
 
     lines = [
         "# Game Overview",
@@ -271,7 +296,7 @@ def _render_game_overview(records_by_id: Mapping[str, SourceRecord]) -> str:
         "## Product premise",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -293,42 +318,42 @@ def _render_story_and_world(records_by_id: Mapping[str, SourceRecord]) -> str:
         "Setting: 2025 Republic of Korea, inside the hidden mansion of a cult "
         "leader; outwardly charitable but concealing occult experiments."
     )
-    cite = _citation_from_id(records_by_id, "scenario:93cff884e57e")
-    if cite:
-        claims.append(f"- {setting} {cite}")
+    claims.append(
+        f"- {setting} {_citation_from_id(records_by_id, 'scenario:93cff884e57e')}"
+    )
 
     protagonist = (
         "Protagonist: a former police detective driven by guilt over a lost "
         "partner; dry and cynical tone with investigative judgment under pressure."
     )
-    cite = _citation_from_id(records_by_id, "scenario:a73346ecb3d9")
-    if cite:
-        claims.append(f"- {protagonist} {cite}")
+    claims.append(
+        f"- {protagonist} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+    )
 
     cheshire = (
         "Cheshire: a mansion parrot who delivers riddles and testimony; not a "
         "simple animal but a witness to the mansion's truth."
     )
-    cite = _citation_from_id(records_by_id, "scenario:a73346ecb3d9")
-    if cite:
-        claims.append(f"- {cheshire} {cite}")
+    claims.append(
+        f"- {cheshire} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+    )
 
     antagonist = (
         "Antagonist Alfred: mansion owner and leader of the cult 'Those Who "
         "Advocate'; twisted faith after his wife's death leads to human sacrifice "
         "experiments."
     )
-    cite = _citation_from_id(records_by_id, "scenario:a73346ecb3d9")
-    if cite:
-        claims.append(f"- {antagonist} {cite}")
+    claims.append(
+        f"- {antagonist} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+    )
 
     cult = (
         "The cult poses as a university service club helping vulnerable people "
         "while recruiting victims for rituals and body-regeneration research."
     )
-    cite = _citation_from_id(records_by_id, "scenario:93cff884e57e")
-    if cite:
-        claims.append(f"- {cult} {cite}")
+    claims.append(
+        f"- {cult} {_citation_from_id(records_by_id, 'scenario:93cff884e57e')}"
+    )
 
     lines = [
         "# Story and World",
@@ -338,7 +363,7 @@ def _render_story_and_world(records_by_id: Mapping[str, SourceRecord]) -> str:
         "## Setting and characters",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -361,34 +386,34 @@ def _render_rooms_and_progression(
         "Opening flow: civil-office phone call about a foul smell, arrival at the "
         "mansion, doorbell with no answer, then entering through an unlocked gate."
     )
-    cite = _citation_from_id(records_by_id, "planning:e4e36660bb79")
-    if cite:
-        claims.append(f"- {opening} {cite}")
+    claims.append(
+        f"- {opening} {_citation_from_id(records_by_id, 'planning:e4e36660bb79')}"
+    )
 
     second_floor = (
         "Second-floor corridor connects study, child's room, wife's room with "
         "closet, and master bedroom around a central hall."
     )
-    cite = _citation_from_id(records_by_id, "planning:a54025e67028")
-    if cite:
-        claims.append(f"- {second_floor} {cite}")
+    claims.append(
+        f"- {second_floor} {_citation_from_id(records_by_id, 'planning:a54025e67028')}"
+    )
 
     basement = (
         "Basement lab progression requires collecting sacred vessels from the "
         "second floor and feeding them into an extractor to craft a radiant cross "
         "item."
     )
-    cite = _citation_from_id(records_by_id, "planning:47f3be566f34")
-    if cite:
-        claims.append(f"- {basement} {cite}")
+    claims.append(
+        f"- {basement} {_citation_from_id(records_by_id, 'planning:47f3be566f34')}"
+    )
 
     migration = (
         "Room interaction is implemented through Unity scenes coordinated with "
         "Fungus flowcharts and the Godlotto interaction layer."
     )
-    cite = _citation_from_id(records_by_id, "technical:85fdfa8e3425")
-    if cite:
-        claims.append(f"- {migration} {cite}")
+    claims.append(
+        f"- {migration} {_citation_from_id(records_by_id, 'technical:85fdfa8e3425')}"
+    )
 
     lines = [
         "# Rooms and Progression",
@@ -398,7 +423,7 @@ def _render_rooms_and_progression(
         "## Scene flow and dependencies",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -419,33 +444,33 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
         "Main AI system: dynamic NPC dialogue generated at runtime instead of "
         "only pre-written lines, with scene-specific context flags shaping prompts."
     )
-    cite = _citation_from_id(records_by_id, "planning:b98bbfbdb019")
-    if cite:
-        claims.append(f"- {dynamic} {cite}")
+    claims.append(
+        f"- {dynamic} {_citation_from_id(records_by_id, 'planning:b98bbfbdb019')}"
+    )
 
     prompts = (
         "Persona and instructions live in external prompt files so behavior can "
         "change without code edits; Fungus bool variables inject situational orders."
     )
-    cite = _citation_from_id(records_by_id, "planning:b98bbfbdb019")
-    if cite:
-        claims.append(f"- {prompts} {cite}")
+    claims.append(
+        f"- {prompts} {_citation_from_id(records_by_id, 'planning:b98bbfbdb019')}"
+    )
 
     backend = (
         "Production stack routes Unity chat UI through FastAPI `/chat` endpoints "
         "with Groq primary and Gemini fallback providers."
     )
-    cite = _citation_from_id(records_by_id, "technical:884df6c5b462")
-    if cite:
-        claims.append(f"- {backend} {cite}")
+    claims.append(
+        f"- {backend} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+    )
 
     defense = (
         "LLM abuse defenses and play-test guidance are documented for Cheshire "
         "prompt hardening and rate limiting."
     )
-    cite = _citation_from_id(records_by_id, "technical:03a736ea3ab1")
-    if cite:
-        claims.append(f"- {defense} {cite}")
+    claims.append(
+        f"- {defense} {_citation_from_id(records_by_id, 'technical:03a736ea3ab1')}"
+    )
 
     lines = [
         "# AI and Dialogue",
@@ -455,7 +480,7 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
         "## Cheshire, prompts, and tutor behavior",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -476,33 +501,33 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "Monorepo layout: Unity client in `disputatio/`, FastAPI AI backend in "
         "`backend_ai/`, CI scripts, and deploy compose under `deploy/`."
     )
-    cite = _citation_from_id(records_by_id, "technical:884df6c5b462")
-    if cite:
-        claims.append(f"- {overview} {cite}")
+    claims.append(
+        f"- {overview} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+    )
 
     unity = (
         "Unity 6 (6000.0.36f1) with URP, Fungus dialogue, Input System, and team "
         "gameplay code under `Assets/godlotto/Script/`."
     )
-    cite = _citation_from_id(records_by_id, "technical:884df6c5b462")
-    if cite:
-        claims.append(f"- {unity} {cite}")
+    claims.append(
+        f"- {unity} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+    )
 
     persistence = (
         "Client persistence uses PlayerPrefs checkpoints and Fungus variables; "
         "server-side data includes CSV quiz banks and optional Redis rate limits."
     )
-    cite = _citation_from_id(records_by_id, "technical:884df6c5b462")
-    if cite:
-        claims.append(f"- {persistence} {cite}")
+    claims.append(
+        f"- {persistence} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+    )
 
     deploy = (
         "Deployment path: GHCR images to EC2 with Docker Compose and Caddy per "
         "`deploy/docker-compose.prod.yml`."
     )
-    cite = _citation_from_id(records_by_id, "technical:884df6c5b462")
-    if cite:
-        claims.append(f"- {deploy} {cite}")
+    claims.append(
+        f"- {deploy} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+    )
 
     lines = [
         "# Architecture",
@@ -512,7 +537,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "## Unity, backend, deployment, and tools",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -536,9 +561,9 @@ def _render_development_history(
         "Early planning positioned the project as a mansion mystery with puzzle "
         "exploration and evidence-driven story beats."
     )
-    cite = _citation_from_id(records_by_id, "planning:9d4611de3ae3")
-    if cite:
-        claims.append(f"- {initial} {cite}")
+    claims.append(
+        f"- {initial} {_citation_from_id(records_by_id, 'planning:9d4611de3ae3')}"
+    )
 
     report_records = sorted(
         (
@@ -558,7 +583,7 @@ def _render_development_history(
         "## Design evolution",
         "",
     ]
-    lines.extend(claims or ["- *(No grounded claims available in manifest.)*"])
+    lines.extend(claims)
     lines.extend(
         [
             "",
@@ -646,7 +671,6 @@ def build_wiki(
     *,
     manifest: Path,
     wiki_root: Path,
-    repo_root: Path | None = None,
 ) -> None:
     """Render Home, source indexes, curated pages, and operations docs."""
 
@@ -655,6 +679,7 @@ def build_wiki(
 
     _, records = _load_manifest_records(manifest_path)
     records_by_id = {record.source_id: record for record in records}
+    _validate_curated_citations(records_by_id)
     public_records = [record for record in records if _is_public_nav_source(record)]
 
     resolved_wiki_root.mkdir(parents=True, exist_ok=True)
@@ -720,7 +745,6 @@ def main(arguments: Sequence[str] | None = None) -> int:
     build_wiki(
         manifest=manifest_path,
         wiki_root=wiki_root,
-        repo_root=repo_root,
     )
     print(f"Wiki pages written to {wiki_root.resolve()}")
     return 0

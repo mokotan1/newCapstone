@@ -1,11 +1,30 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 
+import pytest
 import yaml
-
 from wiki_rag.build_wiki import build_wiki
+
+_CITATION_PATTERN = re.compile(
+    r"\(\[source_id: ([^\]]+)\]\((sources/[^)]+)\)\)"
+)
+
+_CURATED_CITATION_FIXTURES: tuple[tuple[str, str, str, str], ...] = (
+    ("scenario:93cff884e57e", "시나리오/world.pdf", "scenario", "world-lore"),
+    ("scenario:a73346ecb3d9", "시나리오/characters.pdf", "scenario", "characters"),
+    ("planning:35ada8161577", "기획서/concept.pdf", "planning", "concept"),
+    ("planning:e4e36660bb79", "기획서/opening.pdf", "planning", "opening"),
+    ("planning:a54025e67028", "기획서/second-floor.pdf", "planning", "second-floor"),
+    ("planning:47f3be566f34", "기획서/basement.pdf", "planning", "basement"),
+    ("planning:b98bbfbdb019", "기획서/ai-dialogue.pdf", "planning", "ai-dialogue"),
+    ("planning:9d4611de3ae3", "기획서/initial-plan.pdf", "planning", "initial-plan"),
+    ("technical:85fdfa8e3425", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
+    ("technical:884df6c5b462", "docs/architecture.md", "technical", "architecture"),
+    ("technical:03a736ea3ab1", "docs/security/llm-abuse-defense-plan.md", "technical", "llm-defense"),
+)
 
 
 def _source_record(
@@ -18,7 +37,7 @@ def _source_record(
     source_type: str = "pdf",
     rag_eligible: bool = True,
 ) -> dict[str, object]:
-    content = f"{source_id}:{title}".encode("utf-8")
+    content = f"{source_id}:{title}".encode()
     source_sha256 = hashlib.sha256(content).hexdigest()
     slug = title.lower().replace(" ", "-")
     return {
@@ -37,6 +56,20 @@ def _source_record(
     }
 
 
+def _curated_citation_records() -> list[dict[str, object]]:
+    return [
+        _source_record(
+            source_id=source_id,
+            source_path=source_path,
+            category=category,
+            title=title,
+            status="extracted",
+            source_type="md" if source_path.endswith(".md") else "pdf",
+        )
+        for source_id, source_path, category, title in _CURATED_CITATION_FIXTURES
+    ]
+
+
 def sample_manifest(tmp_path: Path) -> Path:
     manifest_path = tmp_path / "source-manifest.yaml"
     manifest_data = {
@@ -49,20 +82,7 @@ def sample_manifest(tmp_path: Path) -> Path:
             "exclusions": ["tools/**"],
         },
         "sources": [
-            _source_record(
-                source_id="scenario:93cff884e57e",
-                source_path="시나리오/world.pdf",
-                category="scenario",
-                title="world-lore",
-                status="extracted",
-            ),
-            _source_record(
-                source_id="planning:35ada8161577",
-                source_path="기획서/concept.pdf",
-                category="planning",
-                title="concept",
-                status="needs_review",
-            ),
+            *_curated_citation_records(),
             _source_record(
                 source_id="planning:blocked001",
                 source_path="기획서/blocked.hwp",
@@ -100,6 +120,24 @@ def sample_manifest(tmp_path: Path) -> Path:
     return manifest_path
 
 
+def _expected_transcript_href(transcript_path: str) -> str:
+    normalized = transcript_path.replace("\\", "/")
+    prefix = "docs/wiki/"
+    if normalized.startswith(prefix):
+        return normalized[len(prefix) :]
+    return normalized
+
+
+def _manifest_hrefs_by_source_id(manifest_path: Path) -> dict[str, str]:
+    manifest_data = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    sources = manifest_data["sources"]
+    return {
+        str(source["source_id"]): _expected_transcript_href(str(source["transcript_path"]))
+        for source in sources
+        if isinstance(source, dict)
+    }
+
+
 def test_home_lists_only_extracted_or_reviewable_sources(
     tmp_path: Path,
 ) -> None:
@@ -122,11 +160,57 @@ def test_home_excludes_pending_hwp_by_source_id(tmp_path: Path) -> None:
     assert "planning:blocked001" not in home
 
 
-def test_curated_page_claim_has_source_link(tmp_path: Path) -> None:
-    build_wiki(manifest=sample_manifest(tmp_path), wiki_root=tmp_path)
+def test_curated_page_citations_match_manifest_hrefs(tmp_path: Path) -> None:
+    manifest_path = sample_manifest(tmp_path)
+    build_wiki(manifest=manifest_path, wiki_root=tmp_path)
     page = (tmp_path / "Story-and-World.md").read_text(encoding="utf-8")
+    hrefs_by_id = _manifest_hrefs_by_source_id(manifest_path)
 
-    assert "source_id:" in page
+    citations = _CITATION_PATTERN.findall(page)
+    assert citations, "expected at least one grounded citation on Story-and-World"
+
+    for source_id, href in citations:
+        assert source_id in hrefs_by_id
+        assert href == hrefs_by_id[source_id]
+        assert href.startswith("sources/")
+
+
+def test_curated_pages_use_expected_citation_format(tmp_path: Path) -> None:
+    build_wiki(manifest=sample_manifest(tmp_path), wiki_root=tmp_path)
+
+    curated_pages = (
+        "Game-Overview.md",
+        "Story-and-World.md",
+        "Rooms-and-Progression.md",
+        "AI-and-Dialogue.md",
+        "Architecture.md",
+        "Development-History.md",
+    )
+    for filename in curated_pages:
+        page = (tmp_path / filename).read_text(encoding="utf-8")
+        citations = _CITATION_PATTERN.findall(page)
+        assert citations, f"{filename} should contain grounded citations"
+        for source_id, href in citations:
+            assert source_id
+            assert href.startswith("sources/")
+
+
+def test_build_wiki_fails_on_missing_curated_citation_ids(tmp_path: Path) -> None:
+    manifest_path = sample_manifest(tmp_path)
+    manifest_data = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    manifest_data["sources"] = [
+        source
+        for source in manifest_data["sources"]
+        if source["source_id"] != "scenario:a73346ecb3d9"
+    ]
+    manifest_path.write_text(
+        yaml.safe_dump(manifest_data, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    with pytest.raises(ValueError, match="scenario:a73346ecb3d9"):
+        build_wiki(manifest=manifest_path, wiki_root=tmp_path)
 
 
 def test_reports_listed_only_in_development_history(tmp_path: Path) -> None:
