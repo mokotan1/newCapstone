@@ -8,7 +8,8 @@ namespace Godlotto.QA.SceneAdapters
     /// Task 12: single entry point that builds/populates a <see cref="QaSceneRegistry"/> with all
     /// initial scene adapters (<see cref="MainMenuQaAdapter"/>, <see cref="KitchenQaAdapter"/>,
     /// <see cref="HallQaAdapter"/>, <see cref="MaidRoomQaAdapter"/>, <see cref="TutorRoomQaAdapter"/>,
-    /// <see cref="StudyRoomQaAdapter"/>).
+    /// <see cref="StudyRoomQaAdapter"/>, <see cref="ChildRoomQaAdapter"/>,
+    /// <see cref="WifeRoomQaAdapter"/>, <see cref="BedRoomQaAdapter"/>).
     ///
     /// Placement rationale: <c>Godlotto.QA.Scenes</c> (the asmdef the task description names as
     /// the home for these adapters) declares zero assembly references (see its .asmdef), so it
@@ -59,6 +60,9 @@ namespace Godlotto.QA.SceneAdapters
             TryRegister(registry, new MaidRoomQaAdapter());
             TryRegister(registry, new TutorRoomQaAdapter());
             TryRegister(registry, new StudyRoomQaAdapter());
+            TryRegister(registry, new ChildRoomQaAdapter());
+            TryRegister(registry, new WifeRoomQaAdapter());
+            TryRegister(registry, new BedRoomQaAdapter());
         }
 
         private static void TryRegister(QaSceneRegistry registry, IQaSceneAdapter adapter)

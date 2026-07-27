@@ -9,7 +9,8 @@ using UnityEngine;
 /// Task 12 §Step 1 (+ Task 4 StudyRoom): written before touching any scene asset. Verifies (a) the
 /// initial scene adapters (<see cref="MainMenuQaAdapter"/>, <see cref="KitchenQaAdapter"/>,
 /// <see cref="HallQaAdapter"/>, <see cref="MaidRoomQaAdapter"/>, <see cref="TutorRoomQaAdapter"/>,
-/// <see cref="StudyRoomQaAdapter"/>)
+/// <see cref="StudyRoomQaAdapter"/>, <see cref="ChildRoomQaAdapter"/>,
+/// <see cref="WifeRoomQaAdapter"/>, <see cref="BedRoomQaAdapter"/>)
 /// declare well-formed, non-conflicting, already-lowercase-dotted <see cref="QaTargetId"/>s and
 /// register cleanly into a fresh <see cref="QaSceneRegistry"/> via
 /// <see cref="QaSceneAdapterRegistration"/>, and (b) the six real scenario JSON resources under
@@ -25,7 +26,8 @@ public sealed class InitialSceneAdapterSerializationTests
 {
     private static readonly string[] ExpectedSceneNames =
     {
-        "MainMenuScene", "Kitchen", "Hall_playerble", "MaidRoom", "TutorRoom", "StudyRoom"
+        "MainMenuScene", "Kitchen", "Hall_playerble", "MaidRoom", "TutorRoom", "StudyRoom",
+        "ChildRoom", "WifeRoom", "BedRoom"
     };
 
     private static readonly (string SceneName, string RawTargetId)[] ExpectedTargets =
@@ -35,7 +37,10 @@ public sealed class InitialSceneAdapterSerializationTests
         ("Kitchen", "kitchen.parret"),
         ("Hall_playerble", "hall.kitchen-entry"),
         ("MaidRoom", "maidroom.food-tray"),
-        ("TutorRoom", "tutorroom.quiz-input")
+        ("TutorRoom", "tutorroom.quiz-input"),
+        ("ChildRoom", "childroom.seals.seal5"),
+        ("WifeRoom", "wiferoom.wallclock"),
+        ("BedRoom", "bedroom.book")
     };
 
     private static readonly string[] ExpectedScenarioIds =
