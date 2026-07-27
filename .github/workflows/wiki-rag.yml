@@ -37,10 +37,29 @@ on:
       - "시나리오/**"
       - "기획서/**"
       - "보고서/**"
+      - "미니게임_구현_리포트.md"
+      - "report.pdf"
       - "docs/wiki/**"
+      - "docs/architecture.md"
+      - "docs/fungus-migration-audit.md"
+      - "docs/fungus-room-migration-plan.md"
+      - "docs/glass-choice-menu-usage.md"
+      - "docs/play-log-analysis.md"
+      - "docs/play-log-pipeline.md"
+      - "docs/play-log-sheets-upload.md"
+      - "docs/qa/**"
+      - "docs/quest-tracker-manual-verification.md"
+      - "docs/security/**"
       - "tools/wiki_rag/**"
+      - "tools/tests/test_wiki_rag_*.py"
+      - "tools/requirements-wiki-rag.txt"
+      - "backend_ai/config.py"
       - "backend_ai/scripts/build_tutor_rag_index.py"
       - "backend_ai/services/tutor_rag_service.py"
+      - "backend_ai/services/chat_service.py"
+      - "backend_ai/models/requests.py"
+      - "backend_ai/tests/test_project_rag*.py"
+      - "backend_ai/tests/test_tutor_rag*.py"
       - "backend_ai/data/tutor_rag_index.json"
       - ".github/workflows/wiki-rag.yml"
   workflow_dispatch:
@@ -170,18 +189,50 @@ jobs:
         run: |
           MANIFEST_HASH=$(sha256sum "${{ env.MANIFEST_PATH }}" | awk '{print $1}')
           echo "manifest_hash=$MANIFEST_HASH" >> "$GITHUB_OUTPUT"
-          BEFORE_CHUNKS=$(python - <<'PY'
+          python - <<'PY' > /tmp/before_index_meta.txt
           import json
           from pathlib import Path
+
           payload = json.loads(Path("${{ env.INDEX_PATH }}").read_text(encoding="utf-8"))
-          print(len(payload.get("chunks") or []))
-          PY
+          chunks = payload.get("chunks") or []
+          source_ids = sorted(
+              {
+                  str(chunk.get("source_id"))
+                  for chunk in chunks
+                  if isinstance(chunk, dict) and chunk.get("source_id")
+              }
           )
+          print(len(chunks))
+          for source_id in source_ids:
+              print(source_id)
+          PY
+          BEFORE_CHUNKS=$(head -n 1 /tmp/before_index_meta.txt)
+          tail -n +2 /tmp/before_index_meta.txt > /tmp/before_source_ids.txt
           echo "before_chunks=$BEFORE_CHUNKS" >> "$GITHUB_OUTPUT"
           cd backend_ai
           python scripts/build_tutor_rag_index.py --dry-run | tee /tmp/dry-run.txt
           EXPECTED_CHUNKS=$(grep -E '^Chunks:' /tmp/dry-run.txt | awk '{print $2}')
           echo "expected_chunks=$EXPECTED_CHUNKS" >> "$GITHUB_OUTPUT"
+          python - <<'PY' > /tmp/expected_source_ids.txt
+          import re
+          from pathlib import Path
+
+          text = Path("/tmp/dry-run.txt").read_text(encoding="utf-8")
+          source_ids: list[str] = []
+          in_section = False
+          for line in text.splitlines():
+              if line.startswith("Source IDs"):
+                  in_section = True
+                  continue
+              if in_section:
+                  match = re.match(r"^\s+- (.+)$", line)
+                  if match:
+                      source_ids.append(match.group(1))
+                  elif line.strip():
+                      break
+          for source_id in source_ids:
+              print(source_id)
+          PY
 
       - name: Build embedding index
         working-directory: backend_ai
@@ -203,15 +254,34 @@ jobs:
           import sys
           from pathlib import Path
 
+          def read_id_list(path: Path) -> list[str]:
+              if not path.is_file():
+                  return []
+              return [
+                  line.strip()
+                  for line in path.read_text(encoding="utf-8").splitlines()
+                  if line.strip()
+              ]
+
           manifest_path = Path("../docs/wiki/_meta/source-manifest.yaml")
           index_path = Path("data/tutor_rag_index.json")
           manifest_hash = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
           before_manifest = "${{ steps.before.outputs.manifest_hash }}"
           before_chunks = int("${{ steps.before.outputs.before_chunks }}")
           expected_chunks = int("${{ steps.before.outputs.expected_chunks }}")
+          before_source_ids = read_id_list(Path("/tmp/before_source_ids.txt"))
+          expected_source_ids = read_id_list(Path("/tmp/expected_source_ids.txt"))
 
           payload = json.loads(index_path.read_text(encoding="utf-8"))
           chunks = payload.get("chunks") or []
+          after_source_ids = sorted(
+              {
+                  str(chunk.get("source_id"))
+                  for chunk in chunks
+                  if isinstance(chunk, dict) and chunk.get("source_id")
+              }
+          )
+
           if len(chunks) != expected_chunks:
               print(
                   f"::error::Chunk count mismatch after build: expected {expected_chunks}, got {len(chunks)}",
@@ -219,9 +289,33 @@ jobs:
               )
               sys.exit(1)
 
-          if manifest_hash == before_manifest and before_chunks > 0 and len(chunks) != before_chunks:
+          if after_source_ids != expected_source_ids:
+              print(
+                  "::error::Source ID set mismatch after build: "
+                  f"expected {expected_source_ids}, got {after_source_ids}",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          if (
+              manifest_hash == before_manifest
+              and before_chunks > 0
+              and len(chunks) != before_chunks
+          ):
               print(
                   "::error::Embedding index changed without a manifest update. "
+                  "Refresh docs/wiki/_meta/source-manifest.yaml or approve an intentional re-index.",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          if (
+              manifest_hash == before_manifest
+              and before_chunks > 0
+              and after_source_ids != before_source_ids
+          ):
+              print(
+                  "::error::Embedding index source IDs changed without a manifest update. "
                   "Refresh docs/wiki/_meta/source-manifest.yaml or approve an intentional re-index.",
                   file=sys.stderr,
               )

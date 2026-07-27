@@ -83,7 +83,15 @@ Production embeddings run only from a **manual** `workflow_dispatch` on
 `wiki-rag.yml` with `build_embeddings: true`, inside the protected
 `wiki-rag-release` GitHub Environment. That job supplies a masked
 `GOOGLE_API_KEY` secret, rebuilds `backend_ai/data/tutor_rag_index.json`,
-and fails if chunk counts drift without a manifest change.
+and fails if chunk counts or source-ID sets drift without a manifest change.
+An empty committed index skips the manifest-unchanged drift guard on the
+first production build.
+
+After a successful release build, download the workflow artifact
+`tutor-rag-index-<commit-sha>` and commit the refreshed
+`backend_ai/data/tutor_rag_index.json` on a feature branch. Reference the
+manifest hash or source changes in the commit message so reviewers can
+trace the re-index to an intentional corpus update.
 
 ### Local release-equivalent checks (offline)
 

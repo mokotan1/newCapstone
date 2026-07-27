@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
-from wiki_rag.build_rag_corpus import build_rag_corpus
+import yaml
+
+from wiki_rag.build_rag_corpus import build_rag_corpus, expected_rag_source_ids
 from wiki_rag.build_wiki import build_wiki
 from wiki_rag.extract import EXTRACTORS, convert_manifest
 from wiki_rag.inventory import discover_sources, write_manifest
@@ -137,6 +139,16 @@ def test_small_knowledge_set_runs_inventory_to_corpus_without_network(
         repo_root=tmp_path,
     )
     assert written
+    manifest_data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    hwp_source_ids = frozenset(
+        str(source["source_id"])
+        for source in manifest_data.get("sources") or []
+        if isinstance(source, dict)
+        and str(source.get("source_type", "")).casefold() == "hwp"
+    )
+    assert hwp_source_ids, "fixture should include HWP rows for exclusion coverage"
+    corpus_source_ids = expected_rag_source_ids(manifest, repo_root=tmp_path)
+    assert hwp_source_ids.isdisjoint(corpus_source_ids)
     manifest_report = validate_manifest(manifest, tmp_path)
     assert manifest_report.ok, sorted(manifest_report.error_codes)
     rag_report = validate_rag_corpus(
