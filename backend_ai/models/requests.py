@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+RagProfile = Literal["tutor", "project"]
 
 
 class HintRewritePayload(BaseModel):
@@ -35,7 +37,7 @@ class ChatRequest(BaseModel):
     user_id: str | None = Field(default=None, max_length=256)
     #: `prompt`와 동일 텍스트를 기대하는 백엔드 호환용 별칭. prompt가 비었을 때만 채워짐.
     message: str | None = Field(default=None, max_length=4096)
-    rag_profile: str | None = None
+    rag_profile: RagProfile | None = None
     rag_query: str | None = Field(None, max_length=4096)
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
@@ -50,6 +52,17 @@ class ChatRequest(BaseModel):
         from services.locale_support import normalize_locale
 
         return normalize_locale(v)
+
+    @field_validator("rag_profile", mode="before")
+    @classmethod
+    def _validate_rag_profile(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        if v not in ("tutor", "project"):
+            raise ValueError(
+                "rag_profile must be tutor, project, or omitted",
+            )
+        return v
 
     @model_validator(mode="before")
     @classmethod

@@ -90,3 +90,13 @@ def test_chat_request_omitted_locale_defaults_ko() -> None:
 def test_chat_request_japanese_aliases_normalize_to_ja(raw: str) -> None:
     req = ChatRequest(prompt="hi", locale=raw)
     assert req.locale == "ja"
+
+
+def test_chat_request_rejects_unknown_rag_profile() -> None:
+    with pytest.raises(ValueError, match="rag_profile"):
+        ChatRequest(prompt="hi", rag_profile="anything")
+
+
+def test_chat_request_accepts_project_rag_profile() -> None:
+    req = ChatRequest(prompt="hi", rag_profile="project")
+    assert req.rag_profile == "project"

@@ -35,6 +35,7 @@ class _FakeTutorRAG:
         top_k: int,
         max_context_chars: int,
         locale: str = "ko",
+        rag_profile: str = "tutor",
     ) -> str:
         self.last_locale = locale
         return f">>>RAG:{query_text}:{top_k}<<<"
