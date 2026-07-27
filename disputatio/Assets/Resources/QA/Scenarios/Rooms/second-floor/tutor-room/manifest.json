@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "roomId": "tutor-room",
+  "areaId": "second-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["TutorEntrance", "TutorRoom"],
+  "implementationStatus": "NOT_IMPLEMENTED",
+  "entryPreset": "tutor-room.stub",
+  "requiredCapabilities": [],
+  "scenarios": [
+    "room.tutor-room.smoke",
+    "room.tutor-room.happy-path",
+    "room.tutor-room.guard.wrong-item",
+    "room.tutor-room.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}
