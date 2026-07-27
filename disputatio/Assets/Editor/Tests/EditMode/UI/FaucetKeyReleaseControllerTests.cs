@@ -143,6 +143,19 @@ public class FaucetKeyReleaseControllerTests
     }
 
     [Test]
+    public void TriggerImmediateKeySpawnForQa_IgnoresConfiguredDelay()
+    {
+        SetPrivateField(controller, "delaySeconds", 5f);
+        flowchart.SetBooleanVariable("FaucetClicked", true);
+        flowchart.SetBooleanVariable(FungusVariableKeys.BottleDragged, true);
+
+        controller.TriggerImmediateKeySpawnForQa();
+
+        Assert.AreEqual("addKey", executedBlockName);
+        Assert.IsTrue(controller.HasTriggeredForTests);
+    }
+
+    [Test]
     public void KitchenPuzzleState_ApplyBlockCompletion_Faucet_SetsFaucetClickedForController()
     {
         var puzzleRoot = new GameObject("PuzzleState");

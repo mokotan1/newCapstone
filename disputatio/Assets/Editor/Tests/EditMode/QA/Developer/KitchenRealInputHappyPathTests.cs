@@ -37,21 +37,21 @@ public sealed class KitchenRealInputHappyPathTests
 
         IList<DeveloperQaScenarioStepDefinition> steps = result.Scenario.Steps;
         int beforeFillIndex = IndexOfTarget(steps, "kitchen.sink.preset.before-bottle-fill");
-        int fillIndex = IndexOfTarget(steps, "kitchen.sink.fill-bottle");
+        int fillIndex = IndexOfTarget(steps, KitchenQaAdapter.SinkFillBottleCapabilityId);
         int pointerIndex = IndexOf(steps, "interaction", "pointer");
         int exitIndex = IndexOfTarget(steps, "kitchen.exit.assert");
         int apiClickIndex = IndexOfTarget(steps, "kitchen.faucet.click");
         int evidenceIndex = IndexOf(steps, "evidence", "capture");
 
         Assert.GreaterOrEqual(beforeFillIndex, 0, "Expected before-bottle-fill preset.");
-        Assert.GreaterOrEqual(fillIndex, 0, "Expected kitchen.sink.fill-bottle.");
+        Assert.GreaterOrEqual(fillIndex, 0, "Expected " + KitchenQaAdapter.SinkFillBottleCapabilityId);
         Assert.GreaterOrEqual(pointerIndex, 0, "Expected interaction.pointer RealInput step.");
         Assert.GreaterOrEqual(exitIndex, 0, "Expected kitchen.exit.assert.");
         Assert.GreaterOrEqual(apiClickIndex, 0, "Expected kitchen.faucet.click API invoke.");
         Assert.GreaterOrEqual(evidenceIndex, 0, "Expected evidence.capture.");
 
-        Assert.Less(beforeFillIndex, fillIndex, "before-bottle-fill must precede fills-bottle.");
-        Assert.Less(fillIndex, pointerIndex, "fills-bottle must precede RealInput faucet.");
+        Assert.Less(beforeFillIndex, fillIndex, "before-bottle-fill must precede fill-bottle.");
+        Assert.Less(fillIndex, pointerIndex, "fill-bottle must precede RealInput faucet.");
         Assert.Less(pointerIndex, exitIndex, "RealInput faucet must precede exit.assert.");
         Assert.Less(pointerIndex, apiClickIndex, "RealInput pointer must precede API faucet click.");
         Assert.Less(apiClickIndex, evidenceIndex, "API invoke must precede evidence.capture.");

@@ -59,7 +59,7 @@ public class MainMenuQaCapabilityTests
         MainMenuQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "assertion", "invoke", "mainmenu.start.assert-invoked"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", "mainmenu.start.assert-invoked"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
     }

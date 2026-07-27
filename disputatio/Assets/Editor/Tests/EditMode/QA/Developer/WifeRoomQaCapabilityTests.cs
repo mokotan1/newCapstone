@@ -59,7 +59,7 @@ public class WifeRoomQaCapabilityTests
         WifeRoomQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "assertion", "invoke", "wiferoom.wallclock.assert-controller"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", "wiferoom.wallclock.assert-controller"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
     }

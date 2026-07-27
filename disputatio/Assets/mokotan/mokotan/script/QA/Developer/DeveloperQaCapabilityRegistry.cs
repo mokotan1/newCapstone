@@ -7,7 +7,7 @@ namespace Godlotto.QA.Developer
 {
     /// <summary>
     /// In-memory catalog of developer-QA capabilities and optional handlers.
-    /// Version bumps on each successful Register.
+    /// Version bumps on each successful Register / RegisterAsync.
     /// </summary>
     public sealed class DeveloperQaCapabilityRegistry
     {
@@ -16,6 +16,9 @@ namespace Godlotto.QA.Developer
 
         private readonly Dictionary<string, DeveloperQaCapabilityHandler> _handlers =
             new Dictionary<string, DeveloperQaCapabilityHandler>(StringComparer.Ordinal);
+
+        private readonly Dictionary<string, DeveloperQaAsyncCapabilityHandler> _asyncHandlers =
+            new Dictionary<string, DeveloperQaAsyncCapabilityHandler>(StringComparer.Ordinal);
 
         private int _versionNumber;
 
@@ -36,6 +39,7 @@ namespace Godlotto.QA.Developer
             }
 
             _byId[capability.Id] = capability;
+            _asyncHandlers.Remove(capability.Id);
             if (handler != null)
             {
                 _handlers[capability.Id] = handler;
@@ -45,6 +49,35 @@ namespace Godlotto.QA.Developer
                 _handlers.Remove(capability.Id);
             }
 
+            _versionNumber++;
+        }
+
+        /// <summary>
+        /// Registers an async handler (preferred when the step must yield Unity frames).
+        /// Clears any sync handler for the same id.
+        /// </summary>
+        public void RegisterAsync(
+            DeveloperQaCapability capability,
+            DeveloperQaAsyncCapabilityHandler handler)
+        {
+            if (capability == null)
+            {
+                throw new ArgumentNullException(nameof(capability));
+            }
+
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            if (string.IsNullOrWhiteSpace(capability.Id))
+            {
+                throw new ArgumentException("Capability id is required.", nameof(capability));
+            }
+
+            _byId[capability.Id] = capability;
+            _handlers.Remove(capability.Id);
+            _asyncHandlers[capability.Id] = handler;
             _versionNumber++;
         }
 
@@ -73,6 +106,17 @@ namespace Godlotto.QA.Developer
             }
 
             return _handlers.TryGetValue(id, out handler);
+        }
+
+        public bool TryGetAsyncHandler(string id, out DeveloperQaAsyncCapabilityHandler handler)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                handler = null;
+                return false;
+            }
+
+            return _asyncHandlers.TryGetValue(id, out handler);
         }
 
         public string FormatCurrentCapabilityIds()

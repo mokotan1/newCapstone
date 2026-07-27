@@ -1,12 +1,15 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Fungus;
+using Godlotto.Interaction;
 using Godlotto.QA.Developer;
 using Godlotto.QA.SceneAdapters;
 using NUnit.Framework;
 using UnityEngine;
+using Task = System.Threading.Tasks.Task;
 
 /// <summary>
 /// Kitchen bottle→key exit-contract capabilities (HaveMaidKey / maid-room-key).
@@ -17,21 +20,35 @@ public class KitchenExitCapabilityTests
     private static readonly string[] ExpectedExitIds =
     {
         "kitchen.sink.preset.before-bottle-fill",
-        "kitchen.sink.fill-bottle",
+        KitchenQaAdapter.SinkFillBottleCapabilityId,
         "kitchen.key.probe",
         "kitchen.key.click",
         "kitchen.exit.assert"
     };
 
     private GameObject _flowchartObject;
+    private GameObject _puzzleObject;
+    private GameObject _inventoryObject;
 
     [TearDown]
     public void TearDown()
     {
         if (_flowchartObject != null)
         {
-            Object.DestroyImmediate(_flowchartObject);
+            UnityEngine.Object.DestroyImmediate(_flowchartObject);
             _flowchartObject = null;
+        }
+
+        if (_puzzleObject != null)
+        {
+            UnityEngine.Object.DestroyImmediate(_puzzleObject);
+            _puzzleObject = null;
+        }
+
+        if (_inventoryObject != null)
+        {
+            UnityEngine.Object.DestroyImmediate(_inventoryObject);
+            _inventoryObject = null;
         }
     }
 
@@ -41,7 +58,20 @@ public class KitchenExitCapabilityTests
         var registry = new DeveloperQaCapabilityRegistry();
         KitchenQaAdapter.RegisterCapabilities(registry);
         var ids = registry.List().Select(c => c.Id).ToArray();
-        CollectionAssert.IsSubsetOf(ExpectedExitIds, ids);
+        foreach (string id in ExpectedExitIds)
+        {
+            bool found = false;
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (string.Equals(ids[i], id, StringComparison.Ordinal))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(found, "Missing exit capability: " + id + "; have=[" + string.Join(",", ids) + "]");
+        }
     }
 
     [Test]
@@ -63,7 +93,7 @@ public class KitchenExitCapabilityTests
         KitchenQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "interaction", "invoke", "kitchen.sink.fill-bottle"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", KitchenQaAdapter.SinkFillBottleCapabilityId),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, result.Code);
     }
@@ -110,6 +140,32 @@ public class KitchenExitCapabilityTests
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.Ok, result.Code, result.Message);
     }
+
+    [Test]
+    public async Task Invoke_BeforeBottleFill_WithoutInventory_ReturnsEnvironmentBlockedInEditMode()
+    {
+        _puzzleObject = new GameObject("KitchenPuzzleState");
+        _puzzleObject.AddComponent<KitchenPuzzleState>();
+        Assert.IsNull(InventoryManager.Instance);
+
+        var registry = new DeveloperQaCapabilityRegistry();
+        KitchenQaAdapter.RegisterCapabilities(registry);
+        var service = new DeveloperQaService(registry);
+        DeveloperQaResult result = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "c1",
+                "preset",
+                "apply",
+                "kitchen.sink.preset.before-bottle-fill"),
+            CancellationToken.None);
+
+        Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, result.Code, result.Message);
+        StringAssert.Contains("InventoryManager", result.Message);
+    }
+
+    // Note: Play Mode bootstrap of Inventory/Variablemanager is verified via unity-cli
+    // against the Kitchen scene (DontDestroyOnLoad is illegal in EditMode).
+
 
     private static void AddBooleanVariable(Flowchart target, string key, bool value)
     {

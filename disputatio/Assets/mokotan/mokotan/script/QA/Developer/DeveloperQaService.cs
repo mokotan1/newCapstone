@@ -66,90 +66,90 @@ namespace Godlotto.QA.Developer
             _profileService = profileService;
             _evidenceRecorder = evidenceRecorder;
             _realInputDriver = realInputDriver;
-            _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteStepCommand);
+            _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteStepCommandAsync);
         }
 
-        public Task<DeveloperQaResult> ExecuteAsync(
+        public async Task<DeveloperQaResult> ExecuteAsync(
             DeveloperQaCommand command,
             CancellationToken cancellationToken)
         {
             if (command == null || string.IsNullOrWhiteSpace(command.Id))
             {
-                return Task.FromResult(new DeveloperQaResult(
+                return new DeveloperQaResult(
                     DeveloperQaResultCode.InvalidCommand,
-                    "Command id is required."));
+                    "Command id is required.");
             }
 
             if (string.IsNullOrWhiteSpace(command.Family) ||
                 !KnownFamilies.Contains(command.Family))
             {
-                return Task.FromResult(new DeveloperQaResult(
+                return new DeveloperQaResult(
                     DeveloperQaResultCode.UnsupportedCommand,
-                    $"Unknown family '{command.Family}'."));
+                    $"Unknown family '{command.Family}'.");
             }
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromResult(new DeveloperQaResult(DeveloperQaResultCode.Cancelled));
+                return new DeveloperQaResult(DeveloperQaResultCode.Cancelled);
             }
 
             if (command.Family == "capability" && command.Name == "list")
             {
                 int count = _registry.List().Count;
-                return Task.FromResult(new DeveloperQaResult(
+                return new DeveloperQaResult(
                     DeveloperQaResultCode.Ok,
                     count == 0 ? "empty" : $"count={count}",
                     data: DeveloperQaMaps.From(new Dictionary<string, string>
                     {
                         ["count"] = count.ToString(),
                         ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
-                    })));
+                    }));
             }
 
             if (command.Family == "capability" && command.Name == "describe")
             {
-                return Task.FromResult(DescribeCapability(command.TargetId));
+                return DescribeCapability(command.TargetId);
             }
 
             if (command.Family == "interaction" && command.Name == "pointer")
             {
-                return Task.FromResult(ExecutePointer(command));
+                return await ExecutePointerAsync(command, cancellationToken).ConfigureAwait(true);
             }
 
             if (IsCapabilityDispatchCommand(command.Family, command.Name))
             {
-                return Task.FromResult(DispatchCapability(command));
+                return await DispatchCapabilityAsync(command, cancellationToken).ConfigureAwait(true);
             }
 
             if (command.Family == "evidence" && command.Name == "capture")
             {
-                return Task.FromResult(CaptureEvidence(command));
+                return CaptureEvidence(command);
             }
 
             if (command.Family == "scenario" && command.Name == "run")
             {
-                return Task.FromResult(BeginScenario(command));
+                return await BeginScenarioAsync(command, cancellationToken).ConfigureAwait(true);
             }
 
             if (command.Family == "scenario" && command.Name == "resume")
             {
-                return Task.FromResult(_scenarioRunner.Resume());
+                return await _scenarioRunner.ResumeAsync(cancellationToken).ConfigureAwait(true);
             }
 
             if (command.Family == "scenario" && command.Name == "status")
             {
-                return Task.FromResult(_scenarioRunner.Status());
+                return _scenarioRunner.Status();
             }
 
             if (command.Family == "scenario" &&
                 (command.Name == "cancel" || command.Name == "abort"))
             {
-                return Task.FromResult(CancelScenario());
+                return CancelScenario();
             }
 
-            return Task.FromResult(new DeveloperQaResult(
+            return new DeveloperQaResult(
                 DeveloperQaResultCode.UnsupportedCommand,
-                $"{command.Family}.{command.Name} not implemented yet."));
+                $"{command.Family}.{command.Name} not implemented yet.");
         }
 
         public DeveloperQaSnapshot CaptureSnapshot()
@@ -214,8 +214,44 @@ namespace Godlotto.QA.Developer
             {
                 return new DeveloperQaResult(
                     DeveloperQaResultCode.InternalError,
-                    $"Handler for '{targetId}' failed: {ex.GetType().Name}.");
+                    $"Handler for '{targetId}' failed: {ex.GetType().Name}: {ex.Message}");
             }
+        }
+
+        private async Task<DeveloperQaResult> DispatchCapabilityAsync(
+            DeveloperQaCommand command,
+            CancellationToken cancellationToken)
+        {
+            string targetId = command.TargetId;
+            if (string.IsNullOrWhiteSpace(targetId) || !_registry.TryGet(targetId, out _))
+            {
+                return CreateMissingCapability(targetId);
+            }
+
+            if (_registry.TryGetAsyncHandler(targetId, out DeveloperQaAsyncCapabilityHandler asyncHandler)
+                && asyncHandler != null)
+            {
+                try
+                {
+                    DeveloperQaResult result = await asyncHandler(command, cancellationToken)
+                        .ConfigureAwait(true);
+                    return result ?? new DeveloperQaResult(
+                        DeveloperQaResultCode.InternalError,
+                        $"Async handler for '{targetId}' returned null.");
+                }
+                catch (OperationCanceledException)
+                {
+                    return new DeveloperQaResult(DeveloperQaResultCode.Cancelled);
+                }
+                catch (Exception ex)
+                {
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.InternalError,
+                        $"Async handler for '{targetId}' failed: {ex.GetType().Name}: {ex.Message}");
+                }
+            }
+
+            return DispatchCapability(command);
         }
 
         private DeveloperQaResult CaptureEvidence(DeveloperQaCommand command)
@@ -258,7 +294,9 @@ namespace Godlotto.QA.Developer
                 }));
         }
 
-        private DeveloperQaResult BeginScenario(DeveloperQaCommand command)
+        private async Task<DeveloperQaResult> BeginScenarioAsync(
+            DeveloperQaCommand command,
+            CancellationToken cancellationToken)
         {
             DeveloperQaResult sessionBegin = BeginScenarioProfileSession(command);
             if (sessionBegin.Code != DeveloperQaResultCode.Ok)
@@ -289,7 +327,9 @@ namespace Godlotto.QA.Developer
                 executeSteps = parsed;
             }
 
-            DeveloperQaResult runnerResult = _scenarioRunner.Begin(command, executeSteps);
+            DeveloperQaResult runnerResult = await _scenarioRunner
+                .BeginAsync(command, executeSteps, cancellationToken)
+                .ConfigureAwait(true);
             if (runnerResult.Code == DeveloperQaResultCode.InvalidCommand
                 || runnerResult.Code == DeveloperQaResultCode.InternalError
                 || runnerResult.Code == DeveloperQaResultCode.UnsupportedCommand)
@@ -421,73 +461,77 @@ namespace Godlotto.QA.Developer
         /// Executes one scenario step without re-entering <c>scenario.*</c> commands
         /// (avoids recursive run/resume/cancel from JSON steps).
         /// </summary>
-        private DeveloperQaResult ExecuteStepCommand(DeveloperQaCommand command)
+        private Task<DeveloperQaResult> ExecuteStepCommandAsync(
+            DeveloperQaCommand command,
+            CancellationToken cancellationToken)
         {
             if (command == null || string.IsNullOrWhiteSpace(command.Id))
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.InvalidCommand,
-                    "Command id is required.");
+                    "Command id is required."));
             }
 
             if (string.IsNullOrWhiteSpace(command.Family) ||
                 !KnownFamilies.Contains(command.Family))
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.UnsupportedCommand,
-                    $"Unknown family '{command.Family}'.");
+                    $"Unknown family '{command.Family}'."));
             }
 
             if (command.Family == "scenario")
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.InvalidCommand,
-                    "Nested scenario.* steps are not allowed.");
+                    "Nested scenario.* steps are not allowed."));
             }
 
             if (command.Family == "capability" && command.Name == "list")
             {
                 int count = _registry.List().Count;
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.Ok,
                     count == 0 ? "empty" : $"count={count}",
                     data: DeveloperQaMaps.From(new Dictionary<string, string>
                     {
                         ["count"] = count.ToString(),
                         ["current_capabilities"] = _registry.FormatCurrentCapabilityIds()
-                    }));
+                    })));
             }
 
             if (command.Family == "capability" && command.Name == "describe")
             {
-                return DescribeCapability(command.TargetId);
+                return Task.FromResult(DescribeCapability(command.TargetId));
             }
 
             if (command.Family == "interaction" && command.Name == "pointer")
             {
-                return ExecutePointer(command);
+                return ExecutePointerAsync(command, cancellationToken);
             }
 
             if (IsCapabilityDispatchCommand(command.Family, command.Name))
             {
-                return DispatchCapability(command);
+                return DispatchCapabilityAsync(command, cancellationToken);
             }
 
             if (command.Family == "evidence" && command.Name == "capture")
             {
-                return CaptureEvidence(command);
+                return Task.FromResult(CaptureEvidence(command));
             }
 
-            return new DeveloperQaResult(
+            return Task.FromResult(new DeveloperQaResult(
                 DeveloperQaResultCode.UnsupportedCommand,
-                $"{command.Family}.{command.Name} not implemented yet.");
+                $"{command.Family}.{command.Name} not implemented yet."));
         }
 
         /// <summary>
         /// Player-visible pointer click via injected RealInput driver (design §6.2).
         /// Never reports fake Ok when the driver/EventSystem/resolver is missing.
         /// </summary>
-        private DeveloperQaResult ExecutePointer(DeveloperQaCommand command)
+        private async Task<DeveloperQaResult> ExecutePointerAsync(
+            DeveloperQaCommand command,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(command.TargetId))
             {
@@ -528,16 +572,19 @@ namespace Godlotto.QA.Developer
             QaInputResult inputResult;
             try
             {
-                inputResult = _realInputDriver
-                    .ClickAsync(targetId, CancellationToken.None)
-                    .GetAwaiter()
-                    .GetResult();
+                inputResult = await _realInputDriver
+                    .ClickAsync(targetId, cancellationToken)
+                    .ConfigureAwait(true);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
+            {
+                return new DeveloperQaResult(DeveloperQaResultCode.Cancelled);
+            }
+            catch (Exception)
             {
                 return new DeveloperQaResult(
                     DeveloperQaResultCode.InternalError,
-                    "RealInput click failed: " + ex.GetType().Name + ".");
+                    "RealInput click failed: Exception.");
             }
 
             return MapInputResult(inputResult);

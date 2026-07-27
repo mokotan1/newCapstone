@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Fungus;
 using Godlotto.QA.Developer;
+using Task = System.Threading.Tasks.Task;
 using Godlotto.QA.SceneAdapters;
 using Godlotto.QA.Scenes;
 using NUnit.Framework;

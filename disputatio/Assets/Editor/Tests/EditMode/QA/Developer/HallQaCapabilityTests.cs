@@ -59,7 +59,7 @@ public class HallQaCapabilityTests
         HallQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "assertion", "invoke", "hall.nav.assert-route"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", "hall.nav.assert-route"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
     }

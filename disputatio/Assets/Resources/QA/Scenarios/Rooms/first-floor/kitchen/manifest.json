@@ -4,8 +4,8 @@
   "areaId": "first-floor",
   "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
   "unityScenes": ["Kitchen"],
-  "implementationStatus": "PARTIAL",
-  "notes": "exit asserts wired, PlayMode pending",
+  "implementationStatus": "IMPLEMENTED",
+  "notes": "PlayMode bottle→faucet→key→exit.assert PASS via kitchen.* capabilities (2026-07-27). Faucet Say(waitForClick) completed via QA Say pump + ApplyBlockCompletion; MaidRoomKey spawn via TriggerImmediateKeySpawnForQa + parent activation. No force-solve / no fake HaveMaidKey.",
   "entryPreset": "kitchen.sink.preset.before-bottle-fill",
   "requiredCapabilities": [
     "kitchen.sink.preset.before-bottle-fill",

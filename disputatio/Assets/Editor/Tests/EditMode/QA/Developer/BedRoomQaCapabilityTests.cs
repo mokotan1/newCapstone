@@ -59,7 +59,7 @@ public class BedRoomQaCapabilityTests
         BedRoomQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "assertion", "invoke", "bedroom.book.assert-controller"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", "bedroom.book.assert-controller"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
     }

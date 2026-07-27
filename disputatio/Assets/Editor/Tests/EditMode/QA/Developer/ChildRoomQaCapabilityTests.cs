@@ -59,7 +59,7 @@ public class ChildRoomQaCapabilityTests
         ChildRoomQaAdapter.RegisterCapabilities(registry);
         var service = new DeveloperQaService(registry);
         DeveloperQaResult result = await service.ExecuteAsync(
-            DeveloperQaCommand.Create("c1", "assertion", "invoke", "childroom.seals.assert-controller"),
+            DeveloperQaCommand.Create("c1", "interaction", "invoke", "childroom.seals.assert-controller"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
     }

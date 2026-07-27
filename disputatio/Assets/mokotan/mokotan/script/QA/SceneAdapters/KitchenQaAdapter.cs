@@ -1,12 +1,15 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Fungus;
 using Godlotto.Interaction;
 using Godlotto.QA.Developer;
 using Godlotto.QA.Input;
 using Godlotto.QA.Scenes;
 using UnityEngine;
+using Task = System.Threading.Tasks.Task;
 
 namespace Godlotto.QA.SceneAdapters
 {
@@ -107,14 +110,14 @@ namespace Godlotto.QA.SceneAdapters
                     "{faucetClicked:bool}"),
                 _ => MapPreset(adapter.ApplyPreset(BeforeFaucetPresetId)));
 
-            registry.Register(
+            registry.RegisterAsync(
                 new DeveloperQaCapability(
                     FaucetClickCapabilityId,
                     sceneId,
                     DeveloperQaCapabilityKind.Interaction,
                     "{}",
-                    "{clicked:bool}"),
-                _ => MapClick(adapter, FaucetTargetId));
+                    "{clicked:bool,faucetClicked:bool}"),
+                (command, cancellationToken) => MapClickAsync(adapter, FaucetTargetId, cancellationToken));
 
             registry.Register(
                 new DeveloperQaCapability(
@@ -134,14 +137,14 @@ namespace Godlotto.QA.SceneAdapters
                     "{faucetClicked:bool,bottleDragged:bool}"),
                 _ => MapSnapshot(adapter, assertClicked: false));
 
-            registry.Register(
+            registry.RegisterAsync(
                 new DeveloperQaCapability(
                     FaucetAssertClickedCapabilityId,
                     sceneId,
                     DeveloperQaCapabilityKind.Assertion,
                     "{}",
                     "{faucetClicked:bool,bottleDragged:bool}"),
-                _ => MapSnapshot(adapter, assertClicked: true));
+                (command, cancellationToken) => MapSnapshotAsync(adapter, assertClicked: true, cancellationToken));
 
             registry.Register(
                 new DeveloperQaCapability(
@@ -270,7 +273,19 @@ namespace Godlotto.QA.SceneAdapters
 
             if (targetId == FaucetTargetId)
             {
-                controller.OnInteraction(KitchenSinkInteractionGate.FaucetInteractionId);
+                // Prior QA steps (bottle_drag) may leave Fungus Say/Menu active; API faucet
+                // click must still exercise the Faucet block rather than silently no-op.
+                bool previousBlockDuringDialogue = SceneInteractionController.BlockDuringFungusDialogue;
+                SceneInteractionController.BlockDuringFungusDialogue = false;
+                try
+                {
+                    controller.OnInteraction(KitchenSinkInteractionGate.FaucetInteractionId);
+                }
+                finally
+                {
+                    SceneInteractionController.BlockDuringFungusDialogue = previousBlockDuringDialogue;
+                }
+
                 error = null;
                 return true;
             }
@@ -315,12 +330,33 @@ namespace Godlotto.QA.SceneAdapters
                     "KitchenPuzzleState not found; before-bottle-fill requires the Kitchen Play Mode scene.");
             }
 
-            InventoryManager inventory = InventoryManager.Instance;
+            // Isolated Kitchen play (no MainMenu/Hall DDOL) needs inventory + Variablemanager.
+            // Bootstrap is Play Mode only — FungusManager/InventoryManager use DontDestroyOnLoad.
+            InventoryManager inventory = InventoryManager.Instance
+                ?? UnityEngine.Object.FindFirstObjectByType<InventoryManager>();
+            if (inventory == null && Application.isPlaying)
+            {
+                inventory = EnsureInventoryManagerForIsolatedRoom();
+            }
+
             if (inventory == null)
             {
                 return new DeveloperQaResult(
                     DeveloperQaResultCode.EnvironmentBlocked,
                     "InventoryManager not found; cannot grant Bottle for before-bottle-fill.");
+            }
+
+            Flowchart flowchart = FlowchartLocator.Find();
+            if (flowchart == null && Application.isPlaying)
+            {
+                flowchart = EnsureVariablemanagerFlowchartForIsolatedRoom();
+            }
+
+            if (flowchart == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "Variablemanager Flowchart not found; cannot sync GetBottle/HaveMaidKey for before-bottle-fill.");
             }
 
             Item bottle = ItemLookup.FindById(BottleItemId);
@@ -342,13 +378,13 @@ namespace Godlotto.QA.SceneAdapters
                 inventory.AddItem(bottle);
             }
 
-            Flowchart flowchart = FlowchartLocator.Find();
-            if (flowchart != null)
-            {
-                EnsureBoolean(flowchart, FungusVariableKeys.GetBottle, true);
-                // Clear exit flag for a clean bottle→key run; do not force-set true for PASS.
-                EnsureBoolean(flowchart, FungusVariableKeys.HaveMaidKey, false);
-            }
+            EnsureBoolean(flowchart, FungusVariableKeys.GetBottle, true);
+            // Clear exit flag for a clean bottle→key run; do not force-set true for PASS.
+            EnsureBoolean(flowchart, FungusVariableKeys.HaveMaidKey, false);
+            // KitchenPuzzleState setters mirror to Fungus — variables must exist first.
+            EnsureBoolean(flowchart, FungusVariableKeys.BottleDragged, false);
+            EnsureBoolean(flowchart, FungusVariableKeys.FaucetClicked, false);
+            EnsureBoolean(flowchart, FungusVariableKeys.BottleClicked, false);
 
             puzzleState.SetBottleDragged(false);
             puzzleState.SetFaucetClicked(false);
@@ -388,6 +424,22 @@ namespace Godlotto.QA.SceneAdapters
                 return new DeveloperQaResult(
                     DeveloperQaResultCode.EnvironmentBlocked,
                     "Bottle not present (GetBottle/inventory/drag). Apply kitchen.sink.preset.before-bottle-fill first.",
+                    data: new Dictionary<string, string>
+                    {
+                        ["filled"] = "False",
+                        ["bottleDragged"] = puzzleState != null
+                            ? puzzleState.BottleDragged.ToString()
+                            : "unknown"
+                    });
+            }
+
+            if (!KitchenSinkInteractionGate.ShouldExecuteFungusBlock(
+                    KitchenSinkInteractionGate.BottleDragInteractionId,
+                    puzzleState))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "bottle_drag gate blocked (need Bottle in inventory/HasBottle and BottleDragged=false).",
                     data: new Dictionary<string, string>
                     {
                         ["filled"] = "False",
@@ -573,6 +625,57 @@ namespace Godlotto.QA.SceneAdapters
                 });
         }
 
+        /// <summary>
+        /// Dispatches faucet click then completes the Faucet Fungus block for QA.
+        /// Advances Say input, stops a stuck Faucet block, then applies the same
+        /// <see cref="KitchenPuzzleState.ApplyBlockCompletion"/> OnBlockEnd would run.
+        /// Sync-safe for unity-cli <c>exec</c> (no Task.Yield wait that deadlocks under GetResult).
+        /// Does not force-set HaveMaidKey.
+        /// </summary>
+        private static Task<DeveloperQaResult> MapClickAsync(
+            KitchenQaAdapter adapter,
+            QaTargetId targetId,
+            CancellationToken cancellationToken)
+        {
+            DeveloperQaResult dispatched = MapClick(adapter, targetId);
+            if (dispatched.Code != DeveloperQaResultCode.Ok)
+            {
+                return Task.FromResult(dispatched);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            EnsureFaucetBlockCompletedForQa();
+            EnsureMaidKeySpawnedForQa();
+
+            KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState != null)
+            {
+                puzzleState.HydrateFromFungus();
+            }
+
+            var data = new Dictionary<string, string>
+            {
+                ["clicked"] = "True",
+                ["faucetClicked"] = puzzleState != null
+                    ? puzzleState.FaucetClicked.ToString()
+                    : "unknown"
+            };
+
+            if (puzzleState == null || !puzzleState.FaucetClicked)
+            {
+                return Task.FromResult(new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "Kitchen faucet click dispatched but FaucetClicked stayed false "
+                    + "after Say pump / Faucet block completion.",
+                    data: data));
+            }
+
+            return Task.FromResult(new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Kitchen faucet click completed (FaucetClicked=true).",
+                data: data));
+        }
+
         private static DeveloperQaResult MapSnapshot(KitchenQaAdapter adapter, bool assertClicked)
         {
             if (adapter == null)
@@ -613,6 +716,102 @@ namespace Godlotto.QA.SceneAdapters
                     ? "Kitchen faucet assert-clicked passed."
                     : "Kitchen faucet snapshot captured.",
                 data: data);
+        }
+
+        /// <summary>
+        /// RealInput faucet may leave Say(waitForClick) open; complete Faucet then assert.
+        /// </summary>
+        private static Task<DeveloperQaResult> MapSnapshotAsync(
+            KitchenQaAdapter adapter,
+            bool assertClicked,
+            CancellationToken cancellationToken)
+        {
+            if (assertClicked)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                EnsureFaucetBlockCompletedForQa();
+                EnsureMaidKeySpawnedForQa();
+            }
+
+            return Task.FromResult(MapSnapshot(adapter, assertClicked));
+        }
+
+        /// <summary>
+        /// Advances active Say, stops a stuck Faucet block, then applies the same completion
+        /// hook RoomInteractionController uses on OnBlockEnd. Sync-safe for unity-cli exec.
+        /// </summary>
+        private static void EnsureFaucetBlockCompletedForQa()
+        {
+            for (int i = 0; i < 24; i++)
+            {
+                DeveloperQaFungusSayPump.TryAdvanceActiveWriters();
+            }
+
+            KitchenPuzzleState puzzleState = ResolvePuzzleState();
+            if (puzzleState != null)
+            {
+                puzzleState.HydrateFromFungus();
+                if (puzzleState.FaucetClicked)
+                {
+                    return;
+                }
+            }
+
+            Block faucetBlock = null;
+            Flowchart[] flowcharts = UnityEngine.Object.FindObjectsByType<Flowchart>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
+            for (int i = 0; i < flowcharts.Length; i++)
+            {
+                Flowchart candidate = flowcharts[i];
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                Block found = candidate.FindBlock(KitchenSinkInteractionGate.FaucetBlockName);
+                if (found != null)
+                {
+                    faucetBlock = found;
+                    break;
+                }
+            }
+
+            if (faucetBlock != null && faucetBlock.IsExecuting())
+            {
+                faucetBlock.Stop();
+            }
+
+            puzzleState = ResolvePuzzleState();
+            if (puzzleState != null && !puzzleState.FaucetClicked)
+            {
+                puzzleState.ApplyBlockCompletion(KitchenSinkInteractionGate.FaucetBlockName);
+            }
+        }
+
+        /// <summary>
+        /// <see cref="FaucetKeyReleaseController"/> normally waits 1s on Update; under sync
+        /// QA exec that delay never elapses. Trigger spawn immediately.
+        /// </summary>
+        private static void EnsureMaidKeySpawnedForQa()
+        {
+            FaucetKeyReleaseController[] controllers =
+                UnityEngine.Object.FindObjectsByType<FaucetKeyReleaseController>(
+                    FindObjectsInactive.Include,
+                    FindObjectsSortMode.None);
+            if (controllers == null || controllers.Length == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < controllers.Length; i++)
+            {
+                FaucetKeyReleaseController controller = controllers[i];
+                if (controller != null)
+                {
+                    controller.TriggerImmediateKeySpawnForQa();
+                }
+            }
         }
 
         private static Dictionary<string, string> BuildKeyProbeData(
@@ -775,6 +974,43 @@ namespace Godlotto.QA.SceneAdapters
         private static KitchenPuzzleState ResolvePuzzleState()
         {
             return UnityEngine.Object.FindFirstObjectByType<KitchenPuzzleState>();
+        }
+
+        /// <summary>
+        /// Ensures an <see cref="InventoryManager"/> exists for room-isolated Kitchen QA.
+        /// Prefers the live singleton; otherwise reuses or creates a scene instance.
+        /// </summary>
+        private static InventoryManager EnsureInventoryManagerForIsolatedRoom()
+        {
+            InventoryManager inventory = InventoryManager.Instance;
+            if (inventory != null)
+            {
+                return inventory;
+            }
+
+            inventory = UnityEngine.Object.FindFirstObjectByType<InventoryManager>();
+            if (inventory != null)
+            {
+                return inventory;
+            }
+
+            var host = new GameObject("InventoryManager");
+            return host.AddComponent<InventoryManager>();
+        }
+
+        /// <summary>
+        /// Ensures Fungus <c>Variablemanager</c> exists so GetBottle/HaveMaidKey can be mirrored.
+        /// </summary>
+        private static Flowchart EnsureVariablemanagerFlowchartForIsolatedRoom()
+        {
+            Flowchart flowchart = FlowchartLocator.Find();
+            if (flowchart != null)
+            {
+                return flowchart;
+            }
+
+            var host = new GameObject("Variablemanager");
+            return host.AddComponent<Flowchart>();
         }
     }
 }

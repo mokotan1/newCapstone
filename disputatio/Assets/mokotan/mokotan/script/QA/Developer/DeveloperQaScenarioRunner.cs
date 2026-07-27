@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Godlotto.QA.Developer
 {
@@ -10,20 +12,38 @@ namespace Godlotto.QA.Developer
     /// Executes DeveloperQa-command scenario JSON with status / resume / cancel (Task 9).
     /// Full <c>QaScenarioRunner</c> integration is skipped because that schema cannot
     /// express StudyRoom capability IDs (<c>studyroom.mirror.*</c>).
+    /// Steps are awaited so Fungus Say/Wait can complete across player-loop frames.
     /// </summary>
     public sealed class DeveloperQaScenarioRunner
     {
         private readonly DeveloperQaScenarioValidator _validator;
-        private readonly Func<DeveloperQaCommand, DeveloperQaResult> _executeStep;
+        private readonly Func<DeveloperQaCommand, CancellationToken, Task<DeveloperQaResult>> _executeStep;
         private Session _session;
 
         public DeveloperQaScenarioRunner(Func<DeveloperQaCommand, DeveloperQaResult> executeStep)
-            : this(executeStep, new DeveloperQaScenarioValidator())
+            : this(
+                (command, _) => Task.FromResult(executeStep(command)),
+                new DeveloperQaScenarioValidator())
         {
         }
 
         public DeveloperQaScenarioRunner(
             Func<DeveloperQaCommand, DeveloperQaResult> executeStep,
+            DeveloperQaScenarioValidator validator)
+            : this(
+                (command, _) => Task.FromResult(executeStep(command)),
+                validator)
+        {
+        }
+
+        public DeveloperQaScenarioRunner(
+            Func<DeveloperQaCommand, CancellationToken, Task<DeveloperQaResult>> executeStep)
+            : this(executeStep, new DeveloperQaScenarioValidator())
+        {
+        }
+
+        public DeveloperQaScenarioRunner(
+            Func<DeveloperQaCommand, CancellationToken, Task<DeveloperQaResult>> executeStep,
             DeveloperQaScenarioValidator validator)
         {
             _executeStep = executeStep ?? throw new ArgumentNullException(nameof(executeStep));
@@ -39,27 +59,37 @@ namespace Godlotto.QA.Developer
             DeveloperQaCommand command,
             bool executeSteps)
         {
+            return BeginAsync(command, executeSteps, CancellationToken.None)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        public Task<DeveloperQaResult> BeginAsync(
+            DeveloperQaCommand command,
+            bool executeSteps,
+            CancellationToken cancellationToken)
+        {
             if (_session != null
                 && (_session.State == DeveloperQaScenarioStates.Running))
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.EnvironmentBlocked,
-                    "A DeveloperQa scenario is already running. Cancel or wait for completion.");
+                    "A DeveloperQa scenario is already running. Cancel or wait for completion."));
             }
 
             string json;
             DeveloperQaResult loadResult = TryLoadScenarioJson(command, out json);
             if (loadResult.Code != DeveloperQaResultCode.Ok)
             {
-                return loadResult;
+                return Task.FromResult(loadResult);
             }
 
             DeveloperQaScenarioValidationResult validation = _validator.Validate(json);
             if (!validation.IsValid)
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.InvalidCommand,
-                    "Invalid scenario: " + string.Join("; ", validation.Errors));
+                    "Invalid scenario: " + string.Join("; ", validation.Errors)));
             }
 
             DeveloperQaScenarioDefinition scenario = validation.Scenario;
@@ -71,42 +101,47 @@ namespace Godlotto.QA.Developer
 
             if (!executeSteps)
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.Ok,
                     "Scenario session started (deferred execution).",
                     checkpointId: _session.CheckpointId,
-                    data: BuildStatusData());
+                    data: BuildStatusData()));
             }
 
-            return ExecuteRemaining();
+            return ExecuteRemainingAsync(cancellationToken);
         }
 
         public DeveloperQaResult Resume()
         {
+            return ResumeAsync(CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        public Task<DeveloperQaResult> ResumeAsync(CancellationToken cancellationToken)
+        {
             if (_session == null)
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.InvalidCommand,
-                    "No scenario session to resume.");
+                    "No scenario session to resume."));
             }
 
             if (_session.State == DeveloperQaScenarioStates.Cancelled)
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.Cancelled,
-                    "Scenario was cancelled; start a new run.");
+                    "Scenario was cancelled; start a new run."));
             }
 
             if (_session.State == DeveloperQaScenarioStates.Completed)
             {
-                return new DeveloperQaResult(
+                return Task.FromResult(new DeveloperQaResult(
                     DeveloperQaResultCode.Ok,
                     "Scenario already completed.",
-                    data: BuildStatusData());
+                    data: BuildStatusData()));
             }
 
             _session.State = DeveloperQaScenarioStates.Running;
-            return ExecuteRemaining();
+            return ExecuteRemainingAsync(cancellationToken);
         }
 
         public DeveloperQaResult Cancel()
@@ -267,13 +302,15 @@ namespace Godlotto.QA.Developer
             return Path.Combine(root, "Resources", "QA", "Scenarios", fileName);
         }
 
-        private DeveloperQaResult ExecuteRemaining()
+        private async Task<DeveloperQaResult> ExecuteRemainingAsync(CancellationToken cancellationToken)
         {
             IList<DeveloperQaScenarioStepDefinition> steps = _session.Scenario.Steps;
             while (_session.StepIndex < steps.Count)
             {
-                if (_session.State == DeveloperQaScenarioStates.Cancelled)
+                if (cancellationToken.IsCancellationRequested
+                    || _session.State == DeveloperQaScenarioStates.Cancelled)
                 {
+                    _session.State = DeveloperQaScenarioStates.Cancelled;
                     return new DeveloperQaResult(
                         DeveloperQaResultCode.Cancelled,
                         "Scenario cancelled.",
@@ -292,7 +329,8 @@ namespace Godlotto.QA.Developer
                     step.TargetId,
                     step.Parameters);
 
-                DeveloperQaResult stepResult = _executeStep(stepCommand);
+                DeveloperQaResult stepResult = await _executeStep(stepCommand, cancellationToken)
+                    .ConfigureAwait(true);
                 _session.LastResultCode = stepResult != null
                     ? stepResult.Code.ToString()
                     : DeveloperQaResultCode.InternalError.ToString();

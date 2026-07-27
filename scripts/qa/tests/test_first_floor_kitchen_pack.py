@@ -39,13 +39,16 @@ def test_kitchen_manifest_validates() -> None:
     validate_room_manifest(payload)
     assert payload["roomId"] == "kitchen"
     assert payload["areaId"] == "first-floor"
-    assert payload["implementationStatus"] == "PARTIAL"
+    assert payload["implementationStatus"] == "IMPLEMENTED"
     assert "kitchen.faucet.click" in payload["requiredCapabilities"]
     assert "kitchen.sink.fill-bottle" in payload["requiredCapabilities"]
     assert "kitchen.exit.assert" in payload["requiredCapabilities"]
     assert "kitchen.sink.preset.before-bottle-fill" in payload["requiredCapabilities"]
     assert payload["entryPreset"] == "kitchen.sink.preset.before-bottle-fill"
-    assert "exit asserts wired" in str(payload.get("notes", "")).lower()
+    notes = str(payload.get("notes", "")).lower()
+    assert "playmode" in notes
+    assert "exit.assert" in notes
+    assert "no force-solve" in notes or "force-solve" not in notes.replace("no force-solve", "")
 
 
 def test_kitchen_scenarios_validate_and_avoid_force_solve() -> None:
