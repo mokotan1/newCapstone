@@ -1,6 +1,7 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using System.Collections.Generic;
+using Godlotto.QA.Developer;
 using Godlotto.QA.Input;
 using Godlotto.QA.Scenes;
 using UnityEngine;
@@ -8,9 +9,10 @@ using UnityEngine;
 namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
-    /// MainMenuScene QA adapter (Task 12). Wraps <see cref="MainMenu.OnStartButton"/> — already a
-    /// public API on the real domain component, exactly the entry point a player click invokes —
-    /// so a QA scenario can exercise the real "새 게임" reset path
+    /// MainMenuScene QA adapter (Task 12 + Wave 1 start capabilities). Wraps
+    /// <see cref="MainMenu.OnStartButton"/> — already a public API on the real domain component,
+    /// exactly the entry point a player click invokes — so a QA scenario can exercise the real
+    /// "새 게임" reset path
     /// (<see cref="PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings"/>) end-to-end
     /// without private reflection or any scene edits.
     ///
@@ -28,6 +30,11 @@ namespace Godlotto.QA.SceneAdapters
     public sealed class MainMenuQaAdapter : IQaSceneAdapter, IQaApiInteractable
     {
         public const string StartButtonTargetIdValue = "mainmenu.start-button";
+
+        public const string StartClickCapabilityId = "mainmenu.start.click";
+        public const string StartProbeCapabilityId = "mainmenu.start.probe";
+        public const string StartAssertInvokedCapabilityId = "mainmenu.start.assert-invoked";
+        public const string StartCaptureCapabilityId = "mainmenu.start.capture";
 
         private static readonly QaTargetId StartButtonTargetId = QaTargetId.Create(StartButtonTargetIdValue);
 
@@ -49,6 +56,57 @@ namespace Godlotto.QA.SceneAdapters
         public IReadOnlyCollection<string> PresetIds
         {
             get { return DeclaredPresetIds; }
+        }
+
+        /// <summary>
+        /// Registers MainMenu start-button developer capabilities and their handlers.
+        /// Handlers thin-wrap <see cref="TryClick"/> and <see cref="CaptureSnapshot"/>.
+        /// </summary>
+        public static void RegisterCapabilities(DeveloperQaCapabilityRegistry registry)
+        {
+            if (registry == null)
+            {
+                throw new ArgumentNullException(nameof(registry));
+            }
+
+            string sceneId = SceneNames.MainMenu;
+            var adapter = new MainMenuQaAdapter();
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    StartClickCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{clicked:bool}"),
+                _ => MapClick(adapter));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    StartProbeCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Probe,
+                    "{}",
+                    "{mainMenuFound:bool}"),
+                _ => MapSnapshot(adapter, assertInvoked: false));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    StartCaptureCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Probe,
+                    "{}",
+                    "{mainMenuFound:bool}"),
+                _ => MapSnapshot(adapter, assertInvoked: false));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    StartAssertInvokedCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Assertion,
+                    "{}",
+                    "{mainMenuFound:bool}"),
+                _ => MapSnapshot(adapter, assertInvoked: true));
         }
 
         /// <summary>
@@ -102,6 +160,80 @@ namespace Godlotto.QA.SceneAdapters
         {
             error = "MainMenuQaAdapter does not support key interactions.";
             return false;
+        }
+
+        private static DeveloperQaResult MapClick(MainMenuQaAdapter adapter)
+        {
+            if (adapter == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "MainMenuQaAdapter instance is required for start click.");
+            }
+
+            string error;
+            if (adapter.TryClick(StartButtonTargetId, out error))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.Ok,
+                    "MainMenu start click dispatched.",
+                    data: new Dictionary<string, string>
+                    {
+                        ["clicked"] = "True"
+                    });
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.EnvironmentBlocked,
+                string.IsNullOrEmpty(error)
+                    ? "MainMenu start click blocked (MainMenu scene unavailable)."
+                    : error,
+                data: new Dictionary<string, string>
+                {
+                    ["clicked"] = "False"
+                });
+        }
+
+        private static DeveloperQaResult MapSnapshot(MainMenuQaAdapter adapter, bool assertInvoked)
+        {
+            if (adapter == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    "MainMenuQaAdapter instance is required for start snapshot.");
+            }
+
+            QaSceneSnapshot snapshot = adapter.CaptureSnapshot();
+            var data = new Dictionary<string, string>();
+            if (snapshot != null && snapshot.Values != null)
+            {
+                foreach (KeyValuePair<string, string> pair in snapshot.Values)
+                {
+                    data[pair.Key] = pair.Value;
+                }
+            }
+
+            string mainMenuFound;
+            if (!data.TryGetValue("mainMenuFound", out mainMenuFound))
+            {
+                mainMenuFound = "unknown";
+            }
+
+            if (assertInvoked &&
+                !string.Equals(mainMenuFound, bool.TrueString, StringComparison.Ordinal))
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.AssertionFailed,
+                    "Expected mainMenuFound=True but was '" + mainMenuFound + "'.",
+                    data: data);
+            }
+
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                assertInvoked
+                    ? "MainMenu start assert-invoked passed."
+                    : "MainMenu start snapshot captured.",
+                data: data);
         }
 
         private static MainMenu ResolveMainMenu()
