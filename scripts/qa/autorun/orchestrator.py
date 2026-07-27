@@ -26,7 +26,7 @@ class OrchestratorState(str, Enum):
 
 
 class AutorunOrchestrator:
-    """Explicit-state repair loop; patch wiring is intentionally out of scope."""
+    """Explicit-state repair loop; patch apply is supplied by callers/fixtures."""
 
     def __init__(self, max_attempts: int = MAX_ATTEMPTS_PER_SIGNATURE) -> None:
         if max_attempts < 1:
@@ -34,14 +34,24 @@ class AutorunOrchestrator:
         self._max_attempts = max_attempts
         self._state = OrchestratorState.PREFLIGHT
         self._attempts: dict[str, int] = {}
+        self._transitions: list[OrchestratorState] = [OrchestratorState.PREFLIGHT]
 
     @property
     def state(self) -> OrchestratorState:
         return self._state
 
-    def start(self) -> OrchestratorState:
-        self._state = OrchestratorState.RUNNING
+    @property
+    def transitions(self) -> list[OrchestratorState]:
+        """Ordered state visits (including PREFLIGHT); used by E2E assertions."""
+        return list(self._transitions)
+
+    def _set_state(self, state: OrchestratorState) -> OrchestratorState:
+        self._state = state
+        self._transitions.append(state)
         return self._state
+
+    def start(self) -> OrchestratorState:
+        return self._set_state(OrchestratorState.RUNNING)
 
     def attempt_count(self, signature: str) -> int:
         return self._attempts.get(signature, 0)
@@ -67,32 +77,56 @@ class AutorunOrchestrator:
         if not signature.strip():
             raise ValueError("signature must be non-empty")
 
-        self._state = OrchestratorState.CLASSIFYING
+        self._set_state(OrchestratorState.CLASSIFYING)
         count = self._attempts.get(signature, 0) + 1
         self._attempts[signature] = count
 
         if classification == "EnvironmentBlocked":
-            self._state = OrchestratorState.BLOCKED
-            return self._state
+            return self._set_state(OrchestratorState.BLOCKED)
 
         if count > self._max_attempts:
-            self._state = OrchestratorState.BLOCKED
-            return self._state
+            return self._set_state(OrchestratorState.BLOCKED)
 
         if classification == "MissingQaCapability":
-            self._state = OrchestratorState.PATCHING_QA
-            return self._state
+            return self._set_state(OrchestratorState.PATCHING_QA)
 
         if classification == "ProductDefect":
-            self._state = OrchestratorState.PATCHING_PRODUCT
-            return self._state
+            return self._set_state(OrchestratorState.PATCHING_PRODUCT)
 
         if classification == "InvalidScenario":
             # Scenario-only fixes are not auto-patched in this skeleton.
-            self._state = OrchestratorState.BLOCKED
-            return self._state
+            return self._set_state(OrchestratorState.BLOCKED)
 
         raise ValueError(f"unknown classification: {classification}")
+
+    def begin_compile(self) -> OrchestratorState:
+        if self._state not in {
+            OrchestratorState.PATCHING_QA,
+            OrchestratorState.PATCHING_PRODUCT,
+        }:
+            raise RuntimeError(f"cannot begin compile from state {self._state}")
+        return self._set_state(OrchestratorState.COMPILING)
+
+    def begin_focused_test(self) -> OrchestratorState:
+        if self._state != OrchestratorState.COMPILING:
+            raise RuntimeError(f"cannot begin focused test from state {self._state}")
+        return self._set_state(OrchestratorState.FOCUSED_TEST)
+
+    def complete_focused_test(self, *, passed: bool) -> OrchestratorState:
+        if self._state != OrchestratorState.FOCUSED_TEST:
+            raise RuntimeError(f"cannot complete focused test from state {self._state}")
+        if not passed:
+            return self._set_state(OrchestratorState.FAIL)
+        return self._set_state(OrchestratorState.REGRESSION_TEST)
+
+    def complete_regression_test(self, *, passed: bool) -> OrchestratorState:
+        if self._state != OrchestratorState.REGRESSION_TEST:
+            raise RuntimeError(
+                f"cannot complete regression test from state {self._state}"
+            )
+        if not passed:
+            return self._set_state(OrchestratorState.FAIL)
+        return self._set_state(OrchestratorState.COMMITTING)
 
     def resume_after_patch(self) -> OrchestratorState:
         if self._state not in {
@@ -102,6 +136,19 @@ class AutorunOrchestrator:
             OrchestratorState.RESUMING,
         }:
             raise RuntimeError(f"cannot resume from state {self._state}")
-        self._state = OrchestratorState.RESUMING
-        self._state = OrchestratorState.RUNNING
-        return self._state
+        self._set_state(OrchestratorState.RESUMING)
+        return self._set_state(OrchestratorState.RUNNING)
+
+    def mark_pass(self) -> OrchestratorState:
+        if self._state != OrchestratorState.RUNNING:
+            raise RuntimeError(f"cannot mark PASS from state {self._state}")
+        return self._set_state(OrchestratorState.PASS)
+
+    def mark_fail(self) -> OrchestratorState:
+        if self._state not in {
+            OrchestratorState.RUNNING,
+            OrchestratorState.FOCUSED_TEST,
+            OrchestratorState.REGRESSION_TEST,
+        }:
+            raise RuntimeError(f"cannot mark FAIL from state {self._state}")
+        return self._set_state(OrchestratorState.FAIL)
