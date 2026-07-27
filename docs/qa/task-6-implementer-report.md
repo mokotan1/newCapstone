@@ -39,6 +39,6 @@ Capability IDs added: `preset.before-placement`, `place-bookmark`. Force-solve n
 
 ## Commits
 
-- Product seam SHA: (see `git log` after commit 1)
-- QA SHA: (see `git log` after commit 2)
+- Product seam SHA: `9a0b4e6f` — `fix(studyroom): expose placement seam for QA without changing player path`
+- QA SHA: `3db05b4f` — `feat(qa): add studyroom.mirror place and before-placement preset`
 - Push: not performed (per instructions)
