@@ -185,6 +185,15 @@ namespace Godlotto.QA.SceneAdapters
             return QaSceneSnapshot.Create(SceneName, DateTime.UtcNow, values);
         }
 
+        /// <summary>
+        /// Resolves a Kitchen target id to a pointer-capable <see cref="GameObject"/> for RealInput.
+        /// Delegates to <see cref="KitchenQaTargetResolver"/>; returns <c>null</c> when unresolved.
+        /// </summary>
+        public static GameObject TryResolveTargetGameObject(QaTargetId targetId)
+        {
+            return KitchenQaTargetResolver.TryResolve(targetId);
+        }
+
         public bool TryClick(QaTargetId targetId, out string error)
         {
             KitchenInteractionController controller = ResolveController();
