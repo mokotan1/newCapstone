@@ -6,6 +6,7 @@ __all__ = [
     "catalog",
     "coverage_audit",
     "orchestrate_area",
+    "preflight",
     "progression",
     "schema",
     "verdicts",
