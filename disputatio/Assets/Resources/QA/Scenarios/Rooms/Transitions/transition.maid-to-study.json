@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.maid-to-study",
+  "sourceRegion": "maid-room",
+  "destinationRegion": "study-room",
+  "entryPreset": "maid-room.partial",
+  "prerequisites": [],
+  "lockedAssertions": ["door.study.locked"],
+  "sourceExitContract": [],
+  "destinationEntryContract": ["scene.StudyEntrance"],
+  "checkpointContract": ["resumeRegion.study-room"],
+  "implementationStatus": "PARTIAL"
+}

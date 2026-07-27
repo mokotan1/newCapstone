@@ -48,7 +48,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py, qa/autorun 등)
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
 ├── .github/workflows/   # CI/CD
@@ -74,7 +74,8 @@ newCapstone/
 | `Assets/Scenes/` | **모든 플레이 씬** | 씬 에셋·Flowchart 배치 (로직은 Script에) |
 | `Assets/Editor/Tests/EditMode/` | **EditMode 단위 테스트** | 순수 C# 로직 테스트 |
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
-| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/` | 런타임 `Resources.Load` 대상 |
+| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
+| `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
@@ -309,6 +310,7 @@ flowchart LR
 | `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
 | `MaidRoomPuzzleController` | MaidRoom 클릭 진입 (Phase R3-A, RoomInteractionController 확장) |
 | `StudyRoomPuzzleController` | StudyRoom UI·월드 클릭 (R4-A CardStack/Diary, R4-B Bible/BookCase + LoadScene outcome) |
+| `StudyRoomDiaryMirrorPuzzleController` | BookmarkMirror 드롭 후 위치·각도·반사 판정 → `StudyRoomMirrorPuzzleSuccessRouter`. QA seam: `TrySnapToConfiguredSolutionAndEvaluateForQa` (플레이어 입력 경로 불변; ForceSolve 아님). Adapter: `StudyRoomQaAdapter` (`preset.before-placement`, `place-bookmark` via real `FilterCardBookDropZone.OnDrop`) |
 | `ChildRoomPuzzleController` | ChildRoom 클릭(R5-A), 인장 드롭(R5-B), allSealsComplete(R5-C) |
 | `KitchenInteractionController` | Kitchen 월드(R6-A)·UI(R6-B)·드롭(R6-C) 클릭·패널(R6-D) 조율 |
 | `KitchenPanelRegistry` | Kitchen 버너/프라이팬/앵무 패널 SetActive → Call Method (R6-D) |
@@ -503,6 +505,8 @@ graph TB
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (C#) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
+| QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend) | `.github/workflows/backend-build.yml` |
 | 배포 | `.github/workflows/deploy-backend.yml`, `deploy/docker-compose.prod.yml` |
 | EditMode 테스트 | `disputatio/Assets/Editor/Tests/EditMode/` |

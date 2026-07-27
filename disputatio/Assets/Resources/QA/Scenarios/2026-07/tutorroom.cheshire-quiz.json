@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "tutorroom.cheshire-quiz",
+  "scene": "TutorRoom",
+  "steps": [
+    {
+      "id": "click-quiz-input",
+      "command": "interaction.pointer",
+      "target": "tutorroom.quiz-input",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-ai-idle-or-connected",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "fieldEquals",
+        "field": "AiConnectionState",
+        "value": "Idle",
+        "description": "Gap (Task 12): TutorRoomQaAdapter is a registration-only stub (no TutorRoom controller exists yet), so click-quiz-input is expected to fail explicitly rather than execute a guessed interaction id; this assertion documents the intended AI-service-unavailability-vs-interaction-lock distinction for the follow-up task."
+      }
+    }
+  ]
+}

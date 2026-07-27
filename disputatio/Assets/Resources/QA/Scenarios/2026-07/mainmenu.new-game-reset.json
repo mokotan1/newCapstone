@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "mainmenu.new-game-reset",
+  "scene": "MainMenuScene",
+  "steps": [
+    {
+      "id": "click-start",
+      "command": "interaction.pointer",
+      "target": "mainmenu.start-button",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-input-unlocked",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "inputUnlocked",
+        "description": "The global input gate must not be left locked after MainMenu.OnStartButton() resets progress."
+      }
+    },
+    {
+      "id": "assert-no-console-errors",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "noNewConsoleError",
+        "description": "PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings() must not log new console errors."
+      }
+    },
+    {
+      "id": "capture-post-reset-evidence",
+      "command": "evidence.capture",
+      "timeoutMs": 5000
+    }
+  ]
+}

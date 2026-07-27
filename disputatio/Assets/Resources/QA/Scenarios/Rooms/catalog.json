@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "regions": {
+    "hall": {
+      "areaId": "first-floor",
+      "unityScenes": ["Hall_animate", "Hall_playerble"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Mansion isolation, Cheshire availability, initial quest/input readiness"
+    },
+    "hall.left": {
+      "areaId": "first-floor",
+      "unityScenes": ["Hall_Left", "Hall_Left2", "Hallway_Left", "Hallway_Left2"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Left-side navigation, locked routes, state persistence"
+    },
+    "hall.right": {
+      "areaId": "first-floor",
+      "unityScenes": ["Hall_Right", "Hall_Right2", "Hall_RightCross", "Hallway_Right", "Hallway_Right2"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Right-side navigation, Study/Maid/Prison route gating"
+    },
+    "utility-room": {
+      "areaId": "first-floor",
+      "unityScenes": ["UtilityRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Breaker/light restoration and downstream power-dependent state"
+    },
+    "kitchen": {
+      "areaId": "first-floor",
+      "unityScenes": ["Kitchen"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Bottle/sink flow, burner/food interactions where active, MaidRoom key reward"
+    },
+    "maid-room": {
+      "areaId": "first-floor",
+      "unityScenes": ["MaidEntrance", "MaidRoom"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Entry gating, diary/book/puzzle flow, magnifier/Look-panel behavior, reward state"
+    },
+    "study-room": {
+      "areaId": "first-floor",
+      "unityScenes": ["StudyEntrance", "StudyRoomCutScene", "StudyRoom"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Entry gating, diary mirror puzzle, Bible commentary document, next progression state"
+    },
+    "study-bookcases": {
+      "areaId": "first-floor",
+      "unityScenes": ["BookCase1", "BookCase2", "BookCase2Back", "BookCase3", "BookCase4", "POAnimation"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Detail-view navigation, persistent book state, back/close restoration"
+    },
+    "prison": {
+      "areaId": "first-floor",
+      "unityScenes": ["PrisonEntrance", "Prison", "GoPrisonAnimation"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Entry gating, transition/cutscene handoff, prison progression state"
+    },
+    "second-floor.hall": {
+      "areaId": "second-floor",
+      "unityScenes": [
+        "2floorMainHall",
+        "2floorLeft",
+        "2floorRight",
+        "2floorHallway_Left",
+        "2floorHallway_Right",
+        "2floorLeftCross",
+        "2floorRightCross"
+      ],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Navigation, locked entrances, return position, checkpoint continuity"
+    },
+    "tutor-room": {
+      "areaId": "second-floor",
+      "unityScenes": ["TutorEntrance", "TutorRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Entry gating, Bible quiz, deterministic grading, completion reward"
+    },
+    "child-room": {
+      "areaId": "second-floor",
+      "unityScenes": ["ChildEntrance", "ChildRoom"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Entry gating, seal/drag puzzle, clue and completion state"
+    },
+    "wife-room": {
+      "areaId": "second-floor",
+      "unityScenes": ["WifeEntrance", "WifeRoom", "DressingRoom"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Entry gating, Bible commentary/calendar/Cheshire clue combination, password flow"
+    },
+    "bed-room": {
+      "areaId": "second-floor",
+      "unityScenes": ["BedEntrance", "BedRoom"],
+      "implementationStatus": "PARTIAL",
+      "scenarioResponsibility": "Entry gating, master-bedroom truth sequence, basement progression unlock"
+    },
+    "basement.entry": {
+      "areaId": "basement",
+      "unityScenes": ["Basement"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Basement availability, initial state, checkpoint handoff"
+    },
+    "basement.hall": {
+      "areaId": "basement",
+      "unityScenes": ["BasementHallway"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Navigation and room gating"
+    },
+    "basement.extraction": {
+      "areaId": "basement",
+      "unityScenes": ["BasementExtractionRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Extraction experiment clues and progression state"
+    },
+    "basement.observation": {
+      "areaId": "basement",
+      "unityScenes": ["BasementObservationRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Observation clues and cross-room state"
+    },
+    "basement.brick": {
+      "areaId": "basement",
+      "unityScenes": ["BasementBrickRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Brick-room puzzle or clue state"
+    },
+    "basement.research": {
+      "areaId": "basement",
+      "unityScenes": ["BasementResearchRoom"],
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "scenarioResponsibility": "Research/laboratory truth, final-item preparation, final handoff"
+    }
+  }
+}

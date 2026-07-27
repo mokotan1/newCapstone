@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "room.wife-room.happy-path",
+  "roomId": "wife-room",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "wiferoom.wallclock.click",
+    "wiferoom.wallclock.probe",
+    "wiferoom.wallclock.assert-controller",
+    "wiferoom.wallclock.capture"
+  ],
+  "steps": [
+    {
+      "id": "click-wallclock",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.click"
+    },
+    {
+      "id": "probe-wallclock",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.probe"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.assert-controller"
+    },
+    {
+      "id": "capture-wallclock",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

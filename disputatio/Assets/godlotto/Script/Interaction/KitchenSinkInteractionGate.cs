@@ -34,8 +34,23 @@ namespace Godlotto.Interaction
             if (state != null && state.HasBottle)
                 return true;
 
-            return InventorySlot.draggedItem != null
-                && InventorySlot.draggedItem.itemName == "Bottle";
+            if (InventorySlot.draggedItem != null
+                && InventorySlot.draggedItem.itemName == "Bottle")
+                return true;
+
+            InventoryManager inventory = InventoryManager.Instance
+                ?? UnityEngine.Object.FindFirstObjectByType<InventoryManager>();
+            if (inventory == null || inventory.Items == null)
+                return false;
+
+            for (int i = 0; i < inventory.Items.Count; i++)
+            {
+                Item item = inventory.Items[i];
+                if (item != null && item.itemName == "Bottle")
+                    return true;
+            }
+
+            return false;
         }
     }
 }

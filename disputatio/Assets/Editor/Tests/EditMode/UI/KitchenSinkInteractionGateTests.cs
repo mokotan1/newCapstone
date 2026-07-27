@@ -37,6 +37,32 @@ public class KitchenSinkInteractionGateTests
     }
 
     [Test]
+    public void ShouldExecuteFungusBlock_BottleDrag_AllowsWhenBottleInInventoryEvenIfHasBottleFlagStale()
+    {
+        InventorySlot.draggedItem = null;
+        state.SetSinkFlagsForTests(hasBottle: false, bottleClicked: false, faucetClicked: false, bottleDragged: false);
+
+        var inventoryObject = new GameObject("InventoryManagerGateTest");
+        var inventory = inventoryObject.AddComponent<InventoryManager>();
+        var bottle = ScriptableObject.CreateInstance<Item>();
+        bottle.itemId = 1;
+        bottle.itemName = "Bottle";
+        inventory.AddItem(bottle);
+
+        try
+        {
+            Assert.IsTrue(
+                KitchenSinkInteractionGate.ShouldExecuteFungusBlock("bottle_drag", state),
+                "Bottle in InventoryManager must satisfy bottle_drag gate (same as HasBottle/draggedItem).");
+        }
+        finally
+        {
+            Object.DestroyImmediate(bottle);
+            Object.DestroyImmediate(inventoryObject);
+        }
+    }
+
+    [Test]
     public void ShouldExecuteFungusBlock_BottleDrag_AllowsWhenDraggedBottleEvenIfHasBottleFlagStale()
     {
         var bottle = ScriptableObject.CreateInstance<Item>();

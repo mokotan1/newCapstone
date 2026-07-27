@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "roomId": "second-floor.hall",
+  "areaId": "second-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": [
+    "2floorMainHall",
+    "2floorLeft",
+    "2floorRight",
+    "2floorHallway_Left",
+    "2floorHallway_Right",
+    "2floorLeftCross",
+    "2floorRightCross"
+  ],
+  "implementationStatus": "NOT_IMPLEMENTED",
+  "entryPreset": "second-floor.hall.stub",
+  "requiredCapabilities": [],
+  "scenarios": [
+    "room.second-floor.hall.smoke",
+    "room.second-floor.hall.happy-path",
+    "room.second-floor.hall.guard.wrong-item",
+    "room.second-floor.hall.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "roomId": "prison",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["PrisonEntrance", "Prison", "GoPrisonAnimation"],
+  "implementationStatus": "NOT_IMPLEMENTED",
+  "entryPreset": "prison.stub",
+  "requiredCapabilities": [],
+  "scenarios": [
+    "room.prison.smoke",
+    "room.prison.happy-path",
+    "room.prison.guard.wrong-item",
+    "room.prison.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}
