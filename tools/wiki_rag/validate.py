@@ -1,0 +1,402 @@
+"""Validate manifest coverage, transcript quality, and encoding."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import re
+import sys
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+from urllib.parse import unquote, urlparse
+
+import yaml
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from wiki_rag.models import SourceRecord
+else:
+    from .models import SourceRecord
+
+_MIN_EXTRACTED_TEXT_CHARS = 40
+_OWNER_SKIP_SOURCE_TYPES = frozenset({"hwp"})
+_INTERNAL_LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+_REQUIRED_FRONT_MATTER_KEYS = frozenset(
+    {
+        "source_id",
+        "source_path",
+        "source_sha256",
+        "source_type",
+        "category",
+        "status",
+        "rag_eligible",
+    }
+)
+
+
+@dataclass(frozen=True)
+class ValidationReport:
+    """Aggregate validation outcome for one manifest or transcript."""
+
+    error_codes: frozenset[str]
+    rows: tuple[dict[str, Any], ...] = ()
+    warnings: tuple[str, ...] = ()
+
+    @property
+    def ok(self) -> bool:
+        return not self.error_codes
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for block in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _resolve_inside(repo_root: Path, relative_path: str) -> Path:
+    if Path(relative_path).is_absolute():
+        raise ValueError(f"path must be relative: {relative_path}")
+    resolved = (repo_root / Path(relative_path)).resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError as error:
+        raise ValueError(f"path escapes repository: {relative_path}") from error
+    return resolved
+
+
+def _parse_front_matter(content: str) -> tuple[dict[str, Any], str]:
+    if not content.startswith("---"):
+        return {}, content
+    lines = content.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return {}, content
+    end_index: int | None = None
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            end_index = index
+            break
+    if end_index is None:
+        return {}, content
+    yaml_text = "".join(lines[1:end_index])
+    body = "".join(lines[end_index + 1 :])
+    parsed = yaml.safe_load(yaml_text)
+    if not isinstance(parsed, dict):
+        return {}, body
+    return parsed, body
+
+
+def _meaningful_text_length(body: str) -> int:
+    return sum(1 for character in body if not character.isspace())
+
+
+def _is_internal_link_target(target: str) -> bool:
+    stripped = target.strip()
+    if not stripped or stripped.startswith("#"):
+        return False
+    parsed = urlparse(stripped)
+    return parsed.scheme in {"", "file"} and not stripped.startswith("//")
+
+
+def _resolve_internal_link(
+    target: str,
+    *,
+    repo_root: Path,
+    source_path: Path | None = None,
+    transcript_path: Path | None = None,
+) -> Path | None:
+    stripped = target.strip()
+    parsed = urlparse(stripped)
+    link_path = unquote(parsed.path)
+    if parsed.scheme == "file":
+        candidate = Path(link_path)
+    elif link_path.startswith("/"):
+        candidate = repo_root / link_path.lstrip("/")
+    elif source_path is not None:
+        candidate = (source_path.parent / link_path).resolve()
+    elif transcript_path is not None:
+        candidate = (transcript_path.parent / link_path).resolve()
+    else:
+        return None
+    if candidate.is_file():
+        return candidate
+    return None
+
+
+def _collect_transcript_errors(
+    transcript_path: Path,
+    *,
+    repo_root: Path | None = None,
+    manifest_record: Mapping[str, Any] | None = None,
+) -> tuple[set[str], list[str]]:
+    errors: set[str] = set()
+    warnings: list[str] = []
+
+    if not transcript_path.is_file():
+        errors.add("missing_transcript")
+        return errors, warnings
+
+    raw_bytes = transcript_path.read_bytes()
+    try:
+        content = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        errors.add("invalid_utf8")
+        return errors, warnings
+
+    metadata, body = _parse_front_matter(content)
+    missing_keys = _REQUIRED_FRONT_MATTER_KEYS.difference(metadata)
+    if missing_keys:
+        errors.add("invalid_front_matter")
+
+    status = str(metadata.get("status", ""))
+    rag_eligible = metadata.get("rag_eligible") is True
+    content_kind = ""
+    if manifest_record is not None:
+        content_kind = str(manifest_record.get("content_kind", "")).casefold()
+
+    if "\ufffd" in body and rag_eligible:
+        errors.add("unicode_replacement_character")
+
+    if status == "extracted" and content_kind != "visual_only":
+        if _meaningful_text_length(body) < _MIN_EXTRACTED_TEXT_CHARS:
+            errors.add("insufficient_text")
+
+    if rag_eligible and status in {"extracted", "needs_review"}:
+        if _meaningful_text_length(body) == 0:
+            errors.add("missing_meaningful_text")
+
+    resolved_repo_root = repo_root
+    source_file: Path | None = None
+    if manifest_record is not None:
+        source_path_value = str(manifest_record.get("source_path", ""))
+        if source_path_value and resolved_repo_root is not None:
+            candidate = resolved_repo_root / Path(source_path_value)
+            if candidate.is_file():
+                source_file = candidate.resolve()
+
+    if resolved_repo_root is not None:
+        for match in _INTERNAL_LINK_PATTERN.finditer(body):
+            target = match.group(1)
+            if not _is_internal_link_target(target):
+                continue
+            if _resolve_internal_link(
+                target,
+                repo_root=resolved_repo_root,
+                source_path=source_file,
+                transcript_path=transcript_path,
+            ) is None:
+                errors.add("unresolved_internal_link")
+                break
+
+    return errors, warnings
+
+
+def validate_transcript(
+    transcript_path: Path,
+    *,
+    repo_root: Path | None = None,
+    manifest_record: Mapping[str, Any] | None = None,
+) -> ValidationReport:
+    """Validate one transcript file."""
+
+    errors, warnings = _collect_transcript_errors(
+        transcript_path,
+        repo_root=repo_root,
+        manifest_record=manifest_record,
+    )
+    return ValidationReport(
+        error_codes=frozenset(errors),
+        warnings=tuple(warnings),
+    )
+
+
+def _record_from_mapping(source: Mapping[str, Any]) -> SourceRecord:
+    return SourceRecord(
+        source_id=str(source["source_id"]),
+        source_path=str(source["source_path"]),
+        source_sha256=str(source["source_sha256"]),
+        source_type=str(source["source_type"]),
+        category=str(source["category"]),
+        title=str(source.get("title", "")),
+        transcript_path=str(source["transcript_path"]),
+        status=str(source["status"]),
+        rag_eligible=bool(source["rag_eligible"]),
+        canonical_group=str(source["canonical_group"]),
+    )
+
+
+def validate_manifest(
+    manifest_path: Path,
+    repo_root: Path,
+    *,
+    owner_skip_types: frozenset[str] = _OWNER_SKIP_SOURCE_TYPES,
+) -> ValidationReport:
+    """Validate every manifest record against its original and transcript."""
+
+    resolved_root = repo_root.resolve()
+    manifest_data = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(manifest_data, dict):
+        raise TypeError("manifest root must be a mapping")
+    sources = manifest_data.get("sources")
+    if not isinstance(sources, list):
+        raise TypeError("manifest sources must be a list")
+
+    errors: set[str] = set()
+    warnings: list[str] = []
+    rows: list[dict[str, Any]] = []
+
+    for source in sources:
+        if not isinstance(source, dict):
+            raise TypeError("manifest source entries must be mappings")
+
+        record = _record_from_mapping(source)
+        source_type = record.source_type.casefold()
+        skip_reason: str | None = None
+        row_warnings = [
+            str(item) for item in source.get("warnings", []) if item is not None
+        ]
+
+        if source_type in owner_skip_types and record.status == "pending":
+            skip_reason = "skipped_by_owner"
+            rows.append(
+                {
+                    "source_path": record.source_path,
+                    "source_type": record.source_type,
+                    "transcript_path": record.transcript_path,
+                    "status": record.status,
+                    "warnings": row_warnings,
+                    "rag_eligible": record.rag_eligible,
+                    "canonical_group": record.canonical_group,
+                    "skip_reason": skip_reason,
+                }
+            )
+            continue
+
+        source_path = _resolve_inside(resolved_root, record.source_path)
+        transcript_path = _resolve_inside(resolved_root, record.transcript_path)
+
+        if not source_path.is_file():
+            errors.add("missing_source")
+        elif _sha256(source_path) != record.source_sha256:
+            errors.add("source_hash_changed")
+
+        if record.status == "pending":
+            errors.add("unconverted_in_scope")
+
+        transcript_report = validate_transcript(
+            transcript_path,
+            repo_root=resolved_root,
+            manifest_record=source,
+        )
+        errors.update(transcript_report.error_codes)
+        warnings.extend(transcript_report.warnings)
+
+        rows.append(
+            {
+                "source_path": record.source_path,
+                "source_type": record.source_type,
+                "transcript_path": record.transcript_path,
+                "status": record.status,
+                "warnings": row_warnings,
+                "rag_eligible": record.rag_eligible,
+                "canonical_group": record.canonical_group,
+                "skip_reason": skip_reason,
+            }
+        )
+
+    return ValidationReport(
+        error_codes=frozenset(errors),
+        rows=tuple(rows),
+        warnings=tuple(warnings),
+    )
+
+
+def render_coverage_report(report: ValidationReport) -> str:
+    """Render a human-readable coverage report."""
+
+    lines = [
+        "# Project Knowledge Coverage Report",
+        "",
+        f"- Validation status: {'PASS' if report.ok else 'FAIL'}",
+        f"- Error codes: {', '.join(sorted(report.error_codes)) or '(none)'}",
+        "",
+        "| Source path | Type | Transcript | Status | Warnings | RAG | Canonical group | Notes |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for row in report.rows:
+        warning_text = "; ".join(row.get("warnings", [])) or "-"
+        notes = row.get("skip_reason") or "-"
+        lines.append(
+            "| {source_path} | {source_type} | {transcript_path} | {status} | "
+            "{warnings} | {rag_eligible} | {canonical_group} | {notes} |".format(
+                source_path=row["source_path"],
+                source_type=row["source_type"],
+                transcript_path=row["transcript_path"],
+                status=row["status"],
+                warnings=warning_text.replace("|", "\\|"),
+                rag_eligible="yes" if row.get("rag_eligible") else "no",
+                canonical_group=row["canonical_group"],
+                notes=notes,
+            )
+        )
+    return "\n".join(lines) + "\n"
+
+
+def write_coverage_report(report: ValidationReport, output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(
+        render_coverage_report(report),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
+def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate project knowledge conversion coverage."
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path("."),
+        help="Repository root containing knowledge source folders.",
+    )
+    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument(
+        "--write-report",
+        type=Path,
+        help="Repository-relative or absolute coverage report output path.",
+    )
+    return parser.parse_args(arguments)
+
+
+def main(arguments: Sequence[str] | None = None) -> int:
+    """Run manifest validation and optionally write a coverage report."""
+
+    args = _parse_args(arguments)
+    repo_root = args.repo_root.resolve()
+    manifest_path = args.manifest
+    if not manifest_path.is_absolute():
+        manifest_path = repo_root / manifest_path
+
+    report = validate_manifest(manifest_path, repo_root)
+    if args.write_report is not None:
+        output_path = args.write_report
+        if not output_path.is_absolute():
+            output_path = repo_root / output_path
+        write_coverage_report(report, output_path)
+
+    if report.ok:
+        print(f"Validation passed for {len(report.rows)} manifest records.")
+        return 0
+
+    joined = ", ".join(sorted(report.error_codes))
+    print(f"Validation failed: {joined}", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

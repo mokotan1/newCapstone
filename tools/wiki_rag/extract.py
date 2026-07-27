@@ -17,21 +17,27 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from wiki_rag.extractors import ExtractionResult
+    from wiki_rag.extractors.md import extract_md
     from wiki_rag.extractors.pdf import extract_pdf
     from wiki_rag.extractors.pptx import extract_pptx
+    from wiki_rag.extractors.txt import extract_txt
     from wiki_rag.models import SourceRecord
     from wiki_rag.normalize import normalize_transcript
 else:
     from .extractors import ExtractionResult
+    from .extractors.md import extract_md
     from .extractors.pdf import extract_pdf
     from .extractors.pptx import extract_pptx
+    from .extractors.txt import extract_txt
     from .models import SourceRecord
     from .normalize import normalize_transcript
 
 Extractor = Callable[[Path], ExtractionResult]
 EXTRACTORS: Mapping[str, Extractor] = {
+    "md": extract_md,
     "pdf": extract_pdf,
     "pptx": extract_pptx,
+    "txt": extract_txt,
 }
 _SOURCE_FIELDS = frozenset(field.name for field in fields(SourceRecord))
 
@@ -199,7 +205,7 @@ def convert_manifest(
 
 def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Extract PDF and PPTX manifest sources to Markdown."
+        description="Extract manifest sources to provenance-preserving Markdown."
     )
     parser.add_argument(
         "--repo-root",
@@ -211,7 +217,7 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--types",
         required=True,
-        help="Comma-separated source types (pdf,pptx).",
+        help="Comma-separated source types (pdf,pptx,md,txt).",
     )
     return parser.parse_args(arguments)
 
