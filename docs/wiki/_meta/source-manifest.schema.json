@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "source-manifest.schema.json",
+  "title": "Project Wiki Source Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "inputs",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roots",
+        "root_sources",
+        "technical_sources",
+        "included_extensions",
+        "exclusions"
+      ],
+      "properties": {
+        "roots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "root_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "technical_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "included_extensions": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "hwp",
+              "md",
+              "pdf",
+              "pptx",
+              "txt"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_path",
+        "source_sha256",
+        "source_type",
+        "category",
+        "title",
+        "transcript_path",
+        "status",
+        "rag_eligible",
+        "canonical_group"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^(scenario|planning|report|technical):[0-9a-f]{12}$"
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_type": {
+          "enum": [
+            "hwp",
+            "md",
+            "pdf",
+            "pptx",
+            "txt"
+          ]
+        },
+        "category": {
+          "enum": [
+            "scenario",
+            "planning",
+            "report",
+            "technical"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "transcript_path": {
+          "type": "string",
+          "pattern": "^docs/wiki/sources/(scenario|planning|report|technical)/.+--[0-9a-f]{12}\\.md$"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rag_eligible": {
+          "type": "boolean"
+        },
+        "canonical_group": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
