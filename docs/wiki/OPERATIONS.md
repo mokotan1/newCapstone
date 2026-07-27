@@ -60,3 +60,39 @@ HWP originals are **owner-skipped** and outside conversion scope.
 Pending HWP manifest rows remain for inventory traceability but do not
 appear on Home or in the RAG corpus until explicitly converted through
 a supported path.
+
+## CI and release automation
+
+Pull requests that touch in-scope originals, `docs/wiki/**`,
+`tools/wiki_rag/**`, or backend RAG integration files run the offline
+**Wiki RAG Validation** workflow (`.github/workflows/wiki-rag.yml`):
+
+1. manifest, transcript, link, encoding, and RAG corpus validation,
+2. `pytest tools/tests/test_wiki_rag_*.py`,
+3. RAG corpus rebuild plus re-validation,
+4. `backend_ai` pytest (dummy API keys only),
+5. `python backend_ai/scripts/build_tutor_rag_index.py --dry-run` (no
+   production embedding API calls).
+
+PR CI never requires or prints a production `GOOGLE_API_KEY`.
+
+### Release embedding build
+
+Production embeddings run only from a **manual** `workflow_dispatch` on
+`wiki-rag.yml` with `build_embeddings: true`, inside the protected
+`wiki-rag-release` GitHub Environment. That job supplies a masked
+`GOOGLE_API_KEY` secret, rebuilds `backend_ai/data/tutor_rag_index.json`,
+and fails if chunk counts drift without a manifest change.
+
+### Local release-equivalent checks (offline)
+
+```powershell
+python tools/wiki_rag/validate.py --repo-root . --manifest docs/wiki/_meta/source-manifest.yaml --rag-dir docs/wiki/rag
+pytest tools/tests/test_wiki_rag_*.py -q --basetemp=.pytest_tmp
+cd backend_ai
+pytest tests -q --basetemp=../.pytest_tmp
+python scripts/build_tutor_rag_index.py --dry-run
+```
+
+Use the full pipeline order above when refreshing transcripts, wiki
+pages, or corpus files locally before opening a PR.

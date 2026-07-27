@@ -2,6 +2,11 @@
 
 캡스톤용 저장소입니다. **2D Unity 게임 클라이언트**와 **AI 대화용 HTTP 백엔드**로 구성되어 있습니다.
 
+## Project wiki
+
+- **[docs/wiki/Home.md](docs/wiki/Home.md)** — curated project knowledge index
+- **[docs/wiki/OPERATIONS.md](docs/wiki/OPERATIONS.md)** — inventory, validation, RAG, and CI runbook
+
 ## 구성
 
 ```

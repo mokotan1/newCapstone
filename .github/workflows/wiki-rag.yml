@@ -1,0 +1,230 @@
+name: Wiki RAG Validation
+
+on:
+  pull_request:
+    paths:
+      - "시나리오/**"
+      - "기획서/**"
+      - "보고서/**"
+      - "미니게임_구현_리포트.md"
+      - "report.pdf"
+      - "docs/wiki/**"
+      - "docs/architecture.md"
+      - "docs/fungus-migration-audit.md"
+      - "docs/fungus-room-migration-plan.md"
+      - "docs/glass-choice-menu-usage.md"
+      - "docs/play-log-analysis.md"
+      - "docs/play-log-pipeline.md"
+      - "docs/play-log-sheets-upload.md"
+      - "docs/qa/**"
+      - "docs/quest-tracker-manual-verification.md"
+      - "docs/security/**"
+      - "tools/wiki_rag/**"
+      - "tools/tests/test_wiki_rag_*.py"
+      - "tools/requirements-wiki-rag.txt"
+      - "backend_ai/config.py"
+      - "backend_ai/scripts/build_tutor_rag_index.py"
+      - "backend_ai/services/tutor_rag_service.py"
+      - "backend_ai/services/chat_service.py"
+      - "backend_ai/models/requests.py"
+      - "backend_ai/tests/test_project_rag*.py"
+      - "backend_ai/tests/test_tutor_rag*.py"
+      - "backend_ai/data/tutor_rag_index.json"
+      - ".github/workflows/wiki-rag.yml"
+  push:
+    branches: ["main", "develop"]
+    paths:
+      - "시나리오/**"
+      - "기획서/**"
+      - "보고서/**"
+      - "docs/wiki/**"
+      - "tools/wiki_rag/**"
+      - "backend_ai/scripts/build_tutor_rag_index.py"
+      - "backend_ai/services/tutor_rag_service.py"
+      - "backend_ai/data/tutor_rag_index.json"
+      - ".github/workflows/wiki-rag.yml"
+  workflow_dispatch:
+    inputs:
+      build_embeddings:
+        description: Build production embedding index (requires release environment)
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wiki-rag-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.10"
+  MANIFEST_PATH: docs/wiki/_meta/source-manifest.yaml
+  RAG_DIR: docs/wiki/rag
+  INDEX_PATH: backend_ai/data/tutor_rag_index.json
+
+jobs:
+  validate-knowledge:
+    name: Validate wiki knowledge (offline)
+    runs-on: ubuntu-latest
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, '[ci skip]')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            tools/requirements-wiki-rag.txt
+            backend_ai/requirements.txt
+
+      - name: Install wiki RAG tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-wiki-rag.txt pytest
+
+      - name: Validate manifest and committed RAG corpus
+        run: |
+          python tools/wiki_rag/validate.py \
+            --repo-root . \
+            --manifest "${{ env.MANIFEST_PATH }}" \
+            --rag-dir "${{ env.RAG_DIR }}"
+
+      - name: Run wiki RAG pytest suite
+        run: pytest tools/tests/test_wiki_rag_*.py -q --basetemp=.pytest_tmp
+
+      - name: Rebuild RAG corpus and re-validate
+        run: |
+          python tools/wiki_rag/build_rag_corpus.py \
+            --repo-root . \
+            --manifest "${{ env.MANIFEST_PATH }}" \
+            --output-dir "${{ env.RAG_DIR }}"
+          python tools/wiki_rag/validate.py \
+            --repo-root . \
+            --manifest "${{ env.MANIFEST_PATH }}" \
+            --rag-dir "${{ env.RAG_DIR }}"
+
+      - name: Install backend dependencies
+        working-directory: backend_ai
+        run: pip install -r requirements.txt
+
+      - name: Run backend pytest (offline)
+        working-directory: backend_ai
+        env:
+          GROQ_API_KEY: dummy
+          GOOGLE_API_KEY: dummy
+        run: pytest tests -q --basetemp=../.pytest_tmp
+
+      - name: Dry-run embedding index build (no API key)
+        working-directory: backend_ai
+        env:
+          GOOGLE_API_KEY: ""
+        run: python scripts/build_tutor_rag_index.py --dry-run
+
+  build-embeddings:
+    name: Build embedding index (release)
+    runs-on: ubuntu-latest
+    needs: validate-knowledge
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.build_embeddings == 'true'
+    environment: wiki-rag-release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            tools/requirements-wiki-rag.txt
+            backend_ai/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/requirements-wiki-rag.txt
+          pip install -r backend_ai/requirements.txt
+
+      - name: Capture pre-build index metadata
+        id: before
+        run: |
+          MANIFEST_HASH=$(sha256sum "${{ env.MANIFEST_PATH }}" | awk '{print $1}')
+          echo "manifest_hash=$MANIFEST_HASH" >> "$GITHUB_OUTPUT"
+          BEFORE_CHUNKS=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          payload = json.loads(Path("${{ env.INDEX_PATH }}").read_text(encoding="utf-8"))
+          print(len(payload.get("chunks") or []))
+          PY
+          )
+          echo "before_chunks=$BEFORE_CHUNKS" >> "$GITHUB_OUTPUT"
+          cd backend_ai
+          python scripts/build_tutor_rag_index.py --dry-run | tee /tmp/dry-run.txt
+          EXPECTED_CHUNKS=$(grep -E '^Chunks:' /tmp/dry-run.txt | awk '{print $2}')
+          echo "expected_chunks=$EXPECTED_CHUNKS" >> "$GITHUB_OUTPUT"
+
+      - name: Build embedding index
+        working-directory: backend_ai
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          if [ -z "${GOOGLE_API_KEY:-}" ]; then
+            echo "::error::GOOGLE_API_KEY is required in the wiki-rag-release environment."
+            exit 1
+          fi
+          python scripts/build_tutor_rag_index.py
+
+      - name: Guard against unexpected index drift
+        working-directory: backend_ai
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import sys
+          from pathlib import Path
+
+          manifest_path = Path("../docs/wiki/_meta/source-manifest.yaml")
+          index_path = Path("data/tutor_rag_index.json")
+          manifest_hash = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          before_manifest = "${{ steps.before.outputs.manifest_hash }}"
+          before_chunks = int("${{ steps.before.outputs.before_chunks }}")
+          expected_chunks = int("${{ steps.before.outputs.expected_chunks }}")
+
+          payload = json.loads(index_path.read_text(encoding="utf-8"))
+          chunks = payload.get("chunks") or []
+          if len(chunks) != expected_chunks:
+              print(
+                  f"::error::Chunk count mismatch after build: expected {expected_chunks}, got {len(chunks)}",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          if manifest_hash == before_manifest and before_chunks > 0 and len(chunks) != before_chunks:
+              print(
+                  "::error::Embedding index changed without a manifest update. "
+                  "Refresh docs/wiki/_meta/source-manifest.yaml or approve an intentional re-index.",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+          PY
+
+      - name: Upload embedding index artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tutor-rag-index-${{ github.sha }}
+          path: backend_ai/data/tutor_rag_index.json
+          retention-days: 14
