@@ -59,10 +59,12 @@ class TutorRAGService:
         *,
         api_key: str,
         embedding_model: str,
+        min_similarity: float = 0.0,
     ) -> None:
         self._index_path = index_path
         self._api_key = api_key
         self._embedding_model = embedding_model
+        self._min_similarity = min_similarity
         self._chunks: list[dict[str, Any]] = []
         self._load_index()
 
@@ -128,6 +130,19 @@ class TutorRAGService:
                 return ko_matched
         return []
 
+    @staticmethod
+    def _format_citation_line(
+        rank: int,
+        *,
+        source_id: str,
+        source_path: str,
+        score: float,
+    ) -> str:
+        return (
+            f"--- [{rank}] source_id={source_id}, "
+            f"source_path={source_path}, score={score:.3f}"
+        )
+
     def build_context_block(
         self,
         query_text: str,
@@ -135,6 +150,7 @@ class TutorRAGService:
         top_k: int,
         max_context_chars: int,
         locale: str = "ko",
+        min_similarity: float | None = None,
     ) -> str:
         pool = self._chunks_for_locale(locale)
         if not pool:
@@ -144,33 +160,48 @@ class TutorRAGService:
         if query_vec is None:
             return ""
 
+        threshold = self._min_similarity if min_similarity is None else min_similarity
+
         scored: list[tuple[float, dict[str, Any]]] = []
         for ch in pool:
             emb = ch.get("embedding")
             if not isinstance(emb, list):
                 continue
             sim = _cosine_similarity(query_vec, emb)
-            scored.append((sim, ch))
+            if sim >= threshold:
+                scored.append((sim, ch))
+
+        if not scored:
+            return ""
 
         scored.sort(key=lambda x: x[0], reverse=True)
         picked = scored[:top_k]
 
         header = _CONTEXT_BLOCK_HEADERS[normalize_locale(locale)]
         lines: list[str] = [header]
-        total = 0
+        total = len(header)
         for rank, (sim, ch) in enumerate(picked, start=1):
-            cid = ch.get("id", f"chunk_{rank}")
             body = (ch.get("text") or "").strip()
             if not body:
                 continue
-            piece = f"--- [{rank}] (id={cid}, score={sim:.3f})\n{body}"
-            if total + len(piece) > max_context_chars:
-                remain = max_context_chars - total - 50
+            source_id = str(ch.get("source_id") or ch.get("id") or f"chunk_{rank}")
+            source_path = str(ch.get("source_path") or "unknown")
+            citation = self._format_citation_line(
+                rank,
+                source_id=source_id,
+                source_path=source_path,
+                score=sim,
+            )
+            piece = f"{citation}\n{body}"
+            if total + len(piece) + 2 > max_context_chars:
+                remain = max_context_chars - total - len(citation) - 20
                 if remain > 80:
-                    piece = f"--- [{rank}] (id={cid})\n{_truncate_block(body, remain)}"
+                    piece = f"{citation}\n{_truncate_block(body, remain)}"
                 else:
                     break
             lines.append(piece)
-            total += len(piece)
+            total += len(piece) + 2
 
+        if len(lines) == 1:
+            return ""
         return "\n\n".join(lines)
