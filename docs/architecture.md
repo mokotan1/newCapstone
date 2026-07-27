@@ -48,7 +48,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py, qa/autorun 등)
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
 ├── .github/workflows/   # CI/CD
@@ -502,6 +502,8 @@ graph TB
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (C#) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
+| QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend) | `.github/workflows/backend-build.yml` |
 | 배포 | `.github/workflows/deploy-backend.yml`, `deploy/docker-compose.prod.yml` |
 | EditMode 테스트 | `disputatio/Assets/Editor/Tests/EditMode/` |
