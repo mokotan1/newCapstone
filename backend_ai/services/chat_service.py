@@ -134,7 +134,8 @@ class ChatService:
                 rag_profile=profile,
             )
             if rag.strip():
-                docs.append(("tutor_rag", rag))
+                doc_label = "project_rag" if profile == "project" else "tutor_rag"
+                docs.append((doc_label, rag))
 
         if profile != "tutor":
             return docs

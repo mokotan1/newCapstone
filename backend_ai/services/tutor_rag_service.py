@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+from models.requests import RagProfile
 from services.locale_support import normalize_locale
 
 logger = logging.getLogger(__name__)
@@ -167,7 +168,7 @@ class TutorRAGService:
         max_context_chars: int,
         locale: str = "ko",
         min_similarity: float | None = None,
-        rag_profile: str = "tutor",
+        rag_profile: RagProfile = "tutor",
     ) -> str:
         pool = self._chunks_for_locale(locale)
         if not pool:
@@ -197,8 +198,12 @@ class TutorRAGService:
         loc = normalize_locale(locale)
         if rag_profile == "project":
             header = _PROJECT_CONTEXT_BLOCK_HEADERS[loc]
-        else:
+        elif rag_profile == "tutor":
             header = _TUTOR_CONTEXT_BLOCK_HEADERS[loc]
+        else:
+            raise ValueError(
+                f"rag_profile must be 'tutor' or 'project', got {rag_profile!r}",
+            )
         lines: list[str] = [header]
         total = len(header)
         for rank, (sim, ch) in enumerate(picked, start=1):
