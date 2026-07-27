@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from wiki_rag.validate import validate_manifest, validate_transcript
+from wiki_rag.build_rag_corpus import build_rag_corpus, rag_output_filename
+from wiki_rag.validate import validate_manifest, validate_rag_corpus, validate_transcript
 
 
 def write_source(repo_root: Path, relative_path: str, content: bytes) -> None:
@@ -246,4 +247,111 @@ def test_validation_rejects_extracted_status_with_insufficient_text(
     report = validate_transcript(transcript)
 
     assert "insufficient_text" in report.error_codes
+    assert not report.ok
+
+
+def _rag_eligible_scenario_record(
+    repo_root: Path,
+    *,
+    source_id: str = "scenario:abc123",
+    body: str = "# Scenario body with enough non-whitespace characters for RAG.",
+) -> dict[str, object]:
+    content = body.encode("utf-8")
+    write_source(repo_root, "시나리오/story.md", content)
+    source_sha256 = hashlib.sha256(content).hexdigest()
+    transcript_path = f"docs/wiki/sources/scenario/story--{source_sha256[:12]}.md"
+    record: dict[str, object] = {
+        "source_id": source_id,
+        "source_path": "시나리오/story.md",
+        "source_sha256": source_sha256,
+        "source_type": "md",
+        "category": "scenario",
+        "title": "story",
+        "transcript_path": transcript_path,
+        "status": "extracted",
+        "rag_eligible": True,
+        "canonical_group": "scenario:story",
+    }
+    transcript = repo_root / transcript_path
+    transcript.parent.mkdir(parents=True, exist_ok=True)
+    transcript.write_text(
+        "\n".join(
+            (
+                "---",
+                f"source_id: {source_id}",
+                "source_path: 시나리오/story.md",
+                f"source_sha256: {source_sha256}",
+                "source_type: md",
+                "category: scenario",
+                "title: story",
+                "status: extracted",
+                "rag_eligible: true",
+                "---",
+                "",
+                body,
+            )
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    return record
+
+
+def test_validate_rag_corpus_passes_for_built_corpus(tmp_path: Path) -> None:
+    record = _rag_eligible_scenario_record(tmp_path)
+    manifest_path = write_manifest(tmp_path, [record])
+    rag_dir = tmp_path / "docs/wiki/rag"
+    build_rag_corpus(manifest_path, output_dir=rag_dir, repo_root=tmp_path)
+
+    report = validate_rag_corpus(manifest_path, tmp_path, rag_dir)
+
+    assert report.ok
+    assert not report.error_codes
+
+
+def test_validate_rag_corpus_detects_missing_rag_document(tmp_path: Path) -> None:
+    record = _rag_eligible_scenario_record(tmp_path)
+    manifest_path = write_manifest(tmp_path, [record])
+    rag_dir = tmp_path / "docs/wiki/rag"
+    build_rag_corpus(manifest_path, output_dir=rag_dir, repo_root=tmp_path)
+    (rag_dir / rag_output_filename(str(record["source_id"]))).unlink()
+
+    report = validate_rag_corpus(manifest_path, tmp_path, rag_dir)
+
+    assert "missing_rag_document" in report.error_codes
+    assert not report.ok
+
+
+def test_validate_rag_corpus_detects_unexpected_rag_document(
+    tmp_path: Path,
+) -> None:
+    record = _rag_eligible_scenario_record(tmp_path)
+    manifest_path = write_manifest(tmp_path, [record])
+    rag_dir = tmp_path / "docs/wiki/rag"
+    build_rag_corpus(manifest_path, output_dir=rag_dir, repo_root=tmp_path)
+    stale_path = rag_dir / "scenario-stale000000.md"
+    stale_path.write_text(
+        "\n".join(
+            (
+                "---",
+                "source_id: scenario:stale000000",
+                "source_path: 시나리오/stale.md",
+                "source_sha256: deadbeef",
+                "source_type: md",
+                "category: scenario",
+                "title: stale",
+                "status: extracted",
+                "rag_eligible: true",
+                "---",
+                "",
+                "# Stale RAG document with enough non-whitespace characters.",
+            )
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    report = validate_rag_corpus(manifest_path, tmp_path, rag_dir)
+
+    assert "unexpected_rag_document" in report.error_codes
     assert not report.ok

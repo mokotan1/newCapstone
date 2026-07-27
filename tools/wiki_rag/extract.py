@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
-import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import fields
 from pathlib import Path
@@ -24,6 +22,7 @@ if __package__ in {None, ""}:
     from wiki_rag.normalize import normalize_transcript
     from wiki_rag.paths import resolve_inside as _resolve_inside
     from wiki_rag.paths import sha256 as _sha256
+    from wiki_rag.paths import write_text_atomic as _write_text_atomic
 else:
     from .extractors import ExtractionResult
     from .extractors.md import extract_md
@@ -34,6 +33,7 @@ else:
     from .normalize import normalize_transcript
     from .paths import resolve_inside as _resolve_inside
     from .paths import sha256 as _sha256
+    from .paths import write_text_atomic as _write_text_atomic
 
 Extractor = Callable[[Path], ExtractionResult]
 EXTRACTORS: Mapping[str, Extractor] = {
@@ -63,29 +63,6 @@ def _resolve_transcript_path(
             f"{record.transcript_path}"
         ) from error
     return transcript_path
-
-
-def _write_text_atomic(output_path: Path, content: str) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path: Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            newline="\n",
-            dir=output_path.parent,
-            prefix=f".{output_path.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as temporary:
-            temporary.write(content)
-            temporary.flush()
-            os.fsync(temporary.fileno())
-            temporary_path = Path(temporary.name)
-        os.replace(temporary_path, output_path)
-    finally:
-        if temporary_path is not None and temporary_path.exists():
-            temporary_path.unlink()
 
 
 def write_transcript_atomic(

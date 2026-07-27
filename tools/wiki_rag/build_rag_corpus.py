@@ -18,27 +18,17 @@ if __package__ in {None, ""}:
     from wiki_rag.models import SourceRecord
     from wiki_rag.normalize import _normalize_markdown, _yaml_scalar
     from wiki_rag.paths import resolve_inside as _resolve_inside
+    from wiki_rag.paths import write_text_atomic
 else:
     from .models import SourceRecord
     from .normalize import _normalize_markdown, _yaml_scalar
     from .paths import resolve_inside as _resolve_inside
+    from .paths import write_text_atomic
 
 _RAG_ELIGIBLE_STATUSES = frozenset({"extracted", "needs_review"})
 _OWNER_SKIP_SOURCE_TYPES = frozenset({"hwp"})
 _MIN_MEANINGFUL_TEXT_CHARS = 40
 _SIMILARITY_THRESHOLD = 0.90
-_REQUIRED_RAG_FRONT_MATTER_KEYS = frozenset(
-    {
-        "source_id",
-        "source_path",
-        "source_sha256",
-        "source_type",
-        "category",
-        "title",
-        "status",
-        "rag_eligible",
-    }
-)
 
 
 class CorpusBuildError(Exception):
@@ -114,6 +104,8 @@ def _collapse_for_similarity(body: str) -> str:
 
 
 def _body_similarity(left: str, right: str) -> float:
+    """Compare transcript bodies for PDF/PPTX dedup (whitespace-normalized ratio)."""
+
     left_norm = _collapse_for_similarity(left)
     right_norm = _collapse_for_similarity(right)
     if not left_norm and not right_norm:
@@ -163,7 +155,12 @@ def plan_rag_documents(
     *,
     repo_root: Path,
 ) -> list[RagDocumentPlan]:
-    """Select eligible sources and resolve canonical PDF/PPTX duplicates."""
+    """Select eligible sources and resolve canonical PDF/PPTX duplicates.
+
+    When a PDF and PPTX in the same canonical_group exceed
+    ``_SIMILARITY_THRESHOLD`` body similarity, keep the PPTX and record the
+    PDF as a related source instead of emitting two near-duplicate RAG docs.
+    """
 
     resolved_root = repo_root.resolve()
     records = _load_manifest_records(manifest)
@@ -279,19 +276,17 @@ def build_rag_corpus(
     resolved_output.mkdir(parents=True, exist_ok=True)
 
     expected_names = {rag_output_filename(plan.record.source_id) for plan in plans}
-    for existing in resolved_output.glob("*.md"):
-        if existing.name not in expected_names:
-            existing.unlink()
 
     written: list[Path] = []
     for plan in plans:
         output_path = resolved_output / rag_output_filename(plan.record.source_id)
-        output_path.write_text(
-            _render_rag_document(plan),
-            encoding="utf-8",
-            newline="\n",
-        )
+        write_text_atomic(output_path, _render_rag_document(plan))
         written.append(output_path)
+
+    for existing in resolved_output.glob("*.md"):
+        if existing.name not in expected_names:
+            existing.unlink()
+
     return written
 
 

@@ -1,8 +1,10 @@
-"""Shared path confinement and hashing helpers for wiki_rag."""
+"""Shared path confinement, hashing, and atomic I/O helpers for wiki_rag."""
 
 from __future__ import annotations
 
 import hashlib
+import os
+import tempfile
 from pathlib import Path
 
 
@@ -34,3 +36,28 @@ def resolve_inside(
             f"{path_label} escapes repository: {relative_path}"
         ) from error
     return resolved
+
+
+def write_text_atomic(output_path: Path, content: str) -> None:
+    """Write UTF-8 text atomically via a same-directory temporary file."""
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=output_path.parent,
+            prefix=f".{output_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary.write(content)
+            temporary.flush()
+            os.fsync(temporary.fileno())
+            temporary_path = Path(temporary.name)
+        os.replace(temporary_path, output_path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
