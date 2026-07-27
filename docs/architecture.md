@@ -308,6 +308,7 @@ flowchart LR
 | `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
 | `MaidRoomPuzzleController` | MaidRoom 클릭 진입 (Phase R3-A, RoomInteractionController 확장) |
 | `StudyRoomPuzzleController` | StudyRoom UI·월드 클릭 (R4-A CardStack/Diary, R4-B Bible/BookCase + LoadScene outcome) |
+| `StudyRoomDiaryMirrorPuzzleController` | BookmarkMirror 드롭 후 위치·각도·반사 판정 → `StudyRoomMirrorPuzzleSuccessRouter`. QA seam: `TrySnapToConfiguredSolutionAndEvaluateForQa` (플레이어 입력 경로 불변; ForceSolve 아님). Adapter: `StudyRoomQaAdapter` (`preset.before-placement`, `place-bookmark` via real `FilterCardBookDropZone.OnDrop`) |
 | `ChildRoomPuzzleController` | ChildRoom 클릭(R5-A), 인장 드롭(R5-B), allSealsComplete(R5-C) |
 | `KitchenInteractionController` | Kitchen 월드(R6-A)·UI(R6-B)·드롭(R6-C) 클릭·패널(R6-D) 조율 |
 | `KitchenPanelRegistry` | Kitchen 버너/프라이팬/앵무 패널 SetActive → Call Method (R6-D) |

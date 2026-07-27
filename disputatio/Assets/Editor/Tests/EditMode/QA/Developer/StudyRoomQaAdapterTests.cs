@@ -11,7 +11,8 @@ using NUnit.Framework;
 using UnityEngine;
 
 /// <summary>
-/// Task 4: StudyRoom diary-mirror developer capabilities (grant/reset/probe/assert/capture).
+/// Task 4/6: StudyRoom diary-mirror developer capabilities
+/// (grant/reset/probe/assert/capture + before-placement + place-bookmark).
 /// </summary>
 public class StudyRoomQaAdapterTests
 {
@@ -21,7 +22,9 @@ public class StudyRoomQaAdapterTests
         StudyRoomQaAdapter.ResetCapabilityId,
         StudyRoomQaAdapter.ProbeCapabilityId,
         StudyRoomQaAdapter.AssertSolvedCapabilityId,
-        StudyRoomQaAdapter.CaptureCapabilityId
+        StudyRoomQaAdapter.CaptureCapabilityId,
+        StudyRoomQaAdapter.BeforePlacementCapabilityId,
+        StudyRoomQaAdapter.PlaceBookmarkCapabilityId
     };
 
     private GameObject flowchartObject;
@@ -54,7 +57,7 @@ public class StudyRoomQaAdapterTests
     }
 
     [Test]
-    public void RegisterCapabilities_MakesListCapabilitiesContainAllFiveIds()
+    public void RegisterCapabilities_MakesListCapabilitiesContainAllSevenIds()
     {
         IReadOnlyCollection<DeveloperQaCapability> listed = service.ListCapabilities();
         string[] ids = listed.Select(c => c.Id).ToArray();
@@ -85,11 +88,112 @@ public class StudyRoomQaAdapterTests
                 "c-unknown",
                 "interaction",
                 "invoke",
-                "studyroom.mirror.place-bookmark"),
+                "studyroom.mirror.not-a-real-capability"),
             CancellationToken.None);
 
         Assert.AreEqual(DeveloperQaResultCode.MissingCapability, result.Code);
-        Assert.AreEqual("studyroom.mirror.place-bookmark", result.MissingCapabilityId);
+        Assert.AreEqual("studyroom.mirror.not-a-real-capability", result.MissingCapabilityId);
+    }
+
+    [Test]
+    public async Task PresetApply_BeforePlacement_WhenDevModeBlocked_ReturnsEnvironmentBlocked()
+    {
+        DeveloperModeController.SetIsDeveloperModeEnabledForTests(false);
+
+        DeveloperQaResult result = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "c-before",
+                "preset",
+                "apply",
+                StudyRoomQaAdapter.BeforePlacementCapabilityId),
+            CancellationToken.None);
+
+        Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, result.Code);
+        Assert.IsFalse(
+            string.IsNullOrEmpty(result.Message),
+            "Blocked before-placement should explain the environment gate.");
+    }
+
+    [Test]
+    public async Task PresetApply_BeforePlacement_WithFlowchart_ResetsToUnsolvedBaseline()
+    {
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey, true);
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.HaveTutorKeyKey, true);
+
+        DeveloperQaResult result = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "c-before-ok",
+                "preset",
+                "apply",
+                StudyRoomQaAdapter.BeforePlacementCapabilityId),
+            CancellationToken.None);
+
+        Assert.AreEqual(DeveloperQaResultCode.Ok, result.Code);
+        Assert.IsFalse(flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey));
+        Assert.IsFalse(flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.HaveTutorKeyKey));
+        Assert.AreEqual("False", result.Data[StudyRoomMirrorQaHelpers.DataKeyDiarySolved]);
+    }
+
+    [Test]
+    public async Task InteractionInvoke_PlaceBookmark_WithoutInventoryOrController_ReturnsEnvironmentBlocked()
+    {
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey, false);
+
+        DeveloperQaResult result = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "c-place",
+                "interaction",
+                "invoke",
+                StudyRoomQaAdapter.PlaceBookmarkCapabilityId),
+            CancellationToken.None);
+
+        Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, result.Code);
+        Assert.IsFalse(
+            flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey),
+            "Missing inventory/controller must not fake a solved state.");
+        Assert.IsFalse(
+            string.IsNullOrEmpty(result.Message),
+            "Blocked place-bookmark should explain missing drop zone/inventory.");
+    }
+
+    [Test]
+    public async Task InteractionInvoke_PlaceBookmark_DoesNotCallForceSolve()
+    {
+        // Without drop zone / BookmarkMirror inventory, a ForceSolve shortcut would still flip
+        // DiarySolved via SuccessRouter when Variablemanager exists. Real place must not do that.
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey, false);
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.HaveTutorKeyKey, false);
+
+        DeveloperQaResult result = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "c-place-no-force",
+                "interaction",
+                "invoke",
+                StudyRoomQaAdapter.PlaceBookmarkCapabilityId),
+            CancellationToken.None);
+
+        Assert.AreNotEqual(
+            DeveloperQaResultCode.Ok,
+            result.Code,
+            "place-bookmark must not report Ok without the real drop/success route.");
+        Assert.IsFalse(
+            flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey),
+            "place-bookmark must not ForceSolve when the real path is unavailable.");
+        Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, result.Code);
+    }
+
+    [Test]
+    public void ApplyPreset_BeforePlacement_ResetsUnsolvedBaseline()
+    {
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey, true);
+        flowchart.SetBooleanVariable(StudyRoomPuzzleDevTool.HaveTutorKeyKey, true);
+
+        var adapter = new StudyRoomQaAdapter();
+        QaScenePresetResult presetResult = adapter.ApplyPreset(StudyRoomQaAdapter.BeforePlacementPresetId);
+
+        Assert.IsTrue(presetResult.IsSuccess, presetResult.Message);
+        Assert.IsFalse(flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.DiarySolvedKey));
+        Assert.IsFalse(flowchart.GetBooleanVariable(StudyRoomPuzzleDevTool.HaveTutorKeyKey));
     }
 
     [Test]
