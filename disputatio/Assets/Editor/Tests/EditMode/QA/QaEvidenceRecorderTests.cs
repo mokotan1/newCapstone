@@ -88,6 +88,12 @@ public class QaEvidenceRecorderTests
         Assert.AreEqual("20260101T000000Z-run-smoke-001", directoryName);
         Assert.IsTrue(Directory.Exists(recorder.RunDirectoryPath));
         Assert.IsTrue(Directory.Exists(Path.Combine(recorder.RunDirectoryPath, "screenshots")));
+        Assert.IsTrue(Directory.Exists(Path.Combine(recorder.RunDirectoryPath, "patches")));
+        Assert.IsTrue(File.Exists(Path.Combine(recorder.RunDirectoryPath, "console.log")));
+        Assert.IsTrue(File.Exists(Path.Combine(recorder.RunDirectoryPath, "report.md")));
+        Assert.IsTrue(File.Exists(Path.Combine(recorder.RunDirectoryPath, "manifest.json")));
+        Assert.IsTrue(File.Exists(Path.Combine(recorder.RunDirectoryPath, "journal.jsonl")));
+        Assert.IsTrue(File.Exists(Path.Combine(recorder.RunDirectoryPath, "events.jsonl")));
     }
 
     [Test]

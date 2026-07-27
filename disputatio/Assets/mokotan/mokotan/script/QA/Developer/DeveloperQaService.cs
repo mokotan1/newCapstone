@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Godlotto.QA.Core;
+using Godlotto.QA.Evidence;
 using Godlotto.QA.Profile;
 
 namespace Godlotto.QA.Developer
@@ -16,26 +17,37 @@ namespace Godlotto.QA.Developer
         };
 
         private const string ProfileUnavailableMessage = "QA profile service unavailable";
+        private const string EvidenceUnavailableMessage = "QA evidence recorder unavailable";
 
         private readonly DeveloperQaCapabilityRegistry _registry;
         private readonly IQaProfileService _profileService;
+        private readonly IQaEvidenceRecorder _evidenceRecorder;
 
         public DeveloperQaService()
-            : this(new DeveloperQaCapabilityRegistry(), null)
+            : this(new DeveloperQaCapabilityRegistry(), null, null)
         {
         }
 
         public DeveloperQaService(DeveloperQaCapabilityRegistry registry)
-            : this(registry, null)
+            : this(registry, null, null)
         {
         }
 
         public DeveloperQaService(
             DeveloperQaCapabilityRegistry registry,
             IQaProfileService profileService)
+            : this(registry, profileService, null)
+        {
+        }
+
+        public DeveloperQaService(
+            DeveloperQaCapabilityRegistry registry,
+            IQaProfileService profileService,
+            IQaEvidenceRecorder evidenceRecorder)
         {
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _profileService = profileService;
+            _evidenceRecorder = evidenceRecorder;
         }
 
         public Task<DeveloperQaResult> ExecuteAsync(
@@ -83,6 +95,11 @@ namespace Godlotto.QA.Developer
             if (IsCapabilityDispatchCommand(command.Family, command.Name))
             {
                 return Task.FromResult(DispatchCapability(command));
+            }
+
+            if (command.Family == "evidence" && command.Name == "capture")
+            {
+                return Task.FromResult(CaptureEvidence(command));
             }
 
             if (command.Family == "scenario" && command.Name == "run")
@@ -133,11 +150,6 @@ namespace Godlotto.QA.Developer
                 return true;
             }
 
-            if (family == "evidence" && name == "capture")
-            {
-                return true;
-            }
-
             return false;
         }
 
@@ -172,6 +184,46 @@ namespace Godlotto.QA.Developer
             }
         }
 
+        private DeveloperQaResult CaptureEvidence(DeveloperQaCommand command)
+        {
+            if (_evidenceRecorder == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.EnvironmentBlocked,
+                    EvidenceUnavailableMessage);
+            }
+
+            QaRunId runId = ResolveRunId(command);
+            DeveloperQaResult beginResult = EnsureEvidenceRunBegun(runId, command.Id);
+            if (beginResult.Code != DeveloperQaResultCode.Ok)
+            {
+                return beginResult;
+            }
+
+            QaEvidenceOperationResult appendResult = _evidenceRecorder.AppendEvent(
+                QaEvidenceEvent.Create(
+                    QaEvidenceEventType.Note,
+                    commandId: command.Id,
+                    code: "EvidenceCapture",
+                    message: "DeveloperQa evidence.capture checkpoint."));
+
+            if (!appendResult.IsSuccess)
+            {
+                return MapEvidenceFailure(appendResult);
+            }
+
+            string runDirectory = ResolveActiveRunDirectory();
+            return new DeveloperQaResult(
+                DeveloperQaResultCode.Ok,
+                "Evidence capture recorded.",
+                data: DeveloperQaMaps.From(new Dictionary<string, string>
+                {
+                    ["run_id"] = runId.ToString(),
+                    ["command_id"] = command.Id,
+                    ["run_directory"] = runDirectory ?? string.Empty
+                }));
+        }
+
         private DeveloperQaResult BeginScenarioProfileSession(DeveloperQaCommand command)
         {
             if (_profileService == null)
@@ -192,14 +244,92 @@ namespace Godlotto.QA.Developer
                         : profileResult.Message);
             }
 
+            var data = new Dictionary<string, string>
+            {
+                ["run_id"] = runId.ToString(),
+                ["command_id"] = command.Id
+            };
+
+            if (_evidenceRecorder != null)
+            {
+                DeveloperQaResult evidenceBegin = EnsureEvidenceRunBegun(runId, command.Id);
+                if (evidenceBegin.Code != DeveloperQaResultCode.Ok)
+                {
+                    return evidenceBegin;
+                }
+
+                string runDirectory = ResolveActiveRunDirectory();
+                if (!string.IsNullOrEmpty(runDirectory))
+                {
+                    data["run_directory"] = runDirectory;
+                }
+            }
+
             return new DeveloperQaResult(
                 DeveloperQaResultCode.Ok,
                 "QA profile session begun.",
-                data: DeveloperQaMaps.From(new Dictionary<string, string>
-                {
-                    ["run_id"] = runId.ToString(),
-                    ["command_id"] = command.Id
-                }));
+                data: DeveloperQaMaps.From(data));
+        }
+
+        private DeveloperQaResult EnsureEvidenceRunBegun(QaRunId runId, string commandId)
+        {
+            string runIdText = runId.IsNone ? QaRunId.NewId().ToString() : runId.ToString();
+            QaEvidenceOperationResult begin = _evidenceRecorder.BeginRun(runIdText);
+            if (begin.IsSuccess)
+            {
+                return new DeveloperQaResult(DeveloperQaResultCode.Ok, begin.Message);
+            }
+
+            // A prior evidence.capture / scenario.run in the same service session is fine —
+            // keep appending into the already-active directory.
+            if (begin.Code == QaEvidenceOperationCode.AlreadyActive)
+            {
+                return new DeveloperQaResult(DeveloperQaResultCode.Ok, begin.Message);
+            }
+
+            return MapEvidenceFailure(begin, commandId);
+        }
+
+        private static DeveloperQaResult MapEvidenceFailure(
+            QaEvidenceOperationResult operation,
+            string commandId = null)
+        {
+            if (operation == null)
+            {
+                return new DeveloperQaResult(
+                    DeveloperQaResultCode.InternalError,
+                    "Evidence recorder returned null.");
+            }
+
+            switch (operation.Code)
+            {
+                case QaEvidenceOperationCode.InvalidRequest:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.InvalidCommand,
+                        string.IsNullOrWhiteSpace(operation.Message)
+                            ? "Invalid evidence request."
+                            : operation.Message);
+                case QaEvidenceOperationCode.NotActive:
+                case QaEvidenceOperationCode.AlreadyFinalized:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.EnvironmentBlocked,
+                        string.IsNullOrWhiteSpace(operation.Message)
+                            ? "Evidence run is not writable."
+                            : operation.Message);
+                default:
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.InternalError,
+                        string.IsNullOrWhiteSpace(operation.Message)
+                            ? "Evidence recorder failed" +
+                              (string.IsNullOrEmpty(commandId) ? "." : " for '" + commandId + "'.")
+                            : operation.Message);
+            }
+        }
+
+        private string ResolveActiveRunDirectory()
+        {
+            var development = _evidenceRecorder as DevelopmentQaEvidenceRecorder;
+            return development != null ? development.RunDirectoryPath : null;
         }
 
         private DeveloperQaResult RestoreScenarioProfileSession()

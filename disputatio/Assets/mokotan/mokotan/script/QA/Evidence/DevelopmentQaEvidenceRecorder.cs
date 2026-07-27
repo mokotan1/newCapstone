@@ -20,12 +20,16 @@ namespace Godlotto.QA.Evidence
     public sealed class DevelopmentQaEvidenceRecorder : IQaEvidenceRecorder
     {
         public const string EventsFileName = "events.jsonl";
+        public const string JournalFileName = "journal.jsonl";
         public const string ConsoleFileName = "console.log";
         public const string ScreenshotsDirectoryName = "screenshots";
+        public const string PatchesDirectoryName = "patches";
         public const string ManifestFileName = "manifest.json";
         public const string ReportFileName = "report.md";
 
         private const string RunIdDirectoryTimestampFormat = "yyyyMMdd'T'HHmmss'Z'";
+        private const string ProvisionalReportMarkdown =
+            "# QA Run Report" + "\n\n" + "(stub — replace on Finalize)" + "\n";
 
         private readonly string runsRootDirectory;
         private readonly Func<DateTime> utcNowProvider;
@@ -110,6 +114,14 @@ namespace Godlotto.QA.Evidence
                 {
                     Directory.CreateDirectory(candidatePath);
                     Directory.CreateDirectory(Path.Combine(candidatePath, ScreenshotsDirectoryName));
+                    Directory.CreateDirectory(Path.Combine(candidatePath, PatchesDirectoryName));
+                    // Stub artifacts so consumers (DeveloperQa, orchestrator) can rely on the
+                    // design layout immediately — Finalize overwrites report.md / manifest.json.
+                    File.WriteAllText(
+                        Path.Combine(candidatePath, ConsoleFileName), string.Empty, Encoding.UTF8);
+                    File.WriteAllText(
+                        Path.Combine(candidatePath, ReportFileName), ProvisionalReportMarkdown, Encoding.UTF8);
+                    WriteProvisionalManifest(candidatePath, runId, now);
                 }
                 catch (Exception ex)
                 {
@@ -325,8 +337,13 @@ namespace Godlotto.QA.Evidence
             try
             {
                 string jsonLine = JsonConvert.SerializeObject(redacted);
-                string eventsPath = Path.Combine(activeRunDirectoryPath, EventsFileName);
-                File.AppendAllText(eventsPath, jsonLine + Environment.NewLine, Encoding.UTF8);
+                string lineWithNewline = jsonLine + Environment.NewLine;
+                // Dual-write: legacy QA driver uses events.jsonl; self-extending DeveloperQa
+                // design (§11) names the same append-only journal journal.jsonl.
+                File.AppendAllText(
+                    Path.Combine(activeRunDirectoryPath, EventsFileName), lineWithNewline, Encoding.UTF8);
+                File.AppendAllText(
+                    Path.Combine(activeRunDirectoryPath, JournalFileName), lineWithNewline, Encoding.UTF8);
             }
             catch (Exception ex)
             {
@@ -345,6 +362,26 @@ namespace Godlotto.QA.Evidence
             string manifestPath = Path.Combine(activeRunDirectoryPath, ManifestFileName);
             string json = JsonConvert.SerializeObject(manifest, Formatting.Indented);
             File.WriteAllText(manifestPath, json, Encoding.UTF8);
+        }
+
+        private static void WriteProvisionalManifest(string runDirectoryPath, string runId, DateTime startedAtUtc)
+        {
+            var provisional = new Dictionary<string, object>
+            {
+                ["RunId"] = runId ?? string.Empty,
+                ["RunDirectoryName"] = Path.GetFileName(runDirectoryPath) ?? string.Empty,
+                ["StartedAtUtc"] = startedAtUtc.ToString("o", CultureInfo.InvariantCulture),
+                ["Status"] = "InProgress",
+                ["EventsFileName"] = EventsFileName,
+                ["JournalFileName"] = JournalFileName,
+                ["ConsoleFileName"] = ConsoleFileName,
+                ["ScreenshotsDirectoryName"] = ScreenshotsDirectoryName,
+                ["PatchesDirectoryName"] = PatchesDirectoryName,
+                ["ReportFileName"] = ReportFileName
+            };
+            string json = JsonConvert.SerializeObject(provisional, Formatting.Indented);
+            File.WriteAllText(
+                Path.Combine(runDirectoryPath, ManifestFileName), json, Encoding.UTF8);
         }
 
         private void WriteReport(QaRunManifest manifest)
