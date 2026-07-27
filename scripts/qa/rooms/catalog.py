@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -29,7 +28,6 @@ def default_catalog_path() -> Path:
     return _DEFAULT_CATALOG_PATH
 
 
-@lru_cache(maxsize=1)
 def load_catalog(catalog_path: str | None = None) -> dict[str, Any]:
     """Load the machine-readable region catalog."""
     path = Path(catalog_path) if catalog_path else _DEFAULT_CATALOG_PATH
@@ -37,8 +35,8 @@ def load_catalog(catalog_path: str | None = None) -> dict[str, Any]:
     if not isinstance(payload, Mapping) or "regions" not in payload:
         raise ValueError(f"catalog missing regions object: {path}")
     regions = payload["regions"]
-    if not isinstance(regions, Mapping) or not regions:
-        raise ValueError(f"catalog regions must be a non-empty object: {path}")
+    if not isinstance(regions, Mapping):
+        raise ValueError(f"catalog regions must be an object: {path}")
     return dict(payload)
 
 
