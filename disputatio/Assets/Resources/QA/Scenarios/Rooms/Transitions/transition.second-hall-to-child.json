@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.second-hall-to-child",
+  "sourceRegion": "second-floor.hall",
+  "destinationRegion": "child-room",
+  "entryPreset": "second-floor.hall.stub",
+  "prerequisites": [],
+  "lockedAssertions": [],
+  "sourceExitContract": ["route.child-room.available"],
+  "destinationEntryContract": ["scene.ChildEntrance"],
+  "checkpointContract": ["resumeRegion.child-room"]
+}
