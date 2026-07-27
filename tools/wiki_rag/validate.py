@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import re
 import sys
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -17,8 +16,12 @@ import yaml
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from wiki_rag.models import SourceRecord
+    from wiki_rag.paths import resolve_inside as _resolve_inside
+    from wiki_rag.paths import sha256 as _sha256
 else:
     from .models import SourceRecord
+    from .paths import resolve_inside as _resolve_inside
+    from .paths import sha256 as _sha256
 
 _MIN_EXTRACTED_TEXT_CHARS = 40
 _OWNER_SKIP_SOURCE_TYPES = frozenset({"hwp"})
@@ -34,6 +37,15 @@ _REQUIRED_FRONT_MATTER_KEYS = frozenset(
         "rag_eligible",
     }
 )
+_MANIFEST_CROSS_CHECK_KEYS = (
+    "source_id",
+    "source_path",
+    "source_sha256",
+    "status",
+    "rag_eligible",
+    "source_type",
+    "category",
+)
 
 
 @dataclass(frozen=True)
@@ -47,25 +59,6 @@ class ValidationReport:
     @property
     def ok(self) -> bool:
         return not self.error_codes
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for block in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def _resolve_inside(repo_root: Path, relative_path: str) -> Path:
-    if Path(relative_path).is_absolute():
-        raise ValueError(f"path must be relative: {relative_path}")
-    resolved = (repo_root / Path(relative_path)).resolve()
-    try:
-        resolved.relative_to(repo_root)
-    except ValueError as error:
-        raise ValueError(f"path escapes repository: {relative_path}") from error
-    return resolved
 
 
 def _parse_front_matter(content: str) -> tuple[dict[str, Any], str]:
@@ -126,30 +119,51 @@ def _resolve_internal_link(
     return None
 
 
+def _front_matter_matches_manifest(
+    metadata: Mapping[str, Any],
+    manifest_record: Mapping[str, Any],
+) -> bool:
+    for key in _MANIFEST_CROSS_CHECK_KEYS:
+        if key not in metadata:
+            continue
+        front_value = metadata[key]
+        manifest_value = manifest_record.get(key)
+        if key == "rag_eligible":
+            if bool(front_value) != bool(manifest_value):
+                return False
+        elif str(front_value) != str(manifest_value):
+            return False
+    return True
+
+
 def _collect_transcript_errors(
     transcript_path: Path,
     *,
     repo_root: Path | None = None,
     manifest_record: Mapping[str, Any] | None = None,
-) -> tuple[set[str], list[str]]:
+) -> set[str]:
     errors: set[str] = set()
-    warnings: list[str] = []
 
     if not transcript_path.is_file():
         errors.add("missing_transcript")
-        return errors, warnings
+        return errors
 
     raw_bytes = transcript_path.read_bytes()
     try:
         content = raw_bytes.decode("utf-8")
     except UnicodeDecodeError:
         errors.add("invalid_utf8")
-        return errors, warnings
+        return errors
 
     metadata, body = _parse_front_matter(content)
     missing_keys = _REQUIRED_FRONT_MATTER_KEYS.difference(metadata)
     if missing_keys:
         errors.add("invalid_front_matter")
+    elif manifest_record is not None and not _front_matter_matches_manifest(
+        metadata,
+        manifest_record,
+    ):
+        errors.add("front_matter_drift")
 
     status = str(metadata.get("status", ""))
     rag_eligible = metadata.get("rag_eligible") is True
@@ -191,7 +205,7 @@ def _collect_transcript_errors(
                 errors.add("unresolved_internal_link")
                 break
 
-    return errors, warnings
+    return errors
 
 
 def validate_transcript(
@@ -202,14 +216,13 @@ def validate_transcript(
 ) -> ValidationReport:
     """Validate one transcript file."""
 
-    errors, warnings = _collect_transcript_errors(
+    errors = _collect_transcript_errors(
         transcript_path,
         repo_root=repo_root,
         manifest_record=manifest_record,
     )
     return ValidationReport(
         error_codes=frozenset(errors),
-        warnings=tuple(warnings),
     )
 
 

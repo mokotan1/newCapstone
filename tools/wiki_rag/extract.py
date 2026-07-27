@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import os
 import sys
 import tempfile
@@ -23,6 +22,8 @@ if __package__ in {None, ""}:
     from wiki_rag.extractors.txt import extract_txt
     from wiki_rag.models import SourceRecord
     from wiki_rag.normalize import normalize_transcript
+    from wiki_rag.paths import resolve_inside as _resolve_inside
+    from wiki_rag.paths import sha256 as _sha256
 else:
     from .extractors import ExtractionResult
     from .extractors.md import extract_md
@@ -31,6 +32,8 @@ else:
     from .extractors.txt import extract_txt
     from .models import SourceRecord
     from .normalize import normalize_transcript
+    from .paths import resolve_inside as _resolve_inside
+    from .paths import sha256 as _sha256
 
 Extractor = Callable[[Path], ExtractionResult]
 EXTRACTORS: Mapping[str, Extractor] = {
@@ -42,32 +45,15 @@ EXTRACTORS: Mapping[str, Extractor] = {
 _SOURCE_FIELDS = frozenset(field.name for field in fields(SourceRecord))
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for block in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def _resolve_inside(repo_root: Path, relative_path: str) -> Path:
-    if Path(relative_path).is_absolute():
-        raise ValueError(f"manifest path must be relative: {relative_path}")
-    resolved = (repo_root / Path(relative_path)).resolve()
-    try:
-        resolved.relative_to(repo_root)
-    except ValueError as error:
-        raise ValueError(
-            f"manifest path escapes repository: {relative_path}"
-        ) from error
-    return resolved
-
-
 def _resolve_transcript_path(
     repo_root: Path,
     record: SourceRecord,
 ) -> Path:
-    transcript_path = _resolve_inside(repo_root, record.transcript_path)
+    transcript_path = _resolve_inside(
+        repo_root,
+        record.transcript_path,
+        path_label="manifest path",
+    )
     transcript_root = (repo_root / "docs/wiki/sources").resolve()
     try:
         transcript_path.relative_to(transcript_root)
@@ -134,7 +120,11 @@ def _extract_record(
     record: SourceRecord,
     extractor: Extractor,
 ) -> ExtractionResult:
-    source_path = _resolve_inside(repo_root, record.source_path)
+    source_path = _resolve_inside(
+        repo_root,
+        record.source_path,
+        path_label="manifest path",
+    )
     warnings: list[str] = []
     if _sha256(source_path) != record.source_sha256:
         warnings.append("source_sha256_mismatch")

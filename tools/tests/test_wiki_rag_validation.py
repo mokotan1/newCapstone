@@ -196,6 +196,29 @@ def test_validation_rejects_unresolved_internal_link(tmp_path: Path) -> None:
     assert not report.ok
 
 
+def test_validation_rejects_front_matter_source_id_drift(
+    tmp_path: Path,
+) -> None:
+    content = b"# Scenario body with enough non-whitespace characters."
+    source = _md_source_record(tmp_path, "시나리오/a.md", content)
+    transcript_path = tmp_path / str(source["transcript_path"])
+    transcript_text = transcript_path.read_text(encoding="utf-8")
+    transcript_path.write_text(
+        transcript_text.replace(
+            f"source_id: {source['source_id']}",
+            "source_id: scenario:deadbeef0000",
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
+    manifest_path = write_manifest(tmp_path, [source])
+
+    report = validate_manifest(manifest_path, tmp_path)
+
+    assert "front_matter_drift" in report.error_codes
+    assert not report.ok
+
+
 def test_validation_rejects_extracted_status_with_insufficient_text(
     tmp_path: Path,
 ) -> None:
