@@ -201,6 +201,12 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract PDF and PPTX manifest sources to Markdown."
     )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path("."),
+        help="Repository root containing knowledge source folders.",
+    )
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument(
         "--types",
@@ -222,10 +228,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         unsupported = ", ".join(sorted(unsupported_types)) or "(none selected)"
         raise ValueError(f"unsupported extraction types: {unsupported}")
 
+    repo_root = args.repo_root.resolve()
     manifest_path = args.manifest
     if not manifest_path.is_absolute():
-        manifest_path = Path.cwd() / manifest_path
-    counts = convert_manifest(manifest_path, Path.cwd(), source_types)
+        manifest_path = repo_root / manifest_path
+    counts = convert_manifest(manifest_path, repo_root, source_types)
     print(
         "Converted "
         f"{sum(counts.values())} sources: "
