@@ -18,17 +18,17 @@ _NON_HWP_EXTRACT_TYPES = frozenset(EXTRACTORS)
 # Curated wiki pages cite these IDs; e2e aligns discovered records to them.
 _CURATED_SOURCES: tuple[tuple[str, str, str, str], ...] = (
     ("scenario:93cff884e57e", "시나리오/world-lore.md", "scenario", "world-lore"),
-    ("scenario:a73346ecb3d9", "시나리오/characters.md", "scenario", "characters"),
+    ("scenario:31ea9031cf8f", "시나리오/characters.md", "scenario", "characters"),
     ("planning:35ada8161577", "기획서/concept.md", "planning", "concept"),
     ("planning:e4e36660bb79", "기획서/opening.md", "planning", "opening"),
     ("planning:a54025e67028", "기획서/second-floor.md", "planning", "second-floor"),
     ("planning:47f3be566f34", "기획서/basement.md", "planning", "basement"),
     ("planning:b98bbfbdb019", "기획서/ai-dialogue.md", "planning", "ai-dialogue"),
     ("planning:9d4611de3ae3", "기획서/initial-plan.md", "planning", "initial-plan"),
-    ("technical:85fdfa8e3425", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
-    ("technical:884df6c5b462", "docs/architecture.md", "technical", "architecture"),
+    ("technical:e52de73281b4", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
+    ("technical:505bbb50868b", "docs/architecture.md", "technical", "architecture"),
     (
-        "technical:03a736ea3ab1",
+        "technical:ca17d157de10",
         "docs/security/llm-abuse-defense-plan.md",
         "technical",
         "llm-defense",

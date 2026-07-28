@@ -73,19 +73,19 @@ python tools/wiki_rag/build_wiki.py --manifest docs/wiki/_meta/source-manifest.y
 | Planning | 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가 | pdf | extracted | [transcript](sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--53ed77ef462a.md) |
 | Planning | 현재 플로우 직관성 + 맵 제작 + 복도 기믹 추가 | pptx | needs_review | [transcript](sources/planning/현재-플로우-직관성-맵-제작-복도-기믹-추가--acafc91a0413.md) |
 | Scenario | The unholy of mention 세계관 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-세계관--93cff884e57e.md) |
-| Scenario | The unholy of mention 최종 시나리오 | md | extracted | [transcript](sources/scenario/the-unholy-of-mention-최종-시나리오--a73346ecb3d9.md) |
+| Scenario | The unholy of mention 최종 시나리오 | md | extracted | [transcript](sources/scenario/the-unholy-of-mention-최종-시나리오--31ea9031cf8f.md) |
 | Scenario | The unholy of mention 플롯 1막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-1막--f905409b92e5.md) |
 | Scenario | The unholy of mention 플롯 3막 | pdf | needs_review | [transcript](sources/scenario/the-unholy-of-mention-플롯-3막--4dc9203c1c6b.md) |
 | Scenario | The unholy of mention 플롯 4막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-4막--2148f646a4c5.md) |
 | Scenario | the unholy of mention 플롯 2막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-2막--6547e2e5db43.md) |
-| Technical | 2026-07-14-regression-playtest | md | extracted | [transcript](sources/technical/2026-07-14-regression-playtest--c2f05e2172e0.md) |
-| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--884df6c5b462.md) |
-| Technical | fungus-migration-audit | md | extracted | [transcript](sources/technical/fungus-migration-audit--d232bf9f3f1a.md) |
-| Technical | fungus-room-migration-plan | md | extracted | [transcript](sources/technical/fungus-room-migration-plan--85fdfa8e3425.md) |
-| Technical | glass-choice-menu-usage | md | extracted | [transcript](sources/technical/glass-choice-menu-usage--fa5a4b6c3594.md) |
-| Technical | llm-abuse-defense-plan | md | extracted | [transcript](sources/technical/llm-abuse-defense-plan--03a736ea3ab1.md) |
-| Technical | llm-defense-play-test-guide | md | extracted | [transcript](sources/technical/llm-defense-play-test-guide--99ee8a511c6f.md) |
-| Technical | play-log-analysis | md | extracted | [transcript](sources/technical/play-log-analysis--703aa0cef602.md) |
-| Technical | play-log-pipeline | md | extracted | [transcript](sources/technical/play-log-pipeline--bbb4cc9beefd.md) |
-| Technical | play-log-sheets-upload | md | extracted | [transcript](sources/technical/play-log-sheets-upload--45fe7f23c613.md) |
+| Technical | 2026-07-14-regression-playtest | md | extracted | [transcript](sources/technical/2026-07-14-regression-playtest--1634d7ac3efa.md) |
+| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--505bbb50868b.md) |
+| Technical | fungus-migration-audit | md | extracted | [transcript](sources/technical/fungus-migration-audit--aacf05fd62fd.md) |
+| Technical | fungus-room-migration-plan | md | extracted | [transcript](sources/technical/fungus-room-migration-plan--e52de73281b4.md) |
+| Technical | glass-choice-menu-usage | md | extracted | [transcript](sources/technical/glass-choice-menu-usage--f05cffd194cf.md) |
+| Technical | llm-abuse-defense-plan | md | extracted | [transcript](sources/technical/llm-abuse-defense-plan--ca17d157de10.md) |
+| Technical | llm-defense-play-test-guide | md | extracted | [transcript](sources/technical/llm-defense-play-test-guide--873778a0ddcd.md) |
+| Technical | play-log-analysis | md | extracted | [transcript](sources/technical/play-log-analysis--ab3836b72366.md) |
+| Technical | play-log-pipeline | md | extracted | [transcript](sources/technical/play-log-pipeline--68636b3b936e.md) |
+| Technical | play-log-sheets-upload | md | extracted | [transcript](sources/technical/play-log-sheets-upload--0b0032e4671b.md) |
 | Technical | quest-tracker-manual-verification | md | extracted | [transcript](sources/technical/quest-tracker-manual-verification--9db1ee420efd.md) |

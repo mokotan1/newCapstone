@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import sys
@@ -15,8 +14,10 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from wiki_rag.models import SourceRecord
+    from wiki_rag.paths import sha256 as _sha256
 else:
     from .models import SourceRecord
+    from .paths import sha256 as _sha256
 
 CATEGORY_BY_ROOT = {
     "시나리오": "scenario",
@@ -70,14 +71,6 @@ _YAML_RESERVED = frozenset(
 
 class InventoryError(ValueError):
     """Raised when discovered records violate manifest invariants."""
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for block in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def _strip_known_suffixes(filename: str) -> str:

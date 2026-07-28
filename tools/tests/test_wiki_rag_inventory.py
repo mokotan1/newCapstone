@@ -84,13 +84,50 @@ def test_inventory_hashes_original_bytes_and_builds_stable_ids(
         technical_sources=[],
     )
 
-    expected_hash = hashlib.sha256(content).hexdigest()
+    # Text sources hash LF-normalized bytes so Windows CRLF matches CI/LF.
+    expected_hash = hashlib.sha256("원본 bytes\n".encode("utf-8")).hexdigest()
     assert first == second
     assert first[0].source_sha256 == expected_hash
     assert first[0].source_id == f"scenario:{expected_hash[:12]}"
     assert first[0].transcript_path == (
         f"docs/wiki/sources/scenario/원본-문서--{expected_hash[:12]}.md"
     )
+
+
+def test_markdown_crlf_and_lf_share_the_same_source_hash(tmp_path: Path) -> None:
+    from wiki_rag.paths import sha256 as path_sha256
+
+    crlf_path = write_source(tmp_path, "시나리오/crlf.md", b"line-a\r\nline-b\r\n")
+    lf_path = write_source(tmp_path, "시나리오/lf.md", b"line-a\nline-b\n")
+    expected = hashlib.sha256(b"line-a\nline-b\n").hexdigest()
+
+    assert path_sha256(crlf_path) == expected
+    assert path_sha256(lf_path) == expected
+
+    # Inventory uses the same helper; only one twin can exist (shared source_id).
+    lf_path.unlink()
+    records = discover_sources(
+        tmp_path,
+        roots=["시나리오"],
+        root_sources=[],
+        technical_sources=[],
+    )
+    assert len(records) == 1
+    assert records[0].source_sha256 == expected
+
+
+def test_binary_pdf_hash_keeps_raw_bytes_including_crlf(tmp_path: Path) -> None:
+    content = b"%PDF-1.4\r\nbinary\r\n"
+    write_source(tmp_path, "시나리오/raw.pdf", content)
+
+    record = discover_sources(
+        tmp_path,
+        roots=["시나리오"],
+        root_sources=[],
+        technical_sources=[],
+    )[0]
+
+    assert record.source_sha256 == hashlib.sha256(content).hexdigest()
 
 
 def test_source_records_are_frozen(tmp_path: Path) -> None:

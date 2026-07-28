@@ -1,10 +1,9 @@
 ---
-source_id: technical:45fe7f23c613
+source_id: technical:0b0032e4671b
 source_path: docs/play-log-sheets-upload.md
-source_sha256: 45fe7f23c6136e723a05ad4a06aa2af8162a1bf5750f411290a7f96f932bd34c
+source_sha256: 0b0032e4671b99003fccb965c39c74a4b7bc3a3b838e67454d3049fa875a7c77
 source_type: md
 category: technical
-title: play-log-sheets-upload
 status: extracted
 rag_eligible: true
 ---

@@ -14,4 +14,4 @@ public Home listings and from the RAG corpus (`rag_eligible: false`).
 | Title | Type | Status | Transcript | Original |
 | --- | --- | --- | --- | --- |
 | report | pdf | extracted | [transcript](sources/report/report--b8eacd76e0a1.md) | [original](../../report.pdf) |
-| 미니게임_구현_리포트 | md | extracted | [transcript](sources/report/미니게임_구현_리포트--72ed55d40f51.md) | [original](../../미니게임_구현_리포트.md) |
+| 미니게임_구현_리포트 | md | extracted | [transcript](sources/report/미니게임_구현_리포트--24b42e16efca.md) | [original](../../미니게임_구현_리포트.md) |

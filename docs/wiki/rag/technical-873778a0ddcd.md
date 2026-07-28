@@ -1,7 +1,7 @@
 ---
-source_id: technical:99ee8a511c6f
+source_id: technical:873778a0ddcd
 source_path: docs/security/llm-defense-play-test-guide.md
-source_sha256: 99ee8a511c6f240a0115ea15331b69938b05e4e8fd31680da43385634be694e4
+source_sha256: 873778a0ddcda36fad6b333dd8c58e3fdd5014eefe367faecf6b7aaec383dbb9
 source_type: md
 category: technical
 title: llm-defense-play-test-guide
