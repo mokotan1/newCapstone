@@ -1,7 +1,7 @@
 ---
-source_id: technical:bbb4cc9beefd
+source_id: technical:68636b3b936e
 source_path: docs/play-log-pipeline.md
-source_sha256: bbb4cc9beefd02c4d9c005ceeea7e7d95834b9128e1ea914ba47de585c700d5e
+source_sha256: 68636b3b936e63b4ca1aed003ec398904180194ef35c3d22200fb8fc2115bf58
 source_type: md
 category: technical
 status: extracted

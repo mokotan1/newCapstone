@@ -1,9 +1,10 @@
 ---
-source_id: technical:884df6c5b462
+source_id: technical:505bbb50868b
 source_path: docs/architecture.md
-source_sha256: 884df6c5b462b2b3263ade35d6619831f653e3ea6f92d6b46328e705ab682892
+source_sha256: 505bbb50868b681be0acbda0013828e1d229e22f4ab7090f9a06575867e7518e
 source_type: md
 category: technical
+title: architecture
 status: extracted
 rag_eligible: true
 ---
@@ -58,7 +59,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, collect-errors.py, qa/autorun 등)
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
 ├── .github/workflows/   # CI/CD
@@ -84,7 +85,8 @@ newCapstone/
 | `Assets/Scenes/` | **모든 플레이 씬** | 씬 에셋·Flowchart 배치 (로직은 Script에) |
 | `Assets/Editor/Tests/EditMode/` | **EditMode 단위 테스트** | 순수 C# 로직 테스트 |
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
-| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/` | 런타임 `Resources.Load` 대상 |
+| `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
+| `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
@@ -313,11 +315,13 @@ flowchart LR
 | `Item` / `ItemPickup` | ScriptableObject 아이템, `itemId` 1~30 |
 | `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색 |
 | `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` |
+| `DontDestroyGameplayCleanup` | 메인메뉴 복귀 시 DDOL 게임플레이 루트(Fungus 전역 변수·퀘스트 트래커) 정리 정책의 단일 소유자. `GlobalSettingManager`(BGM/SFX/전체화면/해상도)와 호출자 자신만 보존. `InGameSettingsPanel`·`EndSceneManager`·`IntegratedSettingUI`·`SettingPanelButtonActions`의 모든 "메인메뉴로" 진입점이 공유 |
 | `AudioController` | BGM 등 (`SingletonMonoBehaviour`) |
 | `OpeningMentionController` | 오프닝 씬 Bell/Fence (Interaction 패턴 예시) |
 | `WifeRoomPuzzleController` | WifeRoom 클릭·패널·복귀 (RoomInteractionController 확장) |
 | `MaidRoomPuzzleController` | MaidRoom 클릭 진입 (Phase R3-A, RoomInteractionController 확장) |
 | `StudyRoomPuzzleController` | StudyRoom UI·월드 클릭 (R4-A CardStack/Diary, R4-B Bible/BookCase + LoadScene outcome) |
+| `StudyRoomDiaryMirrorPuzzleController` | BookmarkMirror 드롭 후 위치·각도·반사 판정 → `StudyRoomMirrorPuzzleSuccessRouter`. QA seam: `TrySnapToConfiguredSolutionAndEvaluateForQa` (플레이어 입력 경로 불변; ForceSolve 아님). Adapter: `StudyRoomQaAdapter` (`preset.before-placement`, `place-bookmark` via real `FilterCardBookDropZone.OnDrop`) |
 | `ChildRoomPuzzleController` | ChildRoom 클릭(R5-A), 인장 드롭(R5-B), allSealsComplete(R5-C) |
 | `KitchenInteractionController` | Kitchen 월드(R6-A)·UI(R6-B)·드롭(R6-C) 클릭·패널(R6-D) 조율 |
 | `KitchenPanelRegistry` | Kitchen 버너/프라이팬/앵무 패널 SetActive → Call Method (R6-D) |
@@ -508,9 +512,12 @@ graph TB
 | Cheshire locale/프롬프트 | `.../AI/Localization/CheshireLocaleResolver.cs`, `CheshirePromptCatalog.cs` |
 | Cheshire 프롬프트 txt | `disputatio/Assets/Resources/CheshirePrompts/` |
 | AI 서버 URL | `disputatio/Assets/godlotto/Script/Config/ServerConfig.cs` |
+| 메인메뉴 복귀 시 DDOL 정리 | `disputatio/Assets/godlotto/Script/DontDestroyGameplayCleanup.cs` (모든 "메인메뉴로" 버튼이 공유) |
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (C#) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
+| QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend) | `.github/workflows/backend-build.yml` |
 | 배포 | `.github/workflows/deploy-backend.yml`, `deploy/docker-compose.prod.yml` |
 | EditMode 테스트 | `disputatio/Assets/Editor/Tests/EditMode/` |

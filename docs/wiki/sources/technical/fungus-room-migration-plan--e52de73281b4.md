@@ -1,7 +1,7 @@
 ---
-source_id: technical:85fdfa8e3425
+source_id: technical:e52de73281b4
 source_path: docs/fungus-room-migration-plan.md
-source_sha256: 85fdfa8e342510c07ad08ffd988c9636a3b2ebc2fcd5ef22bc888ae2575bfadb
+source_sha256: e52de73281b4929b7f344995a979065b6e0f0fc9ecaa9ec29c5cc386377b3697
 source_type: md
 category: technical
 status: extracted

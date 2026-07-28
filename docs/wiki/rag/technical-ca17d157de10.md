@@ -1,7 +1,7 @@
 ---
-source_id: technical:03a736ea3ab1
+source_id: technical:ca17d157de10
 source_path: docs/security/llm-abuse-defense-plan.md
-source_sha256: 03a736ea3ab18785f694fb9a053675789654f642784a4d4044f01397a21e45cd
+source_sha256: ca17d157de1029181542936292885b699d35c326fa7eb23c57c5d27180bf8350
 source_type: md
 category: technical
 title: llm-abuse-defense-plan

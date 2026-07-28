@@ -54,6 +54,13 @@ Any change to an original document requires:
 - wiki rebuild, and
 - RAG corpus rebuild plus embedding re-index before relying on retrieval.
 
+Inventory and validation hash Markdown/plain-text sources after
+normalizing newlines to LF. This keeps Windows `core.autocrlf` checkouts
+aligned with Linux CI and Git blob bytes. Binary sources (PDF/PPTX/HWP)
+remain raw-byte hashes. After hash prefixes change, update curated
+`source_id` constants in `tools/wiki_rag/build_wiki.py` and remove
+orphaned transcripts under `docs/wiki/sources/`.
+
 ## HWP scope
 
 HWP originals are **owner-skipped** and outside conversion scope.

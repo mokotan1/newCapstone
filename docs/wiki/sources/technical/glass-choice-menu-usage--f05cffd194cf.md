@@ -1,10 +1,9 @@
 ---
-source_id: technical:fa5a4b6c3594
+source_id: technical:f05cffd194cf
 source_path: docs/glass-choice-menu-usage.md
-source_sha256: fa5a4b6c3594bb92b793ba66a124cd4f1d3d63c12441c05ba689876448032c80
+source_sha256: f05cffd194cfea0d17924ebe0ce76ad6c379506c0aa3f5bbff2d91b3da88c95c
 source_type: md
 category: technical
-title: glass-choice-menu-usage
 status: extracted
 rag_eligible: true
 ---

@@ -32,15 +32,15 @@ _BUILD_COMMAND = (
 _CURATED_CITATION_IDS: frozenset[str] = frozenset(
     {
         "planning:35ada8161577",
-        "scenario:a73346ecb3d9",
+        "scenario:31ea9031cf8f",
         "scenario:93cff884e57e",
         "planning:e4e36660bb79",
         "planning:a54025e67028",
         "planning:47f3be566f34",
-        "technical:85fdfa8e3425",
+        "technical:e52de73281b4",
         "planning:b98bbfbdb019",
-        "technical:884df6c5b462",
-        "technical:03a736ea3ab1",
+        "technical:505bbb50868b",
+        "technical:ca17d157de10",
         "planning:9d4611de3ae3",
     }
 )
@@ -285,7 +285,7 @@ def _render_game_overview(records_by_id: Mapping[str, SourceRecord]) -> str:
         "adventure."
     )
     claims.append(
-        f"- {genre} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+        f"- {genre} {_citation_from_id(records_by_id, 'scenario:31ea9031cf8f')}"
     )
 
     lines = [
@@ -327,7 +327,7 @@ def _render_story_and_world(records_by_id: Mapping[str, SourceRecord]) -> str:
         "partner; dry and cynical tone with investigative judgment under pressure."
     )
     claims.append(
-        f"- {protagonist} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+        f"- {protagonist} {_citation_from_id(records_by_id, 'scenario:31ea9031cf8f')}"
     )
 
     cheshire = (
@@ -335,7 +335,7 @@ def _render_story_and_world(records_by_id: Mapping[str, SourceRecord]) -> str:
         "simple animal but a witness to the mansion's truth."
     )
     claims.append(
-        f"- {cheshire} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+        f"- {cheshire} {_citation_from_id(records_by_id, 'scenario:31ea9031cf8f')}"
     )
 
     antagonist = (
@@ -344,7 +344,7 @@ def _render_story_and_world(records_by_id: Mapping[str, SourceRecord]) -> str:
         "experiments."
     )
     claims.append(
-        f"- {antagonist} {_citation_from_id(records_by_id, 'scenario:a73346ecb3d9')}"
+        f"- {antagonist} {_citation_from_id(records_by_id, 'scenario:31ea9031cf8f')}"
     )
 
     cult = (
@@ -412,7 +412,7 @@ def _render_rooms_and_progression(
         "Fungus flowcharts and the Godlotto interaction layer."
     )
     claims.append(
-        f"- {migration} {_citation_from_id(records_by_id, 'technical:85fdfa8e3425')}"
+        f"- {migration} {_citation_from_id(records_by_id, 'technical:e52de73281b4')}"
     )
 
     lines = [
@@ -461,7 +461,7 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
         "with Groq primary and Gemini fallback providers."
     )
     claims.append(
-        f"- {backend} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+        f"- {backend} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
     )
 
     defense = (
@@ -469,7 +469,7 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
         "prompt hardening and rate limiting."
     )
     claims.append(
-        f"- {defense} {_citation_from_id(records_by_id, 'technical:03a736ea3ab1')}"
+        f"- {defense} {_citation_from_id(records_by_id, 'technical:ca17d157de10')}"
     )
 
     lines = [
@@ -502,7 +502,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`backend_ai/`, CI scripts, and deploy compose under `deploy/`."
     )
     claims.append(
-        f"- {overview} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+        f"- {overview} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
     )
 
     unity = (
@@ -510,7 +510,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "gameplay code under `Assets/godlotto/Script/`."
     )
     claims.append(
-        f"- {unity} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+        f"- {unity} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
     )
 
     persistence = (
@@ -518,7 +518,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "server-side data includes CSV quiz banks and optional Redis rate limits."
     )
     claims.append(
-        f"- {persistence} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+        f"- {persistence} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
     )
 
     deploy = (
@@ -526,7 +526,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`deploy/docker-compose.prod.yml`."
     )
     claims.append(
-        f"- {deploy} {_citation_from_id(records_by_id, 'technical:884df6c5b462')}"
+        f"- {deploy} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
     )
 
     lines = [
@@ -647,6 +647,23 @@ def _render_operations() -> str:
             "   retrieval.",
             "8. **Local backend test** — run FastAPI tests and a smoke chat against the",
             "   refreshed index.",
+            "   - Tutor room: `rag_profile: \"tutor\"` with `current_question_id`.",
+            "   - Project wiki Q&A: `rag_profile: \"project\"` (no quiz bank, no answer",
+            "     override). Example body:",
+            "",
+            "     ```json",
+            "     {",
+            '       "prompt": "세계관 핵심 설정은?",',
+            '       "system": "프로젝트 위키 도우미",',
+            '       "use_tools": false,',
+            '       "rag_profile": "project",',
+            '       "locale": "ko"',
+            "     }",
+            "     ```",
+            "",
+            "     Expect retrieved chunks to cite `source_id` / `source_path`. Report",
+            "     sources remain excluded from the corpus; HWP originals stay out of scope",
+            "     until converted.",
             "9. **Deployment** — publish backend images and compose stack after local",
             "   validation passes.",
             "",
@@ -660,12 +677,65 @@ def _render_operations() -> str:
             "- wiki rebuild, and",
             "- RAG corpus rebuild plus embedding re-index before relying on retrieval.",
             "",
+            "Inventory and validation hash Markdown/plain-text sources after",
+            "normalizing newlines to LF. This keeps Windows `core.autocrlf` checkouts",
+            "aligned with Linux CI and Git blob bytes. Binary sources (PDF/PPTX/HWP)",
+            "remain raw-byte hashes. After hash prefixes change, update curated",
+            "`source_id` constants in `tools/wiki_rag/build_wiki.py` and remove",
+            "orphaned transcripts under `docs/wiki/sources/`.",
+            "",
             "## HWP scope",
             "",
             "HWP originals are **owner-skipped** and outside conversion scope.",
             "Pending HWP manifest rows remain for inventory traceability but do not",
             "appear on Home or in the RAG corpus until explicitly converted through",
             "a supported path.",
+            "",
+            "## CI and release automation",
+            "",
+            "Pull requests that touch in-scope originals, `docs/wiki/**`,",
+            "`tools/wiki_rag/**`, or backend RAG integration files run the offline",
+            "**Wiki RAG Validation** workflow (`.github/workflows/wiki-rag.yml`):",
+            "",
+            "1. manifest, transcript, link, encoding, and RAG corpus validation,",
+            "2. `pytest tools/tests/test_wiki_rag_*.py`,",
+            "3. RAG corpus rebuild plus re-validation,",
+            "4. scoped `backend_ai` RAG pytest (dummy API keys only; not the full",
+            "   backend suite),",
+            "5. `python backend_ai/scripts/build_tutor_rag_index.py --dry-run` (no",
+            "   production embedding API calls).",
+            "",
+            "PR CI never requires or prints a production `GOOGLE_API_KEY`.",
+            "",
+            "### Release embedding build",
+            "",
+            "Production embeddings run only from a **manual** `workflow_dispatch` on",
+            "`wiki-rag.yml` with `build_embeddings: true`, inside the protected",
+            "`wiki-rag-release` GitHub Environment. That job supplies a masked",
+            "`GOOGLE_API_KEY` secret, rebuilds `backend_ai/data/tutor_rag_index.json`,",
+            "and fails if chunk counts or source-ID sets drift without a manifest change.",
+            "An empty committed index skips the manifest-unchanged drift guard on the",
+            "first production build.",
+            "",
+            "After a successful release build, download the workflow artifact",
+            "`tutor-rag-index-<commit-sha>` and commit the refreshed",
+            "`backend_ai/data/tutor_rag_index.json` on a feature branch. Reference the",
+            "manifest hash or source changes in the commit message so reviewers can",
+            "trace the re-index to an intentional corpus update.",
+            "",
+            "### Local release-equivalent checks (offline)",
+            "",
+            "```powershell",
+            "python tools/wiki_rag/validate.py --repo-root . --manifest docs/wiki/_meta/source-manifest.yaml --rag-dir docs/wiki/rag",
+            "pytest tools/tests/test_wiki_rag_*.py -q --basetemp=.pytest_tmp",
+            "cd backend_ai",
+            "pytest tests/test_project_rag_index_builder.py tests/test_project_rag_chat_service.py tests/test_tutor_rag_locale.py tests/test_chat_request_model.py tests/test_tutor_chat_service.py -q --basetemp=../.pytest_tmp",
+            "# Optional: run the full backend suite locally with `pytest tests -q --basetemp=../.pytest_tmp`",
+            "python scripts/build_tutor_rag_index.py --dry-run",
+            "```",
+            "",
+            "Use the full pipeline order above when refreshing transcripts, wiki",
+            "pages, or corpus files locally before opening a PR.",
             "",
         ]
     )

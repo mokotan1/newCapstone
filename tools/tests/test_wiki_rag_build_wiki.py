@@ -14,16 +14,16 @@ _CITATION_PATTERN = re.compile(
 
 _CURATED_CITATION_FIXTURES: tuple[tuple[str, str, str, str], ...] = (
     ("scenario:93cff884e57e", "시나리오/world.pdf", "scenario", "world-lore"),
-    ("scenario:a73346ecb3d9", "시나리오/characters.pdf", "scenario", "characters"),
+    ("scenario:31ea9031cf8f", "시나리오/characters.pdf", "scenario", "characters"),
     ("planning:35ada8161577", "기획서/concept.pdf", "planning", "concept"),
     ("planning:e4e36660bb79", "기획서/opening.pdf", "planning", "opening"),
     ("planning:a54025e67028", "기획서/second-floor.pdf", "planning", "second-floor"),
     ("planning:47f3be566f34", "기획서/basement.pdf", "planning", "basement"),
     ("planning:b98bbfbdb019", "기획서/ai-dialogue.pdf", "planning", "ai-dialogue"),
     ("planning:9d4611de3ae3", "기획서/initial-plan.pdf", "planning", "initial-plan"),
-    ("technical:85fdfa8e3425", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
-    ("technical:884df6c5b462", "docs/architecture.md", "technical", "architecture"),
-    ("technical:03a736ea3ab1", "docs/security/llm-abuse-defense-plan.md", "technical", "llm-defense"),
+    ("technical:e52de73281b4", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
+    ("technical:505bbb50868b", "docs/architecture.md", "technical", "architecture"),
+    ("technical:ca17d157de10", "docs/security/llm-abuse-defense-plan.md", "technical", "llm-defense"),
 )
 
 
@@ -201,7 +201,7 @@ def test_build_wiki_fails_on_missing_curated_citation_ids(tmp_path: Path) -> Non
     manifest_data["sources"] = [
         source
         for source in manifest_data["sources"]
-        if source["source_id"] != "scenario:a73346ecb3d9"
+        if source["source_id"] != "scenario:31ea9031cf8f"
     ]
     manifest_path.write_text(
         yaml.safe_dump(manifest_data, allow_unicode=True, sort_keys=False),
@@ -209,7 +209,7 @@ def test_build_wiki_fails_on_missing_curated_citation_ids(tmp_path: Path) -> Non
         newline="\n",
     )
 
-    with pytest.raises(ValueError, match="scenario:a73346ecb3d9"):
+    with pytest.raises(ValueError, match="scenario:31ea9031cf8f"):
         build_wiki(manifest=manifest_path, wiki_root=tmp_path)
 
 

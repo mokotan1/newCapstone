@@ -1,7 +1,7 @@
 ---
-source_id: technical:c2f05e2172e0
+source_id: technical:1634d7ac3efa
 source_path: docs/qa/2026-07-14-regression-playtest.md
-source_sha256: c2f05e2172e0df2621dcf7464565ec25e6c27eabfc6596a54da9200d6141553e
+source_sha256: 1634d7ac3efa27a0eceb6de95a122bb5434be844d60a02c3d6789e154f90e99a
 source_type: md
 category: technical
 title: 2026-07-14-regression-playtest

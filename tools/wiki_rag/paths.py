@@ -7,9 +7,24 @@ import os
 import tempfile
 from pathlib import Path
 
+# Text knowledge sources whose working-tree newlines may differ by platform.
+# Binary formats (pdf/pptx/hwp) must keep raw-byte digests.
+_TEXT_HASH_SUFFIXES = frozenset({".md", ".txt"})
+
 
 def sha256(path: Path) -> str:
-    """Return the SHA-256 hex digest of a file."""
+    """Return the SHA-256 hex digest of a file.
+
+    Markdown and plain-text sources are hashed after normalizing newlines to
+    LF (``\\r\\n`` / ``\\r`` → ``\\n``) so Windows ``core.autocrlf`` checkouts
+    match Linux CI and Git blob bytes. Binary sources are hashed unchanged.
+    """
+
+    if path.suffix.casefold() in _TEXT_HASH_SUFFIXES:
+        normalized = (
+            path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        )
+        return hashlib.sha256(normalized).hexdigest()
 
     digest = hashlib.sha256()
     with path.open("rb") as source:
