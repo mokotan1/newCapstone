@@ -314,6 +314,7 @@ flowchart LR
 | `ChildRoomPuzzleController` | ChildRoom 클릭(R5-A), 인장 드롭(R5-B), allSealsComplete(R5-C) |
 | `KitchenInteractionController` | Kitchen 월드(R6-A)·UI(R6-B)·드롭(R6-C) 클릭·패널(R6-D) 조율 |
 | `KitchenPanelRegistry` | Kitchen 버너/프라이팬/앵무 패널 SetActive → Call Method (R6-D) |
+| `QuizInputHandler` | TutorRoom 퀴즈 TMP 패널 활성화·제출. QA seam: `ActivateQuizInputField` via `TutorRoomQaAdapter` (`tutorroom.quiz-input`) |
 
 ### 백엔드
 
