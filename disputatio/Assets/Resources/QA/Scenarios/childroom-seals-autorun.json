@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "childroom-seals-autorun",
+  "scene": "ChildRoom",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "childroom.seals.click-seal5" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "childroom.seals.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "childroom.seals.assert-controller" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "childroom.seals.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

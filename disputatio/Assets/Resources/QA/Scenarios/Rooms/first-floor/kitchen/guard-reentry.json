@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "room.kitchen.guard.reentry",
+  "roomId": "kitchen",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.click",
+    "kitchen.faucet.probe",
+    "kitchen.faucet.assert-clicked"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-faucet",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.faucet.preset.before-faucet"
+    },
+    {
+      "id": "click-faucet",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.click"
+    },
+    {
+      "id": "assert-clicked",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.assert-clicked"
+    },
+    {
+      "id": "reapply-before-faucet",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.faucet.preset.before-faucet"
+    },
+    {
+      "id": "probe-after-reset",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.probe"
+    }
+  ]
+}

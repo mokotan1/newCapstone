@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "maidroom-food-autorun",
+  "scene": "MaidRoom",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "maidroom.food.click-tray" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "maidroom.food.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "maidroom.food.assert-effect" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "maidroom.food.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

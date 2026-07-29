@@ -116,6 +116,28 @@ public class StudyRoomDiaryMirrorPuzzleControllerTests
     }
 
     [Test]
+    public void TrySnapToConfiguredSolutionAndEvaluateForQa_UsesSuccessRouter_NotForceSolve()
+    {
+        string interactionId = null;
+        StudyRoomMirrorPuzzleSuccessRouter.InteractionHandlerForTests = (controller, id) => interactionId = id;
+
+        mirrorCardRect.anchoredPosition = new Vector2(400f, 200f);
+        mirrorController.NotifyMirrorCardActivated(mirrorCardRect, null);
+
+        Assert.IsTrue(mirrorController.TrySnapToConfiguredSolutionAndEvaluateForQa());
+        Assert.AreEqual("unlock", interactionId);
+        Assert.IsTrue(flowchart.GetBooleanVariable("DiarySolved"));
+    }
+
+    [Test]
+    public void TrySnapToConfiguredSolutionAndEvaluateForQa_WithoutActiveMirror_ReturnsFalse()
+    {
+        SetPrivateField(mirrorController, "mirrorCardRect", null);
+        Assert.IsFalse(mirrorController.TrySnapToConfiguredSolutionAndEvaluateForQa());
+        Assert.IsFalse(flowchart.GetBooleanVariable("DiarySolved"));
+    }
+
+    [Test]
     public void NotifyMirrorCardActivated_BuildsHalfCodeAndMirrorOverlay_WithScatteredDigitPieces()
     {
         mirrorCardRect.anchoredPosition = new Vector2(400f, 200f);

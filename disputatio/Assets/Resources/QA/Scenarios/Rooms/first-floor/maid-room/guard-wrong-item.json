@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "room.maid-room.guard.wrong-item",
+  "roomId": "maid-room",
+  "tier": "guard",
+  "requiredCapabilities": ["maidroom.food.probe"],
+  "steps": [
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.probe"
+    }
+  ]
+}

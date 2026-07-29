@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.hall.guard.reentry",
+  "roomId": "hall",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "hall.nav.click-kitchen-entry",
+    "hall.nav.probe",
+    "hall.nav.assert-route"
+  ],
+  "steps": [
+    {
+      "id": "click-kitchen-entry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.click-kitchen-entry"
+    },
+    {
+      "id": "assert-route",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.assert-route"
+    },
+    {
+      "id": "probe-after-reentry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.probe"
+    }
+  ]
+}

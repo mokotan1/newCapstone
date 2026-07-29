@@ -46,6 +46,20 @@ public class FaucetKeyReleaseController : MonoBehaviour
 
     internal void TryTriggerKeySpawnForTests() => TryTriggerKeySpawn();
 
+    /// <summary>
+    /// QA/autorun: spawn immediately without the Play Mode delay coroutine
+    /// (sync CLI exec cannot wait for Update + WaitForSeconds).
+    /// </summary>
+    public void TriggerImmediateKeySpawnForQa()
+    {
+        float previousDelay = delaySeconds;
+        delaySeconds = 0f;
+        hasTriggered = false;
+        StopAllCoroutines();
+        TryTriggerKeySpawn();
+        delaySeconds = previousDelay;
+    }
+
     void TryTriggerKeySpawn()
     {
         if (hasTriggered)
@@ -99,6 +113,7 @@ public class FaucetKeyReleaseController : MonoBehaviour
             return false;
 
         targetKeyObject.SetActive(true);
+        EnsureActiveInHierarchy(targetKeyObject);
 
         Animator targetAnimator = ResolveKeyAnimator(targetKeyObject);
         if (targetAnimator != null && !string.IsNullOrEmpty(keyAnimatorTriggerName))
@@ -138,6 +153,20 @@ public class FaucetKeyReleaseController : MonoBehaviour
         }
 
         return null;
+    }
+
+    static void EnsureActiveInHierarchy(GameObject target)
+    {
+        if (target == null)
+            return;
+
+        Transform current = target.transform;
+        while (current != null)
+        {
+            if (!current.gameObject.activeSelf)
+                current.gameObject.SetActive(true);
+            current = current.parent;
+        }
     }
 
     Animator ResolveKeyAnimator(GameObject targetKeyObject)

@@ -22,6 +22,21 @@ public sealed class DeveloperModeGuiStyles
         Window != null &&
         ToggleButton != null;
 
+    /// <summary>
+    /// Marks styles stale so the next <see cref="EnsureBuilt"/> rebuilds them.
+    /// Safe to call outside <c>OnGUI</c> (does not touch <see cref="GUI.skin"/>).
+    /// </summary>
+    public void MarkDirty()
+    {
+        appliedFontSize = -1f;
+        Label = null;
+        Button = null;
+        TextField = null;
+        Box = null;
+        Window = null;
+        ToggleButton = null;
+    }
+
     /// <summary>스타일이 없거나 글자 크기가 바뀌었을 때만 다시 만듭니다.</summary>
     public void EnsureBuilt(float fontSize)
     {

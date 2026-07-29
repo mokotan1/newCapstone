@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "roomId": "child-room",
+  "areaId": "second-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["ChildEntrance", "ChildRoom"],
+  "implementationStatus": "PARTIAL",
+  "entryPreset": "childroom.seals.before",
+  "requiredCapabilities": [
+    "childroom.seals.click-seal5",
+    "childroom.seals.probe",
+    "childroom.seals.assert-controller",
+    "childroom.seals.capture"
+  ],
+  "scenarios": [
+    "room.child-room.smoke",
+    "room.child-room.happy-path",
+    "room.child-room.guard.wrong-item",
+    "room.child-room.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}

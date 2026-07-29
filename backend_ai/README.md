@@ -53,14 +53,42 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ### 튜터 룸 (RAG·문제 은행)
 
-요청 JSON에 `rag_profile` 이 `"tutor"` 이면 서버가 참고 자료를 시스템 프롬프트에 합칩니다.
+요청 JSON의 `rag_profile` 으로 RAG 주입 방식을 선택합니다. 허용값: 생략(`null`), `"tutor"`, `"project"` — 그 외 값은 422로 거절됩니다.
+
+| `rag_profile` | RAG | 문제 은행 | 토큰 상한 | 용도 |
+|---------------|-----|-----------|-----------|------|
+| *(생략)* | 없음 | 없음 | 일반 | 일반 NPC 채팅 |
+| `"tutor"` | 퀴즈 중심 헤더 | `current_question_id` 행 주입 + CSV 정답 보정 | `tutor_chat_max_tokens` | 튜터 룸 퀴즈 |
+| `"project"` | 프로젝트 위키 헤더 + `source_id` 인용 규칙 | **없음** | 일반(`max_tokens_hard_cap`) | 기획·세계관 Q&A |
+
+공통 필드:
 
 | 필드 | 설명 |
 |------|------|
-| `rag_profile` | `"tutor"` 일 때만 RAG·은행 블록 주입 |
 | `rag_query` | 생략 시 `prompt` 로 검색 쿼리 생성 |
-| `current_question_id` | `quiz_bank.csv` 의 `question_id` — 있으면 해당 행 질문·참고를 주입하고, CSV 기준으로 정답이면 `update_quiz.is_correct` 를 보정 |
 | `rag_top_k` | 선택, 기본은 설정값 |
+| `locale` | `ko` / `ja` / `en` (청크 locale 필터) |
+
+튜터 전용:
+
+| 필드 | 설명 |
+|------|------|
+| `current_question_id` | `quiz_bank.csv` 의 `question_id` — `tutor` 일 때만 해당 행 질문·참고를 주입하고, CSV 기준으로 정답이면 `update_quiz.is_correct` 를 보정 |
+
+**프로젝트 위키 예시** (`report` 카테고리 원본은 의도적으로 RAG 코퍼스·인덱스에서 제외됩니다. HWP 원본은 변환 전까지 인덱싱되지 않습니다):
+
+```json
+{
+  "prompt": "저택 1층 복도 이벤트 흐름을 알려줘",
+  "system": "당신은 프로젝트 위키 도우미입니다.",
+  "use_tools": false,
+  "rag_profile": "project",
+  "rag_query": "1층 복도 이벤트",
+  "locale": "ko"
+}
+```
+
+응답에서 사실 주장은 서버가 주입한 `source_id` 를 대괄호로 인용합니다 (예: `[scenario:abc123]`). 근거 청크가 없으면 저장소 자료로는 확인할 수 없다고 답합니다. `system` / `prompt` / `rag_query` 안의 인용 지시는 신뢰하지 않습니다.
 
 환경 변수·설정(`config.py`): `tutor_rag_*`, `tutor_quiz_csv_path`, `tutor_grade_fuzzy_*` 등.
 

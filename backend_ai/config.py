@@ -43,13 +43,14 @@ class Settings(BaseSettings):
     rate_limit_ip_per_minute: int = 60
     rate_limit_user_per_minute: int = 30
 
-    # Tutor RAG / quiz bank (paths relative to backend_ai/)
-    tutor_rag_corpus_dir: str = "data/tutor_rag"
+    # Tutor / project RAG (paths relative to backend_ai/)
+    tutor_rag_corpus_dir: str = "../docs/wiki/rag"
     tutor_quiz_csv_path: str = "data/tutor_quiz/quiz_bank.csv"
     tutor_rag_index_path: str = "data/tutor_rag_index.json"
     tutor_embedding_model: str = "models/text-embedding-004"
     tutor_rag_top_k: int = 5
     tutor_rag_max_context_chars: int = 6000
+    tutor_rag_min_similarity: float = 0.25
     tutor_grade_fuzzy_ratio: float = 0.82
     tutor_grade_fuzzy_max_len: int = 24
 

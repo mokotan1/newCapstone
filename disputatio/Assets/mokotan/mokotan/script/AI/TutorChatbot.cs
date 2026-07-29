@@ -34,8 +34,12 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     [SerializeField] public Flowchart flowchart;
     [Tooltip("비워 두면 씬에서 QuizInputHandler를 찾습니다. 전송 Button이 TutorChatbot.OnSendButtonClick에만 연결돼 있을 때 실제 입력은 여기 필드를 읽습니다.")]
     [SerializeField] private QuizInputHandler quizInputHandler;
-    [Tooltip("한 줄에 하나씩 question_id (quiz_bank.csv와 동일). CorrectAnswerCount번째 줄이 현재 출제/채점 ID.")]
+    [Tooltip("레거시 폴백: 한 줄에 하나씩 question_id. sessionQuizBankAsset이 5문제 이상 유효하면 사용되지 않습니다.")]
     [SerializeField] private TextAsset tutorQuestionOrderAsset;
+    [Tooltip("퀴즈 세션 문제 은행 CSV(question_id,question_ko). 비우면 Resources/TutorQuizBank를 로드합니다.")]
+    [SerializeField] private TextAsset sessionQuizBankAsset;
+    [Tooltip("세션 셔플 seed 고정(테스트/재현용). -1이면 매 Start마다 무작위.")]
+    [SerializeField] private int sessionSeedOverrideForTests = -1;
 
     [Header("Tutor 채점 API")]
     [Tooltip("비우면 BaseChatbot의 chat URL에서 /chat → /tutor/grade 로 바꿉니다. EC2 등에 아직 /tutor/grade가 없으면 404 — 서버 배포 후 사용하거나, 여기에 전체 URL을 직접 넣으세요.")]
@@ -108,12 +112,16 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     {
         base.Start();
 
+        BuildTutorQuizSession(out TutorQuizSessionSelector sessionSelector, out string insufficientQuestionsError);
+
         _quizState = new TutorQuizStateTracker(
             flowchart,
             tutorQuestionOrderAsset,
             debugQuizProgress,
             OnQuizCompletedEvent,
-            LockQuizInputAfterSessionComplete);
+            LockQuizInputAfterSessionComplete,
+            sessionSelector,
+            insufficientQuestionsError);
 
         _grader = new TutorQuizGrader(
             tutorGradeUrlOverride,
@@ -154,6 +162,51 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
         _chesterFlow.Subscribe();
     }
 
+    /// <summary>
+    /// One seedable shuffle at session start (design §4): parses the quiz bank, then fixes 5 unique
+    /// question IDs for the whole session. On &lt;5 valid questions, returns a non-null
+    /// <paramref name="insufficientQuestionsError"/> so <see cref="TutorQuizGrader"/> can show a
+    /// localized error and unlock input instead of getting stuck "thinking".
+    /// </summary>
+    private void BuildTutorQuizSession(
+        out TutorQuizSessionSelector sessionSelector,
+        out string insufficientQuestionsError)
+    {
+        sessionSelector = null;
+        insufficientQuestionsError = null;
+
+        TutorQuizBankLoadResult bankResult = sessionQuizBankAsset != null
+            ? TutorQuizBankRepository.LoadFromTextAsset(sessionQuizBankAsset)
+            : TutorQuizBankRepository.LoadFromResources();
+
+        if (bankResult.HasErrors)
+        {
+            foreach (string error in bankResult.Errors)
+                Debug.LogError("[TutorQuiz] 문제 은행 오류: " + error);
+        }
+
+        int seed = sessionSeedOverrideForTests >= 0
+            ? sessionSeedOverrideForTests
+            : Guid.NewGuid().GetHashCode();
+
+        if (!TutorQuizSessionSelector.TrySelectSession(
+                bankResult.ValidQuestionIds,
+                seed,
+                TutorQuizStateTracker.TutorQuizTargetCorrectCount,
+                out sessionSelector,
+                out string selectorError))
+        {
+            insufficientQuestionsError = selectorError;
+            GameLog.LogWarning("[TutorQuiz] 세션 선택 실패(유효 문제 5개 미만) — " + selectorError);
+        }
+        else if (debugQuizProgress)
+        {
+            GameLog.Log(
+                "[TutorQuiz] 세션 문제 " + sessionSelector.SessionQuestionIds.Count +
+                "개 선정 (seed=" + seed + "): " + string.Join(",", sessionSelector.SessionQuestionIds));
+        }
+    }
+
     private void OnEnable()
     {
         if (_chesterFlow == null)
@@ -190,6 +243,17 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     {
         get => useToolsOverrideForNextRequest;
         set => useToolsOverrideForNextRequest = value;
+    }
+
+    /// <summary>
+    /// Same field + <see cref="Godlotto.Interaction.InteractionInputGate"/> block/unblock as
+    /// <see cref="IChatHttpCallbacks.IsRequestInProgress"/> — one gate reason per chatbot instance,
+    /// shared by both the LLM chat path and the deterministic <c>/tutor/grade</c> path.
+    /// </summary>
+    bool IGraderHost.IsRequestInProgress
+    {
+        get => isRequestInProgress;
+        set => ((IChatHttpCallbacks)this).IsRequestInProgress = value;
     }
 
     // ==================================================================
@@ -499,6 +563,9 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             return;
 
         payload.rag_profile = "tutor";
+        if (_quizState.HasInsufficientQuestions)
+            return;
+
         string qid = _quizState.ResolveCurrentQuestionIdFromOrderAsset();
         if (!string.IsNullOrWhiteSpace(qid))
             payload.current_question_id = qid.Trim();

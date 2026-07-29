@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "room.child-room.guard.wrong-item",
+  "roomId": "child-room",
+  "tier": "guard",
+  "requiredCapabilities": ["childroom.seals.probe"],
+  "steps": [
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.probe"
+    }
+  ]
+}

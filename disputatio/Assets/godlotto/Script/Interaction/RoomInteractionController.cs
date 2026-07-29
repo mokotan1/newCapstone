@@ -128,6 +128,7 @@ namespace Godlotto.Interaction
             if (!ShouldExecuteInteraction(interactionId, blockName))
             {
                 LogIgnored($"Gate blocked '{interactionId}' -> '{blockName}'.");
+                OnInteractionGateBlocked(interactionId, blockName);
                 return;
             }
 
@@ -159,6 +160,14 @@ namespace Godlotto.Interaction
 
         /// <summary>ExecuteBlock 직전에 Fungus 변수 미러 등 씬별 준비를 수행합니다.</summary>
         protected virtual void PrepareInteractionExecution(string interactionId, string blockName)
+        {
+        }
+
+        /// <summary>
+        /// <see cref="ShouldExecuteInteraction"/>이 클릭을 막았을 때 호출되는 폴백 훅.
+        /// Fungus 블록은 재실행하지 않지만, 씬별로 대체 동작(예: 일반 채팅 패널 열기)을 붙일 수 있습니다.
+        /// </summary>
+        protected virtual void OnInteractionGateBlocked(string interactionId, string blockName)
         {
         }
 

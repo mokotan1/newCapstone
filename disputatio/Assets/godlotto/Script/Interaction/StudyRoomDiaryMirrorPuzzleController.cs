@@ -146,6 +146,61 @@ namespace Godlotto.Interaction
         }
 
         /// <summary>
+        /// QA observability seam: snap the active mirror card to the inspector-configured
+        /// solution pose and re-evaluate through the normal
+        /// <see cref="EvaluateCurrentPlacement"/> → <see cref="TriggerSuccess"/> →
+        /// <see cref="StudyRoomMirrorPuzzleSuccessRouter"/> path.
+        /// Does not alter player input handlers, does not call ForceSolve, and no-ops when
+        /// no mirror card is active.
+        /// </summary>
+        public bool TrySnapToConfiguredSolutionAndEvaluateForQa()
+        {
+            if (mirrorCardRect == null)
+                return false;
+
+            Vector2 targetPosition = StudyRoomMirrorPuzzleEvaluator.ResolveTargetAnchoredPosition(
+                mirrorCardRect,
+                solutionMarker,
+                targetAnchoredPosition);
+            float targetAngle = StudyRoomMirrorPuzzleEvaluator.ResolveTargetAngle(
+                solutionMarker,
+                targetVisualAngleDegrees);
+
+            mirrorCardRect.anchoredPosition = targetPosition;
+
+            if (mirrorRotator == null)
+                mirrorRotator = mirrorCardRect.GetComponent<FilterCardRotator>();
+
+            if (mirrorRotator != null)
+            {
+                float delta = Mathf.DeltaAngle(mirrorRotator.CurrentVisualAngleDegrees, targetAngle);
+                if (!Mathf.Approximately(delta, 0f))
+                    mirrorRotator.RotateVisualBy(delta);
+            }
+            else
+            {
+                mirrorCardRect.localEulerAngles = new Vector3(0f, 0f, targetAngle);
+            }
+
+            // Immediate evaluation only for this QA entry; restore delay so player path is unchanged.
+            float previousDelay = successDelaySeconds;
+            successDelaySeconds = 0f;
+            try
+            {
+                if (!puzzleActive)
+                    puzzleActive = true;
+
+                EvaluateCurrentPlacement();
+            }
+            finally
+            {
+                successDelaySeconds = previousDelay;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 개발자 모드 QA용 읽기 전용 판정 스냅샷. 성공을 트리거하지 않고
         /// 현재 위치·각도·반사 통과 여부와 밝기 강도만 계산한다.
         /// </summary>

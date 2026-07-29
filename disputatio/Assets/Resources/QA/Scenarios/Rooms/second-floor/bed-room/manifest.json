@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "roomId": "bed-room",
+  "areaId": "second-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["BedEntrance", "BedRoom"],
+  "implementationStatus": "PARTIAL",
+  "entryPreset": "bedroom.book.before",
+  "requiredCapabilities": [
+    "bedroom.book.click",
+    "bedroom.book.probe",
+    "bedroom.book.assert-controller",
+    "bedroom.book.capture"
+  ],
+  "scenarios": [
+    "room.bed-room.smoke",
+    "room.bed-room.happy-path",
+    "room.bed-room.guard.wrong-item",
+    "room.bed-room.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": ["basement.entry"]
+  }
+}

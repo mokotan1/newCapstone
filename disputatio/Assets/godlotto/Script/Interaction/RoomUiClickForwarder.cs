@@ -13,6 +13,17 @@ namespace Godlotto.Interaction
         [SerializeField] string interactionId;
         [SerializeField] Clickable2D clickable;
 
+        /// <summary>Stable interaction route id forwarded to <see cref="RoomInteractionController"/>.</summary>
+        public string InteractionId => interactionId ?? string.Empty;
+
+#if UNITY_EDITOR
+        /// <summary>EditMode test helper — assigns the serialized interaction id without reflection.</summary>
+        public void SetInteractionIdForTests(string value)
+        {
+            interactionId = value;
+        }
+#endif
+
         void Awake()
         {
             if (clickable != null)

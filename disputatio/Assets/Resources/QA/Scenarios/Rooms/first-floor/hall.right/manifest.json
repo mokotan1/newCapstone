@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "roomId": "hall.right",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["Hall_Right", "Hall_Right2", "Hall_RightCross", "Hallway_Right", "Hallway_Right2"],
+  "implementationStatus": "NOT_IMPLEMENTED",
+  "entryPreset": "hall.right.stub",
+  "requiredCapabilities": [],
+  "scenarios": [
+    "room.hall.right.smoke",
+    "room.hall.right.happy-path",
+    "room.hall.right.guard.wrong-item",
+    "room.hall.right.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}

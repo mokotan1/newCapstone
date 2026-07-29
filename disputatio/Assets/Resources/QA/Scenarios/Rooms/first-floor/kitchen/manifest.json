@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "roomId": "kitchen",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["Kitchen"],
+  "implementationStatus": "IMPLEMENTED",
+  "notes": "PlayMode bottle→faucet→key→exit.assert PASS via kitchen.* capabilities (2026-07-27). Faucet Say(waitForClick) completed via QA Say pump + ApplyBlockCompletion; MaidRoomKey spawn via TriggerImmediateKeySpawnForQa + parent activation. No force-solve / no fake HaveMaidKey.",
+  "entryPreset": "kitchen.sink.preset.before-bottle-fill",
+  "requiredCapabilities": [
+    "kitchen.sink.preset.before-bottle-fill",
+    "kitchen.sink.fill-bottle",
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.reset",
+    "kitchen.faucet.click",
+    "kitchen.faucet.probe",
+    "kitchen.faucet.assert-clicked",
+    "kitchen.faucet.capture",
+    "kitchen.key.probe",
+    "kitchen.key.click",
+    "kitchen.exit.assert"
+  ],
+  "scenarios": [
+    "room.kitchen.smoke",
+    "room.kitchen.happy-path",
+    "room.kitchen.guard.wrong-item",
+    "room.kitchen.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": ["maid-room-key"],
+    "flags": {"HaveMaidKey": true},
+    "unlocks": ["maid-room"]
+  }
+}

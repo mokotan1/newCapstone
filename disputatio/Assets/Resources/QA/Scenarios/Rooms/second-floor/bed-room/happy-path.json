@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "room.bed-room.happy-path",
+  "roomId": "bed-room",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "bedroom.book.click",
+    "bedroom.book.probe",
+    "bedroom.book.assert-controller",
+    "bedroom.book.capture"
+  ],
+  "steps": [
+    {
+      "id": "click-book",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.click"
+    },
+    {
+      "id": "probe-book",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.probe"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.assert-controller"
+    },
+    {
+      "id": "capture-book",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

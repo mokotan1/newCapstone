@@ -6,11 +6,12 @@ import math
 from pathlib import Path
 from typing import Any
 
+from models.requests import RagProfile
 from services.locale_support import normalize_locale
 
 logger = logging.getLogger(__name__)
 
-_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
+_TUTOR_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
     "ko": (
         "[참고 자료 — 아래 인용문만 퀴즈 출제·해설·근거로 사용하세요. "
         "없는 내용은 상식으로 보충하지 마세요.]"
@@ -22,6 +23,22 @@ _CONTEXT_BLOCK_HEADERS: dict[str, str] = {
     "en": (
         "[Reference material — Use only the quotes below for quiz questions, "
         "explanations, and evidence. Do not fill gaps with general knowledge.]"
+    ),
+}
+
+_PROJECT_CONTEXT_BLOCK_HEADERS: dict[str, str] = {
+    "ko": (
+        "[프로젝트 참고 자료 — 아래 인용문만 세계관·기획·구현 사실의 근거로 사용하세요. "
+        "없는 내용은 상식으로 보충하지 마세요.]"
+    ),
+    "ja": (
+        "[プロジェクト参考資料 — 以下の引用のみを世界観・企画・実装の根拠に使ってください。"
+        "ない内容は常識で補わないでください。]"
+    ),
+    "en": (
+        "[Project reference — Use only the quotes below as evidence for "
+        "world-building, design, and implementation facts. "
+        "Do not fill gaps with general knowledge.]"
     ),
 }
 
@@ -59,10 +76,12 @@ class TutorRAGService:
         *,
         api_key: str,
         embedding_model: str,
+        min_similarity: float = 0.0,
     ) -> None:
         self._index_path = index_path
         self._api_key = api_key
         self._embedding_model = embedding_model
+        self._min_similarity = min_similarity
         self._chunks: list[dict[str, Any]] = []
         self._load_index()
 
@@ -128,6 +147,19 @@ class TutorRAGService:
                 return ko_matched
         return []
 
+    @staticmethod
+    def _format_citation_line(
+        rank: int,
+        *,
+        source_id: str,
+        source_path: str,
+        score: float,
+    ) -> str:
+        return (
+            f"--- [{rank}] source_id={source_id}, "
+            f"source_path={source_path}, score={score:.3f}"
+        )
+
     def build_context_block(
         self,
         query_text: str,
@@ -135,6 +167,8 @@ class TutorRAGService:
         top_k: int,
         max_context_chars: int,
         locale: str = "ko",
+        min_similarity: float | None = None,
+        rag_profile: RagProfile = "tutor",
     ) -> str:
         pool = self._chunks_for_locale(locale)
         if not pool:
@@ -144,33 +178,56 @@ class TutorRAGService:
         if query_vec is None:
             return ""
 
+        threshold = self._min_similarity if min_similarity is None else min_similarity
+
         scored: list[tuple[float, dict[str, Any]]] = []
         for ch in pool:
             emb = ch.get("embedding")
             if not isinstance(emb, list):
                 continue
             sim = _cosine_similarity(query_vec, emb)
-            scored.append((sim, ch))
+            if sim >= threshold:
+                scored.append((sim, ch))
+
+        if not scored:
+            return ""
 
         scored.sort(key=lambda x: x[0], reverse=True)
         picked = scored[:top_k]
 
-        header = _CONTEXT_BLOCK_HEADERS[normalize_locale(locale)]
+        loc = normalize_locale(locale)
+        if rag_profile == "project":
+            header = _PROJECT_CONTEXT_BLOCK_HEADERS[loc]
+        elif rag_profile == "tutor":
+            header = _TUTOR_CONTEXT_BLOCK_HEADERS[loc]
+        else:
+            raise ValueError(
+                f"rag_profile must be 'tutor' or 'project', got {rag_profile!r}",
+            )
         lines: list[str] = [header]
-        total = 0
+        total = len(header)
         for rank, (sim, ch) in enumerate(picked, start=1):
-            cid = ch.get("id", f"chunk_{rank}")
             body = (ch.get("text") or "").strip()
             if not body:
                 continue
-            piece = f"--- [{rank}] (id={cid}, score={sim:.3f})\n{body}"
-            if total + len(piece) > max_context_chars:
-                remain = max_context_chars - total - 50
+            source_id = str(ch.get("source_id") or ch.get("id") or f"chunk_{rank}")
+            source_path = str(ch.get("source_path") or "unknown")
+            citation = self._format_citation_line(
+                rank,
+                source_id=source_id,
+                source_path=source_path,
+                score=sim,
+            )
+            piece = f"{citation}\n{body}"
+            if total + len(piece) + 2 > max_context_chars:
+                remain = max_context_chars - total - len(citation) - 20
                 if remain > 80:
-                    piece = f"--- [{rank}] (id={cid})\n{_truncate_block(body, remain)}"
+                    piece = f"{citation}\n{_truncate_block(body, remain)}"
                 else:
                     break
             lines.append(piece)
-            total += len(piece)
+            total += len(piece) + 2
 
+        if len(lines) == 1:
+            return ""
         return "\n\n".join(lines)

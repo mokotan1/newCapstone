@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "room.wife-room.smoke",
+  "roomId": "wife-room",
+  "tier": "smoke",
+  "requiredCapabilities": ["wiferoom.wallclock.probe"],
+  "steps": [
+    {
+      "id": "probe-wallclock",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.probe"
+    }
+  ]
+}

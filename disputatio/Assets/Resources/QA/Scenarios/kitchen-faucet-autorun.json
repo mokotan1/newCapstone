@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "kitchen-faucet-autorun",
+  "scene": "Kitchen",
+  "steps": [
+    { "id": "preset", "family": "preset", "name": "apply", "targetId": "kitchen.faucet.preset.before-faucet" },
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "kitchen.faucet.click" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "kitchen.faucet.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "kitchen.faucet.assert-clicked" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "kitchen.faucet.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

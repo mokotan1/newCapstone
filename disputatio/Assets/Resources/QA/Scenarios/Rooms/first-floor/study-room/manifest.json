@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "roomId": "study-room",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["StudyEntrance", "StudyRoomCutScene", "StudyRoom"],
+  "implementationStatus": "PARTIAL",
+  "entryPreset": "studyroom.mirror.preset.before-placement",
+  "requiredCapabilities": [
+    "studyroom.mirror.preset.before-placement",
+    "studyroom.mirror.grant-bookmark",
+    "studyroom.mirror.place-bookmark",
+    "studyroom.mirror.probe",
+    "studyroom.mirror.capture",
+    "studyroom.mirror.assert-solved",
+    "studyroom.mirror.reset"
+  ],
+  "scenarios": [
+    "room.study-room.smoke",
+    "room.study-room.happy-path",
+    "room.study-room.guard.wrong-item",
+    "room.study-room.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": []
+  }
+}

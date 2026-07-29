@@ -22,6 +22,14 @@ internal interface IGraderHost
     void AttachCertificateBypass(UnityWebRequest request);
     void HideTutorQuizUiAfterSessionComplete();
     bool? UseToolsOverrideForNextRequest { get; set; }
+
+    /// <summary>
+    /// Mirrors <see cref="IChatHttpCallbacks.IsRequestInProgress"/> — same request flag +
+    /// <see cref="Godlotto.Interaction.InteractionInputGate"/> block/unblock. <see cref="TutorQuizGrader"/>
+    /// sets this true/false in a try/finally around the <c>/tutor/grade</c> call so timeouts, parse
+    /// failures, and early returns can never leave input stuck locked (design §4).
+    /// </summary>
+    bool IsRequestInProgress { get; set; }
 }
 
 /// <summary>
@@ -37,6 +45,9 @@ internal sealed class TutorQuizGrader
     private readonly TutorQuizStateTracker _state;
 
     private string _chatUrl;
+
+    /// <summary>EditMode seam: when set, replaces the real UnityWebRequest for the grade call.</summary>
+    internal Func<ChatHttpAttemptOutcome> SimulateGradeAttempt;
 
     public TutorQuizGrader(
         string tutorGradeUrlOverride,
@@ -105,68 +116,98 @@ internal sealed class TutorQuizGrader
     public IEnumerator CoGradeThenReact(string playerAnswer, IGraderHost host)
     {
         _state.ExpectingQuizAnswer = false;
-
-        string qid = _state.ResolveCurrentQuestionIdFromOrderAsset();
-        if (string.IsNullOrWhiteSpace(qid))
-        {
-            Debug.LogError("[TutorQuiz] 채점할 question_id가 없습니다. " +
-                           "TutorQuestionOrder·CorrectAnswerCount를 확인하세요.");
-            _state.ExpectingQuizAnswer = true;
-            yield break;
-        }
-
-        string url = ResolveTutorGradeUrl();
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            Debug.LogError("[TutorQuiz] 채점 URL이 비었습니다. " +
-                           "BaseChatbot localServerUrl 또는 TutorGradeUrlOverride를 설정하세요.");
-            _state.ExpectingQuizAnswer = true;
-            yield break;
-        }
-
-        string answerForGrade = playerAnswer ?? "";
-        if (answerForGrade.Length > MaxTutorGradeAnswerChars)
-            answerForGrade = answerForGrade.Substring(0, MaxTutorGradeAnswerChars);
-        int ccBefore = Mathf.Clamp(_state.ReadCorrectAnswerCount(), 0, 10_000);
-
         string locale = CheshireLocaleResolver.ResolveCurrentLocale();
-        var payload = BuildGradeRequestPayload(
-            qid,
-            answerForGrade,
-            ccBefore,
-            TutorQuizStateTracker.TutorQuizTargetCorrectCount,
-            locale);
-        string jsonBody = JsonConvert.SerializeObject(payload);
+        bool answeredCorrectly = false;
 
-        TutorGradeResponseDto grade = null;
-
-        using (var req = new UnityWebRequest(url, "POST"))
+        // Same finally pattern as ChatHttpClient.GetGPTResponse: HTTP timeout, parse failure, or any
+        // early return below must still clear the request flag + InteractionInputGate (design §4) —
+        // never leave the player stuck on "thinking". Released *before* the follow-up
+        // host.GetGPTResponse call further down, which manages this same flag itself and would
+        // no-op (yield break) if called while it were still true.
+        host.IsRequestInProgress = true;
+        try
         {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
-            req.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            req.downloadHandler = new DownloadHandlerBuffer();
-            req.SetRequestHeader("Content-Type", "application/json");
-            host.AttachCertificateBypass(req);
-            req.timeout = 30;
+            if (_state.HasInsufficientQuestions)
+            {
+                Debug.LogError(
+                    "[TutorQuiz] 유효한 문제가 5개 미만입니다: " + _state.InsufficientQuestionsError);
+                bool errorDone = false;
+                host.SayLine(CheshireUiStrings.TutorInsufficientQuestions(locale), () => errorDone = true);
+                yield return new WaitUntil(() => errorDone);
+                yield break;
+            }
 
+            string qid = _state.ResolveCurrentQuestionIdFromOrderAsset();
+            if (string.IsNullOrWhiteSpace(qid))
+            {
+                Debug.LogError("[TutorQuiz] 채점할 question_id가 없습니다. " +
+                               "TutorQuestionOrder·CorrectAnswerCount를 확인하세요.");
+                _state.ExpectingQuizAnswer = true;
+                yield break;
+            }
+
+            string url = ResolveTutorGradeUrl();
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                Debug.LogError("[TutorQuiz] 채점 URL이 비었습니다. " +
+                               "BaseChatbot localServerUrl 또는 TutorGradeUrlOverride를 설정하세요.");
+                _state.ExpectingQuizAnswer = true;
+                yield break;
+            }
+
+            string answerForGrade = playerAnswer ?? "";
+            if (answerForGrade.Length > MaxTutorGradeAnswerChars)
+                answerForGrade = answerForGrade.Substring(0, MaxTutorGradeAnswerChars);
+            int ccBefore = Mathf.Clamp(_state.ReadCorrectAnswerCount(), 0, 10_000);
+
+            var payload = BuildGradeRequestPayload(
+                qid,
+                answerForGrade,
+                ccBefore,
+                TutorQuizStateTracker.TutorQuizTargetCorrectCount,
+                locale);
+            string jsonBody = JsonConvert.SerializeObject(payload);
+
+            ChatHttpAttemptOutcome outcome;
             host.NotifyHttpWaitStarted();
             try
             {
-                yield return req.SendWebRequest();
+                if (SimulateGradeAttempt != null)
+                {
+                    outcome = SimulateGradeAttempt();
+                    yield return null;
+                }
+                else
+                {
+                    using (var req = new UnityWebRequest(url, "POST"))
+                    {
+                        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
+                        req.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                        req.downloadHandler = new DownloadHandlerBuffer();
+                        req.SetRequestHeader("Content-Type", "application/json");
+                        host.AttachCertificateBypass(req);
+                        req.timeout = 30;
+
+                        yield return req.SendWebRequest();
+
+                        string body = req.downloadHandler != null ? req.downloadHandler.text : "";
+                        outcome = new ChatHttpAttemptOutcome(req.result, req.responseCode, req.error ?? "", body);
+                    }
+                }
             }
             finally
             {
                 host.NotifyHttpWaitFinished();
             }
 
-            if (req.result != UnityWebRequest.Result.Success)
+            if (outcome.Result != UnityWebRequest.Result.Success)
             {
-                string body = req.downloadHandler != null ? req.downloadHandler.text : "";
+                string body = outcome.Body;
                 if (body != null && body.Length > 200)
                     body = body.Substring(0, 200) + "…";
                 Debug.LogError(
-                    "[TutorQuiz] /tutor/grade 실패: " + req.error +
-                    " | HTTP " + req.responseCode +
+                    "[TutorQuiz] /tutor/grade 실패: " + outcome.Error +
+                    " | HTTP " + outcome.ResponseCode +
                     " | URL: " + url +
                     " | 서버에 POST /tutor/grade 라우트가 배포됐는지 확인하세요." +
                     " (로그에 404면 구버전 백엔드일 수 있음)" +
@@ -175,10 +216,10 @@ internal sealed class TutorQuizGrader
                 yield break;
             }
 
+            TutorGradeResponseDto grade;
             try
             {
-                grade = JsonConvert.DeserializeObject<TutorGradeResponseDto>(
-                    req.downloadHandler.text);
+                grade = JsonConvert.DeserializeObject<TutorGradeResponseDto>(outcome.Body);
             }
             catch (Exception e)
             {
@@ -186,36 +227,47 @@ internal sealed class TutorQuizGrader
                 _state.ExpectingQuizAnswer = true;
                 yield break;
             }
-        }
 
-        if (grade == null)
+            if (grade == null)
+            {
+                _state.ExpectingQuizAnswer = true;
+                yield break;
+            }
+
+            if (_debug)
+                GameLog.Log(
+                    $"[TutorQuiz] /tutor/grade: qid={grade.question_id}, " +
+                    $"ok={grade.is_correct}, unknown={grade.unknown_question}");
+
+            if (!grade.is_correct || grade.unknown_question)
+            {
+                string hint = string.IsNullOrWhiteSpace(grade.reference_snippet)
+                    ? CheshireUiStrings.WrongAnswerRetry(locale)
+                    : CheshireUiStrings.WrongAnswerWithHint(locale, grade.reference_snippet);
+                bool hintDone = false;
+                host.SayLine(hint, () => hintDone = true);
+                yield return new WaitUntil(() => hintDone);
+                _state.LastGradedWasCorrect = false;
+                _state.LastEmbeddedQuizComplete = false;
+                _state.AwaitingQuestionAdvance = true;
+                _state.ExpectingQuizAnswer = true;
+                yield break;
+            }
+
+            _state.ApplyQuizResult(true, false);
+            _state.LastGradedWasCorrect = true;
+            answeredCorrectly = true;
+        }
+        finally
         {
-            _state.ExpectingQuizAnswer = true;
-            yield break;
+            host.IsRequestInProgress = false;
         }
 
-        if (_debug)
-            GameLog.Log(
-                $"[TutorQuiz] /tutor/grade: qid={grade.question_id}, " +
-                $"ok={grade.is_correct}, unknown={grade.unknown_question}");
-
-        if (!grade.is_correct || grade.unknown_question)
-        {
-            string hint = string.IsNullOrWhiteSpace(grade.reference_snippet)
-                ? CheshireUiStrings.WrongAnswerRetry(locale)
-                : CheshireUiStrings.WrongAnswerWithHint(locale, grade.reference_snippet);
-            bool hintDone = false;
-            host.SayLine(hint, () => hintDone = true);
-            yield return new WaitUntil(() => hintDone);
-            _state.LastGradedWasCorrect = false;
-            _state.LastEmbeddedQuizComplete = false;
-            _state.AwaitingQuestionAdvance = true;
-            _state.ExpectingQuizAnswer = true;
+        // Correct-answer follow-up runs *outside* the grade request-in-progress scope above —
+        // host.GetGPTResponse manages IsRequestInProgress itself (ChatHttpClient) and must see it
+        // false to actually run instead of no-op'ing.
+        if (!answeredCorrectly)
             yield break;
-        }
-
-        _state.ApplyQuizResult(true, false);
-        _state.LastGradedWasCorrect = true;
 
         host.UseToolsOverrideForNextRequest = false;
         Coroutine thinkingHold = host.StartHostCoroutine(host.CoThinkingHoldIfSlow());

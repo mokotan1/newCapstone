@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "room.kitchen.smoke",
+  "roomId": "kitchen",
+  "tier": "smoke",
+  "requiredCapabilities": [
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.probe"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-faucet",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.faucet.preset.before-faucet"
+    },
+    {
+      "id": "probe-readiness",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.probe"
+    }
+  ]
+}

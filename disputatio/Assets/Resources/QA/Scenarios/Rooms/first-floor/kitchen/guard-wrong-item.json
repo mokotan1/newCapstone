@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.kitchen.guard.wrong-item",
+  "roomId": "kitchen",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "kitchen.faucet.preset.before-faucet",
+    "kitchen.faucet.probe"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-faucet",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "kitchen.faucet.preset.before-faucet"
+    },
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "kitchen.faucet.probe"
+    }
+  ]
+}

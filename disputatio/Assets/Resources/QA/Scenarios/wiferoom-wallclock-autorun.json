@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "wiferoom-wallclock-autorun",
+  "scene": "WifeRoom",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "wiferoom.wallclock.click" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "wiferoom.wallclock.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "wiferoom.wallclock.assert-controller" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "wiferoom.wallclock.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "room.hall.happy-path",
+  "roomId": "hall",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "hall.nav.click-kitchen-entry",
+    "hall.nav.probe",
+    "hall.nav.assert-route",
+    "hall.nav.capture"
+  ],
+  "steps": [
+    {
+      "id": "click-kitchen-entry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.click-kitchen-entry"
+    },
+    {
+      "id": "probe-route",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.probe"
+    },
+    {
+      "id": "assert-route",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.assert-route"
+    },
+    {
+      "id": "capture-route",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "room.study-room.smoke",
+  "roomId": "study-room",
+  "tier": "smoke",
+  "requiredCapabilities": [
+    "studyroom.mirror.preset.before-placement",
+    "studyroom.mirror.probe"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-placement",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "studyroom.mirror.preset.before-placement"
+    },
+    {
+      "id": "probe-mirror",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.probe"
+    }
+  ]
+}

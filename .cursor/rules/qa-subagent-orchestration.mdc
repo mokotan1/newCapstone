@@ -1,0 +1,53 @@
+---
+description: Cursor QA subagent delegation and exclusive Unity lease rules for the Subagent QA Driver
+alwaysApply: false
+globs:
+  - .cursor/agents/qa-*.md
+  - docs/qa/**/*
+  - docs/superpowers/plans/*qa-driver*
+  - docs/superpowers/specs/*qa-driver*
+  - disputatio/Assets/mokotan/mokotan/script/QA/**/*
+  - disputatio/Assets/Editor/QA/**/*
+  - disputatio/Assets/Resources/QA/**/*
+  - scripts/qa/**/*
+---
+
+# QA Subagent Orchestration
+
+Use project agents under `.cursor/agents/`:
+
+| Agent | Role | Unity mutation |
+|-------|------|----------------|
+| `qa-coordinator` | Plan, delegate, aggregate | No |
+| `qa-inventory` | Map items → scenes/adapters/tests | No (read-only) |
+| `qa-scenario-author` | Author/review scenario JSON | No |
+| `qa-playtester` | Execute scenarios via QA gateway | **Yes — sole writer** |
+| `qa-evidence-reviewer` | Verify artifacts / reject weak PASS | No (read-only) |
+
+## Exclusive lease
+
+- Only **one** `qa-playtester` job may mutate the Unity Editor or active QA session at a time.
+- Reject a second concurrent lease owner; do not “share” the Editor across agents.
+- Read-only agents may run in parallel (inventory, scenario review, evidence review).
+
+## Handoff contract
+
+Subagents exchange bounded JSON packets including at least:
+
+- `taskId`
+- `scenarioIds`
+- `evidenceRoot` (under `docs/qa/runs/`)
+- `status`: `ready` | `running` | `pass` | `fail` | `blocked`
+- `findings`
+
+## Hard constraints
+
+- QA runs use an isolated QA profile; never mutate the normal player save.
+- No bug fixes during a QA run; diagnosis/implementation is a separate task.
+- Gameplay PASS requires reproduction path, assertions, screenshots, and no new relevant Console exception.
+- Never infer PASS from empty Console alone.
+- Do not write QA results to Google Sheets as part of this workflow.
+
+## Fallback
+
+If Cursor Task custom-agent delegation is unavailable, run the same role prompts sequentially (e.g. `scripts/qa/run-cursor-qa.ps1` / `cursor-agent -p --output-format json`) while preserving the JSON envelope and single-writer rule.

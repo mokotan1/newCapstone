@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "room.study-room.guard.reentry",
+  "roomId": "study-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "studyroom.mirror.preset.before-placement",
+    "studyroom.mirror.grant-bookmark",
+    "studyroom.mirror.place-bookmark",
+    "studyroom.mirror.assert-solved",
+    "studyroom.mirror.reset",
+    "studyroom.mirror.probe"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-placement",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "studyroom.mirror.preset.before-placement"
+    },
+    {
+      "id": "grant-bookmark",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.grant-bookmark"
+    },
+    {
+      "id": "place-bookmark",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.place-bookmark"
+    },
+    {
+      "id": "assert-solved",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.assert-solved"
+    },
+    {
+      "id": "reset-puzzle",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.reset"
+    },
+    {
+      "id": "probe-after-reset",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.probe"
+    }
+  ]
+}

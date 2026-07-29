@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "kitchen.cheshire-repeat",
+  "scene": "Kitchen",
+  "preset": "before-parret",
+  "steps": [
+    {
+      "id": "click-parret-first",
+      "command": "interaction.pointer",
+      "target": "kitchen.parret",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-ai-idle-after-first-click",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "fieldEquals",
+        "field": "AiConnectionState",
+        "value": "Idle",
+        "description": "AI service unavailability (AiConnectionState != Idle/Connected) must be distinguishable from an interaction lock -- checked here as its own assertion, separate from inputUnlocked below."
+      }
+    },
+    {
+      "id": "assert-input-unlocked-after-first-click",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "inputUnlocked",
+        "description": "Distinguishes an interaction lock (this assertion) from AI service unavailability (previous assertion) after the first Cheshire click."
+      }
+    },
+    {
+      "id": "click-parret-repeat",
+      "command": "interaction.pointer",
+      "target": "kitchen.parret",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-input-unlocked-after-repeat-click",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "inputUnlocked",
+        "description": "Repeating the Cheshire click (KitchenParretInteractionGate should now gate ParretClicked==true) must still not leave the global input gate locked."
+      }
+    },
+    {
+      "id": "capture-post-repeat-evidence",
+      "command": "evidence.capture",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-no-console-errors",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "noNewConsoleError",
+        "description": "Repeated Cheshire interaction must not log new console errors."
+      }
+    }
+  ]
+}

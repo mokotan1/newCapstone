@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "room.bed-room.guard.wrong-item",
+  "roomId": "bed-room",
+  "tier": "guard",
+  "requiredCapabilities": ["bedroom.book.probe"],
+  "steps": [
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.probe"
+    }
+  ]
+}

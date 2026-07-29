@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "room.wife-room.guard.wrong-item",
+  "roomId": "wife-room",
+  "tier": "guard",
+  "requiredCapabilities": ["wiferoom.wallclock.probe"],
+  "steps": [
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.probe"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "hall-nav-autorun",
+  "scene": "Hall_playerble",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "hall.nav.click-kitchen-entry" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "hall.nav.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "hall.nav.assert-route" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "hall.nav.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

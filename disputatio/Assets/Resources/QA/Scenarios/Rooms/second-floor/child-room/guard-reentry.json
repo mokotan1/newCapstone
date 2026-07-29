@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.child-room.guard.reentry",
+  "roomId": "child-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "childroom.seals.click-seal5",
+    "childroom.seals.probe",
+    "childroom.seals.assert-controller"
+  ],
+  "steps": [
+    {
+      "id": "click-seal5",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.click-seal5"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.assert-controller"
+    },
+    {
+      "id": "probe-after-reentry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.probe"
+    }
+  ]
+}

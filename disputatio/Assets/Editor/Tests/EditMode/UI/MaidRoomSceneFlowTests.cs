@@ -7,7 +7,11 @@ using UnityEngine;
 
 /// <summary>
 /// MaidRoom.unity Fungus/씬 배선 회귀 잠금.
-/// food 획득 시 pickup+effect 비활성, PuzzleBook_SelectYes는 컨트롤러 openPanel에 위임.
+/// food 획득의 확정 성공은 C# <see cref="ItemPickup"/> 완료가 소유한다: 실제 정리는
+/// PickUpDirect를 호출받는 ItemPickup의 objectsToDeactivateOnPickup 참조가 담당하고,
+/// food 블록에 남은 Fungus SetActive(false) 커맨드는 그 뒤에 위치해 이미 비활성화된
+/// 대상을 다시 false로 설정하는 멱등(idempotent) 안전망일 뿐이다.
+/// PuzzleBook_SelectYes는 컨트롤러 openPanel에 위임한다.
 /// </summary>
 [TestFixture]
 public class MaidRoomSceneFlowTests
@@ -18,10 +22,12 @@ public class MaidRoomSceneFlowTests
     const string PuzzleBookSelectYesBlockName = "PuzzleBook_SelectYes";
     const string FoodPickupFileId = "302541021";
     const string FoodItemEffectFileId = "1934550032";
+    const string FoodItemPickupComponentFileId = "251765675";
     const string PuzzlePanelFileId = "1407025573";
     const string DisabledPuzzleBookSetActivePanelCommandId = "285511175";
     const string DisabledPuzzleBookSetActiveDiaryCommandId = "285511291";
     const string SetActiveCommandScriptGuid = "dbd8c931f22994b9d90e2037fffaa770";
+    const string CallMethodCommandScriptGuid = "688e35811870d403f9e2b1ab2a699d98";
     const string FungusBlockScriptGuid = "3d3d73aef2cfc4f51abf34ac00241f60";
 
     [Test]
@@ -58,6 +64,74 @@ public class MaidRoomSceneFlowTests
         }
 
         Assert.Fail("food block has no enabled SetActive(false) targeting FoodItemEffect.");
+    }
+
+    [Test]
+    public void FoodItemPickup_OwnsConfirmedCleanup_ViaObjectsToDeactivateOnPickup()
+    {
+        string sceneText = ReadMaidRoomSceneText();
+        string pickupComponent = FindObjectBlock(sceneText, "114", FoodItemPickupComponentFileId);
+
+        StringAssert.Contains(
+            "objectsToDeactivateOnPickup:",
+            pickupComponent,
+            "The ItemPickup invoked by Fungus PickUpDirect must own cleanup via objectsToDeactivateOnPickup, "
+            + "so a confirmed pickup deactivates its targets even if later Fungus commands fail.");
+
+        Match arrayMatch = Regex.Match(
+            pickupComponent,
+            @"objectsToDeactivateOnPickup:\r?\n(?<items>(?:  - \{fileID: [0-9]+\}\r?\n)*)");
+        Assert.IsTrue(arrayMatch.Success, "Could not parse objectsToDeactivateOnPickup array.");
+
+        List<string> referencedFileIds = arrayMatch.Groups["items"].Value
+            .Split('\n')
+            .Select(line => Regex.Match(line, @"\{fileID: (?<id>[0-9]+)\}"))
+            .Where(match => match.Success)
+            .Select(match => match.Groups["id"].Value)
+            .ToList();
+
+        CollectionAssert.Contains(
+            referencedFileIds,
+            FoodPickupFileId,
+            "objectsToDeactivateOnPickup must reference the food pickup GameObject (fileID 302541021).");
+        CollectionAssert.Contains(
+            referencedFileIds,
+            FoodItemEffectFileId,
+            "objectsToDeactivateOnPickup must reference FoodItemEffect (fileID 1934550032).");
+    }
+
+    [Test]
+    public void FoodBlock_SetActiveCommandsRunAfterConfirmedPickUpDirectCall()
+    {
+        string sceneText = ReadMaidRoomSceneText();
+        string foodBlock = FindBlockByName(sceneText, FoodBlockName);
+        List<string> commandIds = ParseCommandListFileIds(foodBlock);
+
+        int pickUpDirectIndex = commandIds.FindIndex(id => IsPickUpDirectCall(sceneText, id));
+        Assert.GreaterOrEqual(
+            pickUpDirectIndex,
+            0,
+            "food block must call PickUpDirect so C# owns the confirmed success moment.");
+
+        foreach (string targetFileId in new[] { FoodPickupFileId, FoodItemEffectFileId })
+        {
+            int setActiveIndex = commandIds.FindIndex(id =>
+                IsSetActiveOnTarget(FindObjectBlock(sceneText, "114", id), targetFileId, active: false));
+
+            Assert.GreaterOrEqual(setActiveIndex, 0, $"food block must still SetActive(false) fileID {targetFileId}.");
+            Assert.Greater(
+                setActiveIndex,
+                pickUpDirectIndex,
+                $"Fungus SetActive(false) for fileID {targetFileId} must run after the confirmed PickUpDirect call, "
+                + "so it can only ever be an idempotent no-op instead of racing ahead of C# ownership.");
+        }
+    }
+
+    static bool IsPickUpDirectCall(string sceneText, string commandId)
+    {
+        string command = FindObjectBlock(sceneText, "114", commandId);
+        return command.Contains($"guid: {CallMethodCommandScriptGuid}")
+            && command.Contains("targetMethod: PickUpDirect");
     }
 
     [Test]

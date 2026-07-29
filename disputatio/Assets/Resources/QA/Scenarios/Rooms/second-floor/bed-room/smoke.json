@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "room.bed-room.smoke",
+  "roomId": "bed-room",
+  "tier": "smoke",
+  "requiredCapabilities": ["bedroom.book.probe"],
+  "steps": [
+    {
+      "id": "probe-book",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "bedroom.book.probe"
+    }
+  ]
+}

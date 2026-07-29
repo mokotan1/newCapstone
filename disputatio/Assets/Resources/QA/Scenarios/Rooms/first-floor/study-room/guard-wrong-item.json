@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.study-room.guard.wrong-item",
+  "roomId": "study-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "studyroom.mirror.preset.before-placement",
+    "studyroom.mirror.probe"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-placement",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "studyroom.mirror.preset.before-placement"
+    },
+    {
+      "id": "invoke-unknown-target",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.unknown-wrong-item",
+      "expect": "MissingQaCapability"
+    },
+    {
+      "id": "probe-unchanged",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.probe"
+    }
+  ]
+}

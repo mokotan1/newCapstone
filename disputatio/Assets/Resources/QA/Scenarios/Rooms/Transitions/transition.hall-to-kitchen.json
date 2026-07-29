@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.hall-to-kitchen",
+  "sourceRegion": "hall",
+  "destinationRegion": "kitchen",
+  "entryPreset": "hall.nav.before-kitchen-route",
+  "prerequisites": [],
+  "lockedAssertions": [],
+  "sourceExitContract": ["route.kitchen.available"],
+  "destinationEntryContract": ["scene.Kitchen"],
+  "checkpointContract": ["resumeRegion.kitchen"]
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "room.maid-room.happy-path",
+  "roomId": "maid-room",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "maidroom.food.click-tray",
+    "maidroom.food.probe",
+    "maidroom.food.assert-effect",
+    "maidroom.food.capture"
+  ],
+  "steps": [
+    {
+      "id": "click-tray",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.click-tray"
+    },
+    {
+      "id": "probe-food",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.probe"
+    },
+    {
+      "id": "assert-effect",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.assert-effect"
+    },
+    {
+      "id": "capture-food",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

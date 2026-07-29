@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "room.hall.smoke",
+  "roomId": "hall",
+  "tier": "smoke",
+  "requiredCapabilities": ["hall.nav.probe"],
+  "steps": [
+    {
+      "id": "probe-route",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "hall.nav.probe"
+    }
+  ]
+}

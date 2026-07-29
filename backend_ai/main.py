@@ -55,6 +55,7 @@ _tutor_rag = TutorRAGService(
     index_path=_backend_dir / settings.tutor_rag_index_path,
     api_key=settings.google_api_key,
     embedding_model=settings.tutor_embedding_model,
+    min_similarity=settings.tutor_rag_min_similarity,
 )
 
 _telemetry_service: TelemetryService | None = (

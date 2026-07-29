@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.child-to-wife",
+  "sourceRegion": "child-room",
+  "destinationRegion": "wife-room",
+  "entryPreset": "childroom.seals.before",
+  "prerequisites": [],
+  "lockedAssertions": [],
+  "sourceExitContract": [],
+  "destinationEntryContract": ["scene.WifeEntrance"],
+  "checkpointContract": ["resumeRegion.wife-room"],
+  "implementationStatus": "PARTIAL"
+}

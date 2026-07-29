@@ -60,7 +60,6 @@ namespace Godlotto.Interaction
             if (interactionId == KitchenParretInteractionGate.ParretInteractionId)
             {
                 puzzleState.SetParretClicked(true);
-                DisableParretWorldCollider();
                 return;
             }
 
@@ -78,6 +77,31 @@ namespace Godlotto.Interaction
         {
             puzzleState?.ApplyBlockCompletion(blockName);
             SyncSinkWaterDisplayAfterBlock(blockName);
+        }
+
+        /// <summary>
+        /// ParretClicked는 최초 Fungus 인트로(parret 블록) 재실행만 막는 1회 게이트입니다.
+        /// 이후 클릭은 Fungus를 다시 실행하지 않고 일반 KitchenChatbot 대화 진입점(패널)만 다시 엽니다.
+        /// AI 요청 중복 거절은 KitchenChatbot(BaseChatbot.isRequestInProgress)이 자체적으로 처리합니다.
+        /// </summary>
+        protected override void OnInteractionGateBlocked(string interactionId, string blockName)
+        {
+            if (interactionId != KitchenParretInteractionGate.ParretInteractionId)
+                return;
+
+            if (puzzleState == null || !puzzleState.ParretClicked)
+                return;
+
+            OpenParrotChatEntry();
+        }
+
+        /// <summary>Fungus parret 블록의 최초 대사 이후, 일반 채팅으로 되돌아가는 진입점.</summary>
+        protected virtual void OpenParrotChatEntry()
+        {
+            if (panelRegistry == null)
+                panelRegistry = GetComponent<KitchenPanelRegistry>();
+
+            panelRegistry?.OpenParrotPanel();
         }
 
         void SyncSinkWaterDisplayAfterBlock(string blockName)
@@ -139,11 +163,6 @@ namespace Godlotto.Interaction
                 panelRegistry = GetComponent<KitchenPanelRegistry>();
 
             return panelRegistry != null && panelRegistry.IsFripanPanelOpen;
-        }
-
-        void DisableParretWorldCollider()
-        {
-            SetWorldClickColliderEnabled(KitchenParretInteractionGate.ParretInteractionId, false);
         }
 
         /// <summary>

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "roomId": "hall",
+  "areaId": "first-floor",
+  "notionSource": "https://app.notion.com/p/32cea40d2678817b9f32fc52f944c472",
+  "unityScenes": ["Hall_animate", "Hall_playerble"],
+  "implementationStatus": "PARTIAL",
+  "entryPreset": "hall.nav.before-kitchen-route",
+  "requiredCapabilities": [
+    "hall.nav.click-kitchen-entry",
+    "hall.nav.probe",
+    "hall.nav.assert-route",
+    "hall.nav.capture"
+  ],
+  "scenarios": [
+    "room.hall.smoke",
+    "room.hall.happy-path",
+    "room.hall.guard.wrong-item",
+    "room.hall.guard.reentry"
+  ],
+  "exitContract": {
+    "inventoryContains": [],
+    "flags": {},
+    "unlocks": ["kitchen"]
+  }
+}

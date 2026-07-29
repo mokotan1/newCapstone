@@ -374,4 +374,97 @@ public class TutorQuizStateTrackerTests
         TutorQuizStateTracker tracker = CreateTracker(flowchart: null);
         Assert.IsNull(tracker.ResolveCurrentQuestionIdFromOrderAsset());
     }
+
+    // ---------------------------------------------------------------
+    //  Session selector wiring
+    // ---------------------------------------------------------------
+
+    private static TutorQuizSessionSelector CreateSelector(params string[] ids)
+    {
+        Assert.IsTrue(TutorQuizSessionSelector.TrySelectSession(
+            ids, seed: 1, sessionSize: ids.Length, out TutorQuizSessionSelector selector, out _));
+        return selector;
+    }
+
+    [Test]
+    public void ResolveCurrentQuestionId_WithSessionSelector_UsesSelectorIdsInsteadOfOrderAsset()
+    {
+        // The selector performs a seedable shuffle (design §4), so its SessionQuestionIds order is
+        // not the input order — assert against the selector's own (shuffled) output rather than a
+        // hard-coded pre-shuffle ID, which is what this test actually needs to verify: the tracker
+        // delegates to the selector instead of walking the legacy TutorQuestionOrder asset.
+        TutorQuizSessionSelector selector = CreateSelector("Q010", "Q020", "Q030", "Q040", "Q050");
+        Flowchart fc = CreateFlowchartWithCorrectAnswerCount(0);
+        var tracker = new TutorQuizStateTracker(
+            fc,
+            tutorQuestionOrderAsset: null,
+            debugQuizProgress: false,
+            onQuizCompletedEvent: new UnityEvent(),
+            onQuizSessionFinalized: () => { },
+            sessionSelector: selector);
+
+        Assert.AreEqual(selector.SessionQuestionIds[0], tracker.ResolveCurrentQuestionIdFromOrderAsset());
+    }
+
+    [Test]
+    public void ResolveCurrentQuestionId_WithSessionSelector_AdvancesWithCorrectAnswerCount()
+    {
+        TutorQuizSessionSelector selector = CreateSelector("Q010", "Q020", "Q030", "Q040", "Q050");
+        Flowchart fc = CreateFlowchartWithCorrectAnswerCount(2);
+        var tracker = new TutorQuizStateTracker(
+            fc,
+            tutorQuestionOrderAsset: null,
+            debugQuizProgress: false,
+            onQuizCompletedEvent: new UnityEvent(),
+            onQuizSessionFinalized: () => { },
+            sessionSelector: selector);
+
+        Assert.AreEqual(selector.SessionQuestionIds[2], tracker.ResolveCurrentQuestionIdFromOrderAsset());
+    }
+
+    [Test]
+    public void ResolveCurrentQuestionId_NullSelector_FallsBackToOrderAssetWalk()
+    {
+        Flowchart fc = CreateFlowchartWithCorrectAnswerCount(0);
+        var tracker = new TutorQuizStateTracker(
+            fc,
+            tutorQuestionOrderAsset: null,
+            debugQuizProgress: false,
+            onQuizCompletedEvent: new UnityEvent(),
+            onQuizSessionFinalized: () => { },
+            sessionSelector: null);
+
+        // No order asset and no selector configured — legacy Resources fallback path, still returns
+        // gracefully (null or a value) without throwing.
+        Assert.DoesNotThrow(() => tracker.ResolveCurrentQuestionIdFromOrderAsset());
+    }
+
+    // ---------------------------------------------------------------
+    //  HasInsufficientQuestions
+    // ---------------------------------------------------------------
+
+    [Test]
+    public void HasInsufficientQuestions_DefaultsFalse()
+    {
+        TutorQuizStateTracker tracker = CreateTracker(flowchart: null);
+
+        Assert.IsFalse(tracker.HasInsufficientQuestions);
+        Assert.IsNull(tracker.InsufficientQuestionsError);
+    }
+
+    [Test]
+    public void HasInsufficientQuestions_TrueWhenErrorProvided()
+    {
+        var tracker = new TutorQuizStateTracker(
+            flowchart: null,
+            tutorQuestionOrderAsset: null,
+            debugQuizProgress: false,
+            onQuizCompletedEvent: new UnityEvent(),
+            onQuizSessionFinalized: () => { },
+            sessionSelector: null,
+            insufficientQuestionsError: "insufficient valid questions: need 5, have 3.");
+
+        Assert.IsTrue(tracker.HasInsufficientQuestions);
+        StringAssert.Contains("need 5", tracker.InsufficientQuestionsError);
+    }
 }

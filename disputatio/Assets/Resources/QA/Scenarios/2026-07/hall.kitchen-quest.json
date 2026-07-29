@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "hall.kitchen-quest",
+  "scene": "Hall_playerble",
+  "steps": [
+    {
+      "id": "click-kitchen-entry",
+      "command": "interaction.pointer",
+      "target": "hall.kitchen-entry",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-no-console-errors",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "noNewConsoleError",
+        "description": "Gap (Task 12): HallQaAdapter is a registration-only stub, so click-kitchen-entry is expected to fail explicitly (documented gap) rather than execute a guessed interaction id; this assertion still runs so the run finishes with full evidence."
+      }
+    }
+  ]
+}
