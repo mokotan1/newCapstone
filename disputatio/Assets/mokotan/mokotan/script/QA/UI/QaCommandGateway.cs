@@ -5,11 +5,13 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Godlotto.QA.Core;
+using Godlotto.QA.Developer;
 using Godlotto.QA.Evidence;
 using Godlotto.QA.Input;
 using Godlotto.QA.Profile;
 using Godlotto.QA.Scenarios;
 using Godlotto.QA.Scenes;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Godlotto.QA.Gateway
@@ -103,6 +105,20 @@ namespace Godlotto.QA.Gateway
             return new QaGatewayScenarioSummary(
                 scenario.Id, scenario.Scene, scenario.Preset,
                 scenario.Steps != null ? scenario.Steps.Count : 0, true, Array.Empty<string>());
+        }
+
+        public static QaGatewayScenarioSummary ForValid(DeveloperQaScenarioDefinition scenario)
+        {
+            string scene = !string.IsNullOrWhiteSpace(scenario.Scene)
+                ? scenario.Scene
+                : (scenario.RoomId ?? string.Empty);
+            return new QaGatewayScenarioSummary(
+                scenario.Id,
+                scene,
+                string.Empty,
+                scenario.Steps != null ? scenario.Steps.Count : 0,
+                true,
+                Array.Empty<string>());
         }
 
         public static QaGatewayScenarioSummary ForInvalid(string sourceName, IReadOnlyList<string> errors)
@@ -212,9 +228,12 @@ namespace Godlotto.QA.Gateway
         private readonly IQaInputDriver inputDriver;
         private readonly IQaEvidenceRecorder evidenceRecorder;
         private readonly QaScenarioValidator scenarioValidator;
+        private readonly DeveloperQaScenarioValidator developerScenarioValidator;
         private readonly QaScenarioRunner scenarioRunner;
         private readonly Func<string> evidenceRunDirectoryProvider;
         private readonly Func<IReadOnlyList<(string Name, string Json)>> scenarioSourceProvider;
+        private readonly Func<IDeveloperQaService> developerQaServiceFactory;
+        private readonly IQaPlayModeSceneBootstrap playModeSceneBootstrap;
 
         private readonly object sync = new object();
         private CancellationTokenSource activeRunCts;
@@ -255,6 +274,16 @@ namespace Godlotto.QA.Gateway
         /// Optional RealInput driver retained for diagnostics/status; when <paramref name="inputDriver"/>
         /// is null and this is non-null, the runner uses RealInput instead of API.
         /// </param>
+        /// <param name="developerQaServiceFactory">
+        /// Factory for DeveloperQa room-pack runs (<c>family</c>/<c>name</c>/<c>targetId</c>
+        /// schema). When omitted, constructs a bare <see cref="DeveloperQaService"/>
+        /// (no room adapters). Editor installer should inject
+        /// <c>DeveloperQaServiceFactory.Create</c> so room capabilities are registered.
+        /// </param>
+        /// <param name="playModeSceneBootstrap">
+        /// Ensures Play Mode + <c>scenario.scene</c> before classic runner presets. Editor
+        /// installer must inject a real implementation; omitted in pure unit tests.
+        /// </param>
         public QaCommandGateway(
             IQaEvidenceRecorder evidenceRecorder,
             Func<string> evidenceRunDirectoryProvider = null,
@@ -264,7 +293,9 @@ namespace Godlotto.QA.Gateway
             QaLeaseService leaseService = null,
             Func<byte[]> captureScreenshotPng = null,
             IQaInputDriver inputDriver = null,
-            IQaInputDriver realInputDriver = null)
+            IQaInputDriver realInputDriver = null,
+            Func<IDeveloperQaService> developerQaServiceFactory = null,
+            IQaPlayModeSceneBootstrap playModeSceneBootstrap = null)
         {
             this.evidenceRecorder = evidenceRecorder ?? throw new ArgumentNullException(nameof(evidenceRecorder));
             this.evidenceRunDirectoryProvider = evidenceRunDirectoryProvider;
@@ -274,6 +305,10 @@ namespace Godlotto.QA.Gateway
             this.leaseService = leaseService ?? new QaLeaseService(QaFileLeaseRecoveryStore.CreateDefault());
             this.driver = new QaDriverCore(leaseGate: this.leaseService);
             this.scenarioValidator = new QaScenarioValidator(this.sceneRegistry);
+            this.developerScenarioValidator = new DeveloperQaScenarioValidator();
+            this.developerQaServiceFactory = developerQaServiceFactory
+                ?? (() => new DeveloperQaService());
+            this.playModeSceneBootstrap = playModeSceneBootstrap;
             this.inputDriver = inputDriver
                 ?? realInputDriver
                 ?? new QaApiInputDriver(ResolveInteractable);
@@ -286,7 +321,8 @@ namespace Godlotto.QA.Gateway
                 this.evidenceRecorder,
                 captureSnapshot: () => new QaStateProbe().Capture(),
                 ownerId: DefaultOwnerId,
-                captureScreenshotPng: captureScreenshotPng);
+                captureScreenshotPng: captureScreenshotPng,
+                playModeSceneBootstrap: playModeSceneBootstrap);
         }
 
         // -----------------------------------------------------------------------------------
@@ -356,6 +392,24 @@ namespace Godlotto.QA.Gateway
 
             foreach ((string name, string json) in sources)
             {
+                if (LooksLikeDeveloperQaScenario(json))
+                {
+                    DeveloperQaScenarioValidationResult developerValidation =
+                        developerScenarioValidator.Validate(json);
+                    if (developerValidation.IsValid)
+                    {
+                        summaries.Add(QaGatewayScenarioSummary.ForValid(developerValidation.Scenario));
+                    }
+                    else
+                    {
+                        string displayId = TryPeekScenarioId(json) ?? name;
+                        summaries.Add(QaGatewayScenarioSummary.ForInvalid(
+                            displayId, developerValidation.Errors));
+                    }
+
+                    continue;
+                }
+
                 QaScenarioValidationResult validation = scenarioValidator.Validate(json);
                 summaries.Add(validation.IsValid
                     ? QaGatewayScenarioSummary.ForValid(validation.Scenario)
@@ -388,9 +442,20 @@ namespace Godlotto.QA.Gateway
             }
 
             QaScenarioDefinition scenario = TryFindValidatedScenario(scenarioId, out string notFoundReason);
+            bool isDeveloperQa = false;
+            string developerJson = null;
             if (scenario == null)
             {
-                return QaGatewayRunResult.Failure(QaGatewayOperationCode.NotFound, notFoundReason);
+                developerJson = TryFindValidatedDeveloperQaScenario(
+                    scenarioId, out string developerReason);
+                if (developerJson == null)
+                {
+                    return QaGatewayRunResult.Failure(
+                        QaGatewayOperationCode.NotFound,
+                        notFoundReason ?? developerReason);
+                }
+
+                isDeveloperQa = true;
             }
 
             Task<QaScenarioRunOutcome> runTask;
@@ -411,7 +476,9 @@ namespace Godlotto.QA.Gateway
 
                 activeScenarioId = scenarioId;
                 activeRunId = string.Empty;
-                runTask = scenarioRunner.RunAsync(scenario, activeRunCts.Token);
+                runTask = isDeveloperQa
+                    ? RunDeveloperQaScenarioAsync(scenarioId, developerJson, activeRunCts.Token)
+                    : scenarioRunner.RunAsync(scenario, activeRunCts.Token);
                 activeRunTask = runTask;
             }
 
@@ -429,7 +496,9 @@ namespace Godlotto.QA.Gateway
             catch (Exception ex)
             {
                 return QaGatewayRunResult.Failure(
-                    QaGatewayOperationCode.InternalError, "QaScenarioRunner threw " + ex.GetType().Name + ".");
+                    QaGatewayOperationCode.InternalError,
+                    (isDeveloperQa ? "DeveloperQa" : "QaScenarioRunner")
+                    + " threw " + ex.GetType().Name + ".");
             }
             finally
             {
@@ -666,6 +735,11 @@ namespace Godlotto.QA.Gateway
         {
             foreach ((string name, string json) in SafeLoadScenarioSources())
             {
+                if (LooksLikeDeveloperQaScenario(json))
+                {
+                    continue;
+                }
+
                 QaScenarioValidationResult validation = scenarioValidator.Validate(json);
                 if (validation.IsValid && string.Equals(validation.Scenario.Id, scenarioId, StringComparison.Ordinal))
                 {
@@ -676,6 +750,287 @@ namespace Godlotto.QA.Gateway
 
             reason = "No valid QA scenario with id '" + scenarioId + "' was found.";
             return null;
+        }
+
+        private string TryFindValidatedDeveloperQaScenario(string scenarioId, out string reason)
+        {
+            foreach ((string name, string json) in SafeLoadScenarioSources())
+            {
+                if (!LooksLikeDeveloperQaScenario(json))
+                {
+                    continue;
+                }
+
+                DeveloperQaScenarioValidationResult validation = developerScenarioValidator.Validate(json);
+                if (validation.IsValid
+                    && string.Equals(validation.Scenario.Id, scenarioId, StringComparison.Ordinal))
+                {
+                    reason = null;
+                    return json;
+                }
+            }
+
+            reason = "No valid DeveloperQa scenario with id '" + scenarioId + "' was found.";
+            return null;
+        }
+
+        private async Task<QaScenarioRunOutcome> RunDeveloperQaScenarioAsync(
+            string scenarioId,
+            string scenarioJson,
+            CancellationToken cancellationToken)
+        {
+            DateTime startedAtUtc = DateTime.UtcNow;
+            string sceneName = ResolveDeveloperQaSceneName(scenarioId, scenarioJson);
+
+            if (playModeSceneBootstrap != null && !string.IsNullOrWhiteSpace(sceneName))
+            {
+                QaPlayModeBootstrapResult bootstrap = await playModeSceneBootstrap
+                    .EnsureReadyAsync(sceneName, TimeSpan.FromSeconds(60), cancellationToken)
+                    .ConfigureAwait(true);
+                if (bootstrap == null || !bootstrap.IsSuccess)
+                {
+                    DateTime blockedAt = DateTime.UtcNow;
+                    string message = bootstrap != null
+                        ? bootstrap.Message
+                        : "BLOCKED: Play Mode scene bootstrap returned null.";
+                    if (message.IndexOf("BLOCKED", StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        message = "BLOCKED: " + message;
+                    }
+
+                    try
+                    {
+                        playModeSceneBootstrap.RestoreIfOwned();
+                    }
+                    catch (Exception)
+                    {
+                        // ignore restore failures on blocked path
+                    }
+
+                    return QaScenarioRunOutcome.Create(
+                        scenarioId,
+                        QaRunId.None,
+                        QaScenarioRunOutcomeCode.Blocked,
+                        message,
+                        startedAtUtc,
+                        blockedAt,
+                        Array.Empty<QaScenarioStepOutcome>(),
+                        null);
+                }
+            }
+
+            try
+            {
+                IDeveloperQaService service = developerQaServiceFactory();
+                string resolvedPath = DeveloperQaScenarioRunner.ResolveScenarioPath(scenarioId);
+                var parameters = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["scenario_id"] = scenarioId
+                };
+                if (!string.IsNullOrEmpty(resolvedPath)
+                    && System.IO.File.Exists(resolvedPath))
+                {
+                    parameters["scenario_path"] = resolvedPath;
+                }
+                else if (!string.IsNullOrEmpty(scenarioJson))
+                {
+                    parameters["scenario_json"] = scenarioJson;
+                }
+
+                DeveloperQaCommand command = DeveloperQaCommand.Create(
+                    "gateway-" + scenarioId,
+                    "scenario",
+                    "run",
+                    targetId: scenarioId,
+                    parameters: parameters);
+
+                DeveloperQaResult result = await service.ExecuteAsync(command, cancellationToken)
+                    .ConfigureAwait(true);
+
+                DateTime endedAtUtc = DateTime.UtcNow;
+                QaScenarioRunOutcomeCode code = MapDeveloperQaOutcomeCode(result);
+                return QaScenarioRunOutcome.Create(
+                    scenarioId,
+                    QaRunId.None,
+                    code,
+                    result != null ? result.Message : "DeveloperQa returned null.",
+                    startedAtUtc,
+                    endedAtUtc,
+                    Array.Empty<QaScenarioStepOutcome>(),
+                    null);
+            }
+            finally
+            {
+                if (playModeSceneBootstrap != null)
+                {
+                    try
+                    {
+                        playModeSceneBootstrap.RestoreIfOwned();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning(
+                            "[QaCommandGateway] DeveloperQa Play Mode restore threw: "
+                            + ex.GetType().Name);
+                    }
+                }
+            }
+        }
+
+        public static string ResolveDeveloperQaSceneName(
+            string scenarioId,
+            string scenarioJson)
+        {
+            if (!string.IsNullOrWhiteSpace(scenarioJson))
+            {
+                try
+                {
+                    JObject scenario = JObject.Parse(scenarioJson);
+                    string explicitScene = scenario["scene"]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(explicitScene))
+                    {
+                        return explicitScene.Trim();
+                    }
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+
+            string scenarioPath = DeveloperQaScenarioRunner.ResolveScenarioPath(scenarioId);
+            if (string.IsNullOrEmpty(scenarioPath))
+            {
+                return null;
+            }
+
+            string directory = System.IO.Path.GetDirectoryName(scenarioPath);
+            if (string.IsNullOrEmpty(directory))
+            {
+                return null;
+            }
+
+            string manifestPath = System.IO.Path.Combine(directory, "manifest.json");
+            if (!System.IO.File.Exists(manifestPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                JObject manifest = JObject.Parse(System.IO.File.ReadAllText(manifestPath));
+                JArray unityScenes = manifest["unityScenes"] as JArray;
+                if (unityScenes == null)
+                {
+                    return null;
+                }
+
+                for (int i = 0; i < unityScenes.Count; i++)
+                {
+                    string candidate = unityScenes[i]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(candidate))
+                    {
+                        return candidate.Trim();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+        private static QaScenarioRunOutcomeCode MapDeveloperQaOutcomeCode(DeveloperQaResult result)
+        {
+            if (result == null)
+            {
+                return QaScenarioRunOutcomeCode.Failed;
+            }
+
+            if (result.Code == DeveloperQaResultCode.Cancelled)
+            {
+                return QaScenarioRunOutcomeCode.Interrupted;
+            }
+
+            if (result.Code == DeveloperQaResultCode.Ok)
+            {
+                if (result.Data != null
+                    && result.Data.TryGetValue("state", out string state)
+                    && string.Equals(state, DeveloperQaScenarioStates.Completed, StringComparison.Ordinal))
+                {
+                    return QaScenarioRunOutcomeCode.Passed;
+                }
+
+                // Ok without completed state still means the request executed (e.g. deferred).
+                return QaScenarioRunOutcomeCode.Passed;
+            }
+
+            return QaScenarioRunOutcomeCode.Failed;
+        }
+
+        /// <summary>
+        /// Detects room-pack / DeveloperQa JSON (<c>family</c>/<c>name</c>/<c>targetId</c>)
+        /// versus classic <c>command</c>/<c>timeoutMs</c> scenario schema.
+        /// Manifests also carry <c>roomId</c> but lack <c>tier</c> — do not treat them as scenarios.
+        /// </summary>
+        internal static bool LooksLikeDeveloperQaScenario(string scenarioJson)
+        {
+            if (string.IsNullOrWhiteSpace(scenarioJson))
+            {
+                return false;
+            }
+
+            try
+            {
+                JObject root = JObject.Parse(scenarioJson);
+                bool hasRoomId = root["roomId"] != null
+                    && root["roomId"].Type != JTokenType.Null
+                    && !string.IsNullOrWhiteSpace(root["roomId"].ToString());
+                bool hasTier = root["tier"] != null
+                    && root["tier"].Type != JTokenType.Null
+                    && !string.IsNullOrWhiteSpace(root["tier"].ToString());
+                if (hasRoomId && hasTier)
+                {
+                    return true;
+                }
+
+                JArray steps = root["steps"] as JArray;
+                if (steps == null || steps.Count == 0)
+                {
+                    return false;
+                }
+
+                JToken first = steps[0];
+                return first != null
+                    && first.Type == JTokenType.Object
+                    && first["family"] != null
+                    && first["name"] != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static string TryPeekScenarioId(string scenarioJson)
+        {
+            if (string.IsNullOrWhiteSpace(scenarioJson))
+            {
+                return null;
+            }
+
+            try
+            {
+                JObject root = JObject.Parse(scenarioJson);
+                string id = root["id"]?.ToString();
+                return string.IsNullOrWhiteSpace(id) ? null : id.Trim();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private IReadOnlyList<(string Name, string Json)> SafeLoadScenarioSources()
@@ -715,13 +1070,22 @@ namespace Godlotto.QA.Gateway
             var result = new List<(string Name, string Json)>(assets.Length);
             foreach (TextAsset asset in assets)
             {
-                if (asset != null)
+                if (asset == null || IsNonScenarioResourceName(asset.name))
                 {
-                    result.Add((asset.name, asset.text));
+                    continue;
                 }
+
+                result.Add((asset.name, asset.text));
             }
 
             return result;
+        }
+
+        private static bool IsNonScenarioResourceName(string assetName)
+        {
+            return string.Equals(assetName, "manifest", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(assetName, "catalog", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(assetName, "exclusions", StringComparison.OrdinalIgnoreCase);
         }
 
         public void Dispose()

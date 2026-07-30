@@ -75,13 +75,28 @@ def _manifest_path(rooms_root: Path, area_id: str, room_id: str) -> Path:
     return rooms_root / area_id / room_id / "manifest.json"
 
 
+# Canonical on-disk guard filename used by room packs. Accept the older
+# design-doc name as an alias so either file satisfies coverage.
+_GUARD_WRONG_ITEM = "guard-wrong-item.json"
+_GUARD_WRONG_INPUT_ALIAS = "guard-wrong-input.json"
+
+
 def _required_scenario_files(room_id: str) -> list[str]:
     return [
         "smoke.json",
         "happy-path.json",
-        "guard-wrong-input.json",
+        _GUARD_WRONG_ITEM,
         "guard-reentry.json",
     ]
+
+
+def _scenario_file_present(room_dir: Path, filename: str) -> bool:
+    """True when the required pack file exists, including guard-wrong-input alias."""
+    if (room_dir / filename).is_file():
+        return True
+    if filename == _GUARD_WRONG_ITEM and (room_dir / _GUARD_WRONG_INPUT_ALIAS).is_file():
+        return True
+    return False
 
 
 def audit_coverage(
@@ -146,10 +161,12 @@ def audit_coverage(
         room_dir = manifest.parent
         if status == "IMPLEMENTED":
             for filename in _required_scenario_files(region_id):
-                scenario_path = room_dir / filename
-                if not scenario_path.is_file():
+                if not _scenario_file_present(room_dir, filename):
                     missing_scenario_files.append(f"{region_id}:{filename}")
                     continue
+                scenario_path = room_dir / filename
+                if not scenario_path.is_file() and filename == _GUARD_WRONG_ITEM:
+                    scenario_path = room_dir / _GUARD_WRONG_INPUT_ALIAS
                 try:
                     scenario = json.loads(scenario_path.read_text(encoding="utf-8"))
                 except json.JSONDecodeError:

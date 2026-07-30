@@ -23,6 +23,15 @@ namespace Fungus
         static bool applicationIsQuitting = false;
         readonly static object _lock = new object();  // The keyword "readonly" is friendly to the multi-thread.
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            // Enter Play Mode Options can preserve managed statics between sessions.
+            // Clear the previous session's shutdown guard so Instance can be rebuilt.
+            instance = null;
+            applicationIsQuitting = false;
+        }
+
         void Awake()
         {
             CameraManager = GetComponent<CameraManager>();
