@@ -209,6 +209,14 @@ namespace Godlotto.QA.Developer
                 path = fromPath;
             }
 
+            if (command.Parameters != null
+                && command.Parameters.TryGetValue("scenario_json", out string fromJson)
+                && !string.IsNullOrWhiteSpace(fromJson))
+            {
+                json = fromJson;
+                return new DeveloperQaResult(DeveloperQaResultCode.Ok, "loaded");
+            }
+
             string scenarioId = null;
             if (command.Parameters != null
                 && command.Parameters.TryGetValue("scenario_id", out string fromId)
@@ -261,7 +269,8 @@ namespace Godlotto.QA.Developer
                 return null;
             }
 
-            string fileName = scenarioId.Trim();
+            string trimmedId = scenarioId.Trim();
+            string fileName = trimmedId;
             if (!fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
             {
                 fileName = fileName + ".json";
@@ -279,6 +288,14 @@ namespace Godlotto.QA.Developer
                 if (File.Exists(underAssets))
                 {
                     return underAssets;
+                }
+
+                string nested = FindNestedScenarioPath(
+                    Path.Combine(dataPath, "Resources", "QA", "Scenarios"),
+                    trimmedId);
+                if (!string.IsNullOrEmpty(nested))
+                {
+                    return nested;
                 }
             }
 
@@ -298,8 +315,102 @@ namespace Godlotto.QA.Developer
                 }
             }
 
+            string[] searchRoots =
+            {
+                Path.GetFullPath(Path.Combine(cwd, "disputatio", "Assets", "Resources", "QA", "Scenarios")),
+                Path.GetFullPath(Path.Combine(cwd, "Assets", "Resources", "QA", "Scenarios"))
+            };
+            for (int i = 0; i < searchRoots.Length; i++)
+            {
+                string nested = FindNestedScenarioPath(searchRoots[i], trimmedId);
+                if (!string.IsNullOrEmpty(nested))
+                {
+                    return nested;
+                }
+            }
+
             string root = string.IsNullOrEmpty(dataPath) ? cwd : dataPath;
             return Path.Combine(root, "Resources", "QA", "Scenarios", fileName);
+        }
+
+        /// <summary>
+        /// Finds a nested room-pack JSON under <c>QA/Scenarios/Rooms/**</c> whose
+        /// top-level <c>id</c> matches <paramref name="scenarioId"/>.
+        /// </summary>
+        private static string FindNestedScenarioPath(string scenariosRoot, string scenarioId)
+        {
+            if (string.IsNullOrEmpty(scenariosRoot) || !Directory.Exists(scenariosRoot))
+            {
+                return null;
+            }
+
+            string roomsRoot = Path.Combine(scenariosRoot, "Rooms");
+            if (!Directory.Exists(roomsRoot))
+            {
+                return null;
+            }
+
+            string[] files;
+            try
+            {
+                files = Directory.GetFiles(roomsRoot, "*.json", SearchOption.AllDirectories);
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string path = files[i];
+                string fileName = Path.GetFileName(path);
+                if (string.Equals(fileName, "manifest.json", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(fileName, "catalog.json", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(fileName, "exclusions.json", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string text;
+                try
+                {
+                    text = File.ReadAllText(path);
+                }
+                catch (IOException)
+                {
+                    continue;
+                }
+
+                if (ScenarioJsonDeclaresId(text, scenarioId))
+                {
+                    return path;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool ScenarioJsonDeclaresId(string json, string scenarioId)
+        {
+            if (string.IsNullOrEmpty(json) || string.IsNullOrEmpty(scenarioId))
+            {
+                return false;
+            }
+
+            // Lightweight match avoids a full deserialize on every file during path lookup.
+            string quoted = "\"" + scenarioId + "\"";
+            int idKey = json.IndexOf("\"id\"", StringComparison.Ordinal);
+            if (idKey < 0)
+            {
+                return false;
+            }
+
+            int valueStart = json.IndexOf(quoted, idKey, StringComparison.Ordinal);
+            return valueStart > idKey;
         }
 
         private async Task<DeveloperQaResult> ExecuteRemainingAsync(CancellationToken cancellationToken)

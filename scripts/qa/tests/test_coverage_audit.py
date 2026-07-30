@@ -117,6 +117,102 @@ def test_strict_mode_raises_on_missing_manifests(tmp_path: Path) -> None:
         )
 
 
+def test_implemented_room_accepts_guard_wrong_item_filename(tmp_path: Path) -> None:
+    """Packs ship guard-wrong-item.json; audit must not require guard-wrong-input.json."""
+    rooms_root = tmp_path / "Rooms"
+    room_dir = rooms_root / "first-floor" / "kitchen"
+    room_dir.mkdir(parents=True)
+    (room_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "roomId": "kitchen",
+                "areaId": "first-floor",
+                "unityScenes": ["Kitchen"],
+                "implementationStatus": "IMPLEMENTED",
+                "entryPreset": "kitchen.sink.preset.before-bottle-fill",
+                "requiredCapabilities": ["kitchen.faucet.probe"],
+                "scenarios": [
+                    "room.kitchen.smoke",
+                    "room.kitchen.happy-path",
+                    "room.kitchen.guard.wrong-item",
+                    "room.kitchen.guard.reentry",
+                ],
+                "exitContract": {
+                    "inventoryContains": [],
+                    "flags": {},
+                    "unlocks": [],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    for name in (
+        "smoke.json",
+        "happy-path.json",
+        "guard-wrong-item.json",
+        "guard-reentry.json",
+    ):
+        (room_dir / name).write_text(
+            json.dumps(
+                {
+                    "schemaVersion": 1,
+                    "id": f"room.kitchen.{name.replace('.json', '').replace('-', '.')}",
+                    "roomId": "kitchen",
+                    "tier": "smoke" if name == "smoke.json" else "happy-path" if name == "happy-path.json" else "guard",
+                    "requiredCapabilities": ["kitchen.faucet.probe"],
+                    "steps": [
+                        {
+                            "id": "probe",
+                            "family": "interaction",
+                            "name": "invoke",
+                            "targetId": "kitchen.faucet.probe",
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    catalog_path = tmp_path / "catalog.json"
+    catalog_path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "regions": {
+                    "kitchen": {
+                        "areaId": "first-floor",
+                        "unityScenes": ["Kitchen"],
+                        "implementationStatus": "IMPLEMENTED",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    exclusions_path = tmp_path / "exclusions.json"
+    exclusions_path.write_text(
+        json.dumps({"schemaVersion": 1, "scenes": {}}),
+        encoding="utf-8",
+    )
+    build_settings = tmp_path / "EditorBuildSettings.asset"
+    build_settings.write_text(
+        "m_Scenes:\n  - enabled: 1\n    path: Assets/Scenes/Kitchen.unity\n",
+        encoding="utf-8",
+    )
+
+    report = audit_coverage(
+        catalog_path=catalog_path,
+        rooms_root=rooms_root,
+        exclusions_path=exclusions_path,
+        build_settings_path=build_settings,
+        report_only=True,
+    )
+    missing = report["gaps"]["missingScenarioFiles"]
+    assert "kitchen:guard-wrong-input.json" not in missing
+    assert "kitchen:guard-wrong-item.json" not in missing
+
+
 def test_unmapped_build_scene_requires_exclusion_reason(tmp_path: Path) -> None:
     rooms_root = tmp_path / "Rooms"
     rooms_root.mkdir()

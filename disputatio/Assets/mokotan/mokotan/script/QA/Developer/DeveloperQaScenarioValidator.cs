@@ -112,9 +112,10 @@ namespace Godlotto.QA.Developer
                 errors.Add("Scenario id is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(scenario.Scene))
+            if (string.IsNullOrWhiteSpace(scenario.Scene)
+                && string.IsNullOrWhiteSpace(scenario.RoomId))
             {
-                errors.Add("Scenario scene is required.");
+                errors.Add("Scenario scene or roomId is required.");
             }
 
             if (scenario.Steps == null || scenario.Steps.Count == 0)
