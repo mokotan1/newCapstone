@@ -1,0 +1,57 @@
+{
+  "scenarioId": "kitchen.faucet-key",
+  "cliOutcome": {
+    "returncode": 1,
+    "stderr": "Error: timed out sending command to Unity: cannot reach Unity health endpoint",
+    "stdout_raw": ""
+  },
+  "qaStatusFinal": {
+    "activeRunId": "",
+    "activeScenarioId": "",
+    "commandId": "25e49217dda94e218f614970ec3ad0aa",
+    "evidenceRunDirectoryPath": "C:\\Users\\user\\Documents\\GitHub\\newCapstone\\docs\\qa\\runs\\20260730T022840Z-run-a1ec9b051ff14a4dbf671c8ab13ed700",
+    "isQaProfileActive": true,
+    "isScenarioRunning": false,
+    "registeredSceneNames": [
+      "MainMenuScene",
+      "Kitchen",
+      "Hall_playerble",
+      "MaidRoom",
+      "TutorRoom",
+      "StudyRoom",
+      "ChildRoom",
+      "WifeRoom",
+      "BedRoom"
+    ]
+  },
+  "recoverAfter": {
+    "operationCode": "Success"
+  },
+  "consoleErrors": [],
+  "gatewayEvidencePath": "C:\\Users\\user\\Documents\\GitHub\\newCapstone\\docs\\qa\\runs\\20260730T022840Z-run-a1ec9b051ff14a4dbf671c8ab13ed700",
+  "copiedEvidencePath": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/replay/gateway-runs/20260730T022840Z-run-a1ec9b051ff14a4dbf671c8ab13ed700",
+  "manifest": {
+    "RunId": "a1ec9b051ff14a4dbf671c8ab13ed700",
+    "RunDirectoryName": "20260730T022840Z-run-a1ec9b051ff14a4dbf671c8ab13ed700",
+    "StartedAtUtc": "2026-07-30T02:28:40.052048Z",
+    "EndedAtUtc": "2026-07-30T02:28:41.0857316Z",
+    "Verdict": "Blocked",
+    "VerdictReason": "Partial evidence recorded (assertionsPassed=0, screenshots=0, consoleRecorded=True); a passing assertion AND at least one screenshot are both required for PASS.",
+    "TotalEvents": 5,
+    "AssertionPassedCount": 0,
+    "AssertionFailedCount": 0,
+    "ScreenshotCount": 0,
+    "ConsoleRecorded": true,
+    "EventsFileName": "events.jsonl",
+    "ConsoleFileName": "console.log",
+    "ScreenshotsDirectoryName": "screenshots",
+    "ReportFileName": "report.md"
+  },
+  "reportExcerpt": "# QA Run Report\n\n- Run ID: `a1ec9b051ff14a4dbf671c8ab13ed700`\n- Run directory: `20260730T022840Z-run-a1ec9b051ff14a4dbf671c8ab13ed700`\n- Started (UTC): 2026-07-30T02:28:40.0520480Z\n- Ended (UTC): 2026-07-30T02:28:41.0857316Z\n- Verdict: **BLOCKED**\n- Reason: Partial evidence recorded (assertionsPassed=0, screenshots=0, consoleRecorded=True); a passing assertion AND at least one screenshot are both required for PASS.\n\n## Evidence Summary\n\n| Metric | Count |\n|---|---|\n| Total events | 5 |\n| Assertions passed | 0 |\n| Assertions failed | 0 |\n| Screenshots attached | 0 |\n| Console log recorded | yes |\n\n## Artifacts\n\n- Events: `events.jsonl` (append-only; not tracked in git, see run directory)\n- Console log: `console.log` (not tracked in git)\n- Screenshots: `screenshots/` (not tracked in git)\n",
+  "journalTail": "{\"SequenceNumber\":1,\"TimestampUtc\":\"2026-07-30T02:28:40.0636416Z\",\"Type\":\"RunBegan\",\"CommandId\":\"\",\"Code\":\"\",\"Passed\":null,\"Message\":\"QA run started.\",\"Data\":{\"SceneName\":\"\",\"QuestCurrentStepId\":\"\",\"InputGateLocked\":\"False\",\"AiConnectionState\":\"Idle\",\"ConsoleErrorCount\":\"0\",\"InventoryItemIds\":\"\",\"QuestCompletedStepIds\":\"\"}}\n{\"SequenceNumber\":2,\"TimestampUtc\":\"2026-07-30T02:28:41.0734068Z\",\"Type\":\"Note\",\"CommandId\":\"kitchen.faucet-key\",\"Code\":\"\",\"Passed\":null,\"Message\":\"Restoring QA profile threw UnityException.\",\"Data\":{}}\n{\"SequenceNumber\":3,\"TimestampUtc\":\"2026-07-30T02:28:41.0754265Z\",\"Type\":\"Note\",\"CommandId\":\"auto-finalize-safety-net\",\"Code\":\"\",\"Passed\":null,\"Message\":\"Auto safety-net screenshot capture threw UnityException.\",\"Data\":{}}\n{\"SequenceNumber\":4,\"TimestampUtc\":\"2026-07-30T02:28:41.0842168Z\",\"Type\":\"ConsoleRecorded\",\"CommandId\":\"\",\"Code\":\"\",\"Passed\":null,\"Message\":\"Console output recorded.\",\"Data\":{\"length\":\"36\"}}\n{\"SequenceNumber\":5,\"TimestampUtc\":\"2026-07-30T02:28:41.0857316Z\",\"Type\":\"RunEnded\",\"CommandId\":\"\",\"Code\":\"\",\"Passed\":null,\"Message\":\"QA run ended.\",\"Data\":{\"SceneName\":\"\",\"QuestCurrentStepId\":\"\",\"InputGateLocked\":\"False\",\"AiConnectionState\":\"Idle\",\"ConsoleErrorCount\":\"0\",\"InventoryItemIds\":\"\",\"QuestCompletedStepIds\":\"\"}}",
+  "verdict": "Blocked",
+  "verdictReason": "Partial evidence recorded (assertionsPassed=0, screenshots=0, consoleRecorded=True); a passing assertion AND at least one screenshot are both required for PASS.",
+  "assertionPassedCount": 0,
+  "screenshotCount": 0,
+  "sawRunning": false
+}
