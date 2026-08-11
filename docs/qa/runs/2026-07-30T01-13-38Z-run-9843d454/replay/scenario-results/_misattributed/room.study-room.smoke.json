@@ -1,0 +1,64 @@
+{
+  "scenarioId": "room.study-room.smoke",
+  "cliOutcome": {
+    "returncode": 1,
+    "stderr": "Error: timed out sending command to Unity: cannot reach Unity health endpoint",
+    "stdout_raw": ""
+  },
+  "qaStatusFinal": {
+    "activeRunId": "",
+    "activeScenarioId": "",
+    "commandId": "f17b3ead62a94ecfaaaaac1a3d1c11ad",
+    "evidenceRunDirectoryPath": "C:\\Users\\user\\Documents\\GitHub\\newCapstone\\docs\\qa\\runs\\20260730T023544Z-run-6010e536512f46deb3211aa5459f702b",
+    "isQaProfileActive": true,
+    "isScenarioRunning": false,
+    "registeredSceneNames": [
+      "MainMenuScene",
+      "Kitchen",
+      "Hall_playerble",
+      "MaidRoom",
+      "TutorRoom",
+      "StudyRoom",
+      "ChildRoom",
+      "WifeRoom",
+      "BedRoom"
+    ]
+  },
+  "recoverAfter": {
+    "operationCode": "Success"
+  },
+  "consoleErrors": [
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.Flowchart.GetBooleanVariable (System.String key) (at Assets/Fungus/Scripts/Components/Flowchart.cs:904)\nWorldItemDropZone.IsPersistedFungusBoolTrue (System.String key) (at Assets/godlotto/Script/DropZone/WorldItemDropZone.cs:52)\nWorldItemDropZone.ApplyPersistedUnlockIfNeeded () (at Assets/godlotto/Script/DropZone/WorldItemDropZone.cs:42)\nWorldItemDropZone.Start () (at Assets/godlotto/Script/DropZone/WorldItemDropZone.cs:26)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.Flowchart.GetBooleanVariable (System.String key) (at Assets/Fungus/Scripts/Components/Flowchart.cs:904)\nElectricLightController.Start () (at Assets/godlotto/KTH/ElectricLightController.cs:65)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.VariableBase`1[T].Start () (at Assets/Fungus/Scripts/Components/Variable.cs:249)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.VariableBase`1[T].Start () (at Assets/Fungus/Scripts/Components/Variable.cs:249)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.VariableBase`1[T].Start () (at Assets/Fungus/Scripts/Components/Variable.cs:249)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.VariableBase`1[T].Start () (at Assets/Fungus/Scripts/Components/Variable.cs:249)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.Flowchart.GetBooleanVariable (System.String key) (at Assets/Fungus/Scripts/Components/Flowchart.cs:904)\nElectricLightController.Update () (at Assets/godlotto/KTH/ElectricLightController.cs:142)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.Flowchart.GetBooleanVariable (System.String key) (at Assets/Fungus/Scripts/Components/Flowchart.cs:904)\nElectricLightController.Update () (at Assets/godlotto/KTH/ElectricLightController.cs:142)",
+    "Rethrowing Exception thrown by:Flowchart:Start.SavePoint#0\nFungus.Block/<Execute>d__62:MoveNext () (at Assets/Fungus/Scripts/Components/Block.cs:323)\nUnityEngine.MonoBehaviour:StartCoroutine (System.Collections.IEnumerator)\nFungus.Flowchart:ExecuteBlock (Fungus.Block,int,System.Action) (at Assets/Fungus/Scripts/Components/Flowchart.cs:593)\nFungus.EventHandler:ExecuteBlock () (at Assets/Fungus/Scripts/Components/EventHandler.cs:82)\nFungus.GameStarted/<GameStartCoroutine>d__2:MoveNext () (at Assets/Fungus/Scripts/EventHandlers/GameStarted.cs:35)\nUnityEngine.GUIUtility:ProcessEvent (int,intptr,bool&)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.SavePoint.OnEnter () (at Assets/Fungus/Scripts/Commands/SavePoint.cs:118)\nFungus.Command.Execute () (at Assets/Fungus/Scripts/Components/Command.cs:137)\nFungus.Block+<Execute>d__62.MoveNext () (at Assets/Fungus/Scripts/Components/Block.cs:324)\nUnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <fde3c13fb32a45329a891b3df03f7908>:0)\nUnityEngine.MonoBehaviour:StartCoroutine(IEnumerator)\nFungus.Flowchart:ExecuteBlock(Block, Int32, Action) (at Assets/Fungus/Scripts/Components/Flowchart.cs:593)\nFungus.EventHandler:ExecuteBlock() (at Assets/Fungus/Scripts/Components/EventHandler.cs:82)\nFungus.<GameStartCoroutine>d__2:MoveNext() (at Assets/Fungus/Scripts/EventHandlers/GameStarted.cs:35)\nUnityEngine.GUIUtility:ProcessEvent(Int32, IntPtr, Boolean&)",
+    "NullReferenceException: Object reference not set to an instance of an object\nFungus.VariableBase`1[T].get_globalStaicRef () (at Assets/Fungus/Scripts/Components/Variable.cs:190)\nFungus.VariableBase`1[T].get_Value () (at Assets/Fungus/Scripts/Components/Variable.cs:210)\nFungus.Flowchart.GetBooleanVariable (System.String key) (at Assets/Fungus/Scripts/Components/Flowchart.cs:904)\nElectricLightController.Update () (at Assets/godlotto/KTH/ElectricLightController.cs:142)"
+  ],
+  "gatewayEvidencePath": "C:\\Users\\user\\Documents\\GitHub\\newCapstone\\docs\\qa\\runs\\20260730T023544Z-run-6010e536512f46deb3211aa5459f702b",
+  "copiedEvidencePath": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/replay/gateway-runs/20260730T023544Z-run-6010e536512f46deb3211aa5459f702b",
+  "manifest": {
+    "RunId": "6010e536512f46deb3211aa5459f702b",
+    "RunDirectoryName": "20260730T023544Z-run-6010e536512f46deb3211aa5459f702b",
+    "StartedAtUtc": "2026-07-30T02:35:44.3909341Z",
+    "Status": "InProgress",
+    "EventsFileName": "events.jsonl",
+    "JournalFileName": "journal.jsonl",
+    "ConsoleFileName": "console.log",
+    "ScreenshotsDirectoryName": "screenshots",
+    "PatchesDirectoryName": "patches",
+    "ReportFileName": "report.md"
+  },
+  "reportExcerpt": "# QA Run Report\n\n(stub — replace on Finalize)\n",
+  "journalTail": "{\"SequenceNumber\":1,\"TimestampUtc\":\"2026-07-30T02:35:44.4049363Z\",\"Type\":\"RunBegan\",\"CommandId\":\"\",\"Code\":\"\",\"Passed\":null,\"Message\":\"QA run started.\",\"Data\":{}}",
+  "verdict": null,
+  "verdictReason": null,
+  "assertionPassedCount": null,
+  "screenshotCount": null,
+  "sawRunning": false
+}

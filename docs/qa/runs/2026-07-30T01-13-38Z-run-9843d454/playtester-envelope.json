@@ -1,0 +1,39 @@
+{
+  "taskId": "qa-20260730-autorun",
+  "evidenceRoot": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454",
+  "status": "fail",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "blocker",
+      "classification": "QA_INFRA_DEFECT",
+      "summary": "qa_run does not open scenario.scene / enter Play Mode before adapter preset/interaction; 5/6 legacy scenarios fail with missing scene controller.",
+      "evidence": "Editor state before runs: False|TutorRoom (Edit Mode)."
+    },
+    {
+      "id": "F2",
+      "severity": "blocker",
+      "classification": "QA_INFRA_DEFECT",
+      "summary": "room.* scenario packs schema-mismatch — not loadable via qa_run; study/child/wife/bed have no legacy substitutes.",
+      "evidence": "inventory-findings.json runtimeRunnableViaQaList=false"
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "classification": "OBSERVATION",
+      "summary": "tutorroom.cheshire-quiz Passed with assertions+screenshots while Editor scene was already TutorRoom; may be environment-dependent.",
+      "evidence": "gateway-runs/20260730T012633Z-run-3089a0ef04f0494082a30bef43c4b7bc"
+    }
+  ],
+  "leaseOwnerId": "qa-20260730-playtester",
+  "profileRestoreConfirmed": true,
+  "manifestPaths": [
+    "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/playtester-results.json",
+    "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/smoke-summary.md"
+  ],
+  "scenarioSummary": {
+    "pass": 1,
+    "fail": 5,
+    "blocked": 8
+  }
+}
