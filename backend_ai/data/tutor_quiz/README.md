@@ -9,9 +9,12 @@ cd backend_ai
 python scripts/validate_quiz_bank.py
 ```
 
-필수 열: `question_id`, `question_ko`, `acceptable_answers`, `reference_snippet`
+필수 열: `question_id`, `question_ko`, `acceptable_answers_ko`, `reference_snippet_ko`
 
-- `acceptable_answers`: 정답을 `|`로 구분 (예: `베드로|시몬 베드로`)
+다국어(선택): `question_ja`, `question_en`, `acceptable_answers_ja`, `acceptable_answers_en`, `reference_snippet_ja`, `reference_snippet_en`  
+(비어 있으면 서버가 한국어 열로 폴백합니다. 구형 `acceptable_answers` / `reference_snippet` 열도 로더가 인식합니다.)
+
+- `acceptable_answers_*`: 정답을 `|`로 구분 (예: `베드로|시몬 베드로` / `Peter|Simon Peter`)
 - `difficulty`, `tags`는 선택
 
 Unity `Resources/TutorQuestionOrder.txt`에 출제 순서대로 `question_id`를 한 줄에 하나씩 적으면, 해당 순서로 서버 판정에 ID가 전달됩니다.

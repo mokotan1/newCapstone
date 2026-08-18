@@ -8,6 +8,7 @@ from models.requests import ChatRequest
 from models.responses import SSEEvent
 from providers.base import AIProvider
 from services.chat_service import ChatService, _user_visible_ai_error
+from services.locale_support import response_language_instruction, user_visible_ai_error
 from tools.game_tools import GAME_TOOLS
 from tools.registry import ToolRegistry
 
@@ -31,6 +32,22 @@ class _MockProvider(AIProvider):
             yield event
 
 
+class _CapturingProvider(_MockProvider):
+    def __init__(self, events: list[SSEEvent]):
+        super().__init__("capture", events)
+        self.last_messages = None
+
+    async def stream_chat(self, messages, tools=None, temperature=0.7, max_tokens=512) -> AsyncIterator[SSEEvent]:
+        self.last_messages = messages
+        async for event in super().stream_chat(
+            messages,
+            tools=tools,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        ):
+            yield event
+
+
 def test_user_visible_ai_error_rate_limit() -> None:
     msg = _user_visible_ai_error(RuntimeError("Error code: 429 - rate_limit_exceeded"))
     assert "한도" in msg
@@ -38,6 +55,99 @@ def test_user_visible_ai_error_rate_limit() -> None:
 
 def test_user_visible_ai_error_generic() -> None:
     assert _user_visible_ai_error(RuntimeError("broken")) == "모든 AI 엔진 실패"
+
+
+def test_user_visible_error_rate_limit_en() -> None:
+    msg = user_visible_ai_error(
+        RuntimeError("Error code: 429 - rate_limit_exceeded"),
+        locale="en",
+    )
+    lower = msg.lower()
+    assert "limit" in lower or "rate" in lower
+
+
+def test_user_visible_error_generic_en() -> None:
+    msg = user_visible_ai_error(RuntimeError("broken"), locale="en")
+    assert "fail" in msg.lower()
+
+
+def test_user_visible_error_rate_limit_ja() -> None:
+    msg = user_visible_ai_error(
+        RuntimeError("Error code: 429 - too many requests"),
+        locale="ja",
+    )
+    assert msg  # non-empty localized Japanese
+    assert "한도" not in msg
+    assert "limit" not in msg.lower()
+
+
+def test_user_visible_error_generic_ja() -> None:
+    msg = user_visible_ai_error(RuntimeError("broken"), locale="ja")
+    assert msg
+    assert "모든 AI" not in msg
+
+
+@pytest.mark.asyncio
+async def test_build_messages_includes_response_language_rule_for_ja() -> None:
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="ok")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+    await service.chat(
+        ChatRequest(
+            prompt="hello",
+            system="UNIQUE_CLIENT_PERSONA_MARKER",
+            locale="ja",
+            use_tools=False,
+        )
+    )
+    assert provider.last_messages is not None
+    system = provider.last_messages[0]["content"]
+    user = provider.last_messages[1]["content"]
+    expected = response_language_instruction("ja")
+    assert expected
+    assert expected in system
+    assert "Japanese" in expected or "日本語" in expected
+    # Untrusted client system must stay out of the trusted system channel.
+    assert "UNIQUE_CLIENT_PERSONA_MARKER" not in system
+    assert "UNIQUE_CLIENT_PERSONA_MARKER" in user
+
+
+@pytest.mark.asyncio
+async def test_tool_instruction_en_uses_english_markers() -> None:
+    """locale=en trusted system must use EN tool-instruction prose, not KO chrome."""
+    provider = _CapturingProvider([SSEEvent(type="done", full_text="ok")])
+    service = ChatService(provider, None, _build_registry())
+    await service.chat(
+        ChatRequest(
+            prompt="hello",
+            system="persona",
+            locale="en",
+            use_tools=True,
+        )
+    )
+    assert provider.last_messages is not None
+    system = provider.last_messages[0]["content"]
+    assert "중요: 응답 방식" not in system
+    assert "반드시 캐릭터" not in system
+    lower = system.lower()
+    assert "tool" in lower or "function" in lower
+    assert "important" in lower or "response" in lower
+
+
+@pytest.mark.asyncio
+async def test_stream_error_localized_for_en() -> None:
+    service = ChatService(
+        primary=_MockProvider("groq", should_fail=True),
+        fallback=None,
+        registry=_build_registry(),
+    )
+    collected = [
+        e async for e in service.stream_chat(ChatRequest(prompt="hi", locale="en"))
+    ]
+    error_events = [e for e in collected if e.type == "error"]
+    assert len(error_events) == 1
+    assert "fail" in (error_events[0].content or "").lower()
 
 
 def _build_registry() -> ToolRegistry:
@@ -152,3 +262,57 @@ class TestChatServiceNonStreaming:
         result = await service.chat(request)
         assert result.response == "답변"
         assert len(result.function_calls) == 0
+@pytest.mark.asyncio
+async def test_hint_rewrite_adds_trusted_policy_and_untrusted_document():
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="병은 목마르다. 싱크대가 기억한다.")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+
+    await service.chat(
+        ChatRequest(
+            prompt="이 병 어디다 써?",
+            system="client scene",
+            hint_rewrite={
+                "hint_id": "opaque_bottle_sink_use",
+                "item_id": "opaque_bottle",
+                "hint_target": "kitchen_sink",
+                "hint_level": "direct",
+                "base_hint": "이 병은 주방 싱크대에서 사용할 수 있다.",
+                "required_terms": ["병", "싱크대"],
+                "forbidden_terms": ["열쇠"],
+            },
+        )
+    )
+
+    assert provider.last_messages is not None
+    assert "rewrite only" in provider.last_messages[0]["content"]
+    user_bundle = "\n".join(m["content"] for m in provider.last_messages if m["role"] == "user")
+    assert "hint_rewrite" in user_bundle
+    assert "opaque_bottle_sink_use" in user_bundle
+
+
+@pytest.mark.asyncio
+async def test_hint_rewrite_forbidden_term_falls_back():
+    provider = _CapturingProvider(
+        [SSEEvent(type="done", full_text="싱크대에서 열쇠를 꺼내.")]
+    )
+    service = ChatService(provider, None, ToolRegistry())
+
+    result = await service.chat(
+        ChatRequest(
+            prompt="이 병 어디다 써?",
+            hint_rewrite={
+                "hint_id": "opaque_bottle_sink_use",
+                "item_id": "opaque_bottle",
+                "hint_target": "kitchen_sink",
+                "hint_level": "direct",
+                "base_hint": "이 병은 주방 싱크대에서 사용할 수 있다.",
+                "required_terms": ["병", "싱크대"],
+                "forbidden_terms": ["열쇠"],
+                "fallback_line": "그 병은 주방 싱크대에서 물을 채워볼 수 있다.",
+            },
+        )
+    )
+
+    assert result.response == "그 병은 주방 싱크대에서 물을 채워볼 수 있다."

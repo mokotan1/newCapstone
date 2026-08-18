@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "room.study-room.happy-path",
+  "roomId": "study-room",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "studyroom.mirror.preset.before-placement",
+    "studyroom.mirror.grant-bookmark",
+    "studyroom.mirror.place-bookmark",
+    "studyroom.mirror.probe",
+    "studyroom.mirror.capture",
+    "studyroom.mirror.assert-solved"
+  ],
+  "steps": [
+    {
+      "id": "apply-before-placement",
+      "family": "preset",
+      "name": "apply",
+      "targetId": "studyroom.mirror.preset.before-placement"
+    },
+    {
+      "id": "grant-bookmark",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.grant-bookmark"
+    },
+    {
+      "id": "place-bookmark",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.place-bookmark"
+    },
+    {
+      "id": "probe-state",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.probe"
+    },
+    {
+      "id": "capture-placement",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.capture"
+    },
+    {
+      "id": "assert-solved",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "studyroom.mirror.assert-solved"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

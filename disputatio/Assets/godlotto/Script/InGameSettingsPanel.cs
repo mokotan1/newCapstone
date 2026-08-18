@@ -315,38 +315,33 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     private void CleanupDontDestroyObjects()
     {
-        var temp = new GameObject("TempSceneProbe");
-        DontDestroyOnLoad(temp);
-        var ddScene = temp.scene;
-        Destroy(temp);
+        CleanupDontDestroyGameplayRoots();
+    }
 
-        var roots = new List<GameObject>();
-        ddScene.GetRootGameObjects(roots);
+    /// <summary>
+    /// Runtime entry point: discovers every current DontDestroyOnLoad root and
+    /// wipes the ones not covered by <see cref="DontDestroyGameplayCleanup.ShouldPreserveRoot"/>.
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots()
+    {
+        CleanupDontDestroyGameplayRoots(DontDestroyGameplayCleanup.FindDontDestroyOnLoadRoots());
+    }
 
-        foreach (var obj in roots)
-        {
-            if (ShouldPreserveDontDestroyRoot(obj, gameObject))
-                continue;
-
-            Destroy(obj);
-        }
+    /// <summary>
+    /// EditMode-testable overload: applies the shared cleanup policy to an
+    /// explicit root list with an injectable destroy callback instead of the
+    /// Play-Mode-only DontDestroyOnLoad discovery.
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots(IList<GameObject> roots, System.Action<GameObject> destroyRoot = null)
+    {
+        DontDestroyGameplayCleanup.DestroyUnpreservedRoots(roots, gameObject, destroyRoot);
     }
 
     public static bool ShouldPreserveDontDestroyRoot(GameObject root, GameObject currentSettingsObject)
     {
-        if (root == null)
-            return false;
-
-        if (root == currentSettingsObject)
-            return true;
-
-        if (root.GetComponent<GlobalSettingManager>() != null)
-            return true;
-
-        if (root.GetComponent<GlobalVariables>() != null)
-            return true;
-
-        return root.name == "Variablemanager";
+        // Keep audio/video settings across return-to-menu.
+        // Do NOT preserve GlobalVariables / Variablemanager — those carry Fungus gameplay flags.
+        return DontDestroyGameplayCleanup.ShouldPreserveRoot(root, currentSettingsObject);
     }
 
     public void ReturnToGame()

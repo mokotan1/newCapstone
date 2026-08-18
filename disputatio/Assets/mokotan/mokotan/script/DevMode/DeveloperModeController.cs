@@ -8,11 +8,17 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
     [SerializeField] private KeyCode toggleOverlayKey = KeyCode.F3;
     [SerializeField] private KeyCode quickRestartKey = KeyCode.F5;
     [SerializeField] private KeyCode skipOpeningKey = KeyCode.F6;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [SerializeField] private KeyCode toggleQaPanelKey = KeyCode.F7;
+#endif
 
     [Header("Services")]
     [SerializeField] private QuickRestartService quickRestartService;
     [SerializeField] private OpeningSkipService openingSkipService;
     [SerializeField] private InGameDeveloperOverlay developerOverlay;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [SerializeField] private Godlotto.QA.Gateway.QaDeveloperPanel qaDeveloperPanel;
+#endif
 
     public static bool IsDeveloperModeEnabled { get; private set; }
 
@@ -90,7 +96,93 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
             quickRestartService.TriggerRestart();
         if (Input.GetKeyDown(skipOpeningKey))
             openingSkipService.SkipOpening();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (Input.GetKeyDown(toggleQaPanelKey))
+            ToggleQaDeveloperPanel();
+#endif
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>
+    /// QA 개발자 패널(Task 10)을 켜고 끕니다. 패널은 <c>QaCommandGatewayHost</c>가 소유하는
+    /// 공유 게이트웨이만 호출하므로, 이 컨트롤러는 QA 코어에 대해 아무 것도 소유하거나
+    /// dispose하지 않습니다 — 여기서 하는 일은 오직 GameObject 생명주기와 표시 여부뿐입니다.
+    /// </summary>
+    public void ToggleQaDeveloperPanel()
+    {
+        if (!IsDeveloperModeEnabled)
+            return;
+
+        EnsureQaDeveloperPanel();
+        qaDeveloperPanel?.ToggleVisible();
+    }
+
+    private void EnsureQaDeveloperPanel()
+    {
+        if (qaDeveloperPanel != null)
+            return;
+
+        EnsurePlayerCommandGatewayFactoryInstalled();
+
+        qaDeveloperPanel = FindFirstObjectByType<Godlotto.QA.Gateway.QaDeveloperPanel>(FindObjectsInactive.Include);
+        if (qaDeveloperPanel == null)
+        {
+            var panelObject = new GameObject("QaDeveloperPanel");
+            qaDeveloperPanel = panelObject.AddComponent<Godlotto.QA.Gateway.QaDeveloperPanel>();
+            if (Application.isPlaying)
+                DontDestroyOnLoad(panelObject);
+        }
+
+        // Godlotto.QA.UI cannot reference this default-assembly type (that would be a circular
+        // assembly reference), so readiness flags are pushed in here instead (DIP).
+        qaDeveloperPanel.ConfigureReadinessProviders(
+            () => CanUseDeveloperModeRuntime,
+            () => IsDeveloperModeEnabled);
+    }
+
+    /// <summary>
+    /// 순수 standalone development player 빌드(Editor 어셈블리가 존재하지 않는 빌드)에서는
+    /// <c>QaEditorCommandGatewayInstaller</c>의 <c>[InitializeOnLoad]</c> 팩토리가 절대 실행되지
+    /// 않으므로, <see cref="Godlotto.QA.Gateway.QaCommandGatewayHost"/>는 자체 기본값
+    /// (<c>QaCommandGateway.CreateFallbackProfileService</c> — mutation을 모두 거부하는 안전한
+    /// no-op)으로 대체합니다. 이 컨트롤러(Assembly-CSharp; <c>QaProfileService</c>/
+    /// <c>PlayDataPrefsCleaner</c>에 접근 가능한 몇 안 되는 어셈블리 중 하나)가 대신 진짜
+    /// 팩토리를 설치하여, standalone 빌드의 QA 패널도 Editor CLI와 동등하게 실제 PlayerPrefs
+    /// 격리를 받도록 합니다. Editor(Play Mode 포함)에서는 아무 것도 하지 않으므로
+    /// <c>QaEditorCommandGatewayInstaller</c>가 설치한 팩토리를 덮어쓸 위험이 없습니다.
+    /// </summary>
+    private static void EnsurePlayerCommandGatewayFactoryInstalled()
+    {
+#if !UNITY_EDITOR && DEVELOPMENT_BUILD
+        Godlotto.QA.Gateway.QaCommandGatewayHost.InstallFactory(CreatePlayerCommandGateway);
+#endif
+    }
+
+#if !UNITY_EDITOR && DEVELOPMENT_BUILD
+    private static Godlotto.QA.Gateway.QaCommandGateway CreatePlayerCommandGateway()
+    {
+        var recorder = Godlotto.QA.Evidence.DevelopmentQaEvidenceRecorder.CreateDefault();
+        var profileService = new Godlotto.QA.Profile.QaProfileService(
+            Godlotto.QA.Profile.QaFileProfileMarkerStore.CreateDefault());
+
+        // Task 12: same registry the Editor CLI installer wires in (QaEditorCommandGatewayInstaller
+        // .CreateEditorGateway), so a standalone development player's QA panel sees the exact same
+        // registered scenes/targets/presets as qa_list/qa_run.
+        Godlotto.QA.Scenes.QaSceneRegistry sceneRegistry =
+            Godlotto.QA.SceneAdapters.QaSceneAdapterRegistration.BuildRegistry();
+
+        return new Godlotto.QA.Gateway.QaCommandGateway(
+            recorder,
+            () => recorder.RunDirectoryPath,
+            profileService: profileService,
+            sceneRegistry: sceneRegistry,
+            developerQaServiceFactory: () =>
+                Godlotto.QA.SceneAdapters.DeveloperQaServiceFactory.Create(
+                    profileService,
+                    recorder));
+    }
+#endif
+#endif
 
     public void ToggleDeveloperMode()
     {

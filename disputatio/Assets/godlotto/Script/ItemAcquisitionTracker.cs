@@ -23,6 +23,7 @@ public static class ItemAcquisitionTracker
         new AcquisitionBoolMapping(FungusVariableKeys.GetFood, 2),
         new AcquisitionBoolMapping(FungusVariableKeys.GetFilterCard, 4),
         new AcquisitionBoolMapping(FungusVariableKeys.GetBookmarkMirror, 17),
+        new AcquisitionBoolMapping(FungusVariableKeys.GetBibleCommentary, 21),
         new AcquisitionBoolMapping(FungusVariableKeys.HaveMaidKey, 8),
         new AcquisitionBoolMapping(FungusVariableKeys.HaveBasementKey, 12),
         new AcquisitionBoolMapping(FungusVariableKeys.HasBible, 19),
@@ -57,17 +58,17 @@ public static class ItemAcquisitionTracker
     }
 
     /// <summary>체셔 등 AI 프롬프트에 주입할 진행 요약 문자열을 만듭니다.</summary>
-    public static string BuildPromptSection(Flowchart flowchart)
+    public static string BuildPromptSection(Flowchart flowchart, string locale)
     {
         if (flowchart == null)
             return string.Empty;
 
         int mask = ReadMask(flowchart);
         if (mask == 0)
-            return "\n\n[진행] 아직 획득한 단서 아이템이 없습니다.";
+            return CheshireUiStrings.ProgressEmptySection(locale);
 
         var sb = new StringBuilder(256);
-        sb.Append("\n\n[진행] 획득 아이템: ");
+        sb.Append(CheshireUiStrings.ProgressAcquiredHeader(locale));
         bool first = true;
 
         for (int id = MinId; id <= MaxId; id++)
@@ -83,7 +84,7 @@ public static class ItemAcquisitionTracker
             sb.Append(name).Append('(').Append(id).Append(')');
         }
 
-        sb.Append("\n[진행 안내] 위 목록은 플레이어가 한 번이라도 습득한 아이템입니다. 인벤토리에서 소비했어도 습득 이력은 유지됩니다.");
+        sb.Append(CheshireUiStrings.ProgressGuideFooter(locale));
         return sb.ToString();
     }
 

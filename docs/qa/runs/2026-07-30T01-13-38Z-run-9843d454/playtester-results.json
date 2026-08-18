@@ -1,0 +1,294 @@
+{
+  "taskId": "qa-20260730-autorun",
+  "ownerId": "qa-20260730-playtester",
+  "evidenceRoot": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454",
+  "status": "fail",
+  "preflight": {
+    "unityStatus": "ready",
+    "qaRecover": "Success",
+    "consoleCleared": true,
+    "editorStateBeforeRuns": "False|TutorRoom"
+  },
+  "lease": {
+    "ownerId": "qa-20260730-playtester",
+    "note": "qa_recover used between runs; isQaProfileActive remained false after each completed run (runner finally restores profile)."
+  },
+  "profileRestore": {
+    "confirmed": true,
+    "method": "qa_recover after each scenario + final qa_recover",
+    "finalQaRecoverStdout": "{\n  \"operationCode\": \"Success\"\n}",
+    "isQaProfileActiveAfter": false,
+    "isScenarioRunningAfter": false
+  },
+  "scenarios": [
+    {
+      "scenarioId": "hall.kitchen-quest",
+      "substitutesFor": [
+        "room.hall.smoke"
+      ],
+      "status": "fail",
+      "attempts": 2,
+      "retries": 1,
+      "outcomeCode": "Failed",
+      "outcomeMessage": "Step 'click-kitchen-entry' failed: CorridorEntranceController not found in the active scene. This adapter only works while Hall_playerble is the active Play Mode scene.",
+      "failureSignature": "missing-playmode-scene:Hall_playerble/CorridorEntranceController",
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012105Z-run-ba7ae7b54d024b89b7702639166c80f4",
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012202Z-run-cdc5cef1ede0423086f1e91a0d304bdf"
+      ],
+      "screenshotsPresent": true,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "note": "Same signature twice; not an environmental flake. Gateway records Blocked (partial evidence). qa_run does not bootstrap Play Mode scene."
+    },
+    {
+      "scenarioId": "kitchen.faucet-key",
+      "substitutesFor": [
+        "room.kitchen.smoke",
+        "room.kitchen.happy-path"
+      ],
+      "status": "fail",
+      "attempts": 2,
+      "retries": 1,
+      "outcomeCode": "Failed",
+      "outcomeMessage": "Failed to apply preset 'before-faucet': KitchenPuzzleState not found in the active scene. This preset only works while the Kitchen scene is the active Play Mode scene.",
+      "failureSignature": "missing-playmode-scene:Kitchen/KitchenPuzzleState",
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012226Z-run-b54a8f2e3f77432596bf6ce5bade1460",
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012457Z-run-47c5da7958554fa280583411bee08211"
+      ],
+      "screenshotsPresent": true,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "note": "Same signature twice. Preset apply requires Kitchen Play Mode."
+    },
+    {
+      "scenarioId": "maidroom.food-effect",
+      "substitutesFor": [
+        "room.maid-room.smoke",
+        "room.maid-room.happy-path"
+      ],
+      "status": "fail",
+      "attempts": 2,
+      "retries": 1,
+      "outcomeCode": "Failed",
+      "outcomeMessage": "Step 'click-food-tray' failed: MaidRoomPuzzleController not found in the active scene. This adapter only works while the MaidRoom scene is the active Play Mode scene.",
+      "failureSignature": "missing-playmode-scene:MaidRoom/MaidRoomPuzzleController",
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012512Z-run-7983610111fe48f4b521087e487923d9",
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012524Z-run-48c5c5bfd63f48c5bd2bc6c1d3c28dcf"
+      ],
+      "screenshotsPresent": true,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "note": "Same signature twice."
+    },
+    {
+      "scenarioId": "kitchen.cheshire-repeat",
+      "substitutesFor": [],
+      "status": "fail",
+      "attempts": 2,
+      "retries": 1,
+      "outcomeCode": "Failed",
+      "outcomeMessage": "Failed to apply preset 'before-parret': KitchenPuzzleState not found in the active scene. This preset only works while the Kitchen scene is the active Play Mode scene.",
+      "failureSignature": "missing-playmode-scene:Kitchen/KitchenPuzzleState",
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012536Z-run-7afa6b81c743410a9c70d4b50d4efcc1",
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012555Z-run-0e9ab14cb068414f80e3374d5c04f428"
+      ],
+      "screenshotsPresent": true,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "note": "Same Play Mode bootstrap gap as kitchen.faucet-key."
+    },
+    {
+      "scenarioId": "mainmenu.new-game-reset",
+      "substitutesFor": [],
+      "status": "fail",
+      "attempts": 2,
+      "retries": 1,
+      "outcomeCode": "Failed",
+      "outcomeMessage": "Step 'click-start' failed: MainMenu instance not found in the active scene. Requires MainMenuScene to be the active Play Mode scene when qa_run executes.",
+      "failureSignature": "missing-playmode-scene:MainMenuScene/MainMenu",
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012606Z-run-49edf9cecc3a48bab83e23134a6ad53b",
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012620Z-run-71edbbee22d84b88bbcbe8bfede90bb1"
+      ],
+      "screenshotsPresent": true,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "note": "Same Play Mode bootstrap gap."
+    },
+    {
+      "scenarioId": "tutorroom.cheshire-quiz",
+      "substitutesFor": [],
+      "status": "pass",
+      "attempts": 1,
+      "retries": 0,
+      "outcomeCode": "Passed",
+      "outcomeMessage": "All steps passed.",
+      "failureSignature": null,
+      "gatewayEvidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012633Z-run-3089a0ef04f0494082a30bef43c4b7bc"
+      ],
+      "screenshotsPresent": true,
+      "screenshotFiles": [
+        "screenshots/0006-capture-quiz-input-evidence.png",
+        "screenshots/0008-auto-finalize-safety-net.png"
+      ],
+      "assertionsPassed": 3,
+      "assertionsFailed": 0,
+      "consoleErrors": [],
+      "gatewayVerdict": "Pass",
+      "note": "Editor active scene was already TutorRoom. Gateway Pass with 3 assertions + 2 screenshots + console. Hand to qa-evidence-reviewer."
+    },
+    {
+      "scenarioId": "room.study-room.smoke",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.study-room.happy-path",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.child-room.smoke",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.child-room.happy-path",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.wife-room.smoke",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.wife-room.happy-path",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.bed-room.smoke",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    },
+    {
+      "scenarioId": "room.bed-room.happy-path",
+      "substitutesFor": [],
+      "status": "blocked",
+      "attempts": 0,
+      "retries": 0,
+      "outcomeCode": null,
+      "outcomeMessage": "QA_INFRA_DEFECT: room.* packs are not loadable via qa_run (schema mismatch). No legacy substitute available for this room.",
+      "failureSignature": "QA_INFRA_DEFECT:room-pack-schema-mismatch",
+      "gatewayEvidence": [],
+      "screenshotsPresent": false,
+      "assertionsPassed": 0,
+      "consoleErrors": [],
+      "classification": "QA_INFRA_DEFECT"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "blocker",
+      "classification": "QA_INFRA_DEFECT",
+      "summary": "qa_run does not open scenario.scene / enter Play Mode before adapter preset/interaction; 5/6 legacy scenarios fail with missing scene controller.",
+      "evidence": "Editor state before runs: False|TutorRoom (Edit Mode)."
+    },
+    {
+      "id": "F2",
+      "severity": "blocker",
+      "classification": "QA_INFRA_DEFECT",
+      "summary": "room.* scenario packs schema-mismatch — not loadable via qa_run; study/child/wife/bed have no legacy substitutes.",
+      "evidence": "inventory-findings.json runtimeRunnableViaQaList=false"
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "classification": "OBSERVATION",
+      "summary": "tutorroom.cheshire-quiz Passed with assertions+screenshots while Editor scene was already TutorRoom; may be environment-dependent.",
+      "evidence": "gateway-runs/20260730T012633Z-run-3089a0ef04f0494082a30bef43c4b7bc"
+    }
+  ],
+  "gatewayRunsCopiedUnder": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/",
+  "artifacts": {
+    "playtesterResults": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/playtester-results.json",
+    "smokeSummary": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/smoke-summary.md"
+  }
+}

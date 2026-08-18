@@ -3,6 +3,8 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+# Local pytest basetemp (Windows TEMP permission workaround)
+.tmp_pytest/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -110,8 +112,20 @@ disputatio/Assets/**/node_modules.meta
 .cursor/errors/
 .cursor/mcp.json
 .cursor/worktrees.json
+.worktrees/
 .playwright-mcp/
 .superpowers/
 
 # Microsoft Office lock/temp files (e.g. ~$document.docx)
 ~$*
+
+# QA driver evidence runs (docs/qa/runs/<timestamp>-run-<id>/):
+# manifest.json + report.md are the immutable, reviewable artifacts and stay tracked;
+# raw JSONL events, Console logs, and screenshot binaries are regenerated per run and
+# excluded so the folder itself (and its .gitkeep) remain tracked instead of ignored whole.
+docs/qa/runs/**/events.jsonl
+docs/qa/runs/**/console.log
+docs/qa/runs/**/screenshots/**
+!docs/qa/runs/**/screenshots/.gitkeep
+!docs/qa/runs/**/manifest.json
+!docs/qa/runs/**/report.md

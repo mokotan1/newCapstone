@@ -19,6 +19,48 @@ public class BookCase2StateRestoreTests
     const string SetInteractableScriptGuid = "ab0d0ed4a2ca94c81a230a0ecce6e6e4";
 
     [Test]
+    public void StartBlock_ShowsBlueMidButtonAndHidesPrisonOnCleanEntry()
+    {
+        string sceneText = File.ReadAllText(BookCase2ScenePath);
+        string startBlock = FindBlockByName(sceneText, StartBlockName);
+        List<string> commandIds = ParseCommandListFileIds(startBlock);
+
+        int ifIndex = FindCommandIndex(
+            sceneText,
+            commandIds,
+            command => IsButtonClickedFalseIf(command));
+        int elseIndex = FindCommandIndexAfter(
+            sceneText,
+            commandIds,
+            ifIndex,
+            command => HasScriptGuid(command, ElseScriptGuid));
+
+        Assert.GreaterOrEqual(ifIndex, 0, "Start must branch on ButtonClicked == false.");
+        Assert.GreaterOrEqual(elseIndex, 0, "Start must have an else branch for ButtonClicked == true.");
+        Assert.Greater(elseIndex, ifIndex + 1, "ButtonClicked false branch must contain clean-entry commands before Else.");
+
+        List<string> cleanEntryCommands = commandIds
+            .Skip(ifIndex + 1)
+            .Take(elseIndex - ifIndex - 1)
+            .Select(id => FindObjectBlock(sceneText, "114", id))
+            .ToList();
+
+        Assert.AreEqual(
+            3,
+            cleanEntryCommands.Count,
+            "Clean entry must set Blue active, Blue interactable, then hide Prison — in that order.");
+        Assert.IsTrue(
+            IsSetActive(cleanEntryCommands[0], BlueMidButtonFileId, active: true),
+            "Clean entry first command must Set Active(true) on BlueMidButton.");
+        Assert.IsTrue(
+            IsSetInteractable(cleanEntryCommands[1], BlueMidButtonFileId, interactable: true),
+            "Clean entry second command must Set Interactable(true) on BlueMidButton.");
+        Assert.IsTrue(
+            IsSetActive(cleanEntryCommands[2], PrisonButtonFileId, active: false),
+            "Clean entry third command must Set Active(false) on PrisonButton.");
+    }
+
+    [Test]
     public void StartBlock_RestoresPrisonButtonWhenBlueMidButtonWasAlreadyClicked()
     {
         string sceneText = File.ReadAllText(BookCase2ScenePath);

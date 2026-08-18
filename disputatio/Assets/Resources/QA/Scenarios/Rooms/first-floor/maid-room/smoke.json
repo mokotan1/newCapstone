@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "room.maid-room.smoke",
+  "roomId": "maid-room",
+  "tier": "smoke",
+  "requiredCapabilities": ["maidroom.food.probe"],
+  "steps": [
+    {
+      "id": "probe-food",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "maidroom.food.probe"
+    }
+  ]
+}

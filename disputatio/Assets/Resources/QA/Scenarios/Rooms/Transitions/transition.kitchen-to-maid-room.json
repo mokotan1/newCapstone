@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.kitchen-to-maid-room",
+  "sourceRegion": "kitchen",
+  "destinationRegion": "maid-room",
+  "entryPreset": "kitchen.sink.preset.before-bottle-fill",
+  "prerequisites": ["inventory.opaque-bottle"],
+  "lockedAssertions": ["door.maid.locked"],
+  "sourceExitContract": ["inventory.maid-room-key", "flag.HaveMaidKey"],
+  "destinationEntryContract": ["scene.MaidEntrance", "door.maid.unlocked"],
+  "checkpointContract": ["resumeRegion.maid-room"]
+}

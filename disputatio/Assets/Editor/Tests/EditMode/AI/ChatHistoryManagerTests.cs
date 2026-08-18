@@ -1,8 +1,24 @@
+using System;
 using NUnit.Framework;
+using UnityEngine;
 
 [TestFixture]
 public class ChatHistoryManagerTests
 {
+    Func<string, TextAsset> _previousLoader;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _previousLoader = CheshirePromptCatalog.ResourceLoader;
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        CheshirePromptCatalog.ResourceLoader = _previousLoader;
+    }
+
     // ---------------------------------------------------------------
     //  Initialize
     // ---------------------------------------------------------------
@@ -17,6 +33,22 @@ public class ChatHistoryManagerTests
         Assert.AreEqual("system", mgr.History[0].role);
         Assert.IsNotNull(mgr.History[0].content);
         Assert.IsNotEmpty(mgr.History[0].content);
+    }
+
+    [Test]
+    public void Initialize_LoadsBaseSystemFromKoreanCatalog()
+    {
+        CheshirePromptCatalog.ResourceLoader = path =>
+        {
+            if (path == $"{CheshirePromptCatalog.ResourceRoot}/{CheshireLocaleResolver.Korean}/BaseSystem")
+                return new TextAsset("catalog-base-system");
+            return null;
+        };
+
+        var mgr = new ChatHistoryManager(appendCommonVoice: false);
+        mgr.Initialize();
+
+        Assert.AreEqual("catalog-base-system", mgr.History[0].content);
     }
 
     [Test]
@@ -100,6 +132,37 @@ public class ChatHistoryManagerTests
         string result = mgr.ComposeSystemPromptWithCommonRules("");
 
         Assert.AreEqual("", result);
+    }
+
+    [Test]
+    public void ComposeSystemPrompt_AppendVoiceTrue_AppendsKoreanCatalogCommonRules()
+    {
+        CheshirePromptCatalog.ResourceLoader = path =>
+        {
+            if (path == $"{CheshirePromptCatalog.ResourceRoot}/{CheshireLocaleResolver.Korean}/ChesterVoiceCommon")
+                return new TextAsset("common-voice-block");
+            return null;
+        };
+
+        var mgr = new ChatHistoryManager(appendCommonVoice: true);
+        const string roomPrompt = "You are in the kitchen.";
+
+        string result = mgr.ComposeSystemPromptWithCommonRules(roomPrompt);
+
+        Assert.AreEqual(roomPrompt + "\n\n" + "common-voice-block", result);
+    }
+
+    [Test]
+    public void ComposeSystemPrompt_AppendVoiceTrue_MissingCatalog_ReturnsRoomPromptOnly()
+    {
+        CheshirePromptCatalog.ResourceLoader = _ => null;
+
+        var mgr = new ChatHistoryManager(appendCommonVoice: true);
+        const string roomPrompt = "You are in the kitchen.";
+
+        string result = mgr.ComposeSystemPromptWithCommonRules(roomPrompt);
+
+        Assert.AreEqual(roomPrompt, result);
     }
 
     // ---------------------------------------------------------------

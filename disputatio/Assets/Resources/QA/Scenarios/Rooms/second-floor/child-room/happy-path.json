@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "room.child-room.happy-path",
+  "roomId": "child-room",
+  "tier": "happy-path",
+  "requiredCapabilities": [
+    "childroom.seals.click-seal5",
+    "childroom.seals.probe",
+    "childroom.seals.assert-controller",
+    "childroom.seals.capture"
+  ],
+  "steps": [
+    {
+      "id": "click-seal5",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.click-seal5"
+    },
+    {
+      "id": "probe-seals",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.probe"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.assert-controller"
+    },
+    {
+      "id": "capture-seals",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.capture"
+    },
+    {
+      "id": "evidence-capture",
+      "family": "evidence",
+      "name": "capture"
+    }
+  ]
+}

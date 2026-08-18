@@ -1,0 +1,86 @@
+---
+source_id: planning:e16101da266f
+source_path: 기획서/첫 장면 기획.pptx
+source_sha256: e16101da266f1705d5b4c8e51218b80de83e930384d14b0d45a18b5a48e4d680
+source_type: pptx
+category: planning
+title: 첫 장면 기획
+status: needs_review
+rag_eligible: true
+---
+
+## Slide 1
+
+첫 장면 기획
+
+작성자 김기석
+
+## Slide 2
+
+첫 장면 큰 그림
+
+> Visual asset present: slide 2, shape 2; inspect original PPTX/PDF.
+
+## Slide 3
+
+수정 사항
+
+> Visual asset present: slide 3, shape 2; inspect original PPTX/PDF.
+
+-구도 변경
+
+-> 구도는 다음 페이지 참고
++점점 다가오는 것을 표현하기 위해 가운데의 사람의 스케일을 점점 크게 조정해서 4장 정도
+
+## Slide 4
+
+수정 사항
+
+> Visual asset present: slide 4, shape 2; inspect original PPTX/PDF.
+
+가면 변경
+아래 이미지 처럼
+
+> Visual asset present: slide 4, shape 5; inspect original PPTX/PDF.
+
+## Slide 5
+
+수정 사항
+
+-구도 변경
+
+-> 주인공이 묶여 있는 상황
+
+> Visual asset present: slide 5, shape 3; inspect original PPTX/PDF.
+
+## Slide 6
+
+수정 사항
+
+-구도 변경
+
+-> 주인공이 묶여 있는 상황
+
+> Visual asset present: slide 6, shape 3; inspect original PPTX/PDF.
+
+> Visual asset present: slide 6, shape 4; inspect original PPTX/PDF.
+
+## Slide 7
+
+어떻게 표현할 것인가?
+
+> Visual asset present: slide 7, shape 2; inspect original PPTX/PDF.
+
+## Slide 8
+
+추가 기능
+
+> Visual asset present: slide 8, shape 2; inspect original PPTX/PDF.
+
+눈 깜빡임
+-> 깜빡일 때 마다 시선이 선명해짐(intensity 조정)
+
+시선의 이동
+->좌, 우로 여기가 어딘지 파악하기 위해 두리번거리는 것을 표현하기 위함
+
+물 떨어지는 동굴과 같은 bgm에 전기톱 소리(추후 추가)

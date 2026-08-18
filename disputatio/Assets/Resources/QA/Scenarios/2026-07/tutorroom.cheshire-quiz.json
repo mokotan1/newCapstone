@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "tutorroom.cheshire-quiz",
+  "scene": "TutorRoom",
+  "steps": [
+    {
+      "id": "click-quiz-input",
+      "command": "interaction.pointer",
+      "target": "tutorroom.quiz-input",
+      "timeoutMs": 5000
+    },
+    {
+      "id": "assert-input-unlocked",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "inputUnlocked",
+        "description": "Opening the TutorRoom quiz input panel must not leave the global input gate locked."
+      }
+    },
+    {
+      "id": "assert-ai-idle-or-connected",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "fieldEquals",
+        "field": "AiConnectionState",
+        "value": "Idle",
+        "description": "Probe distinguishes AI service state from interaction lock after quiz-input open (Idle when no in-flight chat)."
+      }
+    },
+    {
+      "id": "assert-no-console-errors",
+      "command": "state.assert",
+      "timeoutMs": 5000,
+      "assertion": {
+        "kind": "noNewConsoleError",
+        "description": "Activating the TutorRoom quiz input must not log new console errors."
+      }
+    },
+    {
+      "id": "capture-quiz-input-evidence",
+      "command": "evidence.capture",
+      "timeoutMs": 5000
+    }
+  ]
+}

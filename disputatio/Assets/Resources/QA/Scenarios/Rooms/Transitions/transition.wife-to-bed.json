@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "transition.wife-to-bed",
+  "sourceRegion": "wife-room",
+  "destinationRegion": "bed-room",
+  "entryPreset": "wiferoom.wallclock.before",
+  "prerequisites": [],
+  "lockedAssertions": [],
+  "sourceExitContract": [],
+  "destinationEntryContract": ["scene.BedEntrance"],
+  "checkpointContract": ["resumeRegion.bed-room"],
+  "implementationStatus": "PARTIAL"
+}

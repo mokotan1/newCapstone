@@ -1,8 +1,28 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+RagProfile = Literal["tutor", "project"]
+
+
+class HintRewritePayload(BaseModel):
+    """Optional client-provided hint data for server-controlled Cheshire rewrites."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    hint_id: str = Field(..., min_length=1, max_length=128)
+    item_id: str = Field(..., min_length=1, max_length=128)
+    hint_target: str = Field(..., min_length=1, max_length=128)
+    hint_level: str = Field(..., min_length=1, max_length=64)
+    base_hint: str = Field(..., min_length=1, max_length=1000)
+    required_terms: list[str] = Field(default_factory=list, max_length=16)
+    forbidden_terms: list[str] = Field(default_factory=list, max_length=32)
+    fallback_line: str | None = Field(default=None, max_length=1000)
+    narrative_seed: str | None = Field(default=None, max_length=1000)
+    interaction_type: str | None = Field(default=None, max_length=128)
+    allow_highlight: bool = True
 
 
 class ChatRequest(BaseModel):
@@ -17,10 +37,32 @@ class ChatRequest(BaseModel):
     user_id: str | None = Field(default=None, max_length=256)
     #: `prompt`와 동일 텍스트를 기대하는 백엔드 호환용 별칭. prompt가 비었을 때만 채워짐.
     message: str | None = Field(default=None, max_length=4096)
-    rag_profile: str | None = None
+    rag_profile: RagProfile | None = None
     rag_query: str | None = Field(None, max_length=4096)
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
+    hint_rewrite: HintRewritePayload | None = None
+    #: Canonical player locale (``ko``|``ja``|``en``). Aliases normalized via ``normalize_locale``.
+    locale: str = "ko"
+
+    @field_validator("locale", mode="before")
+    @classmethod
+    def _normalize_locale(cls, v: Any) -> str:
+        # Lazy import: services.__init__ pulls ChatService → ChatRequest (cycle).
+        from services.locale_support import normalize_locale
+
+        return normalize_locale(v)
+
+    @field_validator("rag_profile", mode="before")
+    @classmethod
+    def _validate_rag_profile(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        if v not in ("tutor", "project"):
+            raise ValueError(
+                "rag_profile must be tutor, project, or omitted",
+            )
+        return v
 
     @model_validator(mode="before")
     @classmethod
@@ -46,6 +88,15 @@ class TutorGradeRequest(BaseModel):
     user_answer: str = Field(default="", max_length=4000)
     correct_count_before: int = Field(default=0, ge=0, le=10_000)
     quiz_target: int = Field(default=5, ge=1, le=50)
+    #: Canonical player locale (``ko``|``ja``|``en``). Aliases normalized via ``normalize_locale``.
+    locale: str = "ko"
+
+    @field_validator("locale", mode="before")
+    @classmethod
+    def _normalize_locale(cls, v: Any) -> str:
+        from services.locale_support import normalize_locale
+
+        return normalize_locale(v)
 
 
 # --- Telemetry (play-log ingestion) ----------------------------------------

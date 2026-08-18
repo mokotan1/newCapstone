@@ -35,6 +35,13 @@ The workflow creates a Windows x64 standalone build using GameCI Unity Builder. 
 
 The workflow uploads the build zip as a GitHub Actions artifact on every successful run. On `v*` tags, it also publishes the zip to GitHub Releases.
 
+Before building the Windows client, the workflow runs Unity Test Framework checks through GameCI Unity Test Runner:
+
+- `EditMode`: runs the existing editor test suite under `disputatio/Assets/Editor/Tests/EditMode`.
+- `PlayMode`: runs play mode tests, starting with a minimal smoke test that verifies the test runner enters play mode and advances one frame.
+
+The Windows build job depends on both test modes passing.
+
 ## Required GitHub Secrets
 
 The repository must define these secrets before the workflow can build:
@@ -61,10 +68,11 @@ Tag builds run for `v*` tags because tags are the release signal.
 The first verification path is:
 
 1. Run the workflow manually with `workflow_dispatch`.
-2. Confirm the Actions artifact exists.
-3. Download and unzip the artifact.
-4. Confirm `The Unholy of Mention.exe` exists in the zip.
-5. Run the executable locally and verify the main menu opens.
+2. Confirm both Unity test jobs pass.
+3. Confirm the Actions artifact exists.
+4. Download and unzip the artifact.
+5. Confirm `The Unholy of Mention.exe` exists in the zip.
+6. Run the executable locally and verify the main menu opens.
 
 The release verification path is:
 

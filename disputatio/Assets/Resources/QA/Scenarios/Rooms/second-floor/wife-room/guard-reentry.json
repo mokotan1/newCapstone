@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "room.wife-room.guard.reentry",
+  "roomId": "wife-room",
+  "tier": "guard",
+  "requiredCapabilities": [
+    "wiferoom.wallclock.click",
+    "wiferoom.wallclock.probe",
+    "wiferoom.wallclock.assert-controller"
+  ],
+  "steps": [
+    {
+      "id": "click-wallclock",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.click"
+    },
+    {
+      "id": "assert-controller",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.assert-controller"
+    },
+    {
+      "id": "probe-after-reentry",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "wiferoom.wallclock.probe"
+    }
+  ]
+}

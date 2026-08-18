@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "room.child-room.smoke",
+  "roomId": "child-room",
+  "tier": "smoke",
+  "requiredCapabilities": ["childroom.seals.probe"],
+  "steps": [
+    {
+      "id": "probe-seals",
+      "family": "interaction",
+      "name": "invoke",
+      "targetId": "childroom.seals.probe"
+    }
+  ]
+}

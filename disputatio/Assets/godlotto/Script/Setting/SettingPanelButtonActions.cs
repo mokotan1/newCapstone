@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -53,7 +55,33 @@ public class SettingPanelButtonActions : MonoBehaviour
             dialogInput.enabled = true;
 
         HidePanel();
+
+        // InGameSettingsPanel의 "메인메뉴로" 버튼과 동일한 DDOL 정리를 수행한다.
+        // 그렇지 않으면 이 버튼으로 나간 회차의 Fungus/퀘스트 상태가 다음
+        // New Game까지 살아남는다.
+        CleanupDontDestroyGameplayRoots();
         SceneManager.LoadScene(mainMenuSceneName);
+    }
+
+    /// <summary>
+    /// Runtime entry point: discovers every current DontDestroyOnLoad root and
+    /// wipes the ones not covered by <see cref="DontDestroyGameplayCleanup.ShouldPreserveRoot"/>
+    /// (GlobalSettingManager and this object are preserved; Fungus globals and
+    /// quest tracker systems are not).
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots()
+    {
+        CleanupDontDestroyGameplayRoots(DontDestroyGameplayCleanup.FindDontDestroyOnLoadRoots());
+    }
+
+    /// <summary>
+    /// EditMode-testable overload: applies the shared cleanup policy to an
+    /// explicit root list with an injectable destroy callback instead of the
+    /// Play-Mode-only DontDestroyOnLoad discovery.
+    /// </summary>
+    public void CleanupDontDestroyGameplayRoots(IList<GameObject> roots, Action<GameObject> destroyRoot = null)
+    {
+        DontDestroyGameplayCleanup.DestroyUnpreservedRoots(roots, gameObject, destroyRoot);
     }
 
     public void ReturnToGame()

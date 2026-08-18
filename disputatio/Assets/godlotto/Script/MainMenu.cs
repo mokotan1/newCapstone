@@ -108,7 +108,11 @@ public class MainMenu : MonoBehaviour
 
         // 새 게임 시작 시 진행 데이터만 초기화하고 오디오/화면 설정은 유지합니다.
         PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings();
-        
+
+        // Clear in-memory Fungus save history and leftover inventory drag before Flowchart continues.
+        Fungus.SaveManagerSignals.DoSaveReset();
+        InventorySlot.ClearDragState();
+
         GameLog.Log("게임 시작! (커서 잠금 해제 완료)");
 
         // (참고) 만약 여기서 코드로 씬을 이동한다면:

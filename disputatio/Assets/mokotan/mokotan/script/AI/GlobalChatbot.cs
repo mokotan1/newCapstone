@@ -8,42 +8,33 @@ public class GlobalChatbot : BaseChatbot
     [Header("GlobalBot UI")]
     [SerializeField] public Flowchart globalFlowchart;
 
-    /// <summary>
-    /// 패널이 열려 있는 동안 SayDialog를 유지합니다.
-    /// BaseChatbot 기본값(true)은 대사 완료 후 SayDialog를 끄는데,
-    /// Parret_Panel 안에서는 패널이 닫힐 때 TutorPanelSayDialogSync가 처리하므로 꺼선 안 됩니다.
-    /// </summary>
     protected override bool DeactivateSayDialogWhenLineCompletes => false;
 
     private const int BottleItemId = 1;
     private const string FallbackSystemPrompt = "당신은 저택의 도우미입니다.";
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
-        TextAsset promptAsset = Resources.Load<TextAsset>("introPrompt");
-        string finalSystemPrompt = promptAsset != null ? promptAsset.text : FallbackSystemPrompt;
+        string roomPrompt = CheshirePromptCatalog.Load("introPrompt", locale);
+        string finalSystemPrompt = !string.IsNullOrEmpty(roomPrompt) ? roomPrompt : FallbackSystemPrompt;
 
         if (globalFlowchart == null)
             return finalSystemPrompt;
 
-        finalSystemPrompt += ItemAcquisitionTracker.BuildPromptSection(globalFlowchart);
-        finalSystemPrompt += BuildBottleHintIfNeeded();
-
+        finalSystemPrompt += ItemAcquisitionTracker.BuildPromptSection(globalFlowchart, locale);
         return finalSystemPrompt;
     }
 
-    private string BuildBottleHintIfNeeded()
+    protected override void AugmentChatPayload(LocalLlamaPayload payload, string userMessage)
     {
-        if (chatHistory.Count == 0)
-            return string.Empty;
+        if (globalFlowchart == null)
+            return;
 
-        string lastMessage = chatHistory[chatHistory.Count - 1].content;
-        bool mentionsBottle = lastMessage.Contains("물병") || lastMessage.Contains("병");
-
-        if (mentionsBottle && ItemAcquisitionTracker.IsAcquired(globalFlowchart, BottleItemId))
-            return "\n\n[중요 지시] 플레이어는 물병 단서를 가졌습니다. 부력에 대해 수수께끼로 답변하세요.";
-
-        return string.Empty;
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        bool hasBottle = ItemAcquisitionTracker.IsAcquired(globalFlowchart, BottleItemId);
+        if (CheshireHintRewritePlanner.TryBuildBottleUseHint(
+                userMessage, hasBottle, locale, out HintRewritePayload hintRewrite))
+            payload.hint_rewrite = hintRewrite;
     }
 
     protected override HeuristicSignalInput BuildHeuristicSignalInput(string userMessage)
@@ -70,7 +61,7 @@ public class GlobalChatbot : BaseChatbot
         ProcessCommonFunctionCalls(functionCalls);
     }
 
-    /// <summary>Dispatch give_hint / emote (and log unknown tools). Subclasses may override to extend.</summary>
+    /// <summary>Dispatch give_hint / emote and log unknown tools. Subclasses may override to extend.</summary>
     protected virtual void ProcessCommonFunctionCalls(List<FunctionCallData> functionCalls)
     {
         if (functionCalls == null) return;
@@ -94,7 +85,7 @@ public class GlobalChatbot : BaseChatbot
         }
     }
 
-    void RecordGiveHintToolCall(Dictionary<string, object> args)
+    private void RecordGiveHintToolCall(Dictionary<string, object> args)
     {
         if (args == null)
             return;

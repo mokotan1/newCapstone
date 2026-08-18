@@ -25,18 +25,37 @@ public class StudyRoomChatbotTests
     [Test]
     public void BuildAlreadySolvedInstruction_UsesChesterAlreadySolvedMessage()
     {
-        string instruction = StudyRoomChatbot.BuildAlreadySolvedInstruction();
+        string instruction = StudyRoomChatbot.BuildAlreadySolvedInstruction(CheshireLocaleResolver.Korean);
 
         StringAssert.Contains("이미 문제를 풀었어", instruction);
         StringAssert.Contains("새 열쇠", instruction);
+    }
+
+    [Test]
+    public void BuildAlreadySolvedInstruction_English_DoesNotContainKoreanGoalHeader()
+    {
+        string instruction = StudyRoomChatbot.BuildAlreadySolvedInstruction(CheshireLocaleResolver.English);
+
+        Assert.IsFalse(instruction.Contains("[현재 목표]"), instruction);
+        StringAssert.Contains("Current goal", instruction);
+        StringAssert.Contains("already", instruction.ToLowerInvariant());
     }
 
     private Flowchart CreateFlowchart()
     {
         flowchartObject = new GameObject("Flowchart");
         Flowchart flowchart = flowchartObject.AddComponent<Flowchart>();
-        flowchart.Variables.Add(new BooleanVariable { Key = "DiarySolved", Value = false });
-        flowchart.Variables.Add(new BooleanVariable { Key = "HaveTutorKey", Value = false });
+        AddBooleanVariable(flowchart, "DiarySolved", false);
+        AddBooleanVariable(flowchart, "HaveTutorKey", false);
         return flowchart;
+    }
+
+    private static void AddBooleanVariable(Flowchart targetFlowchart, string key, bool value)
+    {
+        BooleanVariable variable = targetFlowchart.gameObject.AddComponent<BooleanVariable>();
+        variable.Key = key;
+        variable.Scope = VariableScope.Public;
+        variable.Value = value;
+        targetFlowchart.Variables.Add(variable);
     }
 }

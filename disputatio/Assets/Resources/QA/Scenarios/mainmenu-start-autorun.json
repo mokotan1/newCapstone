@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "mainmenu-start-autorun",
+  "scene": "MainMenuScene",
+  "steps": [
+    { "id": "click", "family": "interaction", "name": "invoke", "targetId": "mainmenu.start.click" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "mainmenu.start.probe" },
+    { "id": "assert", "family": "interaction", "name": "invoke", "targetId": "mainmenu.start.assert-invoked" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "mainmenu.start.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

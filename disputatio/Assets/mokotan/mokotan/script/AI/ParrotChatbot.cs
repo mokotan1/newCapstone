@@ -17,8 +17,13 @@ public class ParrotChatbot : GlobalChatbot
     [Tooltip("Invoked when the model calls give_hint(hint_level, target_object, hint_category).")]
     [SerializeField] private UnityEvent<string, string, string> onGiveHintTool;
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
+        string prompt = CheshirePromptCatalog.Load("ParrotPrompt", locale);
+        if (!string.IsNullOrEmpty(prompt))
+            return prompt;
+
+        // Legacy inline fallback if catalog asset is missing.
         return @"[수수께끼 앵무새 규칙]
 1. 모든 답변은 공백 포함 한글 20자 이내로 할 것.
 2. 수수께끼를 내거나 사용자의 오답을 비웃을 것.

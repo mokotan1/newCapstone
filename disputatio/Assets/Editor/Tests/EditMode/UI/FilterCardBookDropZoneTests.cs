@@ -1,3 +1,4 @@
+using System.Reflection;
 using Fungus;
 using Godlotto.Interaction;
 using NUnit.Framework;
@@ -13,6 +14,7 @@ public class FilterCardBookDropZoneTests
     const string FilterCardAssetPath = "Assets/godlotto/Item/FilterCard.asset";
 
     GameObject root;
+    GameObject cardStackPanel;
     FilterCardBookDropZone dropZone;
     GameObject mirrorCardObject;
     StudyRoomDiaryMirrorPuzzleController mirrorController;
@@ -38,8 +40,11 @@ public class FilterCardBookDropZoneTests
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
+        cardStackPanel = new GameObject("CardStackPanel", typeof(RectTransform));
+        cardStackPanel.transform.SetParent(canvasObject.transform, false);
+
         var dropZoneObject = new GameObject("MirrorItemDropZone", typeof(RectTransform), typeof(Image));
-        dropZoneObject.transform.SetParent(canvasObject.transform, false);
+        dropZoneObject.transform.SetParent(cardStackPanel.transform, false);
         dropZone = dropZoneObject.AddComponent<FilterCardBookDropZone>();
         dropZone.requiredItem = bookmarkMirror;
         dropZone.maxUses = 1;
@@ -49,7 +54,7 @@ public class FilterCardBookDropZoneTests
         bookOverlayObject.transform.SetParent(dropZoneObject.transform, false);
         dropZone.bookOverlayInstance = bookOverlayObject.GetComponent<RectTransform>();
 
-        mirrorCardObject = new GameObject("MirrorCardImage", typeof(RectTransform), typeof(Image));
+        mirrorCardObject = new GameObject("FilterCardImage", typeof(RectTransform), typeof(Image));
         mirrorCardObject.transform.SetParent(bookOverlayObject.transform, false);
         mirrorCardObject.SetActive(false);
         dropZone.filterCardObject = mirrorCardObject;
@@ -170,6 +175,49 @@ public class FilterCardBookDropZoneTests
 
         Assert.IsTrue(flowchart.GetBooleanVariable("DiarySolved"));
         Assert.IsNull(interactionId, "Router should set DiarySolved without requiring room controller in this harness.");
+    }
+
+    [Test]
+    public void OnEnable_BeforeFirstDrop_KeepsFilterCardImageHidden()
+    {
+        InvokeLifecycle(dropZone, "Start");
+        Assert.IsFalse(mirrorCardObject.activeSelf, "Unused panel should start without an active mirror.");
+
+        InvokeLifecycle(dropZone, "OnEnable");
+
+        Assert.IsFalse(
+            mirrorCardObject.activeSelf,
+            "OnEnable before the first BookmarkMirror drop must keep FilterCardImage hidden.");
+    }
+
+    [Test]
+    public void OnEnable_AfterSuccessfulMirrorDrop_RestoresFilterCardImageWhenCardStackPanelReopens()
+    {
+        dropZone.consumeItemOnDrop = false;
+        InvokeLifecycle(dropZone, "Start");
+
+        InventorySlot.draggedItem = bookmarkMirror;
+        dropZone.OnDrop(new PointerEventData(EventSystem.current));
+        Assert.IsTrue(mirrorCardObject.activeSelf, "Successful drop should activate FilterCardImage.");
+
+        // Close-style hide, then reopen CardStackPanel (EditMode does not auto-fire OnEnable).
+        mirrorCardObject.SetActive(false);
+        cardStackPanel.SetActive(false);
+        cardStackPanel.SetActive(true);
+        InvokeLifecycle(dropZone, "OnEnable");
+
+        Assert.IsTrue(
+            mirrorCardObject.activeSelf,
+            "After a successful BookmarkMirror drop, reopening CardStackPanel must restore FilterCardImage.");
+    }
+
+    static void InvokeLifecycle(FilterCardBookDropZone target, string methodName)
+    {
+        MethodInfo method = typeof(FilterCardBookDropZone).GetMethod(
+            methodName,
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        Assert.IsNotNull(method, $"Lifecycle method not found: {methodName}");
+        method.Invoke(target, null);
     }
 
     static void AddBooleanVariable(Flowchart targetFlowchart, string key, bool value)

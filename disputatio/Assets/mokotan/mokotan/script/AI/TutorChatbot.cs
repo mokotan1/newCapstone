@@ -34,8 +34,12 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     [SerializeField] public Flowchart flowchart;
     [Tooltip("비워 두면 씬에서 QuizInputHandler를 찾습니다. 전송 Button이 TutorChatbot.OnSendButtonClick에만 연결돼 있을 때 실제 입력은 여기 필드를 읽습니다.")]
     [SerializeField] private QuizInputHandler quizInputHandler;
-    [Tooltip("한 줄에 하나씩 question_id (quiz_bank.csv와 동일). CorrectAnswerCount번째 줄이 현재 출제/채점 ID.")]
+    [Tooltip("레거시 폴백: 한 줄에 하나씩 question_id. sessionQuizBankAsset이 5문제 이상 유효하면 사용되지 않습니다.")]
     [SerializeField] private TextAsset tutorQuestionOrderAsset;
+    [Tooltip("퀴즈 세션 문제 은행 CSV(question_id,question_ko). 비우면 Resources/TutorQuizBank를 로드합니다.")]
+    [SerializeField] private TextAsset sessionQuizBankAsset;
+    [Tooltip("세션 셔플 seed 고정(테스트/재현용). -1이면 매 Start마다 무작위.")]
+    [SerializeField] private int sessionSeedOverrideForTests = -1;
 
     [Header("Tutor 채점 API")]
     [Tooltip("비우면 BaseChatbot의 chat URL에서 /chat → /tutor/grade 로 바꿉니다. EC2 등에 아직 /tutor/grade가 없으면 404 — 서버 배포 후 사용하거나, 여기에 전체 URL을 직접 넣으세요.")]
@@ -43,7 +47,8 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
 
     [Header("UX — 느린 응답·패널 버튼")]
     [SerializeField] private float thinkingHoldDelaySeconds = 3f;
-    [SerializeField] [TextArea(1, 3)] private string thinkingHoldSayMessage = "음… 지금 생각하는 중이야. 조금만 기다려 줘.";
+    [Tooltip("비우면 Fungus 언어(ko/ja/en) 기본 문구를 사용합니다.")]
+    [SerializeField] [TextArea(1, 3)] private string thinkingHoldSayMessage = "";
 
     [Header("Events")]
     public UnityEvent OnAIReponseComplete;
@@ -71,16 +76,6 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
 
     /// <summary>Fungus Writer 기본 writingSpeed(~60)는 글자 단위로 밀어 넣어 한글도 한 글자씩 들어가는 것처럼 보입니다.</summary>
     private const int TutorWriterCharsPerSecond = 4800;
-
-    /// <summary>Fungus가 창(체셔) 클릭 시 빈 문자열로 <see cref="AddPlayerMessageAndGetResponse"/>를 호출할 때 실제 /chat 프롬프트로 씁니다.</summary>
-    private const string UserPromptChesterWindowOpen =
-        "[시스템: 플레이어가 체셔(창)와 대화를 막 시작했다. 아주 짧게 인사만 한 뒤, " +
-        "문제 은행에 적힌 **지금** 퀴즈 질문 문장을 글자 그대로 한 줄로만 말해. 진행 숫자·n/5·몇 문제는 말하지 마. 새 JSON이나 툴은 쓰지 마.]";
-
-    /// <summary>앵무 클릭 직후 첫 /chat — 인사·도입 없이 질문 한 줄만.</summary>
-    private const string UserPromptChesterParrotAskQuestionNow =
-        "[시스템: 플레이어가 앵무를 방금 눌러 퀴즈를 시작했다. 인사·도입·잡담·추가 문장 금지. " +
-        "문제 은행의 **지금** 질문 문장만 글자 그대로 한 줄로 말해. 진행 숫자·n/5·따옴표·머리말 금지. 새 JSON이나 툴은 쓰지 마.]";
 
     // ---- public properties (API unchanged) ----
 
@@ -117,12 +112,16 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     {
         base.Start();
 
+        BuildTutorQuizSession(out TutorQuizSessionSelector sessionSelector, out string insufficientQuestionsError);
+
         _quizState = new TutorQuizStateTracker(
             flowchart,
             tutorQuestionOrderAsset,
             debugQuizProgress,
             OnQuizCompletedEvent,
-            LockQuizInputAfterSessionComplete);
+            LockQuizInputAfterSessionComplete,
+            sessionSelector,
+            insufficientQuestionsError);
 
         _grader = new TutorQuizGrader(
             tutorGradeUrlOverride,
@@ -163,6 +162,51 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
         _chesterFlow.Subscribe();
     }
 
+    /// <summary>
+    /// One seedable shuffle at session start (design §4): parses the quiz bank, then fixes 5 unique
+    /// question IDs for the whole session. On &lt;5 valid questions, returns a non-null
+    /// <paramref name="insufficientQuestionsError"/> so <see cref="TutorQuizGrader"/> can show a
+    /// localized error and unlock input instead of getting stuck "thinking".
+    /// </summary>
+    private void BuildTutorQuizSession(
+        out TutorQuizSessionSelector sessionSelector,
+        out string insufficientQuestionsError)
+    {
+        sessionSelector = null;
+        insufficientQuestionsError = null;
+
+        TutorQuizBankLoadResult bankResult = sessionQuizBankAsset != null
+            ? TutorQuizBankRepository.LoadFromTextAsset(sessionQuizBankAsset)
+            : TutorQuizBankRepository.LoadFromResources();
+
+        if (bankResult.HasErrors)
+        {
+            foreach (string error in bankResult.Errors)
+                Debug.LogError("[TutorQuiz] 문제 은행 오류: " + error);
+        }
+
+        int seed = sessionSeedOverrideForTests >= 0
+            ? sessionSeedOverrideForTests
+            : Guid.NewGuid().GetHashCode();
+
+        if (!TutorQuizSessionSelector.TrySelectSession(
+                bankResult.ValidQuestionIds,
+                seed,
+                TutorQuizStateTracker.TutorQuizTargetCorrectCount,
+                out sessionSelector,
+                out string selectorError))
+        {
+            insufficientQuestionsError = selectorError;
+            GameLog.LogWarning("[TutorQuiz] 세션 선택 실패(유효 문제 5개 미만) — " + selectorError);
+        }
+        else if (debugQuizProgress)
+        {
+            GameLog.Log(
+                "[TutorQuiz] 세션 문제 " + sessionSelector.SessionQuestionIds.Count +
+                "개 선정 (seed=" + seed + "): " + string.Join(",", sessionSelector.SessionQuestionIds));
+        }
+    }
+
     private void OnEnable()
     {
         if (_chesterFlow == null)
@@ -199,6 +243,17 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     {
         get => useToolsOverrideForNextRequest;
         set => useToolsOverrideForNextRequest = value;
+    }
+
+    /// <summary>
+    /// Same field + <see cref="Godlotto.Interaction.InteractionInputGate"/> block/unblock as
+    /// <see cref="IChatHttpCallbacks.IsRequestInProgress"/> — one gate reason per chatbot instance,
+    /// shared by both the LLM chat path and the deterministic <c>/tutor/grade</c> path.
+    /// </summary>
+    bool IGraderHost.IsRequestInProgress
+    {
+        get => isRequestInProgress;
+        set => ((IChatHttpCallbacks)this).IsRequestInProgress = value;
     }
 
     // ==================================================================
@@ -317,8 +372,8 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             return;
         if (IsTutorQuizFinished)
             return;
-        StartCoroutine(CoTutorPlayerTurn(
-            "[타이머] 남은 플레이 시간이 얼마 없다는 안내만 짧게 해 줘. 새 퀴즈 문제는 내지 마."));
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        StartCoroutine(CoTutorPlayerTurn(CheshireUiStrings.TimerLowTimePrompt(locale)));
     }
 
     /// <summary>답 입력 없이 패널 버튼만 눌렀을 때 — 정답 직후 또는 건너뛰기 직후에만 다음 AI 턴으로 넘깁니다.</summary>
@@ -343,9 +398,10 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
         if (!_quizState.LastGradedWasCorrect)
             _quizState.SkipOrderOffset++;
 
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
         string msg = _quizState.LastGradedWasCorrect
-            ? "[플레이어가 다음 문제로 넘어갔습니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.]"
-            : "[플레이어가 이 문제를 건너뜁니다. 짧게 반응한 뒤 다음 퀴즈 질문 한 가지만 출제해 줘.]";
+            ? CheshireUiStrings.EmptyPanelAdvancePrompt(locale)
+            : CheshireUiStrings.EmptyPanelSkipPrompt(locale);
 
         if (debugQuizProgress)
             GameLog.Log(
@@ -385,9 +441,10 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             && flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked)
             && !IsTutorQuizFinished)
         {
+            string locale = CheshireLocaleResolver.ResolveCurrentLocale();
             llmUserTurn = _chesterFlow.ImmediateQuestionTurnPending
-                ? UserPromptChesterParrotAskQuestionNow
-                : UserPromptChesterWindowOpen;
+                ? CheshireUiStrings.UserPromptChesterParrotAskQuestionNow(locale)
+                : CheshireUiStrings.UserPromptChesterWindowOpen(locale);
         }
 
         bool immediateParrotQuestion = _chesterFlow.ImmediateQuestionTurnPending;
@@ -476,7 +533,7 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
     //  Prompt building
     // ==================================================================
 
-    protected override string BuildFinalSystemPrompt()
+    protected override string BuildFinalSystemPrompt(string locale)
     {
         string finalSystemPrompt = chatHistory[0].content;
 
@@ -485,14 +542,14 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             bool windowClicked = flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked);
             if (windowClicked)
             {
-                TextAsset tutorRoomPromptAsset = Resources.Load<TextAsset>("TutorRoomPrompt");
-                if (tutorRoomPromptAsset != null)
+                string tutorRoomPrompt = CheshirePromptCatalog.Load("TutorRoomPrompt", locale);
+                if (!string.IsNullOrEmpty(tutorRoomPrompt))
                 {
-                    finalSystemPrompt += "\n\n" + tutorRoomPromptAsset.text;
+                    finalSystemPrompt += "\n\n" + tutorRoomPrompt;
                 }
                 else
                 {
-                    Debug.LogError("TutorRoomPrompt.txt 파일을 찾을 수 없습니다!");
+                    Debug.LogError($"TutorRoomPrompt (CheshirePrompts/{locale}) 를 찾을 수 없습니다!");
                     finalSystemPrompt += "\n\n[중요 지시]... (TutorRoomPrompt 내용)...";
                 }
             }
@@ -506,6 +563,9 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             return;
 
         payload.rag_profile = "tutor";
+        if (_quizState.HasInsufficientQuestions)
+            return;
+
         string qid = _quizState.ResolveCurrentQuestionIdFromOrderAsset();
         if (!string.IsNullOrWhiteSpace(qid))
             payload.current_question_id = qid.Trim();
@@ -553,7 +613,11 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
             chatSayDialog.Stop();
             chatSayDialog.FadeWhenDone = false;
         }
-        Say(thinkingHoldSayMessage, null);
+        Say(
+            CheshireUiStrings.ResolveThinkingHoldMessage(
+                thinkingHoldSayMessage,
+                CheshireLocaleResolver.ResolveCurrentLocale()),
+            null);
     }
 
     // ==================================================================
