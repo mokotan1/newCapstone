@@ -11,9 +11,15 @@ public class ServerConfig : ScriptableObject
 {
     private const string ResourcePath = "ServerConfig";
 
+    public const string LocalLoopbackChatUrl = "http://127.0.0.1:8000/chat";
+    public const string DefaultCloudChatUrl = "http://54.156.51.119:8000/chat";
+
     [Header("Chat API")]
-    [Tooltip("Base chat endpoint (e.g. http://host:port/chat).")]
-    [SerializeField] private string chatUrl = "http://54.156.51.119:8000/chat";
+    [Tooltip("When enabled, ChatUrl is always the local FastAPI loopback endpoint.")]
+    [SerializeField] private bool useLocalLoopback = true;
+
+    [Tooltip("Cloud/remote chat endpoint used when Use Local Loopback is off.")]
+    [SerializeField] private string chatUrl = DefaultCloudChatUrl;
 
     [Header("Security")]
     [Tooltip("When true, TLS certificate validation is skipped (dev/staging only).")]
@@ -22,9 +28,16 @@ public class ServerConfig : ScriptableObject
     [Tooltip("Optional shared token for the chat API. Leave empty for local development.")]
     [SerializeField] private string chatApiToken = "";
 
-    public string ChatUrl => chatUrl;
+    public bool UseLocalLoopback => useLocalLoopback;
+    public string ChatUrl => useLocalLoopback ? LocalLoopbackChatUrl : chatUrl;
     public bool BypassTlsCertificate => bypassTlsCertificate;
     public string ChatApiToken => chatApiToken;
+
+    internal void ApplyChatEndpointForTest(bool useLocalLoopback, string chatUrl)
+    {
+        this.useLocalLoopback = useLocalLoopback;
+        this.chatUrl = chatUrl;
+    }
 
     private static ServerConfig _cached;
 

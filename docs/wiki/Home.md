@@ -79,7 +79,7 @@ python tools/wiki_rag/build_wiki.py --manifest docs/wiki/_meta/source-manifest.y
 | Scenario | The unholy of mention 플롯 4막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-4막--2148f646a4c5.md) |
 | Scenario | the unholy of mention 플롯 2막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-2막--6547e2e5db43.md) |
 | Technical | 2026-07-14-regression-playtest | md | extracted | [transcript](sources/technical/2026-07-14-regression-playtest--1634d7ac3efa.md) |
-| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--505bbb50868b.md) |
+| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--194f6010e716.md) |
 | Technical | fungus-migration-audit | md | extracted | [transcript](sources/technical/fungus-migration-audit--aacf05fd62fd.md) |
 | Technical | fungus-room-migration-plan | md | extracted | [transcript](sources/technical/fungus-room-migration-plan--e52de73281b4.md) |
 | Technical | glass-choice-menu-usage | md | extracted | [transcript](sources/technical/glass-choice-menu-usage--f05cffd194cf.md) |

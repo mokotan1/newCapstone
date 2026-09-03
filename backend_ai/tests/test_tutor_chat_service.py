@@ -262,4 +262,4 @@ async def test_tutor_profile_caps_max_tokens() -> None:
         quiz_bank=None,
     )
     await service2.chat(ChatRequest(prompt="a", system="s", use_tools=False))
-    assert cap2.last_max_tokens == 512
+    assert cap2.last_max_tokens == min(512, settings.dialogue_max_tokens)

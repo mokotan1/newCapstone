@@ -22,7 +22,7 @@ _CURATED_CITATION_FIXTURES: tuple[tuple[str, str, str, str], ...] = (
     ("planning:b98bbfbdb019", "기획서/ai-dialogue.pdf", "planning", "ai-dialogue"),
     ("planning:9d4611de3ae3", "기획서/initial-plan.pdf", "planning", "initial-plan"),
     ("technical:e52de73281b4", "docs/fungus-room-migration-plan.md", "technical", "fungus-room"),
-    ("technical:505bbb50868b", "docs/architecture.md", "technical", "architecture"),
+    ("technical:194f6010e716", "docs/architecture.md", "technical", "architecture"),
     ("technical:ca17d157de10", "docs/security/llm-abuse-defense-plan.md", "technical", "llm-defense"),
 )
 

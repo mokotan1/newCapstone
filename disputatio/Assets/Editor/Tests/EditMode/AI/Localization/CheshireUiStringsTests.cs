@@ -80,6 +80,20 @@ public class CheshireUiStringsTests
 
     [TestCase(CheshireLocaleResolver.English)]
     [TestCase(CheshireLocaleResolver.Japanese)]
+    public void LocalAiNotReady_NonKorean_HasNoHangul(string locale)
+    {
+        AssertNoHangul(CheshireUiStrings.LocalAiNotReady(locale), nameof(CheshireUiStrings.LocalAiNotReady));
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void LocalAiDisabled_NonKorean_HasNoHangul(string locale)
+    {
+        AssertNoHangul(CheshireUiStrings.LocalAiDisabled(locale), nameof(CheshireUiStrings.LocalAiDisabled));
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
     public void ConnectionErrorPrefix_NonKorean_HasNoHangul(string locale)
     {
         AssertNoHangul(CheshireUiStrings.ConnectionErrorPrefix(locale), nameof(CheshireUiStrings.ConnectionErrorPrefix));

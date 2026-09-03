@@ -6,6 +6,7 @@ import pytest
 
 from models.responses import SSEEvent
 from providers.groq_provider import GroqProvider
+from providers.litert_provider import LiteRTProvider
 
 
 def _make_text_chunk(content: str):
@@ -143,3 +144,17 @@ class TestGroqProviderStreaming:
         fc = [e for e in events if e.type == "function_call"]
         assert len(fc) == 1
         assert fc[0].arguments == {}
+
+
+def test_litert_provider_name_and_defaults() -> None:
+    provider = LiteRTProvider(
+        base_url="http://127.0.0.1:9379/",
+        model="gemma4-e2b",
+        num_ctx=4096,
+        think=False,
+    )
+    assert provider.name == "litert"
+    assert provider._base_url == "http://127.0.0.1:9379"
+    assert provider._model == "gemma4-e2b"
+    assert provider._num_ctx == 4096
+    assert provider._think is False

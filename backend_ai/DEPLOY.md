@@ -12,6 +12,8 @@
    - 운영에서 채팅 API를 보호하려면 `CHAT_API_TOKEN` 도 채우고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춤
 4. 서버 실행: `uvicorn main:app --host 0.0.0.0 --port 8000` (또는 `python main.py`)
 
+Windows에서 **클라우드 키 없이** 체셔 로컬 대사를 쓰려면 `AI_PROVIDER=local` 과 `.\scripts\install_local_ai.ps1` 을 사용하고 FastAPI는 `127.0.0.1:8000` 에만 바인딩합니다. 자세한 내용: [README.md](README.md) 의 로컬 Gemma 4 E2B 절, `installer/licenses/NOTICE.md`.
+
 `config.py`는 **`backend_ai` 폴더 안의 `.env`** 를 실행 위치와 관계없이 읽습니다.
 
 ## 2. Docker

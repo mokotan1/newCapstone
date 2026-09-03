@@ -17,10 +17,15 @@ public class KitchenChatbot : BaseChatbot
     public void TriggerAIResponseByFlag()
     {
         if (isRequestInProgress) return;
+        if (!TryAllowCheshireChat(out string blocked))
+        {
+            Say(blocked, null);
+            return;
+        }
 
         string locale = CheshireLocaleResolver.ResolveCurrentLocale();
         string actionText = CheshireDynamicPromptFragments.KitchenGiveFoodActionText(locale);
-        StartCoroutine(GetGPTResponse(actionText));
+        StartCoroutine(GetGPTResponseStreaming(actionText));
         GameLog.Log("call");
     }
 
