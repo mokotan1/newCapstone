@@ -33,6 +33,26 @@ def test_empty_prompt_and_message_raises() -> None:
         ChatRequest.model_validate({"system": "s", "prompt": "", "message": ""})
 
 
+def test_cheshire_dialogue_is_dialogue_only() -> None:
+    request = ChatRequest(prompt="안녕", system="체셔", use_tools=True)
+    assert request.is_dialogue_only is True
+
+
+def test_tutor_profile_is_not_dialogue_only() -> None:
+    request = ChatRequest(prompt="골리앗", rag_profile="tutor", use_tools=True)
+    assert request.is_dialogue_only is False
+
+
+def test_character_facts_and_dialogue_context_are_optional() -> None:
+    request = ChatRequest(
+        prompt="힌트 줄래?",
+        character_facts="서재 열쇠는 이미 사용됨",
+        dialogue_context="플레이어가 같은 질문을 세 번 반복함",
+    )
+    assert request.character_facts == "서재 열쇠는 이미 사용됨"
+    assert request.dialogue_context == "플레이어가 같은 질문을 세 번 반복함"
+
+
 def test_hint_rewrite_payload_is_accepted() -> None:
     r = ChatRequest.model_validate(
         {

@@ -10,12 +10,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from config import get_settings
+from local_runtime import build_chat_providers, check_local_runtime
 from models.requests import ChatRequest, TelemetryIngestRequest, TutorGradeRequest
 from models.responses import ChatResponse, TelemetryResponse, TutorGradeResponse
-from providers.groq_provider import GroqProvider
-from providers.gemini_provider import GeminiProvider
-from services.chat_service import ChatService
 from services.chat_auth import verify_chat_api_token
+from services.chat_service import ChatService
 from services.locale_support import (
     all_engines_failed_message,
     api_key_required_message,
@@ -23,6 +22,7 @@ from services.locale_support import (
 from services.quiz_bank import QuizBank
 from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
 from services.rate_limit import build_rate_limiter
+from services.sse_format import format_sse_event
 from services.telemetry_service import TelemetryService
 from services.tutor_grade import grade_tutor_answer
 from services.tutor_rag_service import TutorRAGService
@@ -40,14 +40,20 @@ settings = get_settings()
 registry = ToolRegistry()
 registry.register_many(GAME_TOOLS)
 
-primary = GroqProvider(api_key=settings.groq_api_key, model=settings.default_model_groq) if settings.groq_api_key else None
-fallback = GeminiProvider(api_key=settings.google_api_key, model=settings.default_model_gemini) if settings.google_api_key else None
+_first_available, _second_available = build_chat_providers(settings)
 
-if primary is None and fallback is None:
-    logger.critical("No AI provider API keys configured – server will reject all /chat requests")
-
-_first_available = primary or fallback
-_second_available = fallback if primary else None
+if _first_available is None:
+    logger.critical("No AI provider configured – server will reject all /chat requests")
+elif settings.ai_provider == "local":
+    runtime_status = check_local_runtime(settings)
+    if runtime_status.error:
+        logger.warning("Local AI runtime not ready: %s", runtime_status.error)
+    else:
+        logger.info(
+            "Local AI runtime ready model=%s url=%s",
+            settings.local_ai_model,
+            settings.local_ai_base_url,
+        )
 
 _backend_dir = Path(__file__).resolve().parent
 _quiz_bank = QuizBank.load(_backend_dir / settings.tutor_quiz_csv_path)
@@ -111,7 +117,17 @@ app = FastAPI(title="Disputatio AI Backend", lifespan=lifespan)
 # ---------------------------------------------------------------------------
 @app.get("/")
 def health_check():
-    return {"status": "online", "message": "Server is Running!"}
+    payload: dict = {"status": "online", "message": "Server is Running!"}
+    if settings.ai_provider == "local":
+        runtime = check_local_runtime(settings)
+        payload["local_runtime"] = {
+            "available": runtime.ollama_or_litert_available,
+            "model_available": runtime.model_available,
+            "error": runtime.error,
+        }
+        if not runtime.model_available:
+            payload["status"] = "degraded"
+    return payload
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -170,7 +186,7 @@ async def chat_stream(request: Request, payload: ChatRequest):
 
     async def event_generator():
         async for event in chat_service.stream_chat(payload):
-            yield f"data: {event.model_dump_json()}\n\n"
+            yield format_sse_event(event)
 
     return StreamingResponse(
         event_generator(),
@@ -187,4 +203,5 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    host = "127.0.0.1" if settings.ai_provider == "local" else "0.0.0.0"
+    uvicorn.run(app, host=host, port=port)

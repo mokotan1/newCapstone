@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from config import Settings
 from llm_defense.message_builder import build_llm_messages
 from models.requests import ChatRequest
 from models.responses import ChatResponse, FunctionCallResult, SSEEvent
 from providers.base import AIProvider
+from tools.registry import ToolRegistry
+
 from services.answer_grader import grade_user_answer
+from services.dialogue_guard import sanitize_dialogue_reply
 from services.hint_rewrite import (
     HINT_REWRITE_SERVER_INSTRUCTION,
     apply_hint_rewrite_fallback,
@@ -21,7 +24,6 @@ from services.locale_support import (
 )
 from services.quiz_bank import QuizBank
 from services.tutor_rag_service import TutorRAGService
-from tools.registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +119,10 @@ class ChatService:
                 "hint_rewrite",
                 build_hint_rewrite_external_document(request.hint_rewrite),
             ))
+        if request.character_facts:
+            docs.append(("character_facts", request.character_facts))
+        if request.dialogue_context:
+            docs.append(("dialogue_context", request.dialogue_context))
         profile = request.rag_profile
         if profile not in ("tutor", "project"):
             return docs
@@ -155,7 +161,7 @@ class ChatService:
         mp, ms, mx = self._limits()
         external = self._gather_external_documents(request)
         server_instructions: list[str] = []
-        if request.use_tools and len(self._registry) > 0:
+        if request.effective_use_tools and len(self._registry) > 0:
             server_instructions.append(self._tool_instruction_for(request.locale))
         if request.hint_rewrite is not None:
             server_instructions.append(HINT_REWRITE_SERVER_INSTRUCTION)
@@ -176,7 +182,7 @@ class ChatService:
         )
 
     def _get_tools(self, request: ChatRequest) -> list[dict] | None:
-        if not request.use_tools or len(self._registry) == 0:
+        if not request.effective_use_tools or len(self._registry) == 0:
             return None
         return self._registry.get_all_openai_format()
 
@@ -188,7 +194,18 @@ class ChatService:
             tcap = self._app_settings.tutor_chat_max_tokens
             if tcap > 0:
                 cap = min(cap, tcap)
+        elif (
+            self._app_settings is not None
+            and request.is_dialogue_only
+            and self._app_settings.dialogue_max_tokens > 0
+        ):
+            cap = min(cap, self._app_settings.dialogue_max_tokens)
         return max(1, cap)
+
+    def _temperature_for_request(self, request: ChatRequest) -> float:
+        if self._app_settings is not None and request.is_dialogue_only:
+            return self._app_settings.dialogue_temperature
+        return self._temperature
 
     def _apply_tutor_quiz_override(self, request: ChatRequest, result: ChatResponse) -> ChatResponse:
         """If CSV grader says correct, force update_quiz.is_correct True."""
@@ -218,10 +235,13 @@ class ChatService:
                 new_calls.append(fc)
         return ChatResponse(response=result.response, function_calls=new_calls)
 
-    async def stream_chat(self, request: ChatRequest) -> AsyncIterator[SSEEvent]:
-        messages = self._build_messages(request)
-        tools = self._get_tools(request)
-
+    async def _iter_provider_events(
+        self,
+        request: ChatRequest,
+        messages: list[dict],
+        tools: list[dict] | None,
+    ) -> AsyncIterator[SSEEvent]:
+        temperature = self._temperature_for_request(request)
         primary_err: BaseException | None = None
         try:
             max_tok = self._max_tokens_for_request(request)
@@ -229,14 +249,14 @@ class ChatService:
             async for event in self._primary.stream_chat(
                 messages=messages,
                 tools=tools,
-                temperature=self._temperature,
+                temperature=temperature,
                 max_tokens=max_tok,
             ):
                 yield event
             return
         except Exception as exc:
             primary_err = exc
-            logger.exception("Primary provider (%s) failed: %s", self._primary.name, exc)
+            logger.exception("Primary provider (%s) failed", self._primary.name)
 
         locale = request.locale
         all_failed = user_visible_ai_error(None, locale)
@@ -255,12 +275,12 @@ class ChatService:
             async for event in self._fallback.stream_chat(
                 messages=messages,
                 tools=tools,
-                temperature=self._temperature,
+                temperature=temperature,
                 max_tokens=max_tok,
             ):
                 yield event
         except Exception as exc:
-            logger.exception("Fallback provider (%s) also failed: %s", self._fallback.name, exc)
+            logger.exception("Fallback provider (%s) also failed", self._fallback.name)
             fb_msg = _user_visible_ai_error(exc, locale)
             final_msg = (
                 fb_msg
@@ -269,6 +289,44 @@ class ChatService:
             )
             yield SSEEvent(type="error", content=final_msg)
             yield SSEEvent(type="done", full_text="")
+
+    async def _sanitize_dialogue_events(
+        self,
+        request: ChatRequest,
+        messages: list[dict],
+        tools: list[dict] | None,
+    ) -> AsyncIterator[SSEEvent]:
+        parts: list[str] = []
+        saw_error = False
+        last_full = ""
+        async for event in self._iter_provider_events(request, messages, tools):
+            if event.type == "error":
+                saw_error = True
+                yield event
+                continue
+            if event.type == "function_call":
+                continue
+            if event.type == "text_delta" and event.content:
+                parts.append(event.content)
+                yield event
+                continue
+            if event.type == "done":
+                last_full = event.full_text or "".join(parts)
+        if saw_error:
+            yield SSEEvent(type="done", full_text="")
+            return
+        sanitized = sanitize_dialogue_reply(last_full or "".join(parts), request.locale)
+        yield SSEEvent(type="done", full_text=sanitized)
+
+    async def stream_chat(self, request: ChatRequest) -> AsyncIterator[SSEEvent]:
+        messages = self._build_messages(request)
+        tools = self._get_tools(request)
+        if request.is_dialogue_only:
+            async for event in self._sanitize_dialogue_events(request, messages, tools):
+                yield event
+            return
+        async for event in self._iter_provider_events(request, messages, tools):
+            yield event
 
     async def chat(self, request: ChatRequest) -> ChatResponse:
         """Non-streaming chat that collects all events into a single ChatResponse."""

@@ -178,6 +178,21 @@ public class ChatHttpClientTests
         Assert.AreEqual(expectedUrl, client.ResolvedServerUrl);
     }
 
+    [Test]
+    public void ResolveUseTools_CheshireDialogue_AlwaysDisablesGameTools()
+    {
+        Assert.IsFalse(ChatHttpClient.ResolveUseTools(ragProfile: null, requestedUseTools: true));
+        Assert.IsFalse(ChatHttpClient.ResolveUseTools(ragProfile: "", requestedUseTools: true));
+        Assert.IsFalse(ChatHttpClient.ResolveUseTools(ragProfile: "cheshire", requestedUseTools: true));
+    }
+
+    [Test]
+    public void ResolveUseTools_TutorProfile_HonorsRequestedFlag()
+    {
+        Assert.IsTrue(ChatHttpClient.ResolveUseTools(ragProfile: "tutor", requestedUseTools: true));
+        Assert.IsFalse(ChatHttpClient.ResolveUseTools(ragProfile: "tutor", requestedUseTools: false));
+    }
+
     // ---------------------------------------------------------------
     //  LocalLlamaPayload.locale serialization
     // ---------------------------------------------------------------
@@ -424,6 +439,11 @@ public class ChatHttpClientTests
                 error: "Cannot connect",
                 body: "");
         };
+        client.SimulateNonStreamingAttempt = _ => new ChatHttpAttemptOutcome(
+            UnityEngine.Networking.UnityWebRequest.Result.ConnectionError,
+            responseCode: 0,
+            error: "Cannot connect",
+            body: "");
 
         DrainEnumerator(client.GetGPTResponseStreaming("hello"));
 
@@ -436,6 +456,128 @@ public class ChatHttpClientTests
             CheshireUiStrings.ConnectionErrorPrefix(CheshireLocaleResolver.ResolveCurrentLocale()),
             host.HandledResponses[0]);
         StringAssert.Contains("Cannot connect", host.HandledResponses[0]);
+    }
+
+    [Test]
+    public void FetchRootStatus_UsesSimulateSeam_AndDoesNotMarkRequestInProgress()
+    {
+        var history = new ChatHistoryManager(appendCommonVoice: false);
+        var host = new StubChatHttpCallbacks();
+        var client = new ChatHttpClient(() => "http://127.0.0.1:8000/chat", host, history)
+        {
+            SimulateRootAttempt = () => new ChatHttpAttemptOutcome(
+                UnityEngine.Networking.UnityWebRequest.Result.Success,
+                responseCode: 200,
+                error: "",
+                body: "{\"status\":\"degraded\",\"local_runtime\":{\"model_available\":false}}"),
+        };
+
+        long code = 0;
+        string body = null;
+        DrainEnumerator(client.FetchRootStatus((statusCode, json) =>
+        {
+            code = statusCode;
+            body = json;
+        }));
+
+        Assert.AreEqual(200, code);
+        StringAssert.Contains("degraded", body);
+        Assert.IsFalse(host.IsRequestInProgress);
+        Assert.AreEqual(0, host.WaitStartedCount);
+    }
+
+    [Test]
+    public void NaiveSseSplit_LosesEventWhenJsonIsSplitAcrossChunks()
+    {
+        string part1 = "data: {\"type\":\"text_delta\",\"content\":\"He";
+        string part2 = "llo\"}\n\n";
+
+        List<SSEEventData> events = ParseSseChunksNaively(part1, part2);
+
+        Assert.AreEqual(
+            0,
+            events.Count,
+            "Split('\\n') on each Unity download-buffer increment drops a JSON event split across reads.");
+    }
+
+    [Test]
+    public void ChatSseStreamParser_ReassemblesEventSplitAcrossChunks()
+    {
+        var parser = new ChatSseStreamParser();
+
+        IReadOnlyList<SSEEventData> first = parser.Push(
+            "data: {\"type\":\"text_delta\",\"content\":\"He");
+        Assert.AreEqual(0, first.Count);
+
+        IReadOnlyList<SSEEventData> second = parser.Push("llo\"}\n\n");
+        Assert.AreEqual(1, second.Count);
+        Assert.AreEqual("text_delta", second[0].type);
+        Assert.AreEqual("Hello", second[0].content);
+    }
+
+    [Test]
+    public void ChatSseStreamParser_ParsesCrlfAndMultipleCompleteEvents()
+    {
+        var parser = new ChatSseStreamParser();
+        IReadOnlyList<SSEEventData> events = parser.Push(
+            "data: {\"type\":\"text_delta\",\"content\":\"A\"}\r\n\r\n" +
+            "data: {\"type\":\"done\",\"full_text\":\"A\"}\r\n\r\n");
+
+        Assert.AreEqual(2, events.Count);
+        Assert.AreEqual("text_delta", events[0].type);
+        Assert.AreEqual("A", events[0].content);
+        Assert.AreEqual("done", events[1].type);
+        Assert.AreEqual("A", events[1].full_text);
+    }
+
+    [Test]
+    public void ChatSseStreamParser_FlushIgnoresIncompleteLine()
+    {
+        var parser = new ChatSseStreamParser();
+        parser.Push("data: {\"type\":\"text_delta\",\"content\":\"no-newline");
+        IReadOnlyList<SSEEventData> flushed = parser.Flush();
+        Assert.AreEqual(0, flushed.Count);
+    }
+
+    [Test]
+    public void GetGPTResponseStreaming_StreamRetriesExhausted_FallsBackToNonStreaming()
+    {
+        var history = new ChatHistoryManager(appendCommonVoice: false);
+        var host = new StubChatHttpCallbacks();
+        var client = new ChatHttpClient(() => "http://test.local/chat", host, history)
+        {
+            RetryDelaySecondsOverrideForTests = 0f,
+        };
+
+        int streamAttempts = 0;
+        client.SimulateStreamingAttempt = _ =>
+        {
+            streamAttempts++;
+            return new ChatHttpAttemptOutcome(
+                UnityEngine.Networking.UnityWebRequest.Result.ConnectionError,
+                responseCode: 0,
+                error: "Cannot connect",
+                body: "");
+        };
+
+        int nonStreamAttempts = 0;
+        client.SimulateNonStreamingAttempt = _ =>
+        {
+            nonStreamAttempts++;
+            return new ChatHttpAttemptOutcome(
+                UnityEngine.Networking.UnityWebRequest.Result.Success,
+                responseCode: 200,
+                error: "",
+                body: "{\"response\":\"fallback ok\",\"function_calls\":[]}");
+        };
+
+        DrainEnumerator(client.GetGPTResponseStreaming("hello"));
+
+        Assert.AreEqual(2, streamAttempts);
+        Assert.AreEqual(1, nonStreamAttempts);
+        Assert.AreEqual(1, host.HandledResponses.Count);
+        Assert.AreEqual("fallback ok", host.HandledResponses[0]);
+        Assert.IsFalse(host.IsRequestInProgress);
     }
 
     [Test]
@@ -462,6 +604,37 @@ public class ChatHttpClientTests
         Assert.AreEqual(1, host.WaitStartedCount);
         Assert.AreEqual(1, host.WaitFinishedCount);
         Assert.IsFalse(host.IsRequestInProgress);
+    }
+
+    /// <summary>
+    /// Mirrors the pre-fix Unity loop: split each download increment on '\n' with no pending buffer.
+    /// </summary>
+    private static List<SSEEventData> ParseSseChunksNaively(params string[] chunks)
+    {
+        var events = new List<SSEEventData>();
+        foreach (string newData in chunks)
+        {
+            foreach (string line in newData.Split('\n'))
+            {
+                if (!line.StartsWith("data: "))
+                    continue;
+                string json = line.Substring(6).Trim();
+                if (string.IsNullOrEmpty(json))
+                    continue;
+                try
+                {
+                    SSEEventData evt = JsonConvert.DeserializeObject<SSEEventData>(json);
+                    if (evt != null)
+                        events.Add(evt);
+                }
+                catch
+                {
+                    // Incomplete JSON in this chunk is dropped, matching the production bug.
+                }
+            }
+        }
+
+        return events;
     }
 
     private static void DrainEnumerator(IEnumerator routine, int maxSteps = 200)

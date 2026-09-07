@@ -37,6 +37,8 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     private DialogInput chatDialogInput;
     private ChatHttpClient _httpClient;
     private ChatHistoryManager _historyManager;
+    private bool _localAiReady = true;
+    private string _liveStreamText = "";
     private string ChatRequestInputGateReason => $"{GetType().Name}:{GetInstanceID()}:chat_request";
 
     // ---------------------------------------------------------------
@@ -83,6 +85,13 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
         CacheDialogInput();
         if (userInputField != null && RegisterInputFieldSubmitListener)
             userInputField.onSubmit.AddListener(OnInputFieldSubmit);
+
+        string chatUrl = !string.IsNullOrEmpty(localServerUrl)
+            ? localServerUrl
+            : ServerConfig.GetOrCreate().ChatUrl;
+        _localAiReady = !LocalAiReadiness.RequiresLoopbackRuntime(chatUrl);
+        if (!_localAiReady)
+            StartCoroutine(CoPollLocalAiReady());
     }
 
     protected virtual void Update()
@@ -138,6 +147,12 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
             return;
         }
 
+        if (!TryAllowCheshireChat(out string blocked))
+        {
+            Say(blocked, null);
+            return;
+        }
+
         string message = userInputField.text.Trim();
 
         if (string.IsNullOrEmpty(message))
@@ -153,9 +168,46 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
             return;
         }
 
-        StartCoroutine(GetGPTResponse(message));
+        StartCoroutine(GetGPTResponseStreaming(message));
         AppendCheshirePlayerLog(message);
         userInputField.text = "";
+    }
+
+    private IEnumerator CoPollLocalAiReady()
+    {
+        while (!_localAiReady && !LocalAiReadiness.IsChatDisabled())
+        {
+            long statusCode = 0;
+            string body = "";
+            yield return _httpClient.FetchRootStatus((code, json) =>
+            {
+                statusCode = code;
+                body = json;
+            });
+            _localAiReady = LocalAiReadiness.IsLocalModelReady(
+                body,
+                statusCode,
+                requireLocalRuntime: true);
+            if (_localAiReady)
+                yield break;
+            yield return new WaitForSecondsRealtime(2f);
+        }
+    }
+
+    protected bool TryAllowCheshireChat(out string blockedMessage)
+    {
+        blockedMessage = null;
+        string locale = CheshireLocaleResolver.ResolveCurrentLocale();
+        if (LocalAiReadiness.CanSendChat(
+                LocalAiReadiness.IsChatDisabled(),
+                LocalAiReadiness.RequiresLoopbackRuntime(ResolvedServerUrl),
+                _localAiReady))
+            return true;
+
+        blockedMessage = LocalAiReadiness.IsChatDisabled()
+            ? CheshireUiStrings.LocalAiDisabled(locale)
+            : CheshireUiStrings.LocalAiNotReady(locale);
+        return false;
     }
 
     private IEnumerator CoTrySendAfterImeFrame()
@@ -185,7 +237,13 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
             yield break;
         }
 
-        StartCoroutine(GetGPTResponse(message));
+        if (!TryAllowCheshireChat(out string blocked))
+        {
+            Say(blocked, null);
+            yield break;
+        }
+
+        StartCoroutine(GetGPTResponseStreaming(message));
         AppendCheshirePlayerLog(message);
         userInputField.text = "";
     }
@@ -342,10 +400,28 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     /// <c>SendWebRequest</c> 직전·직후. <see cref="isRequestInProgress"/>는 Say까지 true이므로
     /// "서버 대기" 전용 UI는 여기서 구분합니다.
     /// </summary>
-    protected virtual void OnChatHttpWaitStarted() { }
+    protected virtual void OnChatHttpWaitStarted()
+    {
+        _liveStreamText = "";
+    }
+
     protected virtual void OnChatHttpWaitFinished() { }
 
-    protected virtual void OnStreamTextDelta(string delta) { }
+    protected virtual void OnStreamTextDelta(string delta)
+    {
+        if (string.IsNullOrEmpty(delta))
+            return;
+
+        _liveStreamText = CheshireLiveStreamDisplay.Append(_liveStreamText, delta);
+        if (chatSayDialog == null)
+            return;
+
+        if (!chatSayDialog.gameObject.activeInHierarchy)
+            EnsureSayDialogActiveInHierarchy(chatSayDialog);
+
+        chatSayDialog.FadeWhenDone = false;
+        chatSayDialog.StoryText = _liveStreamText;
+    }
 
     protected void AppendCheshirePlayerLog(string message)
     {

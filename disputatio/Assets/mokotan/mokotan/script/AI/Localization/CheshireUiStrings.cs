@@ -46,6 +46,16 @@ public static class CheshireUiStrings
         return Lookup("ReconnectRetrying", locale);
     }
 
+    public static string LocalAiNotReady(string locale)
+    {
+        return Lookup("LocalAiNotReady", locale);
+    }
+
+    public static string LocalAiDisabled(string locale)
+    {
+        return Lookup("LocalAiDisabled", locale);
+    }
+
     public static string WrongAnswerRetry(string locale)
     {
         return Lookup("WrongAnswerRetry", locale);
@@ -180,6 +190,10 @@ public static class CheshireUiStrings
                 return HardcodedConnectionErrorPrefix(normalizedLocale);
             case "ReconnectRetrying":
                 return HardcodedReconnectRetrying(normalizedLocale);
+            case "LocalAiNotReady":
+                return HardcodedLocalAiNotReady(normalizedLocale);
+            case "LocalAiDisabled":
+                return HardcodedLocalAiDisabled(normalizedLocale);
             case "WrongAnswerRetry":
                 return HardcodedWrongAnswerRetry(normalizedLocale);
             case "WrongAnswerWithHint":
@@ -249,6 +263,32 @@ public static class CheshireUiStrings
                 return "Connection unstable. Retrying…";
             default:
                 return "연결이 원활하지 않아 다시 시도합니다…";
+        }
+    }
+
+    private static string HardcodedLocalAiNotReady(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAIの準備ができていないよ。インストールが終わったらもう一度話しかけてね。";
+            case CheshireLocaleResolver.English:
+                return "Local AI is not ready yet. Try again after installation finishes.";
+            default:
+                return "아직 로컬 AI가 준비되지 않았어. 설치가 끝나면 다시 말해 줘.";
+        }
+    }
+
+    private static string HardcodedLocalAiDisabled(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "会話AIはオフだよ。パズルはそのまま進められるよ。";
+            case CheshireLocaleResolver.English:
+                return "Dialogue AI is turned off. You can still solve puzzles.";
+            default:
+                return "지금은 대화 AI를 끄고 있어. 퍼즐은 그대로 진행할 수 있어.";
         }
     }
 

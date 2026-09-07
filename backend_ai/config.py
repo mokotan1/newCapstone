@@ -27,6 +27,18 @@ class Settings(BaseSettings):
 
     default_temperature: float = 0.7
     max_tokens: int = 512
+    #: cloud = Groq/Gemini. local = LiteRT-LM / Gemma 4 E2B on loopback.
+    ai_provider: str = "cloud"
+    local_ai_base_url: str = "http://127.0.0.1:9379"
+    local_ai_model: str = "gemma4-e2b"
+    local_ai_num_ctx: int = 2048
+    local_ai_think: bool = False
+    #: Empty = health-check only; do not spawn a runtime from FastAPI.
+    local_ai_start_command: str = ""
+    dialogue_temperature: float = 0.8
+    dialogue_max_tokens: int = 64
+    dialogue_top_p: float = 0.95
+    dialogue_top_k: int = 64
     #: 모든 경로에 적용되는 프로바이더 토큰 상한(서버 강제 하드 캡).
     max_tokens_hard_cap: int = 4096
     #: Tutor ``rag_profile`` 요청에만 적용(짧은 대사·툴 호출 위주). 전역 max_tokens와 min.

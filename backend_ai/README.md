@@ -40,6 +40,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 | `GROQ_API_KEY` | Groq API 키 (권장) |
 | `GOOGLE_API_KEY` | Google AI Studio (Gemini) 폴백 |
 | `CHAT_API_TOKEN` | 선택: 설정 시 `/chat`, `/chat/stream` 요청에 동일 토큰 필요 |
+| `AI_PROVIDER` | `cloud`(기본) 또는 `local` (LiteRT-LM Gemma 4 E2B) |
 | `capstone` | 예전 Groq 키 변수명 (`GROQ_API_KEY` 가 비었을 때만 사용) |
 
 ## API
@@ -112,6 +113,36 @@ Unity `Resources/TutorQuestionOrder.txt` 에 출제 순서대로 `question_id` �
 
 Unity 클라이언트의 `BaseChatbot.localServerUrl` 은 배포한 서버 주소로 맞춥니다.
 
+## 로컬 Gemma 4 E2B (Windows 데스크톱)
+
+클라우드 키 없이 체셔 대사를 쓰려면 LiteRT-LM + `gemma4-e2b` 를 루프백에 둡니다.
+
+1. 라이선스·용량: `installer/licenses/NOTICE.md` (약 2.4 GB 다운로드, 여유 디스크 15 GB)
+2. 설치 플래너: `python backend_ai/local_install.py` (동의 없이 import 하지 않음)
+3. 대화형 래퍼: `.\scripts\install_local_ai.ps1` — `YES` 입력 또는 `-Consent`
+4. 이미 설치된 모델은 checksum이 맞으면 건너뜀. 종료 시 모델 파일을 지우지 않음. 삭제는 `-RemoveModel`
+5. 서비스: LiteRT `127.0.0.1:9379`, FastAPI `AI_PROVIDER=local` 로 `127.0.0.1:8000`
+6. 고정 버전·SHA256: `backend_ai/data/local_ai_manifest.json`
+7. 클린 머신 체크리스트: `installer/CHECKLIST.md`
+
+Unity 채팅 URL이 `127.0.0.1` / `localhost` 이면 `GET /` 의 `local_runtime.model_available` 이 참이 될 때까지 전송을 막습니다. 대화 AI만 끄려면 PlayerPrefs `LocalAi.ChatDisabled`.
+
+로컬 모드 환경 변수: `AI_PROVIDER=local`, `LOCAL_AI_BASE_URL=http://127.0.0.1:9379`, `LOCAL_AI_MODEL=gemma4-e2b`
+
+### 체셔 대화 eval (로컬 Gemma만)
+
+클라우드(Groq/Gemini)로는 돌리지 않습니다. LiteRT가 `127.0.0.1:9379`에서 `gemma4-e2b`를 서빙하고 `AI_PROVIDER=local`일 때:
+
+```bash
+cd backend_ai
+python -m tests.evals.run_cheshire_eval
+```
+
+- 케이스: `tests/evals/cheshire_dialogue_cases.jsonl` (50건, 인사/힌트/오답/반복/감정/세계관 경계)
+- 게이트: 유효 대사 ≥ 90%, JSON·툴 누출 0건, `forbidden_substrings` 날조 0건
+- 지연: 완료 시간(`latency_ms`)과 첫 `text_delta`(`ttft_ms`). 대화 출력 상한 기본 64토큰, `num_ctx` 기본 2048(약 3초 완료 목표)
+- 단위 테스트(모델 없음): `pytest tests/test_cheshire_eval.py`
+
 ## 파일 구조
 
 - `main.py` — FastAPI 앱
@@ -122,7 +153,8 @@ Unity 클라이언트의 `BaseChatbot.localServerUrl` 은 배포한 서버 주�
 - `data/tutor_rag/` — RAG용 텍스트 코퍼스
 - `data/tutor_quiz/quiz_bank.csv` — 비개발자 편집용 문제 은행
 - `data/tutor_rag_index.json` — 임베딩 인덱스 (`build_tutor_rag_index.py`로 생성)
-- `scripts/build_tutor_rag_index.py`, `scripts/validate_quiz_bank.py`
+- `tests/evals/cheshire_dialogue_cases.jsonl` — 체셔 대화 품질 케이스
+- `tests/evals/run_cheshire_eval.py` — 로컬 Gemma 전용 eval 러너
 - `services/tutor_rag_service.py`, `services/quiz_bank.py`, `services/answer_grader.py`, `services/quiz_validation.py`
 
 <!-- Touched to validate backend-build workflow path filters in CI. -->
