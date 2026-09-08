@@ -35,7 +35,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 | AI 서버 | **FastAPI** + uvicorn, **Groq**(우선) / **Gemini**(폴백); `AI_PROVIDER=local`이면 LiteRT-LM Gemma 4 E2B |
 | 클라이언트 영속화 | **PlayerPrefs** (체크포인트 JSON, 설정), Fungus 변수(`Variablemanager` Flowchart) |
 | 서버 데이터 | CSV 문제은행, RAG JSON 인덱스, (선택) **Redis** rate limit |
-| CI | GitHub Actions: Python ruff/py_compile, C# syntax checker, backend pytest + Docker |
+| CI | GitHub Actions: lint(`ci-check`)는 모든 브랜치 PR/push; Docker·Unity 자동 빌드는 `main` 진입(push/`main` 대상 PR)만 |
 | 배포 | GHCR 이미지 → EC2 SSH + `docker compose` (`deploy/docker-compose.prod.yml`) |
 
 ---
@@ -52,6 +52,8 @@ newCapstone/
 ├── installer/           # 로컬 AI 라이선스 NOTICE·첫 실행 체크리스트
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
+├── docs/development/    # 얇은 총괄 워크플로 (AGENTS.md가 진입점)
+├── AGENTS.md            # 기능 분할·위임 진입 지침
 ├── .github/workflows/   # CI/CD
 └── README.md
 ```
@@ -69,7 +71,7 @@ newCapstone/
 | `Assets/godlotto/Script/Config/` | `ServerConfig` ScriptableObject | AI 서버 URL 기본값 |
 | `Assets/godlotto/Script/Editor/` | 씬 마이그레이션·에디터 도구 | Fungus→C# 마이그레이션, 씬 일괄 수정 |
 | `Assets/godlotto/KTH/` | 점프스care, 이펙트, 실험적 씬 스크립트 | 공포 연출·특수 씬 |
-| `Assets/mokotan/mokotan/script/AI/` | **AI 챗봇** (`BaseChatbot` 파생) | 방별 챗봇, HTTP, 휴리스틱 |
+| `Assets/mokotan/mokotan/script/AI/` | **AI 챗봇** (`BaseChatbot` 파생) | 방별 챗봇, HTTP, 휴리스틱. 루프백이면 `LocalAiControlApi`가 기본 장치 `gpu`(CUDA 경로)를 FastAPI에 PUT |
 | `Assets/mokotan/mokotan/script/AI/Heuristics/` | 힌트 난이도·재방문 추적 | AI 컨텍스트 신호 |
 | `Assets/mokotan/MapSP/scr/` | 미니맵·씬 이동 UI | 맵에서 방 이동 |
 | `Assets/Scenes/` | **모든 플레이 씬** | 씬 에셋·Flowchart 배치 (로직은 Script에) |
@@ -86,17 +88,19 @@ newCapstone/
 | `main.py` | FastAPI 앱, 라우트, lifespan(rate limiter) |
 | `config.py` | `.env` 로드, 한도·튜터 RAG 설정 |
 | `models/` | `ChatRequest`, `ChatResponse`, `TutorGradeRequest` |
-| `providers/` | Groq / Gemini / LiteRT(로컬 Gemma 4 E2B) 어댑터 |
+| `providers/` | Groq / Gemini / LiteRT(로컬 Gemma 4 E2B CPU) / `CudaCompatProvider`(Gate 1 llama.cpp CUDA) |
 | `services/` | `chat_service`, `dialogue_guard`, `sse_format`, RAG, quiz bank, `locale_support`, rate limit |
 | `local_runtime.py` | `AI_PROVIDER=local`일 때 LiteRT 프로바이더 선택·루프백 헬스 |
+| `services/local_ai/` | 로컬 엔진 소유·장치 전환·`/local-ai/*` 제어 API (`LocalRuntimeManager`). 유휴 GPU 죽음은 health poll/`GET /local-ai/status`가 CPU로 복구. Gate 0: `tests/evals/run_gate0_litert_gpu.py`. Gate 1 CUDA 핀: `data/cuda_candidate_manifest.json` `gate_passed` |
 | `local_install.py` | 동의 후 Gemma 4 E2B import·체크섬 검증 (설치 플래너) |
 | `scripts/` | `validate_quiz_bank.py`, `validate_cheshire_prompts.py`, `build_tutor_rag_index.py` |
 | `tools/` | LLM function schema (`game_tools.py`) |
 | `llm_defense/` | 입력 sanitize, message builder |
 | `data/tutor_quiz/` | `quiz_bank.csv` (KO/JA/EN 질문·정답·스니펫; 빈 셀은 KO 폴백) |
 | `data/tutor_rag/` | RAG 코퍼스 md/txt |
+| `data/cuda_candidate_manifest.json` | Gate 1 llama.cpp CUDA 아티팩트 URL·SHA-256. `gate_passed=true`일 때만 FastAPI가 CUDA 경로를 선택 |
 | `tests/` | pytest |
-| `tests/evals/` | 체셔 대화 JSONL 스위트·스코어러·로컬 전용 러너 (`run_cheshire_eval.py`) |
+| `tests/evals/` | 체셔 대화 JSONL 스위트·스코어러·로컬 러너 (`run_cheshire_eval.py`, `run_gate0_litert_gpu.py`, `run_gate1_cuda.py`) |
 
 ### 네임스페이스 규칙 (실제 코드)
 
@@ -240,6 +244,9 @@ flowchart LR
 | 메서드 | 경로 | 요청 모델 | 응답 |
 |--------|------|-----------|------|
 | GET | `/` | — | `{ status, message }` (`AI_PROVIDER=local`이면 `local_runtime` 상태 포함) |
+| GET | `/local-ai/status` | — | 로컬 엔진 상태. loopback+제어 토큰. 유휴 GPU 프로세스 종료 시 CPU 복구를 예약 |
+| PUT | `/local-ai/settings` | `{ mode, gpu_offload? }` | `202` + `operation_id`. 장치 전환은 비동기 |
+| POST | `/local-ai/benchmark` | — | 유휴 `ready`에서만 고정 샘플 워밍업 |
 | POST | `/chat` | `ChatRequest` | `ChatResponse` (text + function_calls) |
 | POST | `/chat/stream` | `ChatRequest` | SSE |
 | POST | `/tutor/grade` | `TutorGradeRequest` | `TutorGradeResponse` (LLM 없음) |
@@ -287,7 +294,9 @@ flowchart LR
 | 클래스 | 역할 |
 |--------|------|
 | `BaseChatbot` | SayDialog, 입력, HTTP coroutine 진입; locale별 system prompt 조립. 체셔 플레이어 전송은 `GetGPTResponseStreaming`. `text_delta`는 `CheshireLiveStreamDisplay`로 SayDialog `StoryText`에 바로 붙임 |
-| `ChatHttpClient` | `/chat`, `/chat/stream` transport; payload `locale`; `ChatSseStreamParser`로 chunk-safe SSE; 델타마다 `OnStreamTextDelta`; 스트림 재시도 소진 시 `/chat` 폴백; loopback이면 `GET /` 헬스 폴링 |
+| `ChatHttpClient` | `/chat`, `/chat/stream` transport; payload `locale`; `ChatSseStreamParser`로 chunk-safe SSE; 델타마다 `OnStreamTextDelta`; 스트림 재시도 소진 시 `/chat` 폴백; loopback이면 `GET /` 헬스 폴링 후 기본 `PUT /local-ai/settings` (`mode=gpu`) |
+| `LocalAiControlApi` | 루프백 전용 `/local-ai/*` URL·JSON·control.token 경로. 기본 요청 장치는 GPU(CUDA 경로). 프로세스 spawn 없음 |
+| `LocalAiSettingsPanel` | 설정창 체셔 AI 영역. CPU/GPU/자동 적용, `requested_mode`와 `effective_backend` 분리 표시. 프로세스 제어 없음 |
 | `LocalAiReadiness` | `127.0.0.1`/`localhost` 채팅 URL만 로컬 모델 준비 여부를 강제. PlayerPrefs `LocalAi.ChatDisabled` 로 대화 AI만 끄기 |
 | `ChatSseStreamParser` | Unity download-buffer가 JSON을 쪼개도 `data:` 줄이 완성된 뒤에만 파싱 |
 | `ChatHistoryManager` | system prompt·히스토리; `CheshirePromptCatalog`로 BaseSystem/ChesterVoiceCommon 로드 |
@@ -507,8 +516,10 @@ graph TB
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |
 | **체셔 50케이스 eval** | 스위트·스코어러·게이트 테스트 있음. 라이브 2026-09-03 재측정(`dialogue_max_tokens=64`, `num_ctx=2048`, 스트림 가드 통과): `gemma4-e2b` / LiteRT-LM, Windows AMD64 (Intel), 50/50 유효, 폴백 0, JSON/툴 누출 0, 날조 사실 0, 완료 p50 4.9s / p95 5.6s, 첫 `text_delta`(TTFT) p50 3.7s / p95 3.7s. Groq 미사용. 한 대 측정이며 최소 사양 조사는 아님. 말끝(깍/삐약/푸드덕)은 하드 게이트가 아님 | 재측정: `cd backend_ai` 후 `AI_PROVIDER=local python -m tests.evals.run_cheshire_eval`. 게이트: 유효 ≥ 90%, 누출 0, 날조 0 |
-| **Windows 게임 설치본** | `scripts/install_local_ai.ps1`·`installer/CHECKLIST.md`는 플래너. 실제 게임+런타임 패키징 설치 프로그램은 없음 | 패키징 파이프라인 확정 |
-| **Unity EditMode 하네스** | 이 클론(`D:\\Capstone\\newCapstone\\disputatio`)에 Unity 인스턴스가 없으면 unity-cli compile/test 불가 | 해당 프로젝트를 Editor에서 연 뒤 `ServerConfigTests` 실행 |
+| **LiteRT GPU Gate 0** | 2026-09-07 이 PC 실측: RTX 4060 Ti, nvidia-smi **8188 MiB**, `litert-lm==0.16.1` + `gemma4-e2b`, 게임 전용 `--config` (`backend: gpu`), 포트 **9378**(기존 9379 외부 LiteRT는 종료하지 않음). 로그: NVIDIA 어댑터 + decode 전 노드 `LITERT_WEBGPU`, **CUDA 아님**(Direct3D 12/WebGPU), OpenCL context 실패, `libLiteRtTopKWebGpuSampler.dll` 없음. 워밍업 후 5샘플 완료 p50 **1.94s** / TTFT p50 **1.83s**(CPU 2026-09-03 완료 p50 4.9s / TTFT 3.7s보다 빠르나 8GB SLO **1s 미달**). 판정 `slo_miss`. FastAPI `gate0_passed`는 `False` | 재측정: `python -m tests.evals.run_gate0_litert_gpu --port 9378` |
+| **CUDA sidecar Gate 1** | 2026-09-08 이 PC 실측: RTX 4060 Ti 8188 MiB, `llama.cpp b10852` CUDA 12.4, `gemma-4-E2B-it-Q4_0.gguf` SHA 핀, 포트 **19380**(전용 후보 포트). 워밍업 CUDA offload 확인, 50케이스 유효 50/50, 툴 누출 0, 날조 0, 폴백 사용 4. 완료 p50 **244ms** / TTFT p50 **60ms**, 추론 중 VRAM **4418/8188 MiB**. 검증 SLO 1.5s·제품 1s 모두 충족. `data/cuda_candidate_manifest.json` `gate_passed=true`. Unity 프레임 게이트는 미측정 | 재측정: `python -m tests.evals.run_gate1_cuda --runtime-dir %LOCALAPPDATA%/Disputatio/local-ai/cuda --output gate1-report.json`. 플레이 중 프레임은 PlayMode/실빌드 |
+| **Windows 게임 설치본** | `scripts/install_local_ai.ps1`·`installer/CHECKLIST.md`는 플래너. 실제 게임+런타임 패키징 설치 프로그램은 없음. Gate 1 아티팩트는 `%LOCALAPPDATA%/Disputatio/local-ai/cuda`에 동의 후 다운로드 | 패키징 파이프라인 확정 |
+| **Unity EditMode 하네스** | 이 클론에서 2026-09-08 unity-cli `ready`(Unity 6000.0.36f1). `LocalAiControlApiTests` 9, `LocalAiSettingsResumeTests` 6, `ChatHttpClientTests` 36 통과. 다른 머신에 Unity 인스턴스가 없으면 compile/test 불가 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter LocalAiControlApiTests` |
 | **Redis in prod** | `REDIS_URL` 비면 in-process rate limit (멀티 replica 부적합) — 운영 `.env` 미포함 | 서버 `/opt/newcapstone/.env` |
 | **WebGL 빌드** | `deploy/serve_webgl_brotli.py` 존재; 게임 WebGL 배포 파이프라인은 본 문서 범위에서 미검증 | 빌드 타겟·CI 확인 |
 | **Tutor RAG 인덱스 비어 있음** | `backend_ai/data/tutor_rag_index.json`이 `chunks: []` (임베딩 미생성). locale 필터는 동작하나 검색 컨텍스트는 항상 빈 결과 | `build_tutor_rag_index.py`로 인덱스 재생성 후 커밋/배포 |
@@ -532,12 +543,14 @@ graph TB
 | 메인메뉴 복귀 시 DDOL 정리 | `disputatio/Assets/godlotto/Script/DontDestroyGameplayCleanup.cs` (모든 "메인메뉴로" 버튼이 공유) |
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
-| CI (C#) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
+| CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
-| CI (backend) | `.github/workflows/backend-build.yml` |
+| CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
+| CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |
 | 배포 | `.github/workflows/deploy-backend.yml`, `deploy/docker-compose.prod.yml` |
-| 체셔 대화 eval | `backend_ai/tests/evals/` |
+| 체셔 대화 eval | `backend_ai/tests/evals/` (`run_cheshire_eval.py`, Gate 0: `run_gate0_litert_gpu.py`, Gate 1: `run_gate1_cuda.py`) |
+| 기능 분할 워크플로 | `AGENTS.md`, `docs/development/feature-workflow.md` |
 | Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` |
 
 ---

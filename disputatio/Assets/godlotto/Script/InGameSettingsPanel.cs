@@ -69,6 +69,8 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
 
     void Update()
     {
+        if (LocalAiSettingsPanel.HandleModalInput(settingPanel))
+            return;
         if (SceneManager.GetActiveScene().name == SceneNames.MainMenu)
         {
             if (isPanelOpen)

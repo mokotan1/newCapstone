@@ -149,7 +149,7 @@ public static class CheshireUiStrings
         return Lookup("TutorInsufficientQuestions", locale);
     }
 
-    private static string Lookup(string stringId, string locale)
+    public static string Lookup(string stringId, string locale)
     {
         string normalized = CheshireLocaleResolver.NormalizeLocale(locale);
         ScenarioLocalizationTable table = GetTable(normalized);

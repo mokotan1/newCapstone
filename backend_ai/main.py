@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,8 +14,15 @@ from config import get_settings
 from local_runtime import build_chat_providers, check_local_runtime
 from models.requests import ChatRequest, TelemetryIngestRequest, TutorGradeRequest
 from models.responses import ChatResponse, TelemetryResponse, TutorGradeResponse
+from providers.base import AIProvider
 from services.chat_auth import verify_chat_api_token
 from services.chat_service import ChatService
+from services.local_ai.cuda_manifest import cuda_manifest_is_pinned
+from services.local_ai.hardware import probe_nvidia
+from services.local_ai.paths import default_local_ai_dir
+from services.local_ai.process_host import ProcessEngineHost
+from services.local_ai.router import router as local_ai_router
+from services.local_ai.runtime_manager import LocalRuntimeManager
 from services.locale_support import (
     all_engines_failed_message,
     api_key_required_message,
@@ -36,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Bootstrap
 # ---------------------------------------------------------------------------
 settings = get_settings()
+runtime_manager: LocalRuntimeManager | None = None
 
 registry = ToolRegistry()
 registry.register_many(GAME_TOOLS)
@@ -89,8 +98,18 @@ chat_service: ChatService | None = (
 )
 
 
+def service_for_provider(provider: AIProvider) -> ChatService:
+    """Bind one request to its leased engine; local recovery stays local."""
+    return ChatService(
+        primary=provider, fallback=None, registry=registry,
+        temperature=settings.default_temperature, max_tokens=settings.max_tokens,
+        app_settings=settings, tutor_rag=_tutor_rag, quiz_bank=_quiz_bank,
+    )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    global runtime_manager
     limiter = build_rate_limiter(
         enabled=settings.rate_limit_enabled,
         redis_url=settings.redis_url,
@@ -101,15 +120,38 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.warning(
             "REDIS_URL unset — using in-process rate limiter only (not suitable for multi-replica).",
         )
+    if settings.ai_provider == "local":
+        if not settings.local_ai_control_token.strip():
+            settings.local_ai_control_token = secrets.token_urlsafe(32)
+            token_path = default_local_ai_dir() / "control.token"
+            token_path.parent.mkdir(parents=True, exist_ok=True)
+            token_path.write_text(settings.local_ai_control_token, encoding="utf-8")
+        runtime_manager = LocalRuntimeManager(
+            settings_path=default_local_ai_dir() / "settings.json",
+            host=ProcessEngineHost(settings),
+            hardware=probe_nvidia(),
+            gate0_passed=False,
+            cuda_manifest_pinned=cuda_manifest_is_pinned(
+                Path(__file__).resolve().parent / "data" / "cuda_candidate_manifest.json"
+            ),
+        )
+        await runtime_manager.attach_existing_if_present()
+        if runtime_manager.snapshot().state == "stopped":
+            await runtime_manager.queue_apply(runtime_manager.snapshot().requested_mode)
+        await runtime_manager.start_health_poll()
     try:
         yield
     finally:
+        if runtime_manager is not None:
+            await runtime_manager.aclose()
+        runtime_manager = None
         closer = getattr(limiter, "close", None)
         if closer:
             await closer()
 
 
 app = FastAPI(title="Disputatio AI Backend", lifespan=lifespan)
+app.include_router(local_ai_router)
 
 
 # ---------------------------------------------------------------------------
@@ -119,6 +161,16 @@ app = FastAPI(title="Disputatio AI Backend", lifespan=lifespan)
 def health_check():
     payload: dict = {"status": "online", "message": "Server is Running!"}
     if settings.ai_provider == "local":
+        if runtime_manager is not None:
+            snapshot = runtime_manager.snapshot()
+            payload["local_runtime"] = {
+                "available": snapshot.inference_ready,
+                "model_available": snapshot.model_available,
+                "error": snapshot.fallback_reason,
+            }
+            if not snapshot.inference_ready:
+                payload["status"] = "degraded"
+            return payload
         runtime = check_local_runtime(settings)
         payload["local_runtime"] = {
             "available": runtime.ollama_or_litert_available,
@@ -142,7 +194,15 @@ async def chat(request: Request, payload: ChatRequest):
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
-    result = await chat_service.chat(payload)
+    lease = None
+    if runtime_manager is not None:
+        lease = await runtime_manager.admit_and_acquire()
+    try:
+        service = service_for_provider(lease.provider) if lease is not None else chat_service
+        result = await service.chat(payload)
+    finally:
+        if lease is not None:
+            await lease.aclose()
 
     if not result.response and not result.function_calls:
         raise HTTPException(
@@ -184,9 +244,18 @@ async def chat_stream(request: Request, payload: ChatRequest):
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
+    lease = None
+    if runtime_manager is not None:
+        lease = await runtime_manager.admit_and_acquire()
+
     async def event_generator():
-        async for event in chat_service.stream_chat(payload):
-            yield format_sse_event(event)
+        try:
+            service = service_for_provider(lease.provider) if lease is not None else chat_service
+            async for event in service.stream_chat(payload):
+                yield format_sse_event(event)
+        finally:
+            if lease is not None:
+                await lease.aclose()
 
     return StreamingResponse(
         event_generator(),

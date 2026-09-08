@@ -20,6 +20,8 @@ public static class SettingDisplayControlsFactory
         if (panelRoot == null)
             return;
 
+        LocalAiSettingsPanel.Ensure(panelRoot);
+
         if (resolutionDropdown == null)
             resolutionDropdown = FindNamedComponent<TMP_Dropdown>(panelRoot, ResolutionDropdownNames);
 

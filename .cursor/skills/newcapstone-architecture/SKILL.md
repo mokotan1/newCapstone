@@ -54,5 +54,6 @@ Skip only for pure Q&A with no code edits, or when `docs/architecture.md` does n
 ## Related rules
 
 - `.cursor/rules/architecture-preflight.mdc` — same requirement, always applied in Cursor
+- `.cursor/skills/newcapstone-feature-workflow/SKILL.md` — 기능 분할·Task 위임 (얇은 총괄)
 - `.cursor/rules/notion-capstone-spec.mdc` — Notion spec sync (separate from architecture preflight)
 - `docs/fungus-room-migration-plan.md` — Fungus → C# migration detail
