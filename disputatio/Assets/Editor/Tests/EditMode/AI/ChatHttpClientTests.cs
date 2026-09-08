@@ -487,6 +487,59 @@ public class ChatHttpClientTests
     }
 
     [Test]
+    public void ApplyDefaultGpuSettings_RemoteUrl_DoesNotCallBackend()
+    {
+        var history = new ChatHistoryManager(appendCommonVoice: false);
+        var host = new StubChatHttpCallbacks();
+        bool simulated = false;
+        var client = new ChatHttpClient(() => "http://54.156.51.119:8000/chat", host, history)
+        {
+            SimulateLocalAiSettingsAttempt = () =>
+            {
+                simulated = true;
+                return new ChatHttpAttemptOutcome(
+                    UnityEngine.Networking.UnityWebRequest.Result.Success,
+                    202,
+                    "",
+                    "{\"operation_id\":\"x\"}");
+            },
+        };
+
+        long code = -1;
+        DrainEnumerator(client.ApplyDefaultGpuSettings((statusCode, _) => { code = statusCode; }));
+
+        Assert.IsFalse(simulated);
+        Assert.AreEqual(0, code);
+    }
+
+    [Test]
+    public void ApplyDefaultGpuSettings_Loopback_UsesSimulateSeam()
+    {
+        var history = new ChatHistoryManager(appendCommonVoice: false);
+        var host = new StubChatHttpCallbacks();
+        var client = new ChatHttpClient(() => "http://127.0.0.1:8000/chat", host, history)
+        {
+            SimulateLocalAiSettingsAttempt = () => new ChatHttpAttemptOutcome(
+                UnityEngine.Networking.UnityWebRequest.Result.Success,
+                202,
+                "",
+                "{\"operation_id\":\"op-1\"}"),
+        };
+
+        long code = 0;
+        string body = null;
+        DrainEnumerator(client.ApplyDefaultGpuSettings((statusCode, json) =>
+        {
+            code = statusCode;
+            body = json;
+        }));
+
+        Assert.AreEqual(202, code);
+        StringAssert.Contains("op-1", body);
+        Assert.IsFalse(host.IsRequestInProgress);
+    }
+
+    [Test]
     public void NaiveSseSplit_LosesEventWhenJsonIsSplitAcrossChunks()
     {
         string part1 = "data: {\"type\":\"text_delta\",\"content\":\"He";

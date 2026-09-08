@@ -141,6 +141,8 @@ public class IntegratedSettingUI : MonoBehaviour
 
     void Update()
     {
+        if (LocalAiSettingsPanel.HandleModalInput(panelRoot != null ? panelRoot : gameObject))
+            return;
         if (IsMainMenuSceneActive())
         {
             if (uiMode == UIMode.PopupPanel && panelRoot != null && panelRoot.activeSelf)

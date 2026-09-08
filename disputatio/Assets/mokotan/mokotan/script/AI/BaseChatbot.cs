@@ -189,9 +189,31 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
                 statusCode,
                 requireLocalRuntime: true);
             if (_localAiReady)
+            {
                 yield break;
+            }
             yield return new WaitForSecondsRealtime(2f);
         }
+    }
+
+    private static bool s_appliedCudaDefaultThisSession;
+
+    internal static void ResetCudaDefaultApplyForTests()
+    {
+        s_appliedCudaDefaultThisSession = false;
+    }
+
+    private IEnumerator CoApplyDefaultCudaDevice()
+    {
+        if (s_appliedCudaDefaultThisSession)
+            yield break;
+        if (!LocalAiControlApi.ShouldControlLocalRuntime(ResolvedServerUrl))
+            yield break;
+
+        long code = 0;
+        yield return _httpClient.ApplyDefaultGpuSettings((statusCode, _) => { code = statusCode; });
+        if (code == 202)
+            s_appliedCudaDefaultThisSession = true;
     }
 
     protected bool TryAllowCheshireChat(out string blockedMessage)
