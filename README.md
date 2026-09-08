@@ -12,7 +12,7 @@
 ```
 newCapstone/
 ├── disputatio/      # Unity 6 프로젝트 (게임: 민원 번호 33)
-├── backend_ai/      # FastAPI AI 챗봇 서버 (Groq / Gemini)
+├── backend_ai/      # FastAPI AI 챗봇 서버 
 └── scripts/         # 보조 스크립트 (예: C# 구문 검사, 오류 수집)
 ```
 
@@ -29,7 +29,6 @@ newCapstone/
 - **Fungus** — 대화·시퀀싱
 - **Cinemachine** — 카메라
 - **Input System** — 입력
-- **AI Navigation**, **NavMeshPlus** — 2D 내비게이션
 - **Post Processing**, **Timeline**, **Newtonsoft.Json** (UPM)
 
 ### 실행 방법
@@ -47,7 +46,6 @@ newCapstone/
 Unity용 챗봇 API(FastAPI, Groq 우선·Gemini 폴백)입니다. 설치, 환경 변수, API 명세, Docker·배포는 아래 문서를 따릅니다.
 
 - **[backend_ai/README.md](backend_ai/README.md)** — 로컬 실행·API 키·엔드포인트
-- **[backend_ai/DEPLOY.md](backend_ai/DEPLOY.md)** — 운영·Docker·EC2
 
 ## 기타 (`scripts/`)
 
