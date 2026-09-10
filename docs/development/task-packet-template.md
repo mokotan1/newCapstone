@@ -19,6 +19,10 @@
 - model 인자: inherit | <slug> | (생략=상속)
 - 선택 이유 / provisional 여부:
 - checkout / base revision:
+- 위험도: R0 | R1 | R2 | R3
+- Editor 소유권:
+- 증거 위치:
+- 검증 상태 / verificationStatus: passed | failed | blocked | not-applicable | waived
 - 상태: planned | running | review | verified | blocked
 
 ## 결과

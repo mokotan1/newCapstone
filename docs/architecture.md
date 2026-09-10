@@ -53,6 +53,7 @@ newCapstone/
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
 ├── docs/development/    # 얇은 총괄 워크플로 (AGENTS.md가 진입점)
+├── .harness/            # Unity 공통 정책·검증 계약·toolchain (실행 도구와 분리)
 ├── AGENTS.md            # 기능 분할·위임 진입 지침
 ├── .github/workflows/   # CI/CD
 └── README.md
@@ -515,6 +516,8 @@ graph TB
 | **Fungus Save Point vs Checkpoint** | `SaveManager`/`SavePointKey`와 `CheckpointRepository` **병존**; 어떤 메뉴가 어느系를 쓰는지 코드만으로 단일 정책 불명 | 기획·`docs/superpowers/plans/2026-05-11-remove-custom-save-system.md`와 런타임 확인 |
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |
+| **Unity 공식 CLI / Pipeline** | 2026-09-10 이 머신: `unity` 1.0.0-beta.5 (`%LOCALAPPDATA%\Unity\bin\unity.exe`). `unity status --json` → `STATUS_NO_INSTANCES` (Pipeline 패키지 필요). `disputatio`에 Pipeline 미설치. 이 브랜치에서 `unity pipeline install` 미실행 | 격리 checkout에서만 Pipeline 실험. 실패 시 기존 `legacy-unity-cli` 유지. 기록: `.harness/official-cli-compat.md` |
+| **legacy test 결과 파싱** | NUnit XML·`Passed/Failed/Skipped` stdout은 `scripts.unity_harness.result_contract`가 분류. unity-cli 라이브 출력 형식은 Editor 연결 시 재확인 | `python -m scripts.unity_harness.classify_cli`에 실제 로그를 넣어 대조 |
 | **체셔 50케이스 eval** | 스위트·스코어러·게이트 테스트 있음. 라이브 2026-09-03 재측정(`dialogue_max_tokens=64`, `num_ctx=2048`, 스트림 가드 통과): `gemma4-e2b` / LiteRT-LM, Windows AMD64 (Intel), 50/50 유효, 폴백 0, JSON/툴 누출 0, 날조 사실 0, 완료 p50 4.9s / p95 5.6s, 첫 `text_delta`(TTFT) p50 3.7s / p95 3.7s. Groq 미사용. 한 대 측정이며 최소 사양 조사는 아님. 말끝(깍/삐약/푸드덕)은 하드 게이트가 아님 | 재측정: `cd backend_ai` 후 `AI_PROVIDER=local python -m tests.evals.run_cheshire_eval`. 게이트: 유효 ≥ 90%, 누출 0, 날조 0 |
 | **LiteRT GPU Gate 0** | 2026-09-07 이 PC 실측: RTX 4060 Ti, nvidia-smi **8188 MiB**, `litert-lm==0.16.1` + `gemma4-e2b`, 게임 전용 `--config` (`backend: gpu`), 포트 **9378**(기존 9379 외부 LiteRT는 종료하지 않음). 로그: NVIDIA 어댑터 + decode 전 노드 `LITERT_WEBGPU`, **CUDA 아님**(Direct3D 12/WebGPU), OpenCL context 실패, `libLiteRtTopKWebGpuSampler.dll` 없음. 워밍업 후 5샘플 완료 p50 **1.94s** / TTFT p50 **1.83s**(CPU 2026-09-03 완료 p50 4.9s / TTFT 3.7s보다 빠르나 8GB SLO **1s 미달**). 판정 `slo_miss`. FastAPI `gate0_passed`는 `False` | 재측정: `python -m tests.evals.run_gate0_litert_gpu --port 9378` |
 | **CUDA sidecar Gate 1** | 2026-09-08 이 PC 실측: RTX 4060 Ti 8188 MiB, `llama.cpp b10852` CUDA 12.4, `gemma-4-E2B-it-Q4_0.gguf` SHA 핀, 포트 **19380**(전용 후보 포트). 워밍업 CUDA offload 확인, 50케이스 유효 50/50, 툴 누출 0, 날조 0, 폴백 사용 4. 완료 p50 **244ms** / TTFT p50 **60ms**, 추론 중 VRAM **4418/8188 MiB**. 검증 SLO 1.5s·제품 1s 모두 충족. `data/cuda_candidate_manifest.json` `gate_passed=true`. Unity 프레임 게이트는 미측정 | 재측정: `python -m tests.evals.run_gate1_cuda --runtime-dir %LOCALAPPDATA%/Disputatio/local-ai/cuda --output gate1-report.json`. 플레이 중 프레임은 PlayMode/실빌드 |
@@ -551,6 +554,8 @@ graph TB
 | 배포 | `.github/workflows/deploy-backend.yml`, `deploy/docker-compose.prod.yml` |
 | 체셔 대화 eval | `backend_ai/tests/evals/` (`run_cheshire_eval.py`, Gate 0: `run_gate0_litert_gpu.py`, Gate 1: `run_gate1_cuda.py`) |
 | 기능 분할 워크플로 | `AGENTS.md`, `docs/development/feature-workflow.md` |
+| Unity 하네스 정책·검증 | `.harness/unity-policy.md`, `.harness/unity-verification.md`, `.harness/unity-toolchain.json` |
+| Unity 하네스 정적 점검 | `python -m pytest scripts/unity-harness/tests -q` |
 | Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` |
 
 ---

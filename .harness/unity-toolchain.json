@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1",
+  "activeBackend": "legacy-unity-cli",
+  "projectPath": "disputatio",
+  "editorVersion": "6000.0.36f1",
+  "verifiedAt": null,
+  "backends": {
+    "legacy-unity-cli": {
+      "wrapper": "scripts/unity-cli.cmd",
+      "cliInstallPath": "%LOCALAPPDATA%\\unity-cli\\unity-cli.exe",
+      "cliVersionObserved": "0.3.21",
+      "connectorPackage": "com.youngwoocho02.unity-cli-connector",
+      "connectorLockRevision": "c07b5dbd71edb51810df1a678d565bc045d5046e",
+      "capabilities": [
+        "status",
+        "compile",
+        "console",
+        "test",
+        "reserialize",
+        "qa"
+      ]
+    },
+    "official-unity-cli": {
+      "status": "not-verified",
+      "wrapper": "scripts/unity-harness/official.ps1",
+      "cliPath": "%LOCALAPPDATA%\\Unity\\bin\\unity.exe",
+      "cliVersionObserved": "1.0.0-beta.5",
+      "observedAt": "2026-09-10",
+      "pipelinePackage": "not-installed-in-disputatio",
+      "connectEvidence": "STATUS_NO_INSTANCES: Pipeline package required",
+      "compatReport": ".harness/official-cli-compat.md",
+      "note": "Phase C connect/compile/test gate not met. Do not activate. Do not install Pipeline into this checkout."
+    }
+  }
+}

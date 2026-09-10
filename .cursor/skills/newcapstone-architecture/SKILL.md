@@ -26,10 +26,11 @@ Skip only for pure Q&A with no code edits, or when `docs/architecture.md` does n
 2. **Map the task** to documented folders and patterns before writing code.
 3. **Implement** using §6 rules (e.g. `SceneNames`, `FungusVariableKeys`, `Godlotto.Interaction`, `SceneTransitionService`, `GameLog`, `CheckpointRepository`).
 4. **After shipping logic changes**, update `docs/architecture.md` if structure or flows changed; note unknowns in §8.
-5. **After Unity C# / scene / prefab edits**, run the mandatory postflight in
-   `.cursor/rules/unity-verification-postflight.mdc` via
-   `newcapstone-unity-automation` (unity-cli compile, console, targeted
-   EditMode `--filter`). Do not treat syntax-check-only as done.
+5. **After Unity C# / scene / prefab edits**, run the mandatory verification in
+    `.harness/unity-verification.md` via
+    `newcapstone-unity-automation` (compile, console, targeted
+    EditMode `--filter`). Cursor 진입점은
+    `.cursor/rules/unity-verification-postflight.mdc`다. Do not treat syntax-check-only as done.
 
 ## Quick routing (confirm in doc before coding)
 

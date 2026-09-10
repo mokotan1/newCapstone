@@ -114,6 +114,20 @@ AC가 범위의 천장이다. “GPU로 추론되게”면 그 동작과 검증�
 - 커밋·push·배포는 사용자 요청이 있을 때만.
 - 기존 사용자 변경을 보존한다. 관련 없는 파일을 고치지 않는다.
 
+## Unity 위험도와 리뷰
+
+Unity 작업은 `.harness/unity-policy.md`의 R0~R3를 고른다. 완료 판정은
+`.harness/unity-verification.md`다.
+
+| 등급 | 예 | 리뷰 |
+|---|---|---|
+| R0 | 설명 문서, 동작에 영향 없는 주석 | 자체 검토로 완료 가능. Unity 실행 불필요 |
+| R1 | 독립 계산, 좁은 로직 | 컴파일·관련 테스트. 한 세션 순차 가능 |
+| R2 | 씬·프리팹·UI 입력 | 플레이/PlayMode 증거. 별도 세션 명세·품질 검토 |
+| R3 | 저장·씬 전환·패키지·하네스 | R2 + 경계 회귀·복구. 별도 품질 리뷰 |
+
+작은 작업의 경량 경로는 R0/R1뿐이다. R2/R3에서 독립 리뷰가 없으면 `verified`가 아니다.
+
 ## 모델 고르는 법 (추상 등급 없음)
 
 | 작업 | 기본 | 비고 |
@@ -138,5 +152,7 @@ AC가 범위의 천장이다. “GPU로 추론되게”면 그 동작과 검증�
 - 패킷 칸: `docs/development/task-packet-template.md`
 - 인계: `docs/development/provider-neutral-handoff.md`
 - 아키텍처: `docs/architecture.md`
-- Unity postflight: `.cursor/rules/unity-verification-postflight.mdc`
+- Unity 정책: `.harness/unity-policy.md`
+- Unity 검증: `.harness/unity-verification.md`
+- Unity postflight 진입: `.cursor/rules/unity-verification-postflight.mdc`
 - QA: `.cursor/rules/qa-subagent-orchestration.mdc`

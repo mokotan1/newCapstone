@@ -13,8 +13,10 @@
 - 같은 checkout의 쓰기 작업은 순차. Unity Editor는 한 세션만.
   `qa-playtester`가 Editor를 쓰는 동안 구현은 멈춘다.
 - 커밋·push·배포는 사용자가 요청할 때만.
-- Unity 검증은 `.cursor/rules/unity-verification-postflight.mdc`와
-  `.harness/unity-cli-postflight.md`를 따른다.
+- 기존 사용자 변경을 보존한다. Unity Editor 조작은 단일 담당자가 수행한다.
+- Unity 작업 분류·소유권은 `.harness/unity-policy.md`, 완료 판정은
+  `.harness/unity-verification.md`를 따른다. Cursor 진입 규칙은
+  `.cursor/rules/unity-verification-postflight.mdc`다. 상세 명령은 복제하지 않는다.
 - 플레이 QA는 `.cursor/agents/qa-*.md`와
   `.cursor/rules/qa-subagent-orchestration.mdc`를 따른다. QA는 게임 코드를 고치지 않는다.
 - Cheshire localization은 `.cursor/skills/cheshire-localization-sdd/SKILL.md`가 더 엄격하면 그것을 우선한다.
