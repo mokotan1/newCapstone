@@ -46,7 +46,7 @@ def test_toolchain_json_has_required_fields() -> None:
     official = backends["official-unity-cli"]
     assert official["status"] == "not-verified"
     assert official["cliVersionObserved"] == "1.0.0-beta.5"
-    assert official["pipelinePackage"] == "not-installed-in-disputatio"
+    assert official["pipelinePackage"] == "0.6.0-exp.1"
 
 
 def test_agents_entry_points_to_common_policy_not_only_cli_commands() -> None:
