@@ -1,13 +1,8 @@
-# Unity CLI Postflight Harness
+# Unity CLI Postflight (legacy wrapper)
+
+완료 기준은 `.harness/unity-verification.md`다. 위험도와 소유권은 `.harness/unity-policy.md`다. 활성 backend는 `.harness/unity-toolchain.json`이다.
 
 Use this repo-local wrapper instead of relying on PATH:
-
-```powershell
-.\scripts\unity-cli-open-status-cmd.cmd
-.\scripts\unity-cli.cmd --project disputatio status
-```
-
-Run these after Unity C# changes:
 
 ```powershell
 .\scripts\unity-cli-open-status-cmd.cmd
@@ -17,5 +12,5 @@ Run these after Unity C# changes:
 .\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter <TestClassName>
 ```
 
-If `status` reports `Unity: not responding`, restart the Unity Editor with the
-`disputatio` project open and wait for package import/compilation to finish.
+`--filter`는 테스트 클래스 전체 이름이다. 매칭 0개는 검증 성공이 아니다.
+If `status` reports `Unity: not responding`, do not retry mutation blindly; inspect the running command first.

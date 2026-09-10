@@ -6,6 +6,9 @@ alwaysApply: false
 
 # Unity 사후 검증 (postflight) — 필수
 
+완료 기준은 `.harness/unity-verification.md`다. 위험도·소유권은 `.harness/unity-policy.md`다.
+이 규칙은 Cursor에서 Unity 파일 변경 시 그 문서를 읽게 하는 진입점이다.
+
 `disputatio/` 아래 **C#·씬·프리팹을 바꾸거나 추가**한 뒤, **완료·커밋 권고·PR 준비** 전에 아래를 **반드시** 수행한다.
 
 `CSharpSyntaxChecker`만으로는 **Unity 컴파일·EditMode 하네스 검증을 대체할 수 없다.**
