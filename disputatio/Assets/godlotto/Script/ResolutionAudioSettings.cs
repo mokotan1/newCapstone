@@ -110,7 +110,7 @@ public sealed class ResolutionAudioSettings
             if (options == null || options.Count == 0)
                 options = ResolutionListUtility.BuildLabels(ResolutionListUtility.BuildPreferredResolutionList());
             if (options.Count == 0)
-                options.Add("1920 x 1080");
+                options.Add("1920 × 1080");
 
             resolutionDropdown.AddOptions(options);
             int idx = Mathf.Clamp(Global.currentResolutionIndex, 0, Mathf.Max(0, options.Count - 1));
@@ -124,7 +124,7 @@ public sealed class ResolutionAudioSettings
         _localResolutions = ResolutionListUtility.BuildPreferredResolutionList();
         List<string> localOptions = ResolutionListUtility.BuildLabels(_localResolutions);
         if (localOptions.Count == 0)
-            localOptions.Add("1920 x 1080");
+            localOptions.Add("1920 × 1080");
 
         resolutionDropdown.AddOptions(localOptions);
 

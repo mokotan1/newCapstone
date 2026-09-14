@@ -20,6 +20,14 @@ public static class SettingDisplayControlsFactory
         if (panelRoot == null)
             return;
 
+        SettingsShellController shell = SettingsShellFactory.Ensure(panelRoot);
+        Transform generalPage = SettingsShellFactory.TryGetGeneralPage(panelRoot) ?? panelRoot;
+        Transform aiPage = SettingsShellFactory.TryGetCheshireAiPage(panelRoot);
+        if (aiPage != null)
+            LocalAiSettingsPanel.EnsureEmbedded(aiPage);
+        else
+            LocalAiSettingsPanel.Ensure(panelRoot);
+
         if (resolutionDropdown == null)
             resolutionDropdown = FindNamedComponent<TMP_Dropdown>(panelRoot, ResolutionDropdownNames);
 
@@ -27,21 +35,104 @@ public static class SettingDisplayControlsFactory
             fullscreenToggle = FindNamedComponent<Toggle>(panelRoot, FullscreenToggleNames);
 
         if (resolutionDropdown != null && fullscreenToggle != null)
+        {
+            if (shell != null)
+                AdoptIntoGeneralRow(generalPage, resolutionDropdown.transform, fullscreenToggle.transform);
             return;
+        }
 
-        TMP_FontAsset labelFont = FindPanelFont(panelRoot);
+        TMP_FontAsset labelFont = FindPanelFont(generalPage) ?? FindPanelFont(panelRoot);
 
         if (resolutionDropdown == null)
         {
-            EnsureLabel(panelRoot, ResolutionLabelNames, "해상도", new Vector2(-200f, -100f), new Vector2(300f, 100f), labelFont);
-            resolutionDropdown = CreateResolutionDropdown(panelRoot, labelFont);
+            EnsureLabel(generalPage, ResolutionLabelNames, CheshireUiStrings.Lookup("SettingsResolution", SettingsDisplayPreferences.ResolveLocale()), new Vector2(-200f, -100f), new Vector2(300f, 100f), labelFont);
+            resolutionDropdown = CreateResolutionDropdown(generalPage, labelFont);
         }
 
         if (fullscreenToggle == null)
         {
-            EnsureLabel(panelRoot, FullscreenLabelNames, "전체화면", new Vector2(-100f, -250f), new Vector2(400f, 100f), labelFont);
-            fullscreenToggle = CreateFullscreenToggle(panelRoot);
+            EnsureLabel(generalPage, FullscreenLabelNames, CheshireUiStrings.Lookup("SettingsFullscreen", SettingsDisplayPreferences.ResolveLocale()), new Vector2(-100f, -250f), new Vector2(400f, 100f), labelFont);
+            fullscreenToggle = CreateFullscreenToggle(generalPage);
         }
+
+        if (shell != null)
+            AdoptIntoGeneralRow(generalPage, resolutionDropdown != null ? resolutionDropdown.transform : null, fullscreenToggle != null ? fullscreenToggle.transform : null);
+    }
+
+    public static Slider FindSlider(Transform root, params string[] names)
+    {
+        return FindNamedComponent<Slider>(root, names);
+    }
+
+    static void AdoptIntoGeneralRow(Transform generalPage, Transform dropdown, Transform toggle)
+    {
+        if (generalPage == null)
+            return;
+
+        if (dropdown != null)
+            PlaceInRow(generalPage, "ResolutionRow", "SettingsResolution", dropdown);
+        if (toggle != null)
+            PlaceInRow(generalPage, "FullscreenRow", "SettingsFullscreen", toggle);
+    }
+
+    static void PlaceInRow(Transform generalPage, string rowName, string labelKey, Transform control)
+    {
+        Transform row = generalPage.Find(rowName);
+        if (row == null)
+        {
+            GameObject created = new GameObject(rowName, typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            created.transform.SetParent(generalPage, false);
+            var layout = created.GetComponent<HorizontalLayoutGroup>();
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = false;
+            layout.spacing = SettingsWoodPanelSpec.ColumnGap;
+            layout.padding = new RectOffset(0, 0, 0, 0);
+            created.GetComponent<LayoutElement>().minHeight = SettingsWoodPanelSpec.RowHeight;
+            created.GetComponent<LayoutElement>().preferredHeight = SettingsWoodPanelSpec.RowHeight;
+
+            var labelObject = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            labelObject.transform.SetParent(created.transform, false);
+            TextMeshProUGUI label = labelObject.GetComponent<TextMeshProUGUI>();
+            label.text = CheshireUiStrings.Lookup(labelKey, SettingsDisplayPreferences.ResolveLocale());
+            label.fontSize = SettingsWoodPanelSpec.UiFontSize;
+            label.color = SettingsWoodPanelSpec.PrimaryText;
+            TMP_FontAsset font = FindPanelFont(generalPage);
+            if (font != null)
+                label.font = font;
+
+            var value = new GameObject("Value", typeof(RectTransform), typeof(LayoutElement), typeof(HorizontalLayoutGroup));
+            value.transform.SetParent(created.transform, false);
+            var valueLayout = value.GetComponent<HorizontalLayoutGroup>();
+            valueLayout.childAlignment = TextAnchor.MiddleRight;
+            valueLayout.childControlHeight = true;
+            valueLayout.childControlWidth = true;
+            valueLayout.childForceExpandHeight = false;
+            valueLayout.childForceExpandWidth = false;
+            var valueElement = value.GetComponent<LayoutElement>();
+            valueElement.flexibleWidth = 0f;
+            valueElement.preferredWidth = SettingsWoodPanelSpec.ControlWidth;
+            valueElement.minWidth = SettingsWoodPanelSpec.ControlWidth;
+            valueElement.minHeight = SettingsWoodPanelSpec.ControlHeight;
+            valueElement.preferredHeight = SettingsWoodPanelSpec.ControlHeight;
+            row = created.transform;
+        }
+
+        Transform valueSlot = row.Find("Value");
+        if (valueSlot == null || control == null)
+            return;
+        control.SetParent(valueSlot, false);
+        Slider slider = control.GetComponent<Slider>();
+        if (slider != null)
+            SettingsShellFactory.StyleWoodSlider(slider);
+        TMP_Dropdown dropdown = control.GetComponent<TMP_Dropdown>();
+        if (dropdown != null)
+            SettingsShellFactory.StyleWoodDropdown(dropdown, FindPanelFont(generalPage));
+        Toggle toggle = control.GetComponent<Toggle>();
+        if (toggle != null)
+            SettingsShellFactory.StyleWoodToggle(toggle);
     }
 
     static TMP_Dropdown CreateResolutionDropdown(Transform panelRoot, TMP_FontAsset labelFont)

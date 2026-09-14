@@ -1,0 +1,225 @@
+using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+/// <summary>Shared settings view. Runtime state is owned by the loopback backend.</summary>
+public sealed class LocalAiSettingsPanel : MonoBehaviour
+{
+    const string PanelName = "LocalAiSettingsPanel";
+    TMP_Text statusLabel;
+    Button[] modeButtons;
+    Button closeButton;
+    Button openButton;
+    bool applying;
+    bool isEmbedded;
+
+    static string Text(string key) => CheshireUiStrings.Lookup(key, CheshireLocaleResolver.ResolveCurrentLocale());
+
+    public static void Ensure(Transform parent)
+    {
+        if (parent == null || parent.Find(PanelName) != null)
+            return;
+        TMP_FontAsset font = parent.GetComponentInChildren<TMP_Text>(true)?.font;
+        var root = new GameObject(PanelName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        root.transform.SetParent(parent, false);
+        root.layer = parent.gameObject.layer;
+        root.SetActive(false);
+        RectTransform rect = (RectTransform)root.transform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = new Vector2(35, 35);
+        rect.offsetMax = new Vector2(-35, -35);
+        root.GetComponent<Image>().color = new Color(0.08f, 0.06f, 0.04f, 0.99f);
+        var panel = root.AddComponent<LocalAiSettingsPanel>();
+        Label(root.transform, "Title", Text("AiSettingsTitle"), new Vector2(0, 205), new Vector2(580, 55), font, 32);
+        panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, -35), new Vector2(590, 250), font, 23);
+        string[] modes = { "cpu", "gpu", "auto" };
+        panel.modeButtons = new Button[3];
+        for (int i = 0; i < modes.Length; i++)
+        {
+            string mode = modes[i];
+            Button button = MakeButton(root.transform, mode.ToUpperInvariant(),
+                new Vector2((i - 1) * 190, 115), font);
+            button.onClick.AddListener(() => panel.Apply(mode));
+            panel.modeButtons[i] = button;
+        }
+        panel.closeButton = MakeButton(root.transform, Text("AiSettingsBack"), new Vector2(0, -220), font);
+        panel.closeButton.onClick.AddListener(panel.Close);
+        panel.openButton = MakeButton(parent, Text("AiSettingsTitle"), Vector2.zero, font);
+        panel.openButton.name = "LocalAiSettingsButton";
+        RectTransform openRect = (RectTransform)panel.openButton.transform;
+        openRect.anchorMin = openRect.anchorMax = new Vector2(1, 0);
+        openRect.anchoredPosition = new Vector2(-145, 60);
+        panel.openButton.onClick.AddListener(() =>
+        {
+            root.transform.SetAsLastSibling();
+            root.SetActive(true);
+            panel.closeButton.Select();
+        });
+    }
+
+    public static void EnsureEmbedded(Transform parent)
+    {
+        if (parent == null || parent.Find(PanelName) != null)
+            return;
+
+        TMP_FontAsset font = parent.GetComponentInChildren<TMP_Text>(true)?.font ?? SettingsShellFactory.FindUiFont();
+        var root = new GameObject(PanelName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        root.transform.SetParent(parent, false);
+        root.layer = parent.gameObject.layer;
+        root.SetActive(true);
+        RectTransform rect = (RectTransform)root.transform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(0.5f, 1f);
+        rect.sizeDelta = new Vector2(0f, 168f);
+        rect.anchoredPosition = Vector2.zero;
+        root.GetComponent<Image>().color = Color.clear;
+        var layout = root.AddComponent<LayoutElement>();
+        layout.minHeight = 168f;
+        layout.preferredHeight = 168f;
+
+        var panel = root.AddComponent<LocalAiSettingsPanel>();
+        panel.isEmbedded = true;
+        panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, 36), new Vector2(620, 70), font, 16);
+        panel.statusLabel.color = SettingsWoodPanelSpec.PrimaryText;
+        string[] modes = { "cpu", "gpu", "auto" };
+        panel.modeButtons = new Button[3];
+        for (int i = 0; i < modes.Length; i++)
+        {
+            string mode = modes[i];
+            Button button = MakeButton(root.transform, mode.ToUpperInvariant(),
+                new Vector2((i - 1) * 170, -40), font);
+            button.onClick.AddListener(() => panel.Apply(mode));
+            panel.modeButtons[i] = button;
+        }
+    }
+
+    public static bool HandleModalInput(GameObject settingsRoot)
+    {
+        if (settingsRoot == null)
+            return false;
+        LocalAiSettingsPanel[] panels = settingsRoot.GetComponentsInChildren<LocalAiSettingsPanel>(true);
+        for (int i = 0; i < panels.Length; i++)
+        {
+            LocalAiSettingsPanel panel = panels[i];
+            if (panel == null || panel.isEmbedded || !panel.gameObject.activeInHierarchy)
+                continue;
+            if (Input.GetKeyDown(KeyCode.Escape))
+                panel.Close();
+            return true;
+        }
+
+        return false;
+    }
+
+    void OnEnable()
+    {
+        if (statusLabel == null)
+            return;
+        applying = false;
+        SetButtons(false);
+        statusLabel.text = Text("AiSettingsConnecting");
+        StartCoroutine(Poll());
+    }
+
+    void OnDisable()
+    {
+        StopAllCoroutines();
+        applying = false;
+    }
+
+    public void ShowRuntimeStatus(string text)
+    {
+        if (statusLabel == null)
+            return;
+        statusLabel.text = text ?? "";
+    }
+
+    public void RefreshLocalizedText()
+    {
+        if (isEmbedded || statusLabel == null || applying)
+            return;
+        statusLabel.text = Text("AiSettingsUnavailable");
+    }
+
+    void Close()
+    {
+        gameObject.SetActive(false);
+        if (openButton != null && openButton.gameObject.activeInHierarchy)
+            openButton.Select();
+    }
+
+    void SetButtons(bool enabled)
+    {
+        foreach (Button button in modeButtons)
+            button.interactable = enabled;
+    }
+
+    IEnumerator Poll()
+    {
+        if (isEmbedded)
+            yield break;
+        while (true)
+        {
+            if (statusLabel != null && !applying)
+                statusLabel.text = Text("AiSettingsUnavailable");
+            SetButtons(false);
+            yield return new WaitForSecondsRealtime(2);
+        }
+    }
+
+    void Apply(string mode)
+    {
+        if (applying)
+            return;
+        applying = true;
+        SetButtons(false);
+        statusLabel.text = Text("AiSettingsApplying");
+        StartCoroutine(ApplyRequest(mode));
+    }
+
+    IEnumerator ApplyRequest(string mode)
+    {
+        yield return null;
+        applying = false;
+        if (statusLabel != null)
+            statusLabel.text = Text("AiSettingsUnavailable");
+    }
+
+    static TMP_Text Label(Transform parent, string name, string text, Vector2 position,
+        Vector2 size, TMP_FontAsset font, int fontSize)
+    {
+        var obj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        obj.transform.SetParent(parent, false);
+        obj.layer = parent.gameObject.layer;
+        var rect = (RectTransform)obj.transform;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        var label = obj.GetComponent<TextMeshProUGUI>();
+        if (font != null) label.font = font;
+        label.text = text;
+        label.fontSize = fontSize;
+        label.alignment = TextAlignmentOptions.Center;
+        label.color = Color.white;
+        label.raycastTarget = false;
+        return label;
+    }
+
+    static Button MakeButton(Transform parent, string title, Vector2 position, TMP_FontAsset font)
+    {
+        var obj = new GameObject(title, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        obj.transform.SetParent(parent, false);
+        obj.layer = parent.gameObject.layer;
+        var rect = (RectTransform)obj.transform;
+        rect.sizeDelta = new Vector2(170, 48);
+        rect.anchoredPosition = position;
+        obj.GetComponent<Image>().color = new Color(0.38f, 0.20f, 0.04f);
+        var button = obj.GetComponent<Button>();
+        button.targetGraphic = obj.GetComponent<Image>();
+        Label(obj.transform, "Label", title, Vector2.zero, rect.sizeDelta, font, 24);
+        return button;
+    }
+}

@@ -10,6 +10,9 @@ public static class SettingPlayerPrefsKeys
     public const string Fullscreen = "Fullscreen";
     public const string ResolutionIndex = "ResolutionIndex";
 
+    /// <summary>Cheshire answer size: 100, 120, or 140. New key — does not change audio/video keys.</summary>
+    public const string AnswerTextScale = "CheshireAnswerTextScale";
+
     public const float DefaultLinearVolume = 0.75f;
     public const int FullscreenDefaultEnabled = 1;
 }

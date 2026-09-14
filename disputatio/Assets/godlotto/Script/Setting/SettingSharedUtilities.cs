@@ -85,7 +85,7 @@ public static class ResolutionListUtility
         for (int i = 0; i < resolutions.Count; i++)
         {
             Resolution r = resolutions[i];
-            list.Add($"{r.width} x {r.height}");
+            list.Add($"{r.width} × {r.height}");
         }
 
         return list;
