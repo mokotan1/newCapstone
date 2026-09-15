@@ -62,6 +62,7 @@ public class HallQaCapabilityTests
             DeveloperQaCommand.Create("c1", "interaction", "invoke", "hall.nav.assert-route"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
+        StringAssert.Contains("destination-mismatch", result.Message);
     }
 }
 #endif

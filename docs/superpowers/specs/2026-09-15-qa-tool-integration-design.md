@@ -308,7 +308,7 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 - `Hall_Left2` Fungus `Door_Clicked` LoadScene → `Kitchen`
 - `Hall_Left` / `Hall_Left2`에는 C# `interactionId`가 없다 (Clickable2D).
 - `transition.hall-to-kitchen.json`은 중간 씬 없이 `scene.Kitchen`만 적는다. 이 hop을 생략한 계획은 `spec-mismatch`다.
-- `HallQaAdapter` assert-route는 여전히 `controllerFound`만 본다 (G02 미해소).
+- `HallQaAdapter` assert-route는 `HallQaRouteAssertion`으로 Kitchen 도착·전환 종료·입력 게이트를 본다. EditMode 단위 테스트만; 라이브 Kitchen 도착은 NOT_RUN.
 
 | AC | status | implementationFiles | testOrAction | executionStatus | verificationStatus | limitations |
 |---|---|---|---|---|---|---|
@@ -318,7 +318,7 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 | AC04 | partial | `preflight.acquire_lease` | in-memory store | succeeded | NOT_RUN | 실제 Gateway lease 아님 |
 | AC05 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 격리 프로파일 미연결 |
 | AC06 | partial | `scripts/qa/tool/hall_route.py` | `test_tool_hall_route.py` 이중 attempt 기록 | succeeded | NOT_RUN | api/event-system 실실행·reset은 fixture |
-| AC07 | NOT_RUN | `HallQaAdapter.cs`는 controllerFound만 | — | NOT_RUN | NOT_RUN | Kitchen 도착·게이트 해제는 라이브 필요 |
+| AC07 | partial | `HallQaRouteAssertion.cs`, `HallQaAdapter.cs` | `HallQaRouteAssertionTests`, `HallQaCapabilityTests` | NOT_RUN | NOT_RUN | EditMode 단위만. 라이브 Kitchen 도착·화면 없음 |
 | AC08 | unit-green | `hall_route.py` + 씬 YAML | 정적 hop 고정, 생략 시 spec-mismatch | succeeded | passed | PlayMode hop 미확인. `Hall_Left`/`Hall_Left2`에 C# interactionId 없음 |
 | AC09 | unit-green | `scripts/qa/tool/verdict.py` | `test_tool_verdicts.py` | succeeded | passed | — |
 | AC10 | unit-green | `scripts/qa/tool/evidence.py` | `test_tool_evidence.py` | succeeded | passed | — |

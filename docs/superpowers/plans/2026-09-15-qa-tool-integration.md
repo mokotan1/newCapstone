@@ -68,7 +68,7 @@
 
 - [x] Task 6: preflight BLOCKED reasons (AC02–AC04) — pytest snapshots only; live Editor NOT_RUN
 - [x] Task 7: coordinator state machine + journal (AC12–AC15) — RecordingGateway; live NOT_RUN
-- [ ] Task 8: Hall path expected scenes + adapter assertions (AC06–AC08)
+- [ ] Task 8: Hall path expected scenes + adapter assertions (AC06–AC08) — hops frozen + `HallQaRouteAssertion` EditMode; live Hall→Kitchen NOT_RUN
 - [ ] Task 9: live Unity run (AC19) — Editor exclusive
 - [ ] Task 10: independent review (AC23)
 

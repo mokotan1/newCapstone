@@ -80,6 +80,7 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)

@@ -6,6 +6,7 @@ using Godlotto.QA.Developer;
 using Godlotto.QA.Input;
 using Godlotto.QA.Scenes;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Godlotto.QA.SceneAdapters
 {
@@ -18,8 +19,9 @@ namespace Godlotto.QA.SceneAdapters
     /// <see cref="CorridorEntranceController.OnInteraction(string)"/>("left") — documented
     /// here so callers do not hunt for a non-existent "kitchen" route.
     ///
-    /// No ForceSolve; missing controller → explicit failure (click → EnvironmentBlocked,
-    /// assert-route → AssertionFailed).
+    /// No ForceSolve; missing controller → explicit failure (click → EnvironmentBlocked).
+    /// assert-route uses <see cref="HallQaRouteAssertion"/>: Kitchen arrival, transition
+    /// finished, and open input gate. Controller presence in Hall is not a pass.
     ///
     /// Placement/assembly note: see <see cref="QaSceneAdapterRegistration"/> remarks.
     /// </summary>
@@ -90,7 +92,7 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Probe,
                     "{}",
-                    "{controllerFound:bool}"),
+                    "{controllerFound:bool,activeScene:string,transitionPending:bool,inputGateBlocked:bool}"),
                 _ => MapSnapshot(adapter, assertRoute: false));
 
             registry.Register(
@@ -99,7 +101,7 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Probe,
                     "{}",
-                    "{controllerFound:bool}"),
+                    "{controllerFound:bool,activeScene:string,transitionPending:bool,inputGateBlocked:bool}"),
                 _ => MapSnapshot(adapter, assertRoute: false));
 
             registry.Register(
@@ -108,7 +110,7 @@ namespace Godlotto.QA.SceneAdapters
                     sceneId,
                     DeveloperQaCapabilityKind.Assertion,
                     "{}",
-                    "{controllerFound:bool}"),
+                    "{controllerFound:bool,activeScene:string,transitionPending:bool,inputGateBlocked:bool}"),
                 _ => MapSnapshot(adapter, assertRoute: true));
         }
 
@@ -123,7 +125,10 @@ namespace Godlotto.QA.SceneAdapters
             var values = new Dictionary<string, string>
             {
                 ["controllerFound"] = (controller != null).ToString(),
-                ["kitchenEntryInteractionId"] = KitchenEntryInteractionId
+                ["kitchenEntryInteractionId"] = KitchenEntryInteractionId,
+                ["activeScene"] = SceneManager.GetActiveScene().name,
+                ["transitionPending"] = SceneTransitionService.IsTransitionPending.ToString(),
+                ["inputGateBlocked"] = InteractionInputGate.IsBlocked.ToString()
             };
 
             return QaSceneSnapshot.Create(SceneName, DateTime.UtcNow, values);
@@ -216,19 +221,18 @@ namespace Godlotto.QA.SceneAdapters
                 }
             }
 
-            string controllerFound;
-            if (!data.TryGetValue("controllerFound", out controllerFound))
+            if (assertRoute)
             {
-                controllerFound = "unknown";
-            }
-
-            if (assertRoute &&
-                !string.Equals(controllerFound, bool.TrueString, StringComparison.Ordinal))
-            {
-                return new DeveloperQaResult(
-                    DeveloperQaResultCode.AssertionFailed,
-                    "Expected controllerFound=True but was '" + controllerFound + "'.",
-                    data: data);
+                HallQaRouteAssertionResult assertion = HallQaRouteAssertion.Evaluate(data);
+                data["assertPassed"] = assertion.Passed.ToString();
+                data["reasonCodes"] = string.Join(",", assertion.ReasonCodes);
+                if (!assertion.Passed)
+                {
+                    return new DeveloperQaResult(
+                        DeveloperQaResultCode.AssertionFailed,
+                        "Hall nav assert-route failed: " + data["reasonCodes"] + ".",
+                        data: data);
+                }
             }
 
             return new DeveloperQaResult(
