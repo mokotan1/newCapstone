@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public sealed class LocalAiSettingsPanel : MonoBehaviour
 {
     const string PanelName = "LocalAiSettingsPanel";
+    const float DisabledIdleAlpha = 0.45f;
+    static readonly string[] ModeKeys = { "cpu", "gpu", "auto" };
     TMP_Text statusLabel;
     Button[] modeButtons;
     Button closeButton;
@@ -38,16 +40,16 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         var panel = root.AddComponent<LocalAiSettingsPanel>();
         Label(root.transform, "Title", Text("AiSettingsTitle"), new Vector2(0, 205), new Vector2(580, 55), font, 32);
         panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, -35), new Vector2(590, 250), font, 23);
-        string[] modes = { "cpu", "gpu", "auto" };
-        panel.modeButtons = new Button[3];
-        for (int i = 0; i < modes.Length; i++)
+        panel.modeButtons = new Button[ModeKeys.Length];
+        for (int i = 0; i < ModeKeys.Length; i++)
         {
-            string mode = modes[i];
+            string mode = ModeKeys[i];
             Button button = MakeButton(root.transform, mode.ToUpperInvariant(),
                 new Vector2((i - 1) * 190, 115), font);
             button.onClick.AddListener(() => panel.Apply(mode));
             panel.modeButtons[i] = button;
         }
+        panel.HighlightRequestedMode(LocalAiControlApi.DefaultRequestedMode);
         panel.closeButton = MakeButton(root.transform, Text("AiSettingsBack"), new Vector2(0, -220), font);
         panel.closeButton.onClick.AddListener(panel.Close);
         panel.openButton = MakeButton(parent, Text("AiSettingsTitle"), Vector2.zero, font);
@@ -89,16 +91,16 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         root.SetActive(true);
         panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, 36), new Vector2(620, 70), font, 16);
         panel.statusLabel.color = SettingsWoodPanelSpec.PrimaryText;
-        string[] modes = { "cpu", "gpu", "auto" };
-        panel.modeButtons = new Button[3];
-        for (int i = 0; i < modes.Length; i++)
+        panel.modeButtons = new Button[ModeKeys.Length];
+        for (int i = 0; i < ModeKeys.Length; i++)
         {
-            string mode = modes[i];
+            string mode = ModeKeys[i];
             Button button = MakeButton(root.transform, mode.ToUpperInvariant(),
                 new Vector2((i - 1) * 170, -40), font);
             button.onClick.AddListener(() => panel.Apply(mode));
             panel.modeButtons[i] = button;
         }
+        panel.HighlightRequestedMode(LocalAiControlApi.DefaultRequestedMode);
     }
 
     public static bool HandleModalInput(GameObject settingsRoot)
@@ -124,10 +126,15 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         if (statusLabel == null)
             return;
         applying = false;
-        SetButtons(false);
-        statusLabel.text = Text("AiSettingsConnecting");
         if (OwnsIndependentStatusPoll)
+        {
+            SetButtons(false);
+            statusLabel.text = Text("AiSettingsConnecting");
             StartCoroutine(Poll());
+            return;
+        }
+
+        SetButtons(true);
     }
 
     void OnDisable()
@@ -141,6 +148,27 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         if (statusLabel == null)
             return;
         statusLabel.text = text ?? "";
+    }
+
+    public void HighlightRequestedMode(string requestedMode)
+    {
+        if (modeButtons == null)
+            return;
+        string normalized = string.IsNullOrWhiteSpace(requestedMode)
+            ? ""
+            : requestedMode.Trim().ToLowerInvariant();
+        for (int i = 0; i < modeButtons.Length; i++)
+        {
+            bool selected = i < ModeKeys.Length && ModeKeys[i] == normalized;
+            ApplyModeButtonVisual(modeButtons[i], selected);
+        }
+    }
+
+    public void NotifyApplyCompleted()
+    {
+        applying = false;
+        if (!OwnsIndependentStatusPoll)
+            SetButtons(true);
     }
 
     public void RefreshLocalizedText()
@@ -159,8 +187,13 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
 
     void SetButtons(bool enabled)
     {
+        if (modeButtons == null)
+            return;
         foreach (Button button in modeButtons)
-            button.interactable = enabled;
+        {
+            if (button != null)
+                button.interactable = enabled;
+        }
     }
 
     IEnumerator Poll()
@@ -180,6 +213,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
                         return;
                     }
                     SetButtons(status.CanApply);
+                    HighlightRequestedMode(status.RequestedMode);
                     string gpu = status.GpuUtilization.HasValue
                         ? string.Format(Text("AiSettingsGpuUsage"), status.GpuName, status.GpuUtilization.Value,
                             status.GpuMemoryUsedMiB ?? 0, status.GpuMemoryTotalMiB ?? 0)
@@ -200,6 +234,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
     {
         if (applying)
             return;
+        HighlightRequestedMode(mode);
         applying = true;
         SetButtons(false);
         statusLabel.text = Text("AiSettingsApplying");
@@ -213,7 +248,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
             if (code != 202)
                 statusLabel.text = Text(code == 409 ? "AiSettingsBusy" : "AiSettingsUnavailable");
         });
-        applying = false;
+        NotifyApplyCompleted();
     }
 
     static TMP_Text Label(Transform parent, string name, string text, Vector2 position,
@@ -243,10 +278,46 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         var rect = (RectTransform)obj.transform;
         rect.sizeDelta = new Vector2(170, 48);
         rect.anchoredPosition = position;
-        obj.GetComponent<Image>().color = new Color(0.38f, 0.20f, 0.04f);
+        Image image = obj.GetComponent<Image>();
         var button = obj.GetComponent<Button>();
-        button.targetGraphic = obj.GetComponent<Image>();
+        button.targetGraphic = image;
+        button.transition = Selectable.Transition.ColorTint;
+        Outline outline = obj.AddComponent<Outline>();
+        outline.effectDistance = new Vector2(2f, -2f);
+        ApplyModeButtonVisual(button, false);
         Label(obj.transform, "Label", title, Vector2.zero, rect.sizeDelta, font, 24);
         return button;
+    }
+
+    static void ApplyModeButtonVisual(Button button, bool selected)
+    {
+        if (button == null)
+            return;
+
+        Graphic graphic = button.targetGraphic ?? button.GetComponent<Image>();
+        if (graphic != null)
+            graphic.color = Color.white;
+
+        Outline outline = button.GetComponent<Outline>();
+        if (outline != null)
+            outline.effectColor = selected
+                ? SettingsWoodPanelSpec.SelectedBorder
+                : SettingsWoodPanelSpec.Border;
+
+        Color idleDisabled = SettingsWoodPanelSpec.ButtonFace;
+        idleDisabled.a = DisabledIdleAlpha;
+        ColorBlock colors = ColorBlock.defaultColorBlock;
+        colors.normalColor = selected
+            ? SettingsWoodPanelSpec.SelectedBackground
+            : SettingsWoodPanelSpec.ButtonFace;
+        colors.highlightedColor = SettingsWoodPanelSpec.SelectedBorder;
+        colors.pressedColor = SettingsWoodPanelSpec.PrimaryButtonFace;
+        colors.selectedColor = colors.normalColor;
+        colors.disabledColor = selected
+            ? SettingsWoodPanelSpec.SelectedBackground
+            : idleDisabled;
+        colors.colorMultiplier = 1f;
+        colors.fadeDuration = 0.1f;
+        button.colors = colors;
     }
 }
