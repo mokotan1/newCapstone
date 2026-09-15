@@ -141,7 +141,7 @@ git status -sb
 | `disputatio/` C#·씬·프리팹 | `unity-verification-postflight` + `newcapstone-unity-automation` |
 | `backend_ai/` | `ruff check backend_ai`, 관련 `pytest` |
 | C# 전역 구문 | `dotnet test scripts/CSharpSyntaxChecker/CSharpSyntaxChecker.Tests/` |
-| `backend_ai/` Docker 관련 | 로컬 빌드 또는 PR 후 `backend-build` CI 확인 |
+| `backend_ai/` Docker 관련 | 로컬 빌드; `backend-build` CI는 `main` 진입 시에만 실행 |
 | `.github/workflows/` | YAML 검토; push 후 워크플로 실행 확인 |
 
 - [ ] 커밋 메시지가 **why** 중심
@@ -171,8 +171,9 @@ git status -sb
 | 워크플로 | 트리거 | 검증 내용 |
 |----------|--------|-----------|
 | `ci-check.yml` | push/PR (대부분 브랜치) | `backend_ai` Python 구문·ruff; `disputatio/Assets` C# 구문 |
-| `backend-build.yml` | `backend_ai/**` 변경 | Docker 이미지 빌드·검증 |
-| `deploy-backend.yml` | 배포 파이프라인 | 운영 배포 (브랜치·시크릿 정책 확인) |
+| `backend-build.yml` | `main` push/PR + `backend_ai/**` | pytest + Docker 이미지 빌드·검증 |
+| `unity-client-build.yml` | `main` push/PR + Unity 경로 | Unity Edit/PlayMode + Windows 클라이언트 빌드 |
+| `deploy-backend.yml` | 배포 파이프라인 | 운영 배포 (`main` Backend Build 성공 후) |
 
 ### CI 실패 시
 

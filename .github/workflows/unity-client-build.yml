@@ -3,6 +3,8 @@ name: Unity Client Build
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - main
     paths:
       - ".github/workflows/unity-client-build.yml"
       - "disputatio/Assets/**"

@@ -5,6 +5,7 @@
 .utmp/
 # Local pytest basetemp (Windows TEMP permission workaround)
 .tmp_pytest/
+.pytest_tmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -12,6 +13,11 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+
+# Real Unity project is disputatio/. Ignore a second project created at repo root by mistake.
+/Assets/
+/Packages/
+/ProjectSettings/
 *.log
 
 # MemoryCaptures can get excessive in size.

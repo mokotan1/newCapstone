@@ -52,6 +52,9 @@ class LiteRTProvider(AIProvider):
         if self._owns_client:
             await self._client.aclose()
 
+    def adapt_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return payload
+
     async def stream_chat(
         self,
         messages: list[dict],
@@ -77,7 +80,7 @@ class LiteRTProvider(AIProvider):
             async with self._client.stream(
                 "POST",
                 _CHAT_COMPLETIONS_PATH,
-                json=payload,
+                json=self.adapt_payload(payload),
             ) as response:
                 if response.status_code >= 400:
                     yield SSEEvent(type="error", content=_PLAYER_VISIBLE_RUNTIME_ERROR)

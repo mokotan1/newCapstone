@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     google_api_key: str = ""
     chat_api_token: str = ""
+    #: Loopback control API for /local-ai/*. Empty until local startup generates one.
+    local_ai_control_token: str = ""
 
     default_model_groq: str = "llama-3.3-70b-versatile"
     default_model_gemini: str = "gemini-2.0-flash"
@@ -35,6 +37,10 @@ class Settings(BaseSettings):
     local_ai_think: bool = False
     #: Empty = health-check only; do not spawn a runtime from FastAPI.
     local_ai_start_command: str = ""
+    #: Python environment containing the pinned LiteRT package.
+    local_ai_litert_python: str = ""
+    #: Gate 1 artifacts; this setting alone does not enable the candidate.
+    local_ai_cuda_dir: str = ""
     dialogue_temperature: float = 0.8
     dialogue_max_tokens: int = 64
     dialogue_top_p: float = 0.95

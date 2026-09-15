@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -219,6 +220,11 @@ public sealed class ChatHttpClient
     /// EditMode seam: when set, replaces UnityWebRequest for GET / readiness.
     /// </summary>
     internal Func<ChatHttpAttemptOutcome> SimulateRootAttempt;
+
+    /// <summary>
+    /// EditMode seam: when set, replaces UnityWebRequest for PUT /local-ai/settings.
+    /// </summary>
+    internal Func<ChatHttpAttemptOutcome> SimulateLocalAiSettingsAttempt;
 
     /// <summary>EditMode: override realtime retry delay (0 skips WaitForSecondsRealtime).</summary>
     internal float? RetryDelaySecondsOverrideForTests;
@@ -457,6 +463,92 @@ public sealed class ChatHttpClient
             yield return request.SendWebRequest();
             string body = request.downloadHandler != null ? request.downloadHandler.text : "";
             onComplete(request.responseCode, body);
+        }
+    }
+
+    public IEnumerator ApplyDefaultGpuSettings(Action<long, string> onComplete, string controlToken = null)
+    {
+        if (onComplete == null)
+            yield break;
+
+        if (!LocalAiControlApi.ShouldControlLocalRuntime(ResolvedServerUrl))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+
+        if (SimulateLocalAiSettingsAttempt != null)
+        {
+            ChatHttpAttemptOutcome outcome = SimulateLocalAiSettingsAttempt();
+            yield return null;
+            onComplete(outcome.ResponseCode, outcome.Body ?? "");
+            yield break;
+        }
+
+        string token = controlToken;
+        if (string.IsNullOrEmpty(token) && !TryReadDefaultControlToken(out token))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+
+        string url = LocalAiControlApi.SettingsUrl(ResolvedServerUrl);
+        byte[] payload = Encoding.UTF8.GetBytes(LocalAiControlApi.BuildSettingsBody());
+        using (var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT))
+        {
+            request.uploadHandler = new UploadHandlerRaw(payload);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+            request.timeout = 5;
+            AttachCertificateBypass(request);
+            yield return request.SendWebRequest();
+            string body = request.downloadHandler != null ? request.downloadHandler.text : "";
+            onComplete(request.responseCode, body);
+        }
+    }
+
+    internal static bool TryReadDefaultControlToken(out string token)
+    {
+        token = "";
+        try
+        {
+            string path = LocalAiControlApi.DefaultControlTokenPath();
+            if (!File.Exists(path))
+                return false;
+            return LocalAiControlApi.TryReadControlToken(File.ReadAllText(path), out token);
+        }
+        catch
+        {
+            token = "";
+            return false;
+        }
+    }
+
+    /// <summary>Settings transport; UI never sends HTTP or starts processes itself.</summary>
+    public static IEnumerator LocalAiControlRequest(
+        string chatUrl, string mode, Action<long, string> onComplete)
+    {
+        if (!LocalAiControlApi.ShouldControlLocalRuntime(chatUrl) ||
+            !TryReadDefaultControlToken(out string token))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+        bool applying = mode != null;
+        string url = applying ? LocalAiControlApi.SettingsUrl(chatUrl) : LocalAiControlApi.StatusUrl(chatUrl);
+        using (var request = new UnityWebRequest(url, applying ? "PUT" : "GET"))
+        {
+            request.downloadHandler = new DownloadHandlerBuffer();
+            if (applying)
+            {
+                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(LocalAiControlApi.BuildSettingsBody(mode)));
+                request.SetRequestHeader("Content-Type", "application/json");
+            }
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+            request.timeout = 5;
+            yield return request.SendWebRequest();
+            onComplete(request.responseCode, request.downloadHandler.text);
         }
     }
 

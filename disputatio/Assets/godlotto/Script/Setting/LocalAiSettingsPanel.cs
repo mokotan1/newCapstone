@@ -160,13 +160,33 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
 
     IEnumerator Poll()
     {
-        if (isEmbedded)
-            yield break;
         while (true)
         {
-            if (statusLabel != null && !applying)
-                statusLabel.text = Text("AiSettingsUnavailable");
-            SetButtons(false);
+            if (!applying)
+            {
+                yield return ChatHttpClient.LocalAiControlRequest(ServerConfig.GetOrCreate().ChatUrl, null, (code, json) =>
+                {
+                    if (applying)
+                        return;
+                    if (code != 200 || !LocalAiControlApi.TryParseStatus(json, out LocalAiRuntimeStatus status))
+                    {
+                        SetButtons(false);
+                        statusLabel.text = Text("AiSettingsUnavailable");
+                        return;
+                    }
+                    SetButtons(status.CanApply);
+                    string gpu = status.GpuUtilization.HasValue
+                        ? string.Format(Text("AiSettingsGpuUsage"), status.GpuName, status.GpuUtilization.Value,
+                            status.GpuMemoryUsedMiB ?? 0, status.GpuMemoryTotalMiB ?? 0)
+                        : Text("AiSettingsGpuUnknown");
+                    string state = Text("AiState_" + status.State);
+                    string note = status.State == "externally_managed" ? Text("AiSettingsExternal")
+                        : string.IsNullOrEmpty(status.FallbackReason) ? "" : Text("AiSettingsFallback");
+                    statusLabel.text = string.Format(Text("AiSettingsStatus"),
+                        status.RequestedMode.ToUpperInvariant(), status.EffectiveBackend.ToUpperInvariant(), state)
+                        + "\n\n" + gpu + "\n" + note;
+                });
+            }
             yield return new WaitForSecondsRealtime(2);
         }
     }
@@ -183,10 +203,12 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
 
     IEnumerator ApplyRequest(string mode)
     {
-        yield return null;
+        yield return ChatHttpClient.LocalAiControlRequest(ServerConfig.GetOrCreate().ChatUrl, mode, (code, _) =>
+        {
+            if (code != 202)
+                statusLabel.text = Text(code == 409 ? "AiSettingsBusy" : "AiSettingsUnavailable");
+        });
         applying = false;
-        if (statusLabel != null)
-            statusLabel.text = Text("AiSettingsUnavailable");
     }
 
     static TMP_Text Label(Transform parent, string name, string text, Vector2 position,
