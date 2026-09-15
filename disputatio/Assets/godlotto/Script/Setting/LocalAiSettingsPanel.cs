@@ -15,6 +15,9 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
     bool applying;
     bool isEmbedded;
 
+    internal bool OwnsIndependentStatusPoll =>
+        SettingsCheshirePreviewGate.PanelOwnsIndependentStatusPoll(isEmbedded);
+
     static string Text(string key) => CheshireUiStrings.Lookup(key, CheshireLocaleResolver.ResolveCurrentLocale());
 
     public static void Ensure(Transform parent)
@@ -69,7 +72,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         var root = new GameObject(PanelName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         root.transform.SetParent(parent, false);
         root.layer = parent.gameObject.layer;
-        root.SetActive(true);
+        root.SetActive(false);
         RectTransform rect = (RectTransform)root.transform;
         rect.anchorMin = new Vector2(0f, 1f);
         rect.anchorMax = Vector2.one;
@@ -83,6 +86,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
 
         var panel = root.AddComponent<LocalAiSettingsPanel>();
         panel.isEmbedded = true;
+        root.SetActive(true);
         panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, 36), new Vector2(620, 70), font, 16);
         panel.statusLabel.color = SettingsWoodPanelSpec.PrimaryText;
         string[] modes = { "cpu", "gpu", "auto" };
@@ -122,7 +126,8 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         applying = false;
         SetButtons(false);
         statusLabel.text = Text("AiSettingsConnecting");
-        StartCoroutine(Poll());
+        if (OwnsIndependentStatusPoll)
+            StartCoroutine(Poll());
     }
 
     void OnDisable()

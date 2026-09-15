@@ -49,3 +49,21 @@ def test_verify_chat_api_token_rejects_wrong_token() -> None:
         assert exc.detail == "chat_api_token_required"
     else:
         raise AssertionError("expected HTTPException")
+
+
+def test_verify_chat_api_token_rejects_browser_origin() -> None:
+    try:
+        verify_chat_api_token(
+            DummyRequest(
+                {
+                    "origin": "https://evil.example",
+                    "authorization": "Bearer secret-token",
+                }
+            ),
+            "secret-token",
+        )
+    except HTTPException as exc:
+        assert exc.status_code == 403
+        assert exc.detail == "origin_not_allowed"
+    else:
+        raise AssertionError("expected HTTPException")

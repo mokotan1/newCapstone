@@ -6,34 +6,38 @@ from models.responses import ChatResponse
 
 
 class _EmptyChatService:
-    async def chat(self, payload):  # noqa: ANN001
+    async def chat(self, payload):
         return ChatResponse(response="", function_calls=[])
 
 
-def test_chat_api_key_missing_detail_en(monkeypatch) -> None:
-    import main as main_mod
+def test_chat_engine_unavailable_detail_en(monkeypatch) -> None:
     from fastapi.testclient import TestClient
+
+    import main as main_mod
 
     monkeypatch.setattr(main_mod, "chat_service", None)
     monkeypatch.setattr(main_mod.settings, "chat_api_token", "")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    monkeypatch.setattr(main_mod.settings, "ai_provider", "test")
 
     with TestClient(main_mod.app) as client:
         resp = client.post("/chat", json={"prompt": "hi", "locale": "en"})
 
     assert resp.status_code == 500
     detail = resp.json()["detail"]
-    assert "API" in detail or "key" in detail.lower()
+    assert "local ai engine" in detail.lower()
     assert "API 키" not in detail
 
 
 def test_chat_all_engines_failed_detail_en(monkeypatch) -> None:
-    import main as main_mod
     from fastapi.testclient import TestClient
+
+    import main as main_mod
 
     monkeypatch.setattr(main_mod, "chat_service", _EmptyChatService())
     monkeypatch.setattr(main_mod.settings, "chat_api_token", "")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    monkeypatch.setattr(main_mod.settings, "ai_provider", "test")
 
     with TestClient(main_mod.app) as client:
         resp = client.post("/chat", json={"prompt": "hi", "locale": "en"})

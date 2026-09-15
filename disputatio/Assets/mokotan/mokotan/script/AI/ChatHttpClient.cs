@@ -197,8 +197,9 @@ public interface IChatHttpCallbacks
 /// </summary>
 public sealed class ChatHttpClient
 {
-    private const int NonStreamingTimeoutSeconds = 60;
-    private const int StreamingTimeoutSeconds = 120;
+    public const int OverallTimeoutSeconds = 155;
+    private const int NonStreamingTimeoutSeconds = OverallTimeoutSeconds;
+    private const int StreamingTimeoutSeconds = OverallTimeoutSeconds;
     private const float DefaultRetryDelaySeconds = 0.5f;
     private const string AnonymousUserIdPrefsKey = "ChatHttpClient.AnonymousUserId";
 

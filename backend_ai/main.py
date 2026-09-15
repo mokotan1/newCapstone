@@ -21,11 +21,12 @@ from services.local_ai.cuda_manifest import cuda_manifest_is_pinned
 from services.local_ai.hardware import probe_nvidia
 from services.local_ai.paths import default_local_ai_dir
 from services.local_ai.process_host import ProcessEngineHost
+from services.local_ai.readiness import build_readiness_payload
 from services.local_ai.router import router as local_ai_router
 from services.local_ai.runtime_manager import LocalRuntimeManager
 from services.locale_support import (
     all_engines_failed_message,
-    api_key_required_message,
+    local_engine_unavailable_message,
 )
 from services.quiz_bank import QuizBank
 from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
@@ -68,7 +69,6 @@ _backend_dir = Path(__file__).resolve().parent
 _quiz_bank = QuizBank.load(_backend_dir / settings.tutor_quiz_csv_path)
 _tutor_rag = TutorRAGService(
     index_path=_backend_dir / settings.tutor_rag_index_path,
-    api_key=settings.google_api_key,
     embedding_model=settings.tutor_embedding_model,
     min_similarity=settings.tutor_rag_min_similarity,
 )
@@ -157,9 +157,44 @@ app.include_router(local_ai_router)
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+def _readiness_fields() -> dict:
+    snap_state = "stopped"
+    chat_ready = False
+    requested = "cpu"
+    effective = "unknown"
+    error_code = None
+    if runtime_manager is not None:
+        snapshot = runtime_manager.snapshot()
+        snap_state = snapshot.state
+        chat_ready = snapshot.inference_ready and snapshot.model_available
+        requested = snapshot.requested_mode
+        effective = snapshot.effective_backend
+        error_code = snapshot.fallback_reason
+    elif settings.ai_provider == "local":
+        runtime = check_local_runtime(settings)
+        chat_ready = runtime.model_available
+        error_code = runtime.error
+        snap_state = "ready" if runtime.model_available else "starting"
+    rag_ready = _tutor_rag.enabled and _tutor_rag.prepare_error is None
+    return build_readiness_payload(
+        protocol_version="1",
+        instance_id=os.environ.get("LOCAL_AI_INSTANCE_ID", ""),
+        runtime_state=snap_state,
+        chat_ready=chat_ready,
+        rag_ready=rag_ready,
+        requested_device=requested,
+        effective_device=effective,
+        model_id=settings.local_ai_model,
+        error_code=error_code or _tutor_rag.prepare_error,
+        retryable=bool(error_code) and snap_state != "failed",
+    )
+
+
 @app.get("/")
-def health_check():
+def health_check(request: Request):
+    verify_chat_api_token(request, settings.chat_api_token)
     payload: dict = {"status": "online", "message": "Server is Running!"}
+    payload["readiness"] = _readiness_fields()
     if settings.ai_provider == "local":
         if runtime_manager is not None:
             snapshot = runtime_manager.snapshot()
@@ -188,7 +223,7 @@ async def chat(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(
             status_code=500,
-            detail=api_key_required_message(payload.locale),
+            detail=local_engine_unavailable_message(payload.locale),
         )
 
     verify_chat_api_token(request, settings.chat_api_token)
@@ -214,9 +249,10 @@ async def chat(request: Request, payload: ChatRequest):
 
 
 @app.post("/tutor/grade", response_model=TutorGradeResponse)
-async def tutor_grade(request: TutorGradeRequest):
+async def tutor_grade(http_request: Request, payload: TutorGradeRequest):
     """LLM 없이 quiz_bank CSV로 정오만 판정합니다."""
-    result = grade_tutor_answer(request, _quiz_bank, settings)
+    verify_chat_api_token(http_request, settings.chat_api_token)
+    result = grade_tutor_answer(payload, _quiz_bank, settings)
     return result
 
 
@@ -238,7 +274,7 @@ async def chat_stream(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(
             status_code=500,
-            detail=api_key_required_message(payload.locale),
+            detail=local_engine_unavailable_message(payload.locale),
         )
 
     verify_chat_api_token(request, settings.chat_api_token)
@@ -271,6 +307,6 @@ async def chat_stream(request: Request, payload: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", "8000"))
     host = "127.0.0.1" if settings.ai_provider == "local" else "0.0.0.0"
     uvicorn.run(app, host=host, port=port)

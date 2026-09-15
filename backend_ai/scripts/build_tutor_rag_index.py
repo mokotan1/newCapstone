@@ -7,7 +7,6 @@ import argparse
 import json
 import re
 import sys
-import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -264,31 +263,6 @@ def write_index_atomically(
     tmp_path.replace(out_path)
 
 
-def _default_embed_batch(
-    genai: object,
-    model: str,
-    texts: list[str],
-    *,
-    batch_size: int = 8,
-    sleep_s: float = 0.2,
-) -> list[list[float]]:
-    embeddings: list[list[float]] = []
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i : i + batch_size]
-        for text in batch:
-            res = genai.embed_content(
-                model=model,
-                content=text,
-                task_type="retrieval_document",
-            )
-            emb = res.get("embedding")
-            if not isinstance(emb, list):
-                raise RuntimeError(f"Bad embedding response for chunk starting: {text[:40]!r}")
-            embeddings.append(emb)
-            time.sleep(sleep_s)
-    return embeddings
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build project wiki RAG embedding index")
     parser.add_argument("--max-chunk-chars", type=int, default=_DEFAULT_MAX_CHUNK_CHARS)
@@ -324,17 +298,12 @@ def main() -> int:
     if args.dry_run:
         return 0
 
-    if not settings.google_api_key:
-        print("GOOGLE_API_KEY is required in backend_ai/.env", file=sys.stderr)
-        return 1
+    from services.local_embedding import MODEL_ID, embed_texts
 
-    import google.generativeai as genai
-
-    genai.configure(api_key=settings.google_api_key)
-    model = settings.tutor_embedding_model
+    model = settings.tutor_embedding_model or MODEL_ID
 
     def embed_fn(texts: list[str]) -> list[list[float]]:
-        return _default_embed_batch(genai, model, texts)
+        return embed_texts(texts)
 
     print(f"Embedding {len(chunks)} chunks with {model} ...")
     write_index_atomically(

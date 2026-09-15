@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from models.requests import RagProfile
+from services.local_embedding import DIMENSION, MODEL_ID, embed_text
 from services.locale_support import normalize_locale
 
 logger = logging.getLogger(__name__)
@@ -74,54 +75,60 @@ class TutorRAGService:
         self,
         index_path: Path,
         *,
-        api_key: str,
-        embedding_model: str,
+        embedding_model: str = MODEL_ID,
         min_similarity: float = 0.0,
     ) -> None:
         self._index_path = index_path
-        self._api_key = api_key
         self._embedding_model = embedding_model
         self._min_similarity = min_similarity
         self._chunks: list[dict[str, Any]] = []
+        self.prepare_error: str | None = None
         self._load_index()
 
     def _load_index(self) -> None:
         if not self._index_path.is_file():
-            logger.warning("Tutor RAG index missing: %s — retrieval disabled", self._index_path)
+            logger.warning("Tutor RAG index missing: %s", self._index_path)
             self._chunks = []
+            self.prepare_error = "index_missing"
             return
         try:
             data = json.loads(self._index_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as e:
             logger.error("Failed to load tutor RAG index: %s", e)
             self._chunks = []
+            self.prepare_error = "corrupt_index"
+            return
+        if not isinstance(data, dict):
+            self._chunks = []
+            self.prepare_error = "corrupt_index"
             return
         self._chunks = data.get("chunks") or []
+        index_model = data.get("embedding_model")
+        if self._chunks and index_model != MODEL_ID:
+            self.prepare_error = "unsupported_embedding_model"
+            logger.error(
+                "Tutor RAG index embedding_model=%s is not %s",
+                index_model,
+                MODEL_ID,
+            )
+        elif self._chunks:
+            sample = self._chunks[0].get("embedding")
+            if not isinstance(sample, list) or len(sample) != DIMENSION:
+                self.prepare_error = "embedding_dimension_mismatch"
+                logger.error(
+                    "Tutor RAG index embedding dimension mismatch: %s",
+                    None if not isinstance(sample, list) else len(sample),
+                )
         logger.info("Loaded tutor RAG index: %d chunks from %s", len(self._chunks), self._index_path)
 
     @property
     def enabled(self) -> bool:
-        return bool(self._chunks)
+        return bool(self._chunks) and self.prepare_error is None
 
     def _embed_query(self, text: str) -> list[float] | None:
-        if not self._api_key:
-            logger.warning("GOOGLE_API_KEY empty — cannot embed tutor RAG query")
-            return None
-        try:
-            import google.generativeai as genai
-
-            genai.configure(api_key=self._api_key)
-            res = genai.embed_content(
-                model=self._embedding_model,
-                content=text,
-                task_type="retrieval_query",
-            )
-            emb = res.get("embedding")
-            if isinstance(emb, list):
-                return emb
-        except Exception as e:
-            logger.error("Gemini embed_query failed: %s", e)
-        return None
+        if self.prepare_error:
+            raise RuntimeError(self.prepare_error)
+        return embed_text(text)
 
     def _chunks_for_locale(self, locale: str) -> list[dict[str, Any]]:
         """Filter by chunk ``locale`` metadata when present; else use all chunks.
@@ -170,6 +177,8 @@ class TutorRAGService:
         min_similarity: float | None = None,
         rag_profile: RagProfile = "tutor",
     ) -> str:
+        if self.prepare_error:
+            return ""
         pool = self._chunks_for_locale(locale)
         if not pool:
             return ""

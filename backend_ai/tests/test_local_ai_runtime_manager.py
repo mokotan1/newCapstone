@@ -178,3 +178,29 @@ async def test_health_poll_recovers_idle_gpu_without_chat(tmp_path: Path) -> Non
         assert "litert_cpu" in host.calls.starts
     finally:
         await manager.stop_health_poll()
+
+
+@pytest.mark.asyncio
+async def test_fourth_lease_is_rejected_with_429(tmp_path: Path) -> None:
+    host = FakeEngineHost()
+    manager = _manager(tmp_path, host)
+    await manager.apply_settings(mode="cpu")
+    first = await manager.admit_and_acquire()
+    waiter_one = asyncio.create_task(manager.admit_and_acquire())
+    waiter_two = asyncio.create_task(manager.admit_and_acquire())
+    await asyncio.sleep(0.05)
+    try:
+        await manager.admit_and_acquire()
+        raise AssertionError("expected 429")
+    except HTTPException as exc:
+        assert exc.status_code == 429
+    await first.aclose()
+    finished, pending = await asyncio.wait(
+        {waiter_one, waiter_two},
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+    second = next(iter(finished)).result()
+    await second.aclose()
+    third = await next(iter(pending))
+    await third.aclose()
+

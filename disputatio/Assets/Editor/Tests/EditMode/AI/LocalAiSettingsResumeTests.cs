@@ -44,6 +44,22 @@ public class LocalAiSettingsResumeTests
             Assert.AreEqual(1, panels.Length);
             Assert.IsFalse(panels[0].gameObject.activeSelf);
             Assert.AreEqual(4, panels[0].GetComponentsInChildren<Button>(true).Length);
+            Assert.IsTrue(panels[0].OwnsIndependentStatusPoll);
+        }
+        finally { Object.DestroyImmediate(root); }
+    }
+
+    [Test]
+    public void EmbeddedPanel_DoesNotOwnIndependentStatusPoll()
+    {
+        var root = new GameObject("CheshireAiPage", typeof(RectTransform));
+        try
+        {
+            LocalAiSettingsPanel.EnsureEmbedded(root.transform);
+            var panel = root.GetComponentInChildren<LocalAiSettingsPanel>(true);
+            Assert.IsNotNull(panel);
+            Assert.IsTrue(panel.gameObject.activeSelf);
+            Assert.IsFalse(panel.OwnsIndependentStatusPoll);
         }
         finally { Object.DestroyImmediate(root); }
     }

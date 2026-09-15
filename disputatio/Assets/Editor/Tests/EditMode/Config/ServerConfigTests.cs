@@ -5,9 +5,16 @@ using UnityEngine.TestTools;
 [TestFixture]
 public class ServerConfigTests
 {
+    [SetUp]
+    public void SetUp()
+    {
+        LocalAiSessionStore.IgnorePersistedSessionForTests = true;
+    }
+
     [TearDown]
     public void TearDown()
     {
+        LocalAiSessionStore.IgnorePersistedSessionForTests = false;
         ServerConfig.ResetCacheForTest();
     }
 
@@ -40,14 +47,14 @@ public class ServerConfigTests
     }
 
     [Test]
-    public void ChatUrl_UsesSerializedCloudUrl_WhenLoopbackDisabled()
+    public void ChatUrl_DoesNotFallBackToRemote_WhenLoopbackDisabled()
     {
         ServerConfig config = ScriptableObject.CreateInstance<ServerConfig>();
         config.ApplyChatEndpointForTest(
             useLocalLoopback: false,
             chatUrl: ServerConfig.DefaultCloudChatUrl);
 
-        Assert.AreEqual(ServerConfig.DefaultCloudChatUrl, config.ChatUrl);
+        Assert.AreEqual(LocalAiEndpointResolver.LoopbackChatUrl, config.ChatUrl);
         Assert.IsFalse(config.UseLocalLoopback);
     }
 

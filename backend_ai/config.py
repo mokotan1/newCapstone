@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -18,19 +17,14 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    groq_api_key: str = ""
-    google_api_key: str = ""
     chat_api_token: str = ""
     #: Loopback control API for /local-ai/*. Empty until local startup generates one.
     local_ai_control_token: str = ""
 
-    default_model_groq: str = "llama-3.3-70b-versatile"
-    default_model_gemini: str = "gemini-2.0-flash"
-
     default_temperature: float = 0.7
     max_tokens: int = 512
-    #: cloud = Groq/Gemini. local = LiteRT-LM / Gemma 4 E2B on loopback.
-    ai_provider: str = "cloud"
+    #: local = LiteRT-LM / Gemma 4 E2B on loopback. Cloud providers are not used.
+    ai_provider: str = "local"
     local_ai_base_url: str = "http://127.0.0.1:9379"
     local_ai_model: str = "gemma4-e2b"
     local_ai_num_ctx: int = 2048
@@ -65,7 +59,7 @@ class Settings(BaseSettings):
     tutor_rag_corpus_dir: str = "../docs/wiki/rag"
     tutor_quiz_csv_path: str = "data/tutor_quiz/quiz_bank.csv"
     tutor_rag_index_path: str = "data/tutor_rag_index.json"
-    tutor_embedding_model: str = "models/text-embedding-004"
+    tutor_embedding_model: str = "local-hash-v1"
     tutor_rag_top_k: int = 5
     tutor_rag_max_context_chars: int = 6000
     tutor_rag_min_similarity: float = 0.25
@@ -82,10 +76,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    # Let pydantic load .env (GROQ_API_KEY, GOOGLE_API_KEY). Legacy env name for Groq only if still empty.
-    s = Settings()
-    if not s.groq_api_key:
-        legacy = os.getenv("capstone", "")
-        if legacy:
-            s = s.model_copy(update={"groq_api_key": legacy})
-    return s
+    return Settings()

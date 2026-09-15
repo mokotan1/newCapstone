@@ -31,4 +31,25 @@ public static class SettingsCheshirePreviewGate
     {
         return LocalAiReadiness.CanSendChat(playerDisabled, requiresLoopback, localReady);
     }
+
+    public static bool IsServerReachable(long statusCode)
+    {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
+    public static bool ShouldApplyDefaultDevice(
+        bool playerDisabled, bool requiresLoopback, bool alreadyApplied, bool serverReachable)
+    {
+        return !playerDisabled && requiresLoopback && !alreadyApplied && serverReachable;
+    }
+
+    public static bool ShouldKeepPolling(bool playerDisabled, bool requiresLoopback, bool localReady)
+    {
+        return !playerDisabled && requiresLoopback && !localReady;
+    }
+
+    public static bool PanelOwnsIndependentStatusPoll(bool isEmbedded)
+    {
+        return !isEmbedded;
+    }
 }

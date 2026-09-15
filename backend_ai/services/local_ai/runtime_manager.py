@@ -27,6 +27,9 @@ from services.local_ai.types import (
 )
 
 DEFAULT_HEALTH_POLL_INTERVAL_S = 2.0
+MAX_ACTIVE_LEASES = 1
+MAX_QUEUED_LEASES = 2
+QUEUE_WAIT_SECONDS = 30.0
 
 
 def _retry_unavailable(detail: str) -> HTTPException:
@@ -93,6 +96,8 @@ class LocalRuntimeManager:
         self._owned: OwnedEngine | None = None
         self._failure_fingerprint: str | None = None
         self._leases = 0
+        self._queued = 0
+        self._infer_sem = asyncio.Semaphore(MAX_ACTIVE_LEASES)
         self._lease_zero = asyncio.Event()
         self._lease_zero.set()
         self._transition = asyncio.Lock()
@@ -217,6 +222,15 @@ class LocalRuntimeManager:
             raise _retry_unavailable("runtime_unavailable")
         if self._owned is None:
             raise _retry_unavailable("runtime_unavailable")
+        if self._leases + self._queued >= MAX_ACTIVE_LEASES + MAX_QUEUED_LEASES:
+            raise HTTPException(status_code=429, detail="inference_queue_full")
+        self._queued += 1
+        try:
+            await asyncio.wait_for(self._infer_sem.acquire(), timeout=QUEUE_WAIT_SECONDS)
+        except TimeoutError as exc:
+            raise HTTPException(status_code=504, detail="queue_timeout") from exc
+        finally:
+            self._queued = max(0, self._queued - 1)
         self._leases += 1
         self._lease_zero.clear()
         return ProviderLease(self, self._owned.provider)
@@ -225,6 +239,7 @@ class LocalRuntimeManager:
         self._leases = max(0, self._leases - 1)
         if self._leases == 0:
             self._lease_zero.set()
+        self._infer_sem.release()
 
     async def recover_if_engine_died(self) -> None:
         if self._owned is None or not self._managed:
