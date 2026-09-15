@@ -48,7 +48,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun, qa/tool 등)
 ├── installer/           # 로컬 AI 라이선스 NOTICE·첫 실행 체크리스트
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
@@ -555,6 +555,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight; 홀→주방 통합 1단계) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |
