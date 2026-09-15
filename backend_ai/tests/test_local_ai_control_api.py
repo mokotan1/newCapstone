@@ -26,6 +26,10 @@ def _headers() -> dict[str, str]:
     return {"Authorization": "Bearer secret-token"}
 
 
+def _isolate_from_lifespan(monkeypatch: pytest.MonkeyPatch, main_mod: object) -> None:
+    monkeypatch.setattr(main_mod.settings, "ai_provider", "test")
+
+
 @pytest.mark.asyncio
 async def test_status_requires_control_token(
     monkeypatch: pytest.MonkeyPatch,
@@ -37,6 +41,7 @@ async def test_status_requires_control_token(
     monkeypatch.setattr(main_mod, "runtime_manager", local_manager)
     monkeypatch.setattr(main_mod.settings, "local_ai_control_token", "secret-token")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    _isolate_from_lifespan(monkeypatch, main_mod)
     with TestClient(main_mod.app) as client:
         denied = client.get("/local-ai/status")
         assert denied.status_code == 401
@@ -72,6 +77,7 @@ async def test_status_triggers_idle_gpu_recovery(
     monkeypatch.setattr(main_mod, "runtime_manager", manager)
     monkeypatch.setattr(main_mod.settings, "local_ai_control_token", "secret-token")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    _isolate_from_lifespan(monkeypatch, main_mod)
     with TestClient(main_mod.app) as client:
         body = client.get("/local-ai/status", headers=_headers()).json()
     assert body["fallback_reason"] == "gpu_process_exited"
@@ -89,6 +95,7 @@ async def test_settings_put_accepted(
     monkeypatch.setattr(main_mod, "runtime_manager", local_manager)
     monkeypatch.setattr(main_mod.settings, "local_ai_control_token", "secret-token")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    _isolate_from_lifespan(monkeypatch, main_mod)
     with TestClient(main_mod.app) as client:
         resp = client.put(
             "/local-ai/settings",
@@ -115,6 +122,7 @@ async def test_chat_503_when_runtime_unavailable(
     monkeypatch.setattr(main_mod, "chat_service", _StubChatService())
     monkeypatch.setattr(main_mod.settings, "chat_api_token", "")
     monkeypatch.setattr(main_mod.settings, "rate_limit_enabled", False)
+    _isolate_from_lifespan(monkeypatch, main_mod)
     with TestClient(main_mod.app) as client:
         resp = client.post("/chat", json={"prompt": "hi", "locale": "en"})
     assert resp.status_code == 503

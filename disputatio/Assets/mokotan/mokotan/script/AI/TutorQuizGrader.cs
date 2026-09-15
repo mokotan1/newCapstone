@@ -185,6 +185,11 @@ internal sealed class TutorQuizGrader
                         req.uploadHandler = new UploadHandlerRaw(bodyRaw);
                         req.downloadHandler = new DownloadHandlerBuffer();
                         req.SetRequestHeader("Content-Type", "application/json");
+                        if (ChatHttpClient.TryGetChatApiTokenHeader(
+                                ServerConfig.GetOrCreate().ChatApiToken,
+                                out string headerName,
+                                out string headerValue))
+                            req.SetRequestHeader(headerName, headerValue);
                         host.AttachCertificateBypass(req);
                         req.timeout = 30;
 

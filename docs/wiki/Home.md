@@ -79,12 +79,12 @@ python tools/wiki_rag/build_wiki.py --manifest docs/wiki/_meta/source-manifest.y
 | Scenario | The unholy of mention 플롯 4막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-4막--2148f646a4c5.md) |
 | Scenario | the unholy of mention 플롯 2막 | pdf | extracted | [transcript](sources/scenario/the-unholy-of-mention-플롯-2막--6547e2e5db43.md) |
 | Technical | 2026-07-14-regression-playtest | md | extracted | [transcript](sources/technical/2026-07-14-regression-playtest--1634d7ac3efa.md) |
-| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--194f6010e716.md) |
+| Technical | architecture | md | extracted | [transcript](sources/technical/architecture--ded8fb508f0d.md) |
 | Technical | fungus-migration-audit | md | extracted | [transcript](sources/technical/fungus-migration-audit--aacf05fd62fd.md) |
 | Technical | fungus-room-migration-plan | md | extracted | [transcript](sources/technical/fungus-room-migration-plan--e52de73281b4.md) |
 | Technical | glass-choice-menu-usage | md | extracted | [transcript](sources/technical/glass-choice-menu-usage--f05cffd194cf.md) |
 | Technical | llm-abuse-defense-plan | md | extracted | [transcript](sources/technical/llm-abuse-defense-plan--ca17d157de10.md) |
-| Technical | llm-defense-play-test-guide | md | extracted | [transcript](sources/technical/llm-defense-play-test-guide--873778a0ddcd.md) |
+| Technical | llm-defense-play-test-guide | md | extracted | [transcript](sources/technical/llm-defense-play-test-guide--6c982f7ba046.md) |
 | Technical | play-log-analysis | md | extracted | [transcript](sources/technical/play-log-analysis--ab3836b72366.md) |
 | Technical | play-log-pipeline | md | extracted | [transcript](sources/technical/play-log-pipeline--68636b3b936e.md) |
 | Technical | play-log-sheets-upload | md | extracted | [transcript](sources/technical/play-log-sheets-upload--0b0032e4671b.md) |

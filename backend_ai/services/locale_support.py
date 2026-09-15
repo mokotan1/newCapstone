@@ -12,10 +12,10 @@ _PLAYER_MSG_ALL_ENGINES_FAILED: dict[str, str] = {
     "en": "All AI engines failed",
 }
 
-_PLAYER_MSG_API_KEY_REQUIRED: dict[str, str] = {
-    "ko": "API 키 설정 필요",
-    "ja": "APIキーの設定が必要です",
-    "en": "API key configuration required",
+_PLAYER_MSG_ENGINE_UNAVAILABLE: dict[str, str] = {
+    "ko": "로컬 AI 엔진이 준비되지 않았습니다",
+    "ja": "ローカルAIエンジンの準備ができていません",
+    "en": "Local AI engine is not ready",
 }
 
 _PLAYER_MSG_RATE_LIMIT: dict[str, str] = {
@@ -69,10 +69,15 @@ def response_language_instruction(locale: str) -> str:
     return _RESPONSE_LANGUAGE_INSTRUCTION[key]
 
 
-def api_key_required_message(locale: str = _DEFAULT_LOCALE) -> str:
-    """Player-facing HTTP detail when no AI provider API keys are configured."""
+def local_engine_unavailable_message(locale: str = _DEFAULT_LOCALE) -> str:
+    """Player-facing HTTP detail when the local chat engine is not bound."""
     key = normalize_locale(locale)
-    return _PLAYER_MSG_API_KEY_REQUIRED[key]
+    return _PLAYER_MSG_ENGINE_UNAVAILABLE[key]
+
+
+def api_key_required_message(locale: str = _DEFAULT_LOCALE) -> str:
+    """Compatibility alias; cloud API keys are not a runtime requirement."""
+    return local_engine_unavailable_message(locale)
 
 
 def all_engines_failed_message(locale: str = _DEFAULT_LOCALE) -> str:

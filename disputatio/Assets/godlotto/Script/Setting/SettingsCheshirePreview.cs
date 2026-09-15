@@ -286,10 +286,13 @@ public sealed class SettingsCheshirePreview : MonoBehaviour, IChatHttpCallbacks
     IEnumerator CoPollLocalAiReady()
     {
         string chatUrl = ServerConfig.GetOrCreate().ChatUrl;
-        _localAiReady = !LocalAiReadiness.RequiresLoopbackRuntime(chatUrl);
+        bool requiresLoopback = LocalAiReadiness.RequiresLoopbackRuntime(chatUrl);
+        _localAiReady = !requiresLoopback;
         ApplyIdleStatus();
         EnsureClient();
-        while (!_localAiReady && !LocalAiReadiness.IsChatDisabled())
+        bool appliedDefaultDevice = false;
+        while (SettingsCheshirePreviewGate.ShouldKeepPolling(
+            LocalAiReadiness.IsChatDisabled(), requiresLoopback, _localAiReady))
         {
             long statusCode = 0;
             string body = "";
@@ -305,6 +308,19 @@ public sealed class SettingsCheshirePreview : MonoBehaviour, IChatHttpCallbacks
             ApplyIdleStatus();
             if (_localAiReady)
                 yield break;
+
+            if (SettingsCheshirePreviewGate.ShouldApplyDefaultDevice(
+                LocalAiReadiness.IsChatDisabled(),
+                requiresLoopback,
+                appliedDefaultDevice,
+                SettingsCheshirePreviewGate.IsServerReachable(statusCode)))
+            {
+                long applyCode = 0;
+                yield return _client.ApplyDefaultGpuSettings((code, _) => { applyCode = code; });
+                if (applyCode == 202)
+                    appliedDefaultDevice = true;
+            }
+
             yield return new WaitForSecondsRealtime(2f);
         }
 

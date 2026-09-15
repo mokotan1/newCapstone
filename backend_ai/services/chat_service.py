@@ -197,6 +197,7 @@ class ChatService:
         elif (
             self._app_settings is not None
             and request.is_dialogue_only
+            and request.rag_profile is None
             and self._app_settings.dialogue_max_tokens > 0
         ):
             cap = min(cap, self._app_settings.dialogue_max_tokens)

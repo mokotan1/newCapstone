@@ -5,7 +5,7 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: capstone
-        sync: false
-      - key: GOOGLE_API_KEY
+      - key: AI_PROVIDER
+        value: local
+      - key: CHAT_API_TOKEN
         sync: false

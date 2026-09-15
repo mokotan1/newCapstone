@@ -29,9 +29,20 @@ public class ServerConfig : ScriptableObject
     [SerializeField] private string chatApiToken = "";
 
     public bool UseLocalLoopback => useLocalLoopback;
-    public string ChatUrl => useLocalLoopback ? LocalLoopbackChatUrl : chatUrl;
+    public string RawChatUrl => useLocalLoopback ? LocalLoopbackChatUrl : chatUrl;
+    public string ChatUrl => LocalAiEndpointResolver.ResolveChatUrl(
+        RawChatUrl, LocalAiSessionStore.TryLoadCurrent());
     public bool BypassTlsCertificate => bypassTlsCertificate;
-    public string ChatApiToken => chatApiToken;
+    public string ChatApiToken
+    {
+        get
+        {
+            LocalAiSessionSnapshot session = LocalAiSessionStore.TryLoadCurrent();
+            if (session != null && !string.IsNullOrEmpty(session.Token))
+                return session.Token;
+            return chatApiToken;
+        }
+    }
 
     internal void ApplyChatEndpointForTest(bool useLocalLoopback, string chatUrl)
     {

@@ -8,8 +8,7 @@
 2. `.env.example` 을 복사해 `.env` 생성  
    - Windows: `copy .env.example .env`  
    - macOS/Linux: `cp .env.example .env`
-3. `GROQ_API_KEY`, `GOOGLE_API_KEY` 등 필요한 값을 채움
-   - 운영에서 채팅 API를 보호하려면 `CHAT_API_TOKEN` 도 채우고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춤
+3. 로컬 추론은 `AI_PROVIDER=local` 이 기본입니다. 운영에서 채팅 API를 보호하려면 `CHAT_API_TOKEN` 도 채우고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춤
 4. 서버 실행: `uvicorn main:app --host 0.0.0.0 --port 8000` (또는 `python main.py`)
 
 Windows에서 **클라우드 키 없이** 체셔 로컬 대사를 쓰려면 `AI_PROVIDER=local` 과 `.\scripts\install_local_ai.ps1` 을 사용하고 FastAPI는 `127.0.0.1:8000` 에만 바인딩합니다. 자세한 내용: [README.md](README.md) 의 로컬 Gemma 4 E2B 절, `installer/licenses/NOTICE.md`.
@@ -22,12 +21,11 @@ Windows에서 **클라우드 키 없이** 체셔 로컬 대사를 쓰려면 `AI_
   `docker compose up --build -d`  
   (같은 폴더의 `docker-compose.yml` 사용)
 - **환경 변수만:** 이미지에 키를 넣지 말고 실행 시 전달  
-  `docker run -e GROQ_API_KEY=... -e GOOGLE_API_KEY=... -p 8000:8000 <이미지>`
+  `docker run -e AI_PROVIDER=local -e CHAT_API_TOKEN=... -p 8000:8000 <이미지>`
 
 ## 3. EC2·클라우드 (운영)
 
-- 인스턴스/컨테이너의 **환경 변수**에 `GROQ_API_KEY`, `GOOGLE_API_KEY` 설정  
-  (AWS Systems Manager Parameter Store, Secrets Manager, 호스팅 패널의 Env 설정 등)
+- 인스턴스/컨테이너의 **환경 변수**에 `AI_PROVIDER=local` 설정. 모델 런타임은 게임 Supervisor 패키지 경로를 사용합니다.
 - 운영에서 공개 API로 열 경우 `CHAT_API_TOKEN` 설정 권장
 - `.env` 파일을 서버에만 두고 권한 제한 (선택)
 
@@ -35,10 +33,8 @@ Windows에서 **클라우드 키 없이** 체셔 로컬 대사를 쓰려면 `AI_
 
 | 이름 | 용도 |
 |------|------|
-| `GROQ_API_KEY` | Groq (우선) |
-| `GOOGLE_API_KEY` | Gemini 폴백 |
 | `CHAT_API_TOKEN` | 선택: `/chat`, `/chat/stream` 보호용 공유 토큰 |
-| `capstone` | 레거시 Groq 키 (`GROQ_API_KEY` 가 비었을 때만) |
+| `AI_PROVIDER` | `local` |
 
 키는 **절대** 저장소에 넣지 말고, 위 경로로만 배포하세요.
 
@@ -53,7 +49,7 @@ CI 가 main 에 머지될 때마다 다음 두 태그로 이미지를 푸시합�
 
 ```bash
 docker pull ghcr.io/<owner>/newcapstone-ai:latest
-docker run -e GROQ_API_KEY=... -e GOOGLE_API_KEY=... -e CHAT_API_TOKEN=... -p 8000:8000 \
+docker run -e AI_PROVIDER=local -e CHAT_API_TOKEN=... -p 8000:8000 \
   ghcr.io/<owner>/newcapstone-ai:latest
 ```
 

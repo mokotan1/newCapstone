@@ -47,15 +47,18 @@ class FakeEngineHost:
         self.warmup_ok = True
         self.warmup_backend: EffectiveBackend = "cpu"
         self.start_should_fail = False
+        self.open_ports: set[int] = set()
         self._warmup_override = None
 
     def is_port_open(self, port: int) -> bool:
-        return self.port_open
+        return self.port_open or port in self.open_ports
 
     def make_provider(self, kind: EngineKind, port: int) -> FakeProvider:
         return FakeProvider(f"external-{kind}:{port}")
 
     def start(self, kind: EngineKind, port: int) -> OwnedEngine:
+        if self.is_port_open(port):
+            raise RuntimeError("runtime_already_running")
         self.calls.starts.append(kind)
         if self.start_should_fail:
             raise RuntimeError("engine_start_failed")

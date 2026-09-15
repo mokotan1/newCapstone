@@ -73,9 +73,11 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
     {
         _historyManager = new ChatHistoryManager(AppendCommonChesterVoiceBlock);
         _httpClient = new ChatHttpClient(
-            () => !string.IsNullOrEmpty(localServerUrl)
-                ? localServerUrl
-                : ServerConfig.GetOrCreate().ChatUrl,
+            () => LocalAiEndpointResolver.ResolveChatUrl(
+                string.IsNullOrEmpty(localServerUrl)
+                    ? ServerConfig.GetOrCreate().RawChatUrl
+                    : localServerUrl,
+                LocalAiSessionStore.TryLoadCurrent()),
             this,
             _historyManager);
 
@@ -86,9 +88,11 @@ public abstract class BaseChatbot : MonoBehaviour, IChatHttpCallbacks
         if (userInputField != null && RegisterInputFieldSubmitListener)
             userInputField.onSubmit.AddListener(OnInputFieldSubmit);
 
-        string chatUrl = !string.IsNullOrEmpty(localServerUrl)
-            ? localServerUrl
-            : ServerConfig.GetOrCreate().ChatUrl;
+        string chatUrl = LocalAiEndpointResolver.ResolveChatUrl(
+            string.IsNullOrEmpty(localServerUrl)
+                ? ServerConfig.GetOrCreate().RawChatUrl
+                : localServerUrl,
+            LocalAiSessionStore.TryLoadCurrent());
         _localAiReady = !LocalAiReadiness.RequiresLoopbackRuntime(chatUrl);
         if (!_localAiReady)
             StartCoroutine(CoPollLocalAiReady());

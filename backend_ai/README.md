@@ -3,12 +3,12 @@
 ## 프로젝트 개요
 
 - **목적**: Unity 게임 `newCapstone`의 AI 챗봇용 HTTP API.
-- **AI 엔진**: Groq(우선), Gemini(폴백).
+- **AI 엔진**: 로컬 LiteRT-LM (Gemma 4 E2B). 외부 Groq/Gemini 경로는 없습니다.
 - **프레임워크**: FastAPI, uvicorn.
 
-## 새 PC / 클론 직후 필수 설정 (API 키)
+## 새 PC / 클론 직후 필수 설정
 
-API 키는 **Git에 올리지 않습니다**. 다른 컴퓨터에서는 반드시 아래를 한 번 실행하세요.
+API 키는 필요 없습니다. 세션 토큰은 Supervisor가 생성합니다.
 
 ```bash
 cd backend_ai
@@ -16,15 +16,13 @@ copy .env.example .env
    # macOS/Linux: cp .env.example .env
 ```
 
-`.env` 파일을 열어 `GROQ_API_KEY`, `GOOGLE_API_KEY` 를 입력합니다.  
-운영에서 `/chat` 호출을 보호하려면 `CHAT_API_TOKEN` 도 입력하고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춥니다.  
-(레거시로 `capstone` 이름만 쓰는 경우도 `.env.example` 주석 참고.)
+운영에서 `/chat` 호출을 보호하려면 `CHAT_API_TOKEN` 을 입력하고 Unity `ServerConfig`의 토큰과 같은 값으로 맞춥니다. Editor·Player 자동 실행은 Supervisor가 세션 토큰을 넣습니다.
 
 서버 실행:
 
 ```bash
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 `config`는 **`backend_ai` 폴더의 `.env`** 를 자동으로 읽습니다 (작업 디렉터리와 무관).
@@ -37,11 +35,9 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 | 변수 | 설명 |
 |------|------|
-| `GROQ_API_KEY` | Groq API 키 (권장) |
-| `GOOGLE_API_KEY` | Google AI Studio (Gemini) 폴백 |
 | `CHAT_API_TOKEN` | 선택: 설정 시 `/chat`, `/chat/stream` 요청에 동일 토큰 필요 |
-| `AI_PROVIDER` | `cloud`(기본) 또는 `local` (LiteRT-LM Gemma 4 E2B) |
-| `capstone` | 예전 Groq 키 변수명 (`GROQ_API_KEY` 가 비었을 때만 사용) |
+| `AI_PROVIDER` | `local` (LiteRT-LM Gemma 4 E2B). 클라우드 provider는 없습니다 |
+| `LOCAL_AI_CONTROL_TOKEN` | 루프백 `/local-ai/*` 제어 토큰 |
 
 ## API
 
@@ -100,7 +96,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
    `acceptable_answers` 는 `|` 로 여러 정답 표현을 구분합니다.
 2. 검증: `python scripts/validate_quiz_bank.py`
 3. 긴 해설·원문은 **`data/tutor_rag/*.md`** (또는 `.txt`)에 추가합니다.
-4. 임베딩 인덱스 재생성 (**`GOOGLE_API_KEY` 필요**):
+4. 임베딩 인덱스 재생성 (로컬 `local-hash-v1`, 외부 API 키 불필요):
 
    ```bash
    cd backend_ai

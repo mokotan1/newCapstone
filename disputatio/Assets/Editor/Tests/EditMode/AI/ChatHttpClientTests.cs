@@ -134,6 +134,12 @@ public class ChatHttpClientTests
         Assert.AreEqual("Bearer secret-token", headerValue);
     }
 
+    [Test]
+    public void OverallTimeoutSeconds_MatchesSpecClientBudget()
+    {
+        Assert.AreEqual(155, ChatHttpClient.OverallTimeoutSeconds);
+    }
+
     // ---------------------------------------------------------------
     //  Constructor validation
     // ---------------------------------------------------------------

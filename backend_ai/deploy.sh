@@ -10,8 +10,7 @@
 #   동작: (선택)git 체크아웃 → .env·필수키 검증 → logs/ 보장 →
 #         docker compose up --build -d → 헬스체크 → 직전 SHA 기록(롤백용)
 #
-#   전제: backend_ai/.env 에 GROQ_API_KEY 또는 GOOGLE_API_KEY 가 채워져 있어야 한다.
-#         (.env 는 커밋 대상이 아니며 서버에서 직접 관리한다.)
+#   전제: 로컬 LiteRT. 선택적으로 CHAT_API_TOKEN 으로 /chat 을 보호한다.
 set -euo pipefail
 
 # --- 설정 (매직넘버 제거 / 환경변수로 덮어쓰기 가능) ---
@@ -40,11 +39,7 @@ echo "==> 배포 커밋: ${DEPLOY_SHA}"
 
 # --- 1) .env 및 필수 키 검증 (fail-fast) ---
 if [ ! -f .env ]; then
-  echo "ERROR: backend_ai/.env 가 없습니다. 'cp .env.example .env' 후 키를 채우세요." >&2
-  exit 1
-fi
-if ! grep -Eq '^(GROQ_API_KEY|GOOGLE_API_KEY)=.+' .env; then
-  echo "ERROR: .env 에 GROQ_API_KEY 또는 GOOGLE_API_KEY 중 하나는 설정되어야 합니다." >&2
+  echo "ERROR: backend_ai/.env 가 없습니다. 'cp .env.example .env' 후 AI_PROVIDER=local 을 확인하세요." >&2
   exit 1
 fi
 

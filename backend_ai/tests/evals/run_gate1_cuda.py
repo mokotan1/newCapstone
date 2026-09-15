@@ -22,8 +22,11 @@ from tools.registry import ToolRegistry
 
 
 async def run(root: Path, output: Path, port: int) -> None:
-    settings = Settings(ai_provider="local", groq_api_key="", google_api_key="",
-                        local_ai_cuda_dir=str(root), local_ai_base_url=f"http://127.0.0.1:{port}")
+    settings = Settings(
+        ai_provider="local",
+        local_ai_cuda_dir=str(root),
+        local_ai_base_url=f"http://127.0.0.1:{port}",
+    )
     host = ProcessEngineHost(settings)
     engine = host.start("cuda", port)
     report: dict[str, object] = {"runtime": "llama.cpp-b10852-cuda-12.4", "port": port,

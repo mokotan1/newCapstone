@@ -60,9 +60,7 @@ async def _run(settings: Settings, cases_path: Path, limit: int) -> int:
         print(f"Refusing: local runtime not ready ({status.error}).")
         return 2
 
-    primary, _unused_cloud_fallback = build_chat_providers(
-        settings.model_copy(update={"groq_api_key": "", "google_api_key": ""})
-    )
+    primary, _unused_fallback = build_chat_providers(settings)
     if primary is None:
         print("Refusing: local LiteRT provider was not constructed.")
         return 2

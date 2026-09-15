@@ -27,6 +27,9 @@ from services.local_ai.types import (
 )
 
 DEFAULT_HEALTH_POLL_INTERVAL_S = 2.0
+MAX_ACTIVE_LEASES = 1
+MAX_QUEUED_LEASES = 2
+QUEUE_WAIT_SECONDS = 30.0
 
 
 def _retry_unavailable(detail: str) -> HTTPException:
@@ -93,6 +96,8 @@ class LocalRuntimeManager:
         self._owned: OwnedEngine | None = None
         self._failure_fingerprint: str | None = None
         self._leases = 0
+        self._queued = 0
+        self._infer_sem = asyncio.Semaphore(MAX_ACTIVE_LEASES)
         self._lease_zero = asyncio.Event()
         self._lease_zero.set()
         self._transition = asyncio.Lock()
@@ -217,6 +222,15 @@ class LocalRuntimeManager:
             raise _retry_unavailable("runtime_unavailable")
         if self._owned is None:
             raise _retry_unavailable("runtime_unavailable")
+        if self._leases + self._queued >= MAX_ACTIVE_LEASES + MAX_QUEUED_LEASES:
+            raise HTTPException(status_code=429, detail="inference_queue_full")
+        self._queued += 1
+        try:
+            await asyncio.wait_for(self._infer_sem.acquire(), timeout=QUEUE_WAIT_SECONDS)
+        except TimeoutError as exc:
+            raise HTTPException(status_code=504, detail="queue_timeout") from exc
+        finally:
+            self._queued = max(0, self._queued - 1)
         self._leases += 1
         self._lease_zero.clear()
         return ProviderLease(self, self._owned.provider)
@@ -225,6 +239,7 @@ class LocalRuntimeManager:
         self._leases = max(0, self._leases - 1)
         if self._leases == 0:
             self._lease_zero.set()
+        self._infer_sem.release()
 
     async def recover_if_engine_died(self) -> None:
         if self._owned is None or not self._managed:
@@ -316,11 +331,20 @@ class LocalRuntimeManager:
         self._state = "starting"
         self._effective = "unknown"
         port = self._cuda_port if kind == "cuda" else self._litert_port
-        try:
-            engine = self._host.start(kind, port)
-        except (OSError, RuntimeError):
-            self._state = "failed"
-            return False
+        if self._host.is_port_open(port):
+            engine = OwnedEngine(
+                kind=kind,
+                pid=0,
+                port=port,
+                provider=self._host.make_provider(kind, port),
+                started_by_manager=False,
+            )
+        else:
+            try:
+                engine = self._host.start(kind, port)
+            except (OSError, RuntimeError):
+                self._state = "failed"
+                return False
         self._owned = engine
         self._managed = engine.started_by_manager
         self._configured = "gpu" if kind in {"litert_gpu", "cuda"} else "cpu"
@@ -336,7 +360,10 @@ class LocalRuntimeManager:
                 self._failure_fingerprint = self._hardware.fingerprint or "gpu"
             return False
         if kind in {"litert_gpu", "cuda"}:
-            if warmup.effective_backend != "gpu":
+            gpu_confirmed = warmup.effective_backend == "gpu" or (
+                not engine.started_by_manager and warmup.ok
+            )
+            if not gpu_confirmed:
                 await self._stop_owned()
                 self._state = "failed"
                 self._failure_fingerprint = self._hardware.fingerprint or "gpu"

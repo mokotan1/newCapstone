@@ -4,6 +4,7 @@ import asyncio
 import re
 import socket
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import IO
@@ -70,6 +71,8 @@ class ProcessEngineHost:
             )
         elif kind == "litert_cpu":
             python = self._settings.local_ai_litert_python
+            if not python or not Path(python).is_file():
+                python = sys.executable
             if not python or not Path(python).is_file():
                 raise RuntimeError("local_ai_litert_python_not_configured")
             config = write_game_runtime_config(

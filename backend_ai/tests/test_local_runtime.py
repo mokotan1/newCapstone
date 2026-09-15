@@ -11,8 +11,6 @@ from local_runtime import (
     build_chat_providers,
     check_local_runtime,
 )
-from providers.gemini_provider import GeminiProvider
-from providers.groq_provider import GroqProvider
 from providers.litert_provider import LiteRTProvider
 
 
@@ -79,25 +77,21 @@ def test_build_chat_providers_local_without_cloud_keys() -> None:
     assert primary._top_k == 64
 
 
-def test_build_chat_providers_local_keeps_cloud_fallback() -> None:
+def test_build_chat_providers_local_never_uses_cloud_keys() -> None:
     primary, fallback = build_chat_providers(
-        _settings(google_api_key="dev-gemini"),
+        _settings(google_api_key="dev-gemini", groq_api_key="g"),
     )
     assert isinstance(primary, LiteRTProvider)
-    assert isinstance(fallback, GeminiProvider)
-
-
-def test_build_chat_providers_cloud_requires_keys() -> None:
-    primary, fallback = build_chat_providers(_settings(ai_provider="cloud"))
-    assert primary is None
     assert fallback is None
+    assert primary.name != "groq"
+    assert primary.name != "gemini"
 
 
-def test_build_chat_providers_cloud_uses_groq() -> None:
+def test_build_chat_providers_ignores_cloud_mode() -> None:
     primary, fallback = build_chat_providers(
         _settings(ai_provider="cloud", groq_api_key="g"),
     )
-    assert isinstance(primary, GroqProvider)
+    assert isinstance(primary, LiteRTProvider)
     assert fallback is None
 
 

@@ -65,6 +65,38 @@ async def test_gpu_with_cuda_pin_starts_cuda_sidecar(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_gpu_adopts_open_cuda_port_without_spawn(tmp_path: Path) -> None:
+    host = FakeEngineHost()
+    host.open_ports = {9380}
+    host.warmup_backend = "gpu"
+    hw = HardwareInfo(nvidia_available=True, vram_mib=8188, fingerprint="gpu-a")
+    manager = _manager(tmp_path, host, hardware=hw, cuda_manifest_pinned=True)
+    await manager.apply_settings(mode="gpu")
+    assert host.calls.starts == []
+    snap = manager.snapshot()
+    assert snap.state == "ready"
+    assert snap.effective_backend == "gpu"
+    assert snap.model_available is True
+    assert snap.fallback_reason is None
+
+
+@pytest.mark.asyncio
+async def test_adopted_cuda_is_ready_when_warmup_cannot_read_owned_log(
+    tmp_path: Path,
+) -> None:
+    host = FakeEngineHost()
+    host.open_ports = {9380}
+    host.warmup_backend = "unknown"
+    hw = HardwareInfo(nvidia_available=True, vram_mib=8188, fingerprint="gpu-a")
+    manager = _manager(tmp_path, host, hardware=hw, cuda_manifest_pinned=True)
+    await manager.apply_settings(mode="gpu")
+    snap = manager.snapshot()
+    assert snap.state == "ready"
+    assert snap.effective_backend == "gpu"
+    assert snap.model_available is True
+
+
+@pytest.mark.asyncio
 async def test_gpu_warmup_failure_falls_back_to_cpu_once(tmp_path: Path) -> None:
     host = FakeEngineHost()
     hw = HardwareInfo(nvidia_available=True, vram_mib=8192, fingerprint="gpu-a")
@@ -178,3 +210,29 @@ async def test_health_poll_recovers_idle_gpu_without_chat(tmp_path: Path) -> Non
         assert "litert_cpu" in host.calls.starts
     finally:
         await manager.stop_health_poll()
+
+
+@pytest.mark.asyncio
+async def test_fourth_lease_is_rejected_with_429(tmp_path: Path) -> None:
+    host = FakeEngineHost()
+    manager = _manager(tmp_path, host)
+    await manager.apply_settings(mode="cpu")
+    first = await manager.admit_and_acquire()
+    waiter_one = asyncio.create_task(manager.admit_and_acquire())
+    waiter_two = asyncio.create_task(manager.admit_and_acquire())
+    await asyncio.sleep(0.05)
+    try:
+        await manager.admit_and_acquire()
+        raise AssertionError("expected 429")
+    except HTTPException as exc:
+        assert exc.status_code == 429
+    await first.aclose()
+    finished, pending = await asyncio.wait(
+        {waiter_one, waiter_two},
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+    second = next(iter(finished)).result()
+    await second.aclose()
+    third = await next(iter(pending))
+    await third.aclose()
+

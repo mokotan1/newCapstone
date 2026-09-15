@@ -7,10 +7,9 @@ from dataclasses import dataclass
 from typing import Any
 
 import httpx
+
 from config import Settings
 from providers.base import AIProvider
-from providers.gemini_provider import GeminiProvider
-from providers.groq_provider import GroqProvider
 from providers.litert_provider import LiteRTProvider
 
 logger = logging.getLogger(__name__)
@@ -31,23 +30,7 @@ class LocalRuntimeStatus:
 def build_chat_providers(
     settings: Settings,
 ) -> tuple[AIProvider | None, AIProvider | None]:
-    """Select primary/fallback providers. Local mode does not require cloud keys."""
-    cloud_primary = (
-        GroqProvider(api_key=settings.groq_api_key, model=settings.default_model_groq)
-        if settings.groq_api_key
-        else None
-    )
-    cloud_fallback = (
-        GeminiProvider(api_key=settings.google_api_key, model=settings.default_model_gemini)
-        if settings.google_api_key
-        else None
-    )
-
-    if settings.ai_provider != "local":
-        first = cloud_primary or cloud_fallback
-        second = cloud_fallback if cloud_primary else None
-        return first, second
-
+    """Always use the local LiteRT contract. Cloud keys never select a provider."""
     local = LiteRTProvider(
         base_url=settings.local_ai_base_url,
         model=settings.local_ai_model,
@@ -56,8 +39,7 @@ def build_chat_providers(
         top_p=settings.dialogue_top_p,
         top_k=settings.dialogue_top_k,
     )
-    fallback = cloud_primary or cloud_fallback
-    return local, fallback
+    return local, None
 
 
 def check_local_runtime(
