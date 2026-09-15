@@ -443,8 +443,6 @@ async def test_dialogue_only_replaces_json_reply_with_fallback() -> None:
 
 @pytest.mark.asyncio
 async def test_dialogue_only_stream_forwards_deltas_live_and_drops_tools() -> None:
-    from services.dialogue_guard import dialogue_fallback_line
-
     events = [
         SSEEvent(type="text_delta", content="첫 문장이다. "),
         SSEEvent(type="text_delta", content="둘째다. 셋째다."),
@@ -467,5 +465,5 @@ async def test_dialogue_only_stream_forwards_deltas_live_and_drops_tools() -> No
     done = [e for e in collected if e.type == "done"]
 
     assert deltas == ["첫 문장이다. ", "둘째다. 셋째다."]
-    assert done[-1].full_text == dialogue_fallback_line("ko")
+    assert done[-1].full_text == "첫 문장이다. 둘째다."
     assert not any(e.type == "function_call" for e in collected)

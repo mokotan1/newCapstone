@@ -347,7 +347,7 @@ flowchart LR
 | 모듈 | 역할 |
 |------|------|
 | `ChatService` | 단일 로컬 프로바이더(`primary`)만 받는다. 클라우드 2차 프로바이더(`fallback`) 인자는 2026-09-15 제거. 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
-| `dialogue_guard` | 체셔 1–2문장 대사 sanitize (빈/JSON/장문 → 로케일 폴백) |
+| `dialogue_guard` | 체셔 대사 sanitize (빈/JSON → 로케일 폴백, 장문은 마침표 기준 앞 2문장 유지. `!`/`?`/말버릇은 문장 수로 세지 않음) |
 | `sse_format` | `data: {JSON}\\n\\n` SSE 프레임 |
 | `local_runtime` | `build_chat_provider` → LiteRT 단일 프로바이더 (`AI_PROVIDER=local`), 루프백 `GET /v1/models` 헬스. FastAPI는 런타임을 spawn하지 않는다 (`LOCAL_AI_START_COMMAND` 경로 제거; 기동은 Supervisor 소유) |
 | `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |

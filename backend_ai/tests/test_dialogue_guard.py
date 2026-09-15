@@ -17,9 +17,19 @@ def test_json_or_tool_like_reply_uses_fallback() -> None:
     assert sanitize_dialogue_reply("[emote](happy)", locale="ja") == dialogue_fallback_line("ja")
 
 
-def test_more_than_two_sentences_uses_fallback() -> None:
+def test_more_than_two_period_sentences_keeps_first_two() -> None:
     overlong = "첫 문장이다. 둘째 문장이다. 셋째 문장이다."
-    assert sanitize_dialogue_reply(overlong, locale="ko") == dialogue_fallback_line("ko")
+    assert sanitize_dialogue_reply(overlong, locale="ko") == "첫 문장이다. 둘째 문장이다."
+
+
+def test_catchphrase_after_two_periods_is_not_replaced() -> None:
+    line = "여긴 침실이야. 침대 아래를 봐. 깍!"
+    assert sanitize_dialogue_reply(line, locale="ko") == line
+
+
+def test_exclamation_opener_does_not_count_as_a_period_sentence() -> None:
+    line = "켁! 문을 두드려. 깍!"
+    assert sanitize_dialogue_reply(line, locale="ko") == line
 
 
 def test_one_or_two_sentences_pass_through() -> None:

@@ -7,7 +7,9 @@ import re
 from services.locale_support import normalize_locale
 
 _MAX_SENTENCES = 2
-_SENTENCE_SPLIT = re.compile(r"[.!?。！？]+")
+# ChesterVoiceCommon counts sentences by period only. `!`/`?` are mannerisms
+# (`깍!`, `켁!`) and must not trip the length guard.
+_PERIOD = re.compile(r"[.。]+")
 _TOOL_MARKERS = ("give_hint", "emote", "update_quiz")
 
 _DIALOGUE_FALLBACK: dict[str, str] = {
@@ -23,14 +25,15 @@ def dialogue_fallback_line(locale: str = "ko") -> str:
 
 
 def sanitize_dialogue_reply(text: str, locale: str = "ko") -> str:
-    """Return ``text`` if it is a 1–2 sentence player line; otherwise a locale fallback."""
+    """Keep a 1–2 period-sentence player line; clip extras; fallback for empty/JSON."""
     stripped = (text or "").strip()
     if not stripped:
         return dialogue_fallback_line(locale)
     if _looks_like_json_or_tool(stripped):
         return dialogue_fallback_line(locale)
     if _sentence_count(stripped) > _MAX_SENTENCES:
-        return dialogue_fallback_line(locale)
+        clipped = _first_n_period_sentences(stripped, _MAX_SENTENCES)
+        return clipped if clipped else dialogue_fallback_line(locale)
     return stripped
 
 
@@ -56,5 +59,14 @@ def _looks_like_json_or_tool(text: str) -> bool:
 
 
 def _sentence_count(text: str) -> int:
-    parts = [part.strip() for part in _SENTENCE_SPLIT.split(text) if part.strip()]
-    return len(parts)
+    if not text:
+        return 0
+    n = len(_PERIOD.findall(text))
+    return n if n > 0 else 1
+
+
+def _first_n_period_sentences(text: str, n: int) -> str:
+    for count, match in enumerate(_PERIOD.finditer(text), start=1):
+        if count >= n:
+            return text[: match.end()].strip()
+    return text.strip()
