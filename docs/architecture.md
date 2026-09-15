@@ -317,7 +317,8 @@ flowchart LR
 
 **프롬프트 Resources** (`Assets/Resources/CheshirePrompts/{ko,ja,en}/`):
 
-- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`, `ParrotPrompt`
+- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`
+- `Resources/` 루트에는 프롬프트 `.txt`를 두지 않는다 (2026-09-15에 `CheshirePrompts/ko/`와 중복이던 루트 사본 제거)
 - 선택 키: `HintPolicy_{Novice,Intermediate,Expert}`, `Fragment_*` (세 locale 모두 비어 있지 않은 UTF-8)
 - 검증: `backend_ai/scripts/validate_cheshire_prompts.py` · EditMode `CheshirePromptCatalogTests`
 
@@ -345,10 +346,10 @@ flowchart LR
 
 | 모듈 | 역할 |
 |------|------|
-| `ChatService` | 로컬 LiteRT 전용, 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
+| `ChatService` | 단일 로컬 프로바이더(`primary`)만 받는다. 클라우드 2차 프로바이더(`fallback`) 인자는 2026-09-15 제거. 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
 | `dialogue_guard` | 체셔 대사 sanitize (빈/JSON → 로케일 폴백, 장문은 마침표 기준 앞 2문장 유지. `!`/`?`/말버릇은 문장 수로 세지 않음) |
 | `sse_format` | `data: {JSON}\\n\\n` SSE 프레임 |
-| `local_runtime` | LiteRT primary (`AI_PROVIDER=local`), 루프백 `GET /v1/models` |
+| `local_runtime` | `build_chat_provider` → LiteRT 단일 프로바이더 (`AI_PROVIDER=local`), 루프백 `GET /v1/models` 헬스. FastAPI는 런타임을 spawn하지 않는다 (`LOCAL_AI_START_COMMAND` 경로 제거; 기동은 Supervisor 소유) |
 | `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |
 | `TutorRAGService` | `tutor_rag_index.json` 로컬 `local-hash-v1` 검색; Google 임베딩 인덱스는 준비 실패. chunk `locale` 메타가 있으면 필터, 없으면 전체·없으면 KO 폴백 |
 | `QuizBank` | CSV 로드; multi-locale 컬럼(`question_*`, `acceptable_answers_*`, `reference_snippet_*`; 빈 셀 → KO); `format_bank_context_block` chrome locale별 |
@@ -466,7 +467,7 @@ graph TB
    - 단순 복도/방: `RoomInteractionController` 또는 `CorridorEntranceController` 컴포넌트 + Inspector `InteractionRoute[]`, `BlockOutcome[]`
    - 특수 퍼즐: `RoomInteractionController` 상속 (예: `WifeRoomPuzzleController.cs`)
 6. **복귀 경로**: `BackNavigator.TryResolveFixedReturnScene`에 case 추가 또는 Fungus `PrevScene` 설정
-7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions` + `RoomUnlockCheckpointTrigger` on Fungus 이벤트
+7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions`에 정의 추가 후 해금 지점에서 `RoomUnlockCheckpointService.SaveRoomUnlock(unlockKey)` 호출 (예: `WorldItemDropZone`)
 8. **EditMode 테스트** 추가: `Assets/Editor/Tests/EditMode/...`
 
 ### 튜토리얼 퀘스트 단계 연결
@@ -523,6 +524,7 @@ graph TB
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |
 | **Unity 공식 CLI / Pipeline** | 2026-09-10: `unity` 1.0.0-beta.5. 이 브랜치에 `com.unity.pipeline` `0.6.0-exp.1` (manifest+lock). 이 worktree `disputatio`를 6000.0.36f1로 열면 `unity status` ready, Pipeline 서버 `127.0.0.1:7800`. 공식 `qa_*` 명령은 0개. 활성 backend는 `legacy-unity-cli` | 공식 QA 이식 전 `[CliCommand]` API 확인. 기록: `.harness/official-cli-compat.md` |
+| **legacy unity-cli HTTP 포트** | 업스트림 커넥터 0.3.21은 `HttpListener`를 8090–8099만 시도하고 `Stop()`만 호출한다. 도메인 리로드마다 HTTP.sys prefix가 새면 10개 포트가 한 Unity PID에 묶이고 `Failed to start HTTP server — no available port`가 난다. 이 클론은 `Packages/com.youngwoocho02.unity-cli-connector`에 `Abort()`와 8090–8153 창을 핀한다 (`0.3.21-newcapstone.1`) | 이미 샌 리스너는 Unity Editor를 한 번 재시작해야 해제된다. 이후 리로드는 Abort로 같은 포트를 재사용해야 한다 |
 | **legacy test 결과 파싱** | NUnit XML·`Passed/Failed/Skipped` stdout은 `scripts.unity_harness.result_contract`가 분류. unity-cli 라이브 출력 형식은 Editor 연결 시 재확인 | `python -m scripts.unity_harness.classify_cli`에 실제 로그를 넣어 대조 |
 | **체셔 50케이스 eval** | 스위트·스코어러·게이트 테스트 있음. 라이브 2026-09-03 재측정(`dialogue_max_tokens=64`, `num_ctx=2048`, 스트림 가드 통과): `gemma4-e2b` / LiteRT-LM, Windows AMD64 (Intel), 50/50 유효, 폴백 0, JSON/툴 누출 0, 날조 사실 0, 완료 p50 4.9s / p95 5.6s, 첫 `text_delta`(TTFT) p50 3.7s / p95 3.7s. Groq 미사용. 한 대 측정이며 최소 사양 조사는 아님. 말끝(깍/삐약/푸드덕)은 하드 게이트가 아님 | 재측정: `cd backend_ai` 후 `AI_PROVIDER=local python -m tests.evals.run_cheshire_eval`. 게이트: 유효 ≥ 90%, 누출 0, 날조 0 |
 | **LiteRT GPU Gate 0** | 2026-09-07 이 PC 실측: RTX 4060 Ti, nvidia-smi **8188 MiB**, `litert-lm==0.16.1` + `gemma4-e2b`, 게임 전용 `--config` (`backend: gpu`), 포트 **9378**(기존 9379 외부 LiteRT는 종료하지 않음). 로그: NVIDIA 어댑터 + decode 전 노드 `LITERT_WEBGPU`, **CUDA 아님**(Direct3D 12/WebGPU), OpenCL context 실패, `libLiteRtTopKWebGpuSampler.dll` 없음. 워밍업 후 5샘플 완료 p50 **1.94s** / TTFT p50 **1.83s**(CPU 2026-09-03 완료 p50 4.9s / TTFT 3.7s보다 빠르나 8GB SLO **1s 미달**). 판정 `slo_miss`. FastAPI `gate0_passed`는 `False` | 재측정: `python -m tests.evals.run_gate0_litert_gpu --port 9378` |
@@ -530,7 +532,6 @@ graph TB
 | **Windows 게임 설치본** | `scripts/install_local_ai.ps1`·`installer/CHECKLIST.md`는 플래너. 실제 게임+런타임 패키징 설치 프로그램은 없음. Gate 1 아티팩트는 `%LOCALAPPDATA%/Disputatio/local-ai/cuda`에 동의 후 다운로드 | 패키징 파이프라인 확정 |
 | **Unity EditMode 하네스** | 이 클론에서 2026-09-15 unity-cli `ready`(Unity 6000.0.36f1). `ChatHttpClientTests` 37, `TutorQuizGraderTests` 10, `LocalAiEndpointResolverTests` 7, `ServerConfigTests` 10, `LocalAiSettingsResumeTests` 7, `SettingsCheshirePreviewGateTests` 11 통과. 다른 머신에 Unity 인스턴스가 없으면 compile/test 불가 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter ChatHttpClientTests` |
 | **Redis in prod** | `REDIS_URL` 비면 in-process rate limit (멀티 replica 부적합) — 운영 `.env` 미포함 | 서버 `/opt/newcapstone/.env` |
-| **WebGL 빌드** | `deploy/serve_webgl_brotli.py` 존재; 게임 WebGL 배포 파이프라인은 본 문서 범위에서 미검증 | 빌드 타겟·CI 확인 |
 | **Tutor RAG 인덱스 비어 있음** | `backend_ai/data/tutor_rag_index.json`이 `chunks: []` (임베딩 미생성). locale 필터는 동작하나 검색 컨텍스트는 항상 빈 결과 | `build_tutor_rag_index.py`로 인덱스 재생성 후 커밋/배포 |
 | **EN/JA 프롬프트의 KO 제어 태그** | `[진행]`, `[시스템: …]`, `[문제 은행]` 등 일부 대괄호 태그가 EN/JA 본문에 KO로 잔존 (의도적 클라이언트 주입 태그). 본문 서술은 EN/JA | Task 6 이후 주입 prefix 로컬라이즈 여부·태그 키 안정성 점검 |
 
@@ -566,4 +567,4 @@ graph TB
 
 ---
 
-*문서 버전: 저장소 조사 기준 2026-09-03 (체셔 로컬 Gemma 4 E2B·URL 이중 모드·dialogue_guard 반영). 변경 시 §8 불일치 항목부터 재검증하세요.*
+*문서 버전: 저장소 조사 기준 2026-09-15 (미사용 아키텍처 정리: ChatService 단일 프로바이더, ParrotChatbot·RoomUnlockCheckpointTrigger·루트 Resources 프롬프트 사본·WebGL 서빙 스크립트·backend_ai 온호스트 배포 스크립트 제거). 변경 시 §8 불일치 항목부터 재검증하세요.*

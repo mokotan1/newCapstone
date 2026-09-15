@@ -52,7 +52,6 @@ async def test_tutor_profile_injects_rag_block_into_system() -> None:
     fake_rag = _FakeTutorRAG()
     service = ChatService(
         primary=cap,
-        fallback=None,
         registry=_build_registry(),
         app_settings=settings,
         tutor_rag=fake_rag,
@@ -104,7 +103,6 @@ async def test_csv_grader_overrides_update_quiz_to_correct(tmp_path: Path) -> No
     ]
     service = ChatService(
         primary=_MockProvider("groq", events),
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=None,
@@ -150,7 +148,6 @@ async def test_csv_grader_override_uses_en_locale_answers(tmp_path: Path) -> Non
     ]
     service = ChatService(
         primary=_MockProvider("groq", events),
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=None,
@@ -191,7 +188,6 @@ async def test_tutor_bank_context_uses_en_question(tmp_path: Path) -> None:
     cap = _CapturingProvider("groq", events)
     service = ChatService(
         primary=cap,
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=None,
@@ -239,7 +235,6 @@ async def test_tutor_profile_caps_max_tokens() -> None:
     settings = Settings()
     service = ChatService(
         primary=cap,
-        fallback=None,
         registry=_build_registry(),
         max_tokens=512,
         app_settings=settings,
@@ -254,7 +249,6 @@ async def test_tutor_profile_caps_max_tokens() -> None:
     cap2 = _MaxTokenCaptureProvider("groq", events)
     service2 = ChatService(
         primary=cap2,
-        fallback=None,
         registry=_build_registry(),
         max_tokens=512,
         app_settings=settings,

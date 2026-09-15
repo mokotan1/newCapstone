@@ -11,7 +11,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from config import get_settings
-from local_runtime import build_chat_providers, check_local_runtime
+from local_runtime import build_chat_provider, check_local_runtime
 from models.requests import ChatRequest, TelemetryIngestRequest, TutorGradeRequest
 from models.responses import ChatResponse, TelemetryResponse, TutorGradeResponse
 from providers.base import AIProvider
@@ -50,11 +50,9 @@ runtime_manager: LocalRuntimeManager | None = None
 registry = ToolRegistry()
 registry.register_many(GAME_TOOLS)
 
-_first_available, _second_available = build_chat_providers(settings)
+_local_provider = build_chat_provider(settings)
 
-if _first_available is None:
-    logger.critical("No AI provider configured – server will reject all /chat requests")
-elif settings.ai_provider == "local":
+if settings.ai_provider == "local":
     runtime_status = check_local_runtime(settings)
     if runtime_status.error:
         logger.warning("Local AI runtime not ready: %s", runtime_status.error)
@@ -82,26 +80,21 @@ _telemetry_service: TelemetryService | None = (
     else None
 )
 
-chat_service: ChatService | None = (
-    ChatService(
-        primary=_first_available,
-        fallback=_second_available,
-        registry=registry,
-        temperature=settings.default_temperature,
-        max_tokens=settings.max_tokens,
-        app_settings=settings,
-        tutor_rag=_tutor_rag,
-        quiz_bank=_quiz_bank,
-    )
-    if _first_available
-    else None
+chat_service: ChatService | None = ChatService(
+    primary=_local_provider,
+    registry=registry,
+    temperature=settings.default_temperature,
+    max_tokens=settings.max_tokens,
+    app_settings=settings,
+    tutor_rag=_tutor_rag,
+    quiz_bank=_quiz_bank,
 )
 
 
 def service_for_provider(provider: AIProvider) -> ChatService:
     """Bind one request to its leased engine; local recovery stays local."""
     return ChatService(
-        primary=provider, fallback=None, registry=registry,
+        primary=provider, registry=registry,
         temperature=settings.default_temperature, max_tokens=settings.max_tokens,
         app_settings=settings, tutor_rag=_tutor_rag, quiz_bank=_quiz_bank,
     )

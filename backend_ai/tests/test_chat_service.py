@@ -98,7 +98,7 @@ async def test_build_messages_includes_response_language_rule_for_ja() -> None:
     provider = _CapturingProvider(
         [SSEEvent(type="done", full_text="ok")]
     )
-    service = ChatService(provider, None, ToolRegistry())
+    service = ChatService(provider, ToolRegistry())
     await service.chat(
         ChatRequest(
             prompt="hello",
@@ -123,7 +123,7 @@ async def test_build_messages_includes_response_language_rule_for_ja() -> None:
 async def test_tool_instruction_en_uses_english_markers() -> None:
     """locale=en trusted system must use EN tool-instruction prose, not KO chrome."""
     provider = _CapturingProvider([SSEEvent(type="done", full_text="ok")])
-    service = ChatService(provider, None, _build_registry())
+    service = ChatService(provider, _build_registry())
     await service.chat(
         ChatRequest(
             prompt="hello",
@@ -145,7 +145,7 @@ async def test_tool_instruction_en_uses_english_markers() -> None:
 @pytest.mark.asyncio
 async def test_cheshire_dialogue_omits_tool_instruction() -> None:
     provider = _CapturingProvider([SSEEvent(type="done", full_text="ok")])
-    service = ChatService(provider, None, _build_registry())
+    service = ChatService(provider, _build_registry())
     await service.chat(
         ChatRequest(prompt="hello", system="persona", locale="en", use_tools=True),
     )
@@ -159,7 +159,6 @@ async def test_cheshire_dialogue_omits_tool_instruction() -> None:
 async def test_stream_error_localized_for_en() -> None:
     service = ChatService(
         primary=_MockProvider("groq", should_fail=True),
-        fallback=None,
         registry=_build_registry(),
     )
     collected = [
@@ -190,7 +189,6 @@ class TestChatServiceStreaming:
         ]
         service = ChatService(
             primary=_MockProvider("groq", events),
-            fallback=_MockProvider("gemini", [SSEEvent(type="done", full_text="fallback")]),
             registry=_build_registry(),
         )
 
@@ -198,24 +196,9 @@ class TestChatServiceStreaming:
         assert any(e.type == "text_delta" and e.content == "응답" for e in collected)
         assert collected[-1].type == "done"
 
-    async def test_fallback_on_primary_failure(self):
-        fallback_events = [
-            SSEEvent(type="text_delta", content="폴백 응답"),
-            SSEEvent(type="done", full_text="폴백 응답"),
-        ]
+    async def test_provider_failure_yields_single_error_then_done(self):
         service = ChatService(
             primary=_MockProvider("groq", should_fail=True),
-            fallback=_MockProvider("gemini", fallback_events),
-            registry=_build_registry(),
-        )
-
-        collected = [e async for e in service.stream_chat(_request())]
-        assert any(e.content == "폴백 응답" for e in collected if e.type == "text_delta")
-
-    async def test_all_providers_fail_yields_error(self):
-        service = ChatService(
-            primary=_MockProvider("groq", should_fail=True),
-            fallback=_MockProvider("gemini", should_fail=True),
             registry=_build_registry(),
         )
 
@@ -223,16 +206,7 @@ class TestChatServiceStreaming:
         error_events = [e for e in collected if e.type == "error"]
         assert len(error_events) == 1
         assert "실패" in error_events[0].content
-
-    async def test_no_fallback_yields_error(self):
-        service = ChatService(
-            primary=_MockProvider("groq", should_fail=True),
-            fallback=None,
-            registry=_build_registry(),
-        )
-
-        collected = [e async for e in service.stream_chat(_request())]
-        assert any(e.type == "error" for e in collected)
+        assert collected[-1].type == "done"
 
 
 @pytest.mark.asyncio
@@ -247,7 +221,6 @@ class TestChatServiceNonStreaming:
         ]
         service = ChatService(
             primary=_MockProvider("groq", events),
-            fallback=None,
             registry=_build_registry(),
         )
 
@@ -262,7 +235,6 @@ class TestChatServiceNonStreaming:
     async def test_chat_returns_error_text_on_failure(self):
         service = ChatService(
             primary=_MockProvider("groq", should_fail=True),
-            fallback=None,
             registry=_build_registry(),
         )
 
@@ -276,7 +248,6 @@ class TestChatServiceNonStreaming:
         ]
         service = ChatService(
             primary=_MockProvider("groq", events),
-            fallback=None,
             registry=_build_registry(),
         )
 
@@ -302,7 +273,6 @@ async def test_cheshire_dialogue_never_receives_game_tool_registry() -> None:
     provider = _MockProvider("groq", events)
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
     )
 
@@ -326,7 +296,6 @@ async def test_tutor_chat_still_receives_game_tools_when_requested() -> None:
     provider = _MockProvider("groq", events)
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
     )
 
@@ -348,7 +317,7 @@ async def test_hint_rewrite_adds_trusted_policy_and_untrusted_document():
     provider = _CapturingProvider(
         [SSEEvent(type="done", full_text="병은 목마르다. 싱크대가 기억한다.")]
     )
-    service = ChatService(provider, None, ToolRegistry())
+    service = ChatService(provider, ToolRegistry())
 
     await service.chat(
         ChatRequest(
@@ -378,7 +347,7 @@ async def test_hint_rewrite_forbidden_term_falls_back():
     provider = _CapturingProvider(
         [SSEEvent(type="done", full_text="싱크대에서 열쇠를 꺼내.")]
     )
-    service = ChatService(provider, None, ToolRegistry())
+    service = ChatService(provider, ToolRegistry())
 
     result = await service.chat(
         ChatRequest(
@@ -422,7 +391,6 @@ async def test_dialogue_only_uses_dialogue_temperature() -> None:
     settings = Settings(dialogue_temperature=0.8, default_temperature=0.7)
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
         temperature=settings.default_temperature,
         app_settings=settings,
@@ -443,7 +411,6 @@ async def test_tutor_chat_keeps_default_temperature() -> None:
     settings = Settings(dialogue_temperature=0.8, default_temperature=0.7)
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
         temperature=settings.default_temperature,
         app_settings=settings,
@@ -466,7 +433,6 @@ async def test_dialogue_only_replaces_json_reply_with_fallback() -> None:
     ]
     service = ChatService(
         primary=_MockProvider("groq", events),
-        fallback=None,
         registry=_build_registry(),
     )
 
@@ -489,7 +455,6 @@ async def test_dialogue_only_stream_forwards_deltas_live_and_drops_tools() -> No
     ]
     service = ChatService(
         primary=_MockProvider("groq", events),
-        fallback=None,
         registry=_build_registry(),
     )
 

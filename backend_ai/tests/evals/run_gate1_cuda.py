@@ -37,7 +37,7 @@ async def run(root: Path, output: Path, port: int) -> None:
         print(json.dumps(report, ensure_ascii=False), flush=True)
         if not warmup.ok or warmup.effective_backend != "gpu":
             return
-        service = ChatService(primary=engine.provider, fallback=None, registry=ToolRegistry(),
+        service = ChatService(primary=engine.provider, registry=ToolRegistry(),
                               temperature=settings.default_temperature, max_tokens=settings.max_tokens,
                               app_settings=settings)
         cases = load_dialogue_cases(Path(__file__).with_name("cheshire_dialogue_cases.jsonl"))

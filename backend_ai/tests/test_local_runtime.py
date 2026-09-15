@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from unittest.mock import MagicMock
-
 import httpx
 import pytest
 
 from config import Settings
 from local_runtime import (
     LocalRuntimeStatus,
-    build_chat_providers,
+    build_chat_provider,
     check_local_runtime,
 )
 from providers.litert_provider import LiteRTProvider
@@ -19,8 +17,6 @@ def _settings(**overrides: object) -> Settings:
         "ai_provider": "local",
         "local_ai_base_url": "http://127.0.0.1:9379",
         "local_ai_model": "gemma4-e2b",
-        "groq_api_key": "",
-        "google_api_key": "",
     }
     values.update(overrides)
     return Settings(**values)
@@ -69,42 +65,15 @@ def test_dialogue_latency_budget_field_defaults() -> None:
     assert Settings.model_fields["local_ai_num_ctx"].default == 2048
 
 
-def test_build_chat_providers_local_without_cloud_keys() -> None:
-    primary, fallback = build_chat_providers(_settings())
-    assert isinstance(primary, LiteRTProvider)
-    assert fallback is None
-    assert primary._top_p == pytest.approx(0.95)
-    assert primary._top_k == 64
+def test_build_chat_provider_uses_local_litert_sampling() -> None:
+    provider = build_chat_provider(_settings())
+    assert isinstance(provider, LiteRTProvider)
+    assert provider._top_p == pytest.approx(0.95)
+    assert provider._top_k == 64
 
 
-def test_build_chat_providers_local_never_uses_cloud_keys() -> None:
-    primary, fallback = build_chat_providers(
-        _settings(google_api_key="dev-gemini", groq_api_key="g"),
-    )
-    assert isinstance(primary, LiteRTProvider)
-    assert fallback is None
-    assert primary.name != "groq"
-    assert primary.name != "gemini"
-
-
-def test_build_chat_providers_ignores_cloud_mode() -> None:
-    primary, fallback = build_chat_providers(
-        _settings(ai_provider="cloud", groq_api_key="g"),
-    )
-    assert isinstance(primary, LiteRTProvider)
-    assert fallback is None
-
-
-def test_start_local_runtime_skips_when_already_ready(monkeypatch: pytest.MonkeyPatch) -> None:
-    from local_runtime import start_local_runtime
-
-    monkeypatch.setattr(
-        "local_runtime.check_local_runtime",
-        lambda settings, client=None: LocalRuntimeStatus(True, True, None),
-    )
-    popen = MagicMock()
-    monkeypatch.setattr("local_runtime.subprocess.Popen", popen)
-
-    handle = start_local_runtime(_settings())
-    assert handle is None
-    popen.assert_not_called()
+def test_build_chat_provider_ignores_unknown_provider_mode() -> None:
+    # Legacy .env values such as AI_PROVIDER=cloud must still resolve to the local engine.
+    provider = build_chat_provider(_settings(ai_provider="cloud"))
+    assert isinstance(provider, LiteRTProvider)
+    assert provider.name not in ("groq", "gemini")

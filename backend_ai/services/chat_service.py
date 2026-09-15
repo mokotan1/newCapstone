@@ -76,12 +76,11 @@ _TOOL_INSTRUCTIONS: dict[str, str] = {
 
 
 class ChatService:
-    """Orchestrates AI provider calls with tool injection and automatic fallback."""
+    """Orchestrates local AI provider calls with tool injection and dialogue guarding."""
 
     def __init__(
         self,
         primary: AIProvider,
-        fallback: AIProvider | None,
         registry: ToolRegistry,
         temperature: float = 0.7,
         max_tokens: int = 512,
@@ -91,7 +90,6 @@ class ChatService:
         quiz_bank: QuizBank | None = None,
     ) -> None:
         self._primary = primary
-        self._fallback = fallback
         self._registry = registry
         self._temperature = temperature
         self._max_tokens = max_tokens
@@ -243,10 +241,9 @@ class ChatService:
         tools: list[dict] | None,
     ) -> AsyncIterator[SSEEvent]:
         temperature = self._temperature_for_request(request)
-        primary_err: BaseException | None = None
         try:
             max_tok = self._max_tokens_for_request(request)
-            logger.info("Attempting primary provider: %s", self._primary.name)
+            logger.info("Attempting provider: %s", self._primary.name)
             async for event in self._primary.stream_chat(
                 messages=messages,
                 tools=tools,
@@ -254,41 +251,12 @@ class ChatService:
                 max_tokens=max_tok,
             ):
                 yield event
-            return
         except Exception as exc:
-            primary_err = exc
-            logger.exception("Primary provider (%s) failed", self._primary.name)
-
-        locale = request.locale
-        all_failed = user_visible_ai_error(None, locale)
-
-        if self._fallback is None:
+            logger.exception("Provider (%s) failed", self._primary.name)
             yield SSEEvent(
                 type="error",
-                content=_user_visible_ai_error(primary_err, locale),
+                content=_user_visible_ai_error(exc, request.locale),
             )
-            yield SSEEvent(type="done", full_text="")
-            return
-
-        try:
-            max_tok = self._max_tokens_for_request(request)
-            logger.info("Falling back to: %s", self._fallback.name)
-            async for event in self._fallback.stream_chat(
-                messages=messages,
-                tools=tools,
-                temperature=temperature,
-                max_tokens=max_tok,
-            ):
-                yield event
-        except Exception as exc:
-            logger.exception("Fallback provider (%s) also failed", self._fallback.name)
-            fb_msg = _user_visible_ai_error(exc, locale)
-            final_msg = (
-                fb_msg
-                if fb_msg != all_failed
-                else _user_visible_ai_error(primary_err, locale)
-            )
-            yield SSEEvent(type="error", content=final_msg)
             yield SSEEvent(type="done", full_text="")
 
     async def _sanitize_dialogue_events(

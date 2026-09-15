@@ -1,0 +1,365 @@
+using System;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using UnityEditor;
+using UnityEngine;
+
+namespace UnityCliConnector
+{
+    /// <summary>
+    /// Lightweight HTTP server on localhost. Receives CLI commands as POST /command,
+    /// dispatches via CommandRouter, returns JSON responses.
+    /// Uses ConcurrentQueue + EditorApplication.update for main-thread marshaling.
+    /// Background editor throttling can still delay command execution.
+    /// Survives domain reloads via InitializeOnLoad.
+    /// </summary>
+    [InitializeOnLoad]
+    public static class HttpServer
+    {
+        const double AUTO_RESTART_INTERVAL = 1.0;
+        const double FAILURE_LOG_INTERVAL = 5.0;
+        static string s_LastBindError;
+
+        static HttpListener s_Listener;
+        static CancellationTokenSource s_Cts;
+        static int s_Port;
+        static SynchronizationContext s_MainContext;
+        static double s_NextStartAttemptTime;
+        static string s_LastFailureMessage;
+        static double s_LastFailureLogTime;
+        static bool s_Stopping;
+        static bool s_RestartPending;
+
+        static readonly ConcurrentQueue<WorkItem> s_Queue = new();
+
+        struct WorkItem
+        {
+            public string Command;
+            public JObject Parameters;
+            public TaskCompletionSource<object> Tcs;
+        }
+
+        static HttpServer()
+        {
+            s_MainContext = SynchronizationContext.Current;
+            Start();
+            EditorApplication.quitting += Stop;
+            AssemblyReloadEvents.beforeAssemblyReload += StopListener;
+            AssemblyReloadEvents.afterAssemblyReload += Start;
+            EditorApplication.update += ProcessQueue;
+        }
+
+        public static int Port => s_Port;
+        public static bool IsRunning => s_Listener != null && s_Listener.IsListening;
+
+        static void Start()
+        {
+            s_Stopping = false;
+            if (IsRunning) return;
+            if (s_Listener != null) StopListener();
+            s_Stopping = false;
+
+            for (var attempt = 0; attempt < HttpListenPortPolicy.MaxAttempts; attempt++)
+            {
+                var port = HttpListenPortPolicy.PortForAttempt(attempt);
+                if (TryStartOnPort(port))
+                    return;
+            }
+
+            Heartbeat.MarkStopped();
+            ScheduleRetry();
+            string lastError = string.IsNullOrEmpty(s_LastBindError) ? "unknown bind error" : s_LastBindError;
+            LogStartFailure(
+                "[UnityCliConnector] Failed to start HTTP server — no available port "
+                + $"({HttpListenPortPolicy.DefaultPort}-{HttpListenPortPolicy.LastPort}). Last error: {lastError}",
+                true);
+        }
+
+        static bool TryStartOnPort(int port)
+        {
+            try
+            {
+                var listener = new HttpListener();
+                listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+                listener.Start();
+
+                s_Listener = listener;
+                s_Port = port;
+                var cts = new CancellationTokenSource();
+                s_Cts = cts;
+                ClearRetry();
+                ClearStartFailure();
+
+                _ = ListenLoop(listener, cts);
+
+                Debug.Log("[UnityCliConnector] HTTP server started");
+                return true;
+            }
+            catch (HttpListenerException ex)
+            {
+                s_LastBindError = $"port {port}: HttpListenerException {ex.ErrorCode} {ex.Message}";
+                return false;
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                // Windows/Mono throws SocketException instead of HttpListenerException
+                s_LastBindError = $"port {port}: SocketException {ex.ErrorCode} {ex.Message}";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                ScheduleRetry();
+                LogStartFailure($"[UnityCliConnector] Failed to start HTTP server: {ex.Message}", true);
+                return false;
+            }
+        }
+
+        static void ScheduleRetry()
+        {
+            s_NextStartAttemptTime = EditorApplication.timeSinceStartup + AUTO_RESTART_INTERVAL;
+        }
+
+        static void ClearRetry()
+        {
+            s_NextStartAttemptTime = 0;
+        }
+
+        static void LogStartFailure(string message, bool error = false)
+        {
+            var now = EditorApplication.timeSinceStartup;
+            if (s_LastFailureMessage == message && now - s_LastFailureLogTime < FAILURE_LOG_INTERVAL)
+                return;
+
+            s_LastFailureMessage = message;
+            s_LastFailureLogTime = now;
+            if (error) Debug.LogError(message);
+            else Debug.LogWarning(message);
+        }
+
+        static void ClearStartFailure()
+        {
+            s_LastFailureMessage = null;
+            s_LastFailureLogTime = 0;
+        }
+
+        static void StopListener()
+        {
+            s_Stopping = true;
+            s_RestartPending = false;
+            ClearRetry();
+
+            if (s_Listener == null) return;
+
+            s_Cts?.Cancel();
+            s_Cts?.Dispose();
+            s_Cts = null;
+
+            try
+            {
+                // Abort releases HTTP.sys prefixes immediately. Stop+Close alone can leak
+                // 8090-8099 across domain reloads until "no available port".
+                s_Listener.Abort();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                s_Listener.Close();
+            }
+            catch
+            {
+            }
+
+            s_Listener = null;
+        }
+
+        static void Stop()
+        {
+            StopListener();
+            Heartbeat.MarkStopped();
+            Debug.Log("[UnityCliConnector] HTTP server stopped");
+        }
+
+        static void ForceEditorUpdate()
+        {
+            s_MainContext?.Post(_ =>
+            {
+                try { EditorApplication.QueuePlayerLoopUpdate(); }
+                catch { }
+                try { UnityEditorInternal.InternalEditorUtility.RepaintAllViews(); }
+                catch { }
+            }, null);
+        }
+
+        static void ProcessQueue()
+        {
+            if (s_RestartPending)
+            {
+                s_RestartPending = false;
+                Heartbeat.MarkStopped();
+                ScheduleRetry();
+            }
+
+            if (!IsRunning && s_NextStartAttemptTime > 0 && EditorApplication.timeSinceStartup >= s_NextStartAttemptTime)
+                Start();
+
+            while (s_Queue.TryDequeue(out var item))
+                ProcessItem(item);
+        }
+
+        static async void ProcessItem(WorkItem item)
+        {
+            try
+            {
+                var r = await CommandRouter.Dispatch(item.Command, item.Parameters);
+                item.Tcs.SetResult(r);
+            }
+            catch (Exception ex)
+            {
+                item.Tcs.SetResult(new ErrorResponse(ex.Message));
+            }
+        }
+
+        static async Task ListenLoop(HttpListener listener, CancellationTokenSource cts)
+        {
+            var ct = cts.Token;
+            try
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    if (listener == null || !listener.IsListening) break;
+
+                    try
+                    {
+                        var context = await listener.GetContextAsync();
+                        _ = HandleRequest(context);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        break;
+                    }
+                    catch (HttpListenerException)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UnityCliConnector] ListenLoop crashed: {ex.Message}");
+            }
+            finally
+            {
+                if (!ct.IsCancellationRequested && !s_Stopping && ReferenceEquals(s_Listener, listener))
+                {
+                    try
+                    {
+                        listener.Abort();
+                    }
+                    catch
+                    {
+                    }
+                    try
+                    {
+                        listener.Close();
+                    }
+                    catch
+                    {
+                    }
+                    s_Listener = null;
+                    if (ReferenceEquals(s_Cts, cts))
+                        s_Cts = null;
+                    s_RestartPending = true;
+                }
+            }
+        }
+
+        static async Task HandleRequest(HttpListenerContext context)
+        {
+            var request = context.Request;
+            var response = context.Response;
+
+            response.ContentType = "application/json";
+
+            // Block browser cross-origin requests — CLI uses Go HTTP client (not subject to CORS)
+            if (request.HttpMethod == "OPTIONS")
+            {
+                response.StatusCode = 204;
+                response.Close();
+                return;
+            }
+
+            var origin = request.Headers["Origin"];
+            if (origin != null)
+            {
+                response.StatusCode = 403;
+                var buf = Encoding.UTF8.GetBytes("{\"error\":\"Browser requests are not allowed\"}");
+                response.ContentLength64 = buf.Length;
+                await response.OutputStream.WriteAsync(buf, 0, buf.Length);
+                response.Close();
+                return;
+            }
+
+            object result;
+
+            try
+            {
+                if (request.HttpMethod == "GET" && request.Url.AbsolutePath == "/health")
+                {
+                    result = new SuccessResponse("ok", Heartbeat.HealthSnapshot());
+                }
+                else if (request.HttpMethod != "POST" || request.Url.AbsolutePath != "/command")
+                {
+                    result = new ErrorResponse($"Expected POST /command, got {request.HttpMethod} {request.Url.AbsolutePath}");
+                    response.StatusCode = 400;
+                }
+                else
+                {
+                    using var reader = new StreamReader(request.InputStream, Encoding.UTF8);
+                    var body = await reader.ReadToEndAsync();
+                    var json = JObject.Parse(body);
+
+                    var command = json["command"]?.ToString();
+                    var parameters = json["params"] as JObject;
+
+                    if (string.IsNullOrEmpty(command))
+                    {
+                        result = new ErrorResponse("Missing 'command' field");
+                        response.StatusCode = 400;
+                    }
+                    else
+                    {
+                        var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+                        s_Queue.Enqueue(new WorkItem
+                        {
+                            Command = command,
+                            Parameters = parameters,
+                            Tcs = tcs,
+                        });
+                        ForceEditorUpdate();
+                        result = await tcs.Task;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result = new ErrorResponse($"Request error: {ex.Message}");
+                response.StatusCode = 500;
+            }
+
+            var responseJson = JsonConvert.SerializeObject(result);
+            var buffer = Encoding.UTF8.GetBytes(responseJson);
+            response.ContentLength64 = buffer.Length;
+            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            response.Close();
+        }
+    }
+}

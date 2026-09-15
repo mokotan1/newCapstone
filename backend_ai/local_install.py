@@ -120,19 +120,6 @@ def build_serve_command(manifest: LocalAiManifest) -> list[str]:
     ]
 
 
-def build_fastapi_command(manifest: LocalAiManifest) -> list[str]:
-    return [
-        sys.executable,
-        "-m",
-        "uvicorn",
-        "main:app",
-        "--host",
-        manifest.loopback_host,
-        "--port",
-        str(manifest.fastapi_port),
-    ]
-
-
 def plan_install(
     manifest: LocalAiManifest,
     *,
