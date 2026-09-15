@@ -299,7 +299,7 @@ flowchart LR
 | `LocalAiControlApi` | 루프백 전용 `/local-ai/*` URL·JSON·control.token 경로. 기본 요청 장치는 GPU(CUDA 경로). 챗봇·씬은 프로세스 spawn 없음 |
 | `LocalAiRuntimeHost` / `LocalAiEditorBootstrap` / `LocalAiPlayerBootstrap` | 공통 Supervisor만 시작·재연결. Job handle은 Unity 도메인에 두지 않음. batchmode 자동 시작 없음. Play Stop은 서버 종료가 아님 |
 | `LocalAiEndpointResolver` | 세션 파일의 chat/stream/grade/status 주소. Inspector 원격 URL로 돌아가지 않음 |
-| `LocalAiSettingsPanel` | 설정창 체셔 AI 영역. CPU/GPU/자동 적용, `requested_mode`와 `effective_backend` 분리 표시. 프로세스 제어 없음 |
+| `LocalAiSettingsPanel` | 설정창 체셔 AI 영역. CPU/GPU/자동 적용, 선택·호버·누름 ColorTint. 임베드 패널은 탭을 열면 모드 버튼이 클릭 가능하고 적용 후 다시 활성화. `requested_mode`와 `effective_backend` 분리 표시. 프로세스 제어 없음 |
 | `LocalAiReadiness` | `127.0.0.1`/`localhost` 채팅 URL만 로컬 모델 준비 여부를 강제. PlayerPrefs `LocalAi.ChatDisabled` 로 대화 AI만 끄기 |
 | `ChatSseStreamParser` | Unity download-buffer가 JSON을 쪼개도 `data:` 줄이 완성된 뒤에만 파싱 |
 | `ChatHistoryManager` | system prompt·히스토리; `CheshirePromptCatalog`로 BaseSystem/ChesterVoiceCommon 로드 |
