@@ -331,11 +331,20 @@ class LocalRuntimeManager:
         self._state = "starting"
         self._effective = "unknown"
         port = self._cuda_port if kind == "cuda" else self._litert_port
-        try:
-            engine = self._host.start(kind, port)
-        except (OSError, RuntimeError):
-            self._state = "failed"
-            return False
+        if self._host.is_port_open(port):
+            engine = OwnedEngine(
+                kind=kind,
+                pid=0,
+                port=port,
+                provider=self._host.make_provider(kind, port),
+                started_by_manager=False,
+            )
+        else:
+            try:
+                engine = self._host.start(kind, port)
+            except (OSError, RuntimeError):
+                self._state = "failed"
+                return False
         self._owned = engine
         self._managed = engine.started_by_manager
         self._configured = "gpu" if kind in {"litert_gpu", "cuda"} else "cpu"
@@ -351,7 +360,10 @@ class LocalRuntimeManager:
                 self._failure_fingerprint = self._hardware.fingerprint or "gpu"
             return False
         if kind in {"litert_gpu", "cuda"}:
-            if warmup.effective_backend != "gpu":
+            gpu_confirmed = warmup.effective_backend == "gpu" or (
+                not engine.started_by_manager and warmup.ok
+            )
+            if not gpu_confirmed:
                 await self._stop_owned()
                 self._state = "failed"
                 self._failure_fingerprint = self._hardware.fingerprint or "gpu"
