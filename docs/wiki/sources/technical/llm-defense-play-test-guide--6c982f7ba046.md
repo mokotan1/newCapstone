@@ -1,7 +1,7 @@
 ---
-source_id: technical:873778a0ddcd
+source_id: technical:6c982f7ba046
 source_path: docs/security/llm-defense-play-test-guide.md
-source_sha256: 873778a0ddcda36fad6b333dd8c58e3fdd5014eefe367faecf6b7aaec383dbb9
+source_sha256: 6c982f7ba0460eb4f3884648e816ee8b25b73638cea5bafa8b1e100a95b954ae
 source_type: md
 category: technical
 status: extracted
@@ -29,8 +29,8 @@ rag_eligible: true
 
 ## 2. 사전 준비
 
-1. **API 키**
-   - `backend_ai/.env`에 `GROQ_API_KEY`, `GOOGLE_API_KEY` 설정 ([backend_ai/README.md](../../backend_ai/README.md) 참고).
+1. **로컬 AI**
+   - 외부 Groq/Gemini 키는 필요 없습니다. Editor가 Supervisor를 켜거나 `backend_ai`에서 로컬 FastAPI를 실행합니다 ([backend_ai/README.md](../../backend_ai/README.md)).
 
 2. **백엔드 실행** (저장소 루트가 아니라 `backend_ai` 기준으로 실행하는 것을 권장)
 

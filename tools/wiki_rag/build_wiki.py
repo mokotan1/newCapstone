@@ -39,7 +39,7 @@ _CURATED_CITATION_IDS: frozenset[str] = frozenset(
         "planning:47f3be566f34",
         "technical:e52de73281b4",
         "planning:b98bbfbdb019",
-        "technical:194f6010e716",
+        "technical:ded8fb508f0d",
         "technical:ca17d157de10",
         "planning:9d4611de3ae3",
     }
@@ -458,10 +458,11 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
 
     backend = (
         "Production stack routes Unity chat UI through FastAPI `/chat` endpoints "
-        "with Groq primary and Gemini fallback providers."
+        "to a local LiteRT Gemma runtime (`AI_PROVIDER=local`), with no Groq or "
+        "Gemini execution path."
     )
     claims.append(
-        f"- {backend} {_citation_from_id(records_by_id, 'technical:194f6010e716')}"
+        f"- {backend} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     defense = (
@@ -502,7 +503,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`backend_ai/`, CI scripts, and deploy compose under `deploy/`."
     )
     claims.append(
-        f"- {overview} {_citation_from_id(records_by_id, 'technical:194f6010e716')}"
+        f"- {overview} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     unity = (
@@ -510,7 +511,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "gameplay code under `Assets/godlotto/Script/`."
     )
     claims.append(
-        f"- {unity} {_citation_from_id(records_by_id, 'technical:194f6010e716')}"
+        f"- {unity} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     persistence = (
@@ -518,7 +519,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "server-side data includes CSV quiz banks and optional Redis rate limits."
     )
     claims.append(
-        f"- {persistence} {_citation_from_id(records_by_id, 'technical:194f6010e716')}"
+        f"- {persistence} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     deploy = (
@@ -526,7 +527,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`deploy/docker-compose.prod.yml`."
     )
     claims.append(
-        f"- {deploy} {_citation_from_id(records_by_id, 'technical:194f6010e716')}"
+        f"- {deploy} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     lines = [
