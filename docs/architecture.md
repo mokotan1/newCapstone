@@ -346,7 +346,7 @@ flowchart LR
 | 모듈 | 역할 |
 |------|------|
 | `ChatService` | 로컬 LiteRT 전용, 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
-| `dialogue_guard` | 체셔 1–2문장 대사 sanitize (빈/JSON/장문 → 로케일 폴백) |
+| `dialogue_guard` | 체셔 대사 sanitize (빈/JSON → 로케일 폴백, 장문은 마침표 기준 앞 2문장 유지. `!`/`?`/말버릇은 문장 수로 세지 않음) |
 | `sse_format` | `data: {JSON}\\n\\n` SSE 프레임 |
 | `local_runtime` | LiteRT primary (`AI_PROVIDER=local`), 루프백 `GET /v1/models` |
 | `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |
