@@ -146,6 +146,10 @@ public class InGameSettingsPanel : SingletonMonoBehaviour<InGameSettingsPanel>
             settingPanel.transform,
             ref resolutionDropdown,
             ref fullscreenToggle);
+        if (bgmSlider == null)
+            bgmSlider = SettingDisplayControlsFactory.FindSlider(settingPanel.transform, "BGM Slider", "BgmSlider");
+        if (sfxSlider == null)
+            sfxSlider = SettingDisplayControlsFactory.FindSlider(settingPanel.transform, "SFX Slider", "SfxSlider");
     }
 
     public void ToggleSettingPanel()

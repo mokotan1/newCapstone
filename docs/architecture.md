@@ -311,6 +311,7 @@ flowchart LR
 | `TutorChatbot` | RAG 프로필, 퀴즈, `/tutor/grade` |
 | `*RoomChatbot` | 방별 system prompt·휴리스틱 (`StudyRoomChatbot`, `WifeRoomChatbot`, …) |
 | `ParretPanelChatbotBinder` | 씬별 챗봇 타입 바인딩 |
+| `SettingsCheshirePreview` | SettingScene 체셔 AI 탭 미리보기. 전용 `ChatHistoryManager` + `ChatHttpClient` `/chat/stream`. 루프백이면 `FetchRootStatus`로 `local_runtime.model_available` 대기. `use_tools=false`. 게임 진행과 분리 |
 
 **프롬프트 Resources** (`Assets/Resources/CheshirePrompts/{ko,ja,en}/`):
 

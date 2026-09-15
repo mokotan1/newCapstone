@@ -13,6 +13,7 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
     Button closeButton;
     Button openButton;
     bool applying;
+    bool isEmbedded;
 
     static string Text(string key) => CheshireUiStrings.Lookup(key, CheshireLocaleResolver.ResolveCurrentLocale());
 
@@ -59,16 +60,59 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
         });
     }
 
+    public static void EnsureEmbedded(Transform parent)
+    {
+        if (parent == null || parent.Find(PanelName) != null)
+            return;
+
+        TMP_FontAsset font = parent.GetComponentInChildren<TMP_Text>(true)?.font ?? SettingsShellFactory.FindUiFont();
+        var root = new GameObject(PanelName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        root.transform.SetParent(parent, false);
+        root.layer = parent.gameObject.layer;
+        root.SetActive(true);
+        RectTransform rect = (RectTransform)root.transform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(0.5f, 1f);
+        rect.sizeDelta = new Vector2(0f, 168f);
+        rect.anchoredPosition = Vector2.zero;
+        root.GetComponent<Image>().color = Color.clear;
+        var layout = root.AddComponent<LayoutElement>();
+        layout.minHeight = 168f;
+        layout.preferredHeight = 168f;
+
+        var panel = root.AddComponent<LocalAiSettingsPanel>();
+        panel.isEmbedded = true;
+        panel.statusLabel = Label(root.transform, "Status", "", new Vector2(0, 36), new Vector2(620, 70), font, 16);
+        panel.statusLabel.color = SettingsWoodPanelSpec.PrimaryText;
+        string[] modes = { "cpu", "gpu", "auto" };
+        panel.modeButtons = new Button[3];
+        for (int i = 0; i < modes.Length; i++)
+        {
+            string mode = modes[i];
+            Button button = MakeButton(root.transform, mode.ToUpperInvariant(),
+                new Vector2((i - 1) * 170, -40), font);
+            button.onClick.AddListener(() => panel.Apply(mode));
+            panel.modeButtons[i] = button;
+        }
+    }
+
     public static bool HandleModalInput(GameObject settingsRoot)
     {
         if (settingsRoot == null)
             return false;
-        Transform child = settingsRoot.transform.Find(PanelName);
-        if (child == null || !child.gameObject.activeInHierarchy)
-            return false;
-        if (Input.GetKeyDown(KeyCode.Escape))
-            child.GetComponent<LocalAiSettingsPanel>().Close();
-        return true;
+        LocalAiSettingsPanel[] panels = settingsRoot.GetComponentsInChildren<LocalAiSettingsPanel>(true);
+        for (int i = 0; i < panels.Length; i++)
+        {
+            LocalAiSettingsPanel panel = panels[i];
+            if (panel == null || panel.isEmbedded || !panel.gameObject.activeInHierarchy)
+                continue;
+            if (Input.GetKeyDown(KeyCode.Escape))
+                panel.Close();
+            return true;
+        }
+
+        return false;
     }
 
     void OnEnable()
@@ -85,6 +129,20 @@ public sealed class LocalAiSettingsPanel : MonoBehaviour
     {
         StopAllCoroutines();
         applying = false;
+    }
+
+    public void ShowRuntimeStatus(string text)
+    {
+        if (statusLabel == null)
+            return;
+        statusLabel.text = text ?? "";
+    }
+
+    public void RefreshLocalizedText()
+    {
+        if (isEmbedded || statusLabel == null || applying)
+            return;
+        statusLabel.text = Text("AiSettingsUnavailable");
     }
 
     void Close()

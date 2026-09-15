@@ -105,6 +105,10 @@ public class IntegratedSettingUI : MonoBehaviour
     {
         Transform searchRoot = panelRoot != null ? panelRoot.transform : transform;
         SettingDisplayControlsFactory.EnsureDisplayControls(searchRoot, ref resolutionDropdown, ref fullscreenToggle);
+        if (bgmSlider == null)
+            bgmSlider = SettingDisplayControlsFactory.FindSlider(searchRoot, "BGM Slider", "BgmSlider");
+        if (sfxSlider == null)
+            sfxSlider = SettingDisplayControlsFactory.FindSlider(searchRoot, "SFX Slider", "SfxSlider");
     }
 
     private void EnsureResolutionAudio()
