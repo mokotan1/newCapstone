@@ -9,6 +9,7 @@ from copy import deepcopy
 from typing import Any
 
 from scripts.qa.tool.errors import PlanError
+from scripts.qa.tool.hall_route import WIRED_HALL_TO_KITCHEN, expected_scenes
 
 SCHEMA_VERSION = 1
 
@@ -180,6 +181,7 @@ def build_plan(payload: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _hall_to_kitchen_scenario() -> dict[str, Any]:
+    hops = list(WIRED_HALL_TO_KITCHEN["hops"])
     return {
         "id": _HALL_SCENARIO_ID,
         "requirementId": "REQ-QA-HALL-KITCHEN-NAV",
@@ -187,6 +189,8 @@ def _hall_to_kitchen_scenario() -> dict[str, Any]:
         "destinationScene": "Kitchen",
         "interactionId": "left",
         "targetId": "hall.kitchen-entry",
+        "expectedScenes": expected_scenes(),
+        "hops": hops,
         "inputLayers": ["api", "event-system"],
         "steps": [
             {"stepId": "preflight", "action": "preflight", "timeoutSeconds": 60},
@@ -235,6 +239,7 @@ def _hall_to_kitchen_scenario() -> dict[str, Any]:
 def build_hall_to_kitchen_plan() -> dict[str, Any]:
     """Return the frozen phase-1 Hall → Kitchen execution plan."""
     scenario = _hall_to_kitchen_scenario()
+    first_hop = WIRED_HALL_TO_KITCHEN["hops"][0]
     payload: dict[str, Any] = {
         "planId": "hall-to-kitchen.v1",
         "schemaVersion": SCHEMA_VERSION,
@@ -244,9 +249,10 @@ def build_hall_to_kitchen_plan() -> dict[str, Any]:
         "target": {
             "startScene": "Hall_playerble",
             "destinationScene": "Kitchen",
-            "expectedScenes": ["Hall_playerble", "Kitchen"],
-            "interactionId": "left",
-            "targetId": "hall.kitchen-entry",
+            "expectedScenes": expected_scenes(),
+            "hops": list(WIRED_HALL_TO_KITCHEN["hops"]),
+            "interactionId": first_hop["interactionId"],
+            "targetId": first_hop["targetId"],
         },
         "requiredChecks": [
             {"inputLayer": "api"},

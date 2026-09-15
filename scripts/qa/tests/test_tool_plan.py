@@ -23,8 +23,18 @@ def test_valid_hall_to_kitchen_plan_fixes_required_fields() -> None:
     assert plan["scenarioIds"] == ["qa.tool.hall-to-kitchen"]
     assert plan["target"]["startScene"] == "Hall_playerble"
     assert plan["target"]["destinationScene"] == "Kitchen"
-    assert plan["target"]["expectedScenes"] == ["Hall_playerble", "Kitchen"]
-    assert plan["target"]["interactionId"] == "left"
+    assert plan["target"]["expectedScenes"] == [
+        "Hall_playerble",
+        "Hall_Left",
+        "Hall_Left2",
+        "Kitchen",
+    ]
+    assert plan["target"]["hops"][0]["interactionId"] == "left"
+    assert plan["target"]["hops"][0]["nextScene"] == "Hall_Left"
+    assert plan["target"]["hops"][1]["fungusBlock"] == "Front_clicked"
+    assert plan["target"]["hops"][1]["nextScene"] == "Hall_Left2"
+    assert plan["target"]["hops"][2]["fungusBlock"] == "Door_Clicked"
+    assert plan["target"]["hops"][2]["nextScene"] == "Kitchen"
     assert plan["target"]["targetId"] == "hall.kitchen-entry"
     assert {check["inputLayer"] for check in plan["requiredChecks"]} == {
         "api",

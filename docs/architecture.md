@@ -555,7 +555,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
-| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight; 홀→주방 통합 1단계) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route; 홀→주방 통합 1단계) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |

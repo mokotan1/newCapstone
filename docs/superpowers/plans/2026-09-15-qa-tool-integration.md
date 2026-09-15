@@ -32,19 +32,11 @@
 - Test: `scripts/qa/tests/test_tool_plan.py`
 - Create: `scripts/qa/tool/plan.py`, `scripts/qa/tool/errors.py`
 
-- [ ] **Step 1: Write the failing tests** (see `test_tool_plan.py`)
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `python -m pytest scripts/qa/tests/test_tool_plan.py -q`
-Expected: FAIL/ERROR because `scripts.qa.tool.plan` is missing or rejects nothing
-
-- [ ] **Step 3: Minimal implementation**
-  - `PlanError` for empty required fields and duplicate IDs
-  - `build_plan` copies and freezes `planId`, `schemaVersion`, `requirementIds`, `scenarioIds`, `scenarioHashes`, `target`, `requiredChecks`, `timeouts`, `exclusions`, `steps`
-  - `build_hall_to_kitchen_plan` fills Hall_playerble → Kitchen, `left` / `hall.kitchen-entry`, input layers `api` + `event-system`, default timeouts 60/30/300/60
-  - Canonical SHA-256 over sorted JSON for scenarioHashes and planHash
-- [ ] **Step 4: Re-run tests — PASS**
-- [ ] **Step 5: Do not commit unless the user asks**
+- [x] **Step 1: Write the failing tests** (see `test_tool_plan.py`)
+- [x] **Step 2: Run tests to verify they fail**
+- [x] **Step 3: Minimal implementation**
+- [x] **Step 4: Re-run tests — PASS**
+- [x] **Step 5: Committed `61316a26` when the user asked**
 
 ## Task 2: Scenario and aggregate verdicts (AC09, AC17)
 
@@ -72,13 +64,13 @@ Expected: FAIL/ERROR because `scripts.qa.tool.plan` is missing or rejects nothin
 - [ ] Missing counts stay `null` (never coerce unknown → 0)
 - [ ] Zero executed and exit-0+failed both cannot be `verificationStatus=passed`, with distinct `resultKind`
 
-## Later slices (not this commit)
+## Later slices
 
-- Task 6: preflight BLOCKED reasons (AC02–AC04) — `scripts/qa/tool/preflight.py` composing `rooms.preflight` + lease/project/compile/dirty-scene
-- Task 7: coordinator state machine + journal (AC12–AC15)
-- Task 8: Hall path expected scenes + adapter assertions (AC06–AC08)
-- Task 9: live Unity run (AC19) — Editor exclusive
-- Task 10: independent review (AC23)
+- [x] Task 6: preflight BLOCKED reasons (AC02–AC04) — pytest snapshots only; live Editor NOT_RUN
+- [x] Task 7: coordinator state machine + journal (AC12–AC15) — RecordingGateway; live NOT_RUN
+- [ ] Task 8: Hall path expected scenes + adapter assertions (AC06–AC08)
+- [ ] Task 9: live Unity run (AC19) — Editor exclusive
+- [ ] Task 10: independent review (AC23)
 
 ## Spec coverage (self-review)
 

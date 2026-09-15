@@ -1,11 +1,12 @@
 # QA 도구 통합 설계 및 상세 완료조건
 
 - 작성일: 2026-09-15
-- 상태: 설계안 작성 완료 / 구현 미착수
+- 상태: 1단계 구현 진행 중 / 라이브 Editor 미실행 / `independentReview: false`
 - 조사 기준 revision: `2047d55feeddc9e18184005ebaa42cff49bb1b81`
+- 구현 브랜치: `feature/qa-tool-integration` (계약 커밋 `61316a26`; coordinator는 미커밋 가능)
 - 요청: 기존 아키텍처와 QA 기반의 공백을 보완하고 관찰 가능한 작업 완료조건을 정의한다.
-- 이번 문서 작업: R0, 자체 정합성 검토. `independentReview: false`.
-- 향후 구현: 하네스·저장 격리·씬 전환을 포함하므로 R3. 이 문서는 구현 또는 플레이 검증 성공의 증거가 아니다.
+- 계약 본문(§1–§11)은 완료조건을 유지한다. 실행 상태는 **§12 AC 대응표**만 갱신한다.
+- 이 문서의 체크박스나 pytest 통과만으로 1단계 verified를 선언하지 않는다.
 
 ## 1. 목표와 범위
 
@@ -181,7 +182,7 @@ restoring 실패 → recovery-required (새 실행 차단)
 
 ## 7. 상세 인수조건: 1단계 필수
 
-아래 모든 AC는 구현 완료 시 증거 링크와 실제 결과를 요구한다. 현재 상태는 모두 미실행이다.
+아래 모든 AC는 구현 완료 시 증거 링크와 실제 결과를 요구한다. 현재 실행 상태는 §12에 있다. 이 표의 완료조건 문구는 바꾸지 않는다.
 
 | AC | 시험 조건·행동 | 관찰 가능한 완료조건 | 필수 증거 |
 |---|---|---|---|
@@ -238,7 +239,7 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 
 ## 9. 허용 수정 범위와 통합 순서
 
-이번 요청의 실제 변경 허용 파일은 이 설계문서 하나다. 아래는 향후 구현 후보이며 전체 디렉터리 수정 허가가 아니다. 구현 착수 시 AC→심볼→참조→테스트 순으로 정확한 파일 목록을 작업 index에 고정한다.
+구현 허용 파일은 `docs/development/tasks/qa-tool-integration/index.md`에 고정한다. 아래는 모듈 후보이며 전체 디렉터리 수정 허가가 아니다.
 
 | 범위 | 후보 위치 | 연결 AC |
 |---|---|---|
@@ -283,7 +284,7 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 
 ### 10.3 구현 시 작성할 AC 대응표
 
-각 AC에 `status`, `implementationFiles`, `testOrAction`, `executionStatus`, `verificationStatus`, `evidencePaths`, `reviewReference`, `limitations`를 기록한다. 설계 단계의 현재 값은 `NOT_RUN / 구현 미착수`다. 체크박스 선택이나 테스트 코드 존재만으로 passed를 부여하지 않는다.
+각 AC에 `status`, `implementationFiles`, `testOrAction`, `executionStatus`, `verificationStatus`, `evidencePaths`, `reviewReference`, `limitations`를 기록한다. 현재 값은 §12다. 체크박스 선택이나 테스트 코드 존재만으로 라이브 gameplay passed를 부여하지 않는다.
 
 ## 11. 설계문서 자체의 완료조건
 
@@ -295,3 +296,44 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 - 참조한 로컬 파일 경로가 존재하며 기존 사용자 파일을 수정하지 않는다.
 
 이 문서 자체는 R0 경로로 자체 검토할 수 있다. 구현 계획·코드·독립 리뷰·Unity 실행 완료를 포함하지 않는다.
+
+## 12. AC 대응표 (구현 현황)
+
+기록일: 2026-09-15. 검증 명령: `python -m pytest scripts/qa/tests -q` (이 세션 88 passed, coordinator 포함 시 증가). 라이브 Editor 실행 0회. `independentReview: false`.
+
+배선 조사 (AC08, 씬 YAML 정적 읽기, PlayMode 아님):
+
+- `Hall_playerble` `CorridorEntranceController` `left` / `Left_Clicked` → `Hall_Left`
+- `Hall_Left` Fungus `Front_clicked` LoadScene → `Hall_Left2`
+- `Hall_Left2` Fungus `Door_Clicked` LoadScene → `Kitchen`
+- `Hall_Left` / `Hall_Left2`에는 C# `interactionId`가 없다 (Clickable2D).
+- `transition.hall-to-kitchen.json`은 중간 씬 없이 `scene.Kitchen`만 적는다. 이 hop을 생략한 계획은 `spec-mismatch`다.
+- `HallQaAdapter` assert-route는 여전히 `controllerFound`만 본다 (G02 미해소).
+
+| AC | status | implementationFiles | testOrAction | executionStatus | verificationStatus | limitations |
+|---|---|---|---|---|---|---|
+| AC01 | unit-green | `scripts/qa/tool/plan.py` | `pytest scripts/qa/tests/test_tool_plan.py` | succeeded | passed | 라이브 계획 CLI 없음 |
+| AC02 | partial | `scripts/qa/tool/preflight.py` | `test_tool_preflight.py` 스냅샷 | succeeded | NOT_RUN | 실제 Editor 미연결/dirty/compile 미주입 |
+| AC03 | partial | `preflight.py` + `rooms/preflight.py` | 같은 파일 | succeeded | NOT_RUN | live registry는 fixture |
+| AC04 | partial | `preflight.acquire_lease` | in-memory store | succeeded | NOT_RUN | 실제 Gateway lease 아님 |
+| AC05 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 격리 프로파일 미연결 |
+| AC06 | partial | `scripts/qa/tool/hall_route.py` | `test_tool_hall_route.py` 이중 attempt 기록 | succeeded | NOT_RUN | api/event-system 실실행·reset은 fixture |
+| AC07 | NOT_RUN | `HallQaAdapter.cs`는 controllerFound만 | — | NOT_RUN | NOT_RUN | Kitchen 도착·게이트 해제는 라이브 필요 |
+| AC08 | unit-green | `hall_route.py` + 씬 YAML | 정적 hop 고정, 생략 시 spec-mismatch | succeeded | passed | PlayMode hop 미확인. `Hall_Left`/`Hall_Left2`에 C# interactionId 없음 |
+| AC09 | unit-green | `scripts/qa/tool/verdict.py` | `test_tool_verdicts.py` | succeeded | passed | — |
+| AC10 | unit-green | `scripts/qa/tool/evidence.py` | `test_tool_evidence.py` | succeeded | passed | — |
+| AC11 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 콘솔 분류기 없음 |
+| AC12 | partial | `scripts/qa/tool/coordinator.py` | `test_tool_coordinator.py` | succeeded | NOT_RUN | RecordingGateway만 |
+| AC13 | partial | `coordinator.py` | 같은 파일 | succeeded | NOT_RUN | 실제 mutation 유실 없음 |
+| AC14 | partial | `coordinator.py` | 같은 파일 | succeeded | NOT_RUN | 실제 profile/cleanup 없음 |
+| AC15 | partial | `coordinator.py` journal | 같은 파일 | succeeded | NOT_RUN | 프로세스 강제 중단 아님 |
+| AC16 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | diffHash 없음 |
+| AC17 | unit-green | `verdict.py` | `test_tool_verdicts.py` | succeeded | passed | — |
+| AC18 | unit-green | `scripts/qa/tool/report.py` | `test_tool_report.py` | succeeded | passed | — |
+| AC19 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | stub만으로 완료 금지 |
+| AC20 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | — |
+| AC21 | unit-green | `scripts/qa/tool/normalize.py` | `test_tool_normalize.py` | succeeded | passed | result_contract 래핑 |
+| AC22 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | domain reload 없음 |
+| AC23 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 독립 리뷰 없음. verified 금지 |
+
+`reviewReference`: 없음. `evidencePaths`: pytest 로컬 출력만. 런 디렉터리 보고서 없음.
