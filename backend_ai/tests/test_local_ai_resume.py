@@ -69,10 +69,10 @@ async def test_benchmark_holds_lease_until_probe_finishes(tmp_path: Path) -> Non
     await manager.aclose()
 
 
-def test_local_chat_service_uses_leased_provider_without_cloud_fallback() -> None:
+def test_local_chat_service_binds_leased_provider_only() -> None:
     import main
     from tests.local_ai_fakes import FakeProvider
     provider = FakeProvider("new-device")
     service = main.service_for_provider(provider)
     assert service._primary is provider
-    assert service._fallback is None
+    assert not hasattr(service, "_fallback")

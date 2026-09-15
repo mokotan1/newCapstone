@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 from config import Settings, get_settings
-from local_runtime import build_chat_providers, check_local_runtime
+from local_runtime import build_chat_provider, check_local_runtime
 from models.requests import ChatRequest
 from services.chat_service import ChatService
 from tests.evals.cheshire_eval import (
@@ -60,16 +60,12 @@ async def _run(settings: Settings, cases_path: Path, limit: int) -> int:
         print(f"Refusing: local runtime not ready ({status.error}).")
         return 2
 
-    primary, _unused_fallback = build_chat_providers(settings)
-    if primary is None:
-        print("Refusing: local LiteRT provider was not constructed.")
-        return 2
+    primary = build_chat_provider(settings)
 
     registry = ToolRegistry()
     registry.register_many(GAME_TOOLS)
     service = ChatService(
         primary=primary,
-        fallback=None,
         registry=registry,
         temperature=settings.default_temperature,
         max_tokens=settings.max_tokens,

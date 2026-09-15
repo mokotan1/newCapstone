@@ -1,18 +1,11 @@
 from __future__ import annotations
 
-import logging
-import shlex
-import subprocess
 from dataclasses import dataclass
-from typing import Any
 
 import httpx
 
 from config import Settings
-from providers.base import AIProvider
 from providers.litert_provider import LiteRTProvider
-
-logger = logging.getLogger(__name__)
 
 _MODELS_PATH = "/v1/models"
 _HEALTH_TIMEOUT_SECONDS = 3.0
@@ -27,11 +20,9 @@ class LocalRuntimeStatus:
     error: str | None
 
 
-def build_chat_providers(
-    settings: Settings,
-) -> tuple[AIProvider | None, AIProvider | None]:
-    """Always use the local LiteRT contract. Cloud keys never select a provider."""
-    local = LiteRTProvider(
+def build_chat_provider(settings: Settings) -> LiteRTProvider:
+    """Always use the local LiteRT contract. There is no cloud or fallback provider."""
+    return LiteRTProvider(
         base_url=settings.local_ai_base_url,
         model=settings.local_ai_model,
         num_ctx=settings.local_ai_num_ctx,
@@ -39,7 +30,6 @@ def build_chat_providers(
         top_p=settings.dialogue_top_p,
         top_k=settings.dialogue_top_k,
     )
-    return local, None
 
 
 def check_local_runtime(
@@ -63,19 +53,6 @@ def check_local_runtime(
     finally:
         if owns_client:
             http.close()
-
-
-def start_local_runtime(settings: Settings) -> subprocess.Popen[Any] | None:
-    """Start a pinned local runtime only when health says it is down."""
-    status = check_local_runtime(settings)
-    if status.ollama_or_litert_available and status.model_available:
-        return None
-    command = settings.local_ai_start_command.strip()
-    if not command:
-        logger.warning("Local AI runtime is down and LOCAL_AI_START_COMMAND is empty")
-        return None
-    logger.info("Starting local AI runtime: %s", command)
-    return subprocess.Popen(shlex.split(command), shell=False)
 
 
 def _extract_model_ids(payload: object) -> list[str]:

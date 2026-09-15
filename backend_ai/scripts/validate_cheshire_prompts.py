@@ -35,7 +35,6 @@ _REQUIRED_KEYS: tuple[str, ...] = (
     "StudyRoomPrompt",
     "TutorRoomPrompt",
     "WifeRoomPrompt",
-    "ParrotPrompt",
 )
 
 # Hangul syllables — used for dominance scan on en/ja only.

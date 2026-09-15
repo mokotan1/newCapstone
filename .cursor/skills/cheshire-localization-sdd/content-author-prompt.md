@@ -25,7 +25,7 @@ Korean files under `disputatio/Assets/Resources/CheshirePrompts/ko/` (or current
 ## Stable keys to produce
 
 BaseSystem, ChesterVoiceCommon, introPrompt, KitchenPrompt, MainBedroomPrompt,
-SonRoomPrompt, StudyRoomPrompt, TutorRoomPrompt, WifeRoomPrompt, ParrotPrompt
+SonRoomPrompt, StudyRoomPrompt, TutorRoomPrompt, WifeRoomPrompt
 
 Plus any dynamic fragment templates the Task lists (placeholders like `{pageStart}` stay invariant).
 

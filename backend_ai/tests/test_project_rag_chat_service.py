@@ -56,7 +56,6 @@ def build_service_with_fake_rag_and_quiz_bank(
     bank = _write_quiz_bank(tmp_path / "bank.csv")
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=_ProjectFakeRAG(),
@@ -140,7 +139,6 @@ async def test_project_profile_does_not_apply_tutor_token_cap() -> None:
     settings = Settings()
     service = ChatService(
         primary=cap,
-        fallback=None,
         registry=_build_registry(),
         max_tokens=512,
         app_settings=settings,
@@ -167,7 +165,6 @@ async def test_project_profile_skips_quiz_answer_override(tmp_path: Path) -> Non
     bank = _write_quiz_bank(tmp_path / "bank.csv")
     service = ChatService(
         primary=_MockProvider("groq", events),
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=_ProjectFakeRAG(),

@@ -32,30 +32,4 @@ public static class RoomUnlockCheckpointService
         CheckpointRepository.Save(data);
         GameLog.Log("[Checkpoint] 최신 체크포인트 저장: " + data.checkpointId + " -> " + data.resumeSceneName);
     }
-
-    public static void SaveCustom(
-        string checkpointId,
-        CheckpointType checkpointType,
-        string resumeSceneName,
-        string resumeSpawnId = null,
-        string unlockedRoomKey = null)
-    {
-        if (string.IsNullOrEmpty(checkpointId) || string.IsNullOrEmpty(resumeSceneName))
-        {
-            GameLog.LogWarning("[Checkpoint] checkpointId 또는 resumeSceneName이 비어 있어 저장하지 않았습니다.");
-            return;
-        }
-
-        var data = new CheckpointSaveData
-        {
-            checkpointId = checkpointId,
-            checkpointType = checkpointType,
-            unlockedRoomKey = unlockedRoomKey,
-            resumeSceneName = resumeSceneName,
-            resumeSpawnId = resumeSpawnId
-        };
-
-        ProgressSnapshotCollector.Populate(data);
-        CheckpointRepository.Save(data);
-    }
 }

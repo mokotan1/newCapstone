@@ -44,7 +44,7 @@ Examples: `KO`, `ko-KR`, `Korean` → `ko`; `JA`, `JP`, `ja-JP`, `Japanese` → 
 
 ## Stable prompt keys
 
-`BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`, `ParrotPrompt`
+`BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`
 
 Resource load path pattern: `CheshirePrompts/{locale}/{key}` via `Resources.Load<TextAsset>`.
 

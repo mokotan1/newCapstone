@@ -317,7 +317,8 @@ flowchart LR
 
 **프롬프트 Resources** (`Assets/Resources/CheshirePrompts/{ko,ja,en}/`):
 
-- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`, `ParrotPrompt`
+- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`
+- `Resources/` 루트에는 프롬프트 `.txt`를 두지 않는다 (2026-09-15에 `CheshirePrompts/ko/`와 중복이던 루트 사본 제거)
 - 선택 키: `HintPolicy_{Novice,Intermediate,Expert}`, `Fragment_*` (세 locale 모두 비어 있지 않은 UTF-8)
 - 검증: `backend_ai/scripts/validate_cheshire_prompts.py` · EditMode `CheshirePromptCatalogTests`
 
@@ -345,10 +346,10 @@ flowchart LR
 
 | 모듈 | 역할 |
 |------|------|
-| `ChatService` | 로컬 LiteRT 전용, 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
+| `ChatService` | 단일 로컬 프로바이더(`primary`)만 받는다. 클라우드 2차 프로바이더(`fallback`) 인자는 2026-09-15 제거. 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
 | `dialogue_guard` | 체셔 1–2문장 대사 sanitize (빈/JSON/장문 → 로케일 폴백) |
 | `sse_format` | `data: {JSON}\\n\\n` SSE 프레임 |
-| `local_runtime` | LiteRT primary (`AI_PROVIDER=local`), 루프백 `GET /v1/models` |
+| `local_runtime` | `build_chat_provider` → LiteRT 단일 프로바이더 (`AI_PROVIDER=local`), 루프백 `GET /v1/models` 헬스. FastAPI는 런타임을 spawn하지 않는다 (`LOCAL_AI_START_COMMAND` 경로 제거; 기동은 Supervisor 소유) |
 | `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |
 | `TutorRAGService` | `tutor_rag_index.json` 로컬 `local-hash-v1` 검색; Google 임베딩 인덱스는 준비 실패. chunk `locale` 메타가 있으면 필터, 없으면 전체·없으면 KO 폴백 |
 | `QuizBank` | CSV 로드; multi-locale 컬럼(`question_*`, `acceptable_answers_*`, `reference_snippet_*`; 빈 셀 → KO); `format_bank_context_block` chrome locale별 |
@@ -466,7 +467,7 @@ graph TB
    - 단순 복도/방: `RoomInteractionController` 또는 `CorridorEntranceController` 컴포넌트 + Inspector `InteractionRoute[]`, `BlockOutcome[]`
    - 특수 퍼즐: `RoomInteractionController` 상속 (예: `WifeRoomPuzzleController.cs`)
 6. **복귀 경로**: `BackNavigator.TryResolveFixedReturnScene`에 case 추가 또는 Fungus `PrevScene` 설정
-7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions` + `RoomUnlockCheckpointTrigger` on Fungus 이벤트
+7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions`에 정의 추가 후 해금 지점에서 `RoomUnlockCheckpointService.SaveRoomUnlock(unlockKey)` 호출 (예: `WorldItemDropZone`)
 8. **EditMode 테스트** 추가: `Assets/Editor/Tests/EditMode/...`
 
 ### 튜토리얼 퀘스트 단계 연결
@@ -531,7 +532,6 @@ graph TB
 | **Windows 게임 설치본** | `scripts/install_local_ai.ps1`·`installer/CHECKLIST.md`는 플래너. 실제 게임+런타임 패키징 설치 프로그램은 없음. Gate 1 아티팩트는 `%LOCALAPPDATA%/Disputatio/local-ai/cuda`에 동의 후 다운로드 | 패키징 파이프라인 확정 |
 | **Unity EditMode 하네스** | 이 클론에서 2026-09-15 unity-cli `ready`(Unity 6000.0.36f1). `ChatHttpClientTests` 37, `TutorQuizGraderTests` 10, `LocalAiEndpointResolverTests` 7, `ServerConfigTests` 10, `LocalAiSettingsResumeTests` 7, `SettingsCheshirePreviewGateTests` 11 통과. 다른 머신에 Unity 인스턴스가 없으면 compile/test 불가 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter ChatHttpClientTests` |
 | **Redis in prod** | `REDIS_URL` 비면 in-process rate limit (멀티 replica 부적합) — 운영 `.env` 미포함 | 서버 `/opt/newcapstone/.env` |
-| **WebGL 빌드** | `deploy/serve_webgl_brotli.py` 존재; 게임 WebGL 배포 파이프라인은 본 문서 범위에서 미검증 | 빌드 타겟·CI 확인 |
 | **Tutor RAG 인덱스 비어 있음** | `backend_ai/data/tutor_rag_index.json`이 `chunks: []` (임베딩 미생성). locale 필터는 동작하나 검색 컨텍스트는 항상 빈 결과 | `build_tutor_rag_index.py`로 인덱스 재생성 후 커밋/배포 |
 | **EN/JA 프롬프트의 KO 제어 태그** | `[진행]`, `[시스템: …]`, `[문제 은행]` 등 일부 대괄호 태그가 EN/JA 본문에 KO로 잔존 (의도적 클라이언트 주입 태그). 본문 서술은 EN/JA | Task 6 이후 주입 prefix 로컬라이즈 여부·태그 키 안정성 점검 |
 
@@ -567,4 +567,4 @@ graph TB
 
 ---
 
-*문서 버전: 저장소 조사 기준 2026-09-03 (체셔 로컬 Gemma 4 E2B·URL 이중 모드·dialogue_guard 반영). 변경 시 §8 불일치 항목부터 재검증하세요.*
+*문서 버전: 저장소 조사 기준 2026-09-15 (미사용 아키텍처 정리: ChatService 단일 프로바이더, ParrotChatbot·RoomUnlockCheckpointTrigger·루트 Resources 프롬프트 사본·WebGL 서빙 스크립트·backend_ai 온호스트 배포 스크립트 제거). 변경 시 §8 불일치 항목부터 재검증하세요.*
