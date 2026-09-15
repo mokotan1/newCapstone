@@ -1,6 +1,6 @@
 # Production stack: GHCR backend + Caddy HTTPS.
 # Copy to server as /opt/newcapstone/docker-compose.yml (same directory as .env).
-# REQUIRED in .env: GROQ_API_KEY, GOOGLE_API_KEY, IMAGE_TAG (commit SHA preferred).
+# REQUIRED in .env: IMAGE_TAG (commit SHA preferred). Optional: CHAT_API_TOKEN.
 
 services:
   backend:

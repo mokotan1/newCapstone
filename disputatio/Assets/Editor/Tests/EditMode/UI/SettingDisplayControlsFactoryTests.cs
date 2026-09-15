@@ -51,4 +51,37 @@ public class SettingDisplayControlsFactoryTests
         Assert.That(toggle, Is.SameAs(firstToggle));
         Assert.That(panelRoot.transform.childCount, Is.EqualTo(childCountAfterFirst));
     }
+
+    [Test]
+    public void EnsureDisplayControls_RestylesExistingDropdownToWoodContract()
+    {
+        GameObject dropdownObject = TMP_DefaultControls.CreateDropdown(new TMP_DefaultControls.Resources());
+        dropdownObject.name = "Resolution_Dropdown";
+        dropdownObject.transform.SetParent(panelRoot.transform, false);
+        TMP_Dropdown existing = dropdownObject.GetComponent<TMP_Dropdown>();
+        existing.captionText.enableAutoSizing = true;
+        existing.captionText.fontSizeMin = 4f;
+        existing.captionText.enableWordWrapping = true;
+        existing.captionText.fontSize = 48f;
+        Image face = existing.GetComponent<Image>();
+        face.color = Color.white;
+
+        GameObject toggleObject = DefaultControls.CreateToggle(new DefaultControls.Resources());
+        toggleObject.name = "Fullscreen Toggle";
+        toggleObject.transform.SetParent(panelRoot.transform, false);
+        Toggle existingToggle = toggleObject.GetComponent<Toggle>();
+
+        TMP_Dropdown dropdown = existing;
+        Toggle toggle = existingToggle;
+        SettingDisplayControlsFactory.EnsureDisplayControls(panelRoot.transform, ref dropdown, ref toggle);
+
+        Assert.That(dropdown, Is.SameAs(existing));
+        Assert.That(dropdown.captionText.enableAutoSizing, Is.False);
+        Assert.That(dropdown.captionText.enableWordWrapping, Is.False);
+        Assert.That(dropdown.captionText.fontSize, Is.EqualTo(SettingsWoodPanelSpec.UiFontSize));
+        Assert.That(dropdown.GetComponent<Image>().color, Is.EqualTo(SettingsWoodPanelSpec.InputBackground));
+        LayoutElement layout = dropdown.GetComponent<LayoutElement>();
+        Assert.That(layout.preferredWidth, Is.EqualTo(SettingsWoodPanelSpec.ControlWidth));
+        Assert.That(layout.preferredHeight, Is.EqualTo(SettingsWoodPanelSpec.ControlHeight));
+    }
 }

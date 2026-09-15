@@ -594,6 +594,7 @@ public class TutorChatbot : BaseChatbot, IGraderHost, IChesterParrotHost
 
     protected override void OnChatHttpWaitStarted()
     {
+        base.OnChatHttpWaitStarted();
         _tutorWaitingOnHttp = true;
     }
 

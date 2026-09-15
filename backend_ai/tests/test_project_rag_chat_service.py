@@ -182,5 +182,4 @@ async def test_project_profile_skips_quiz_answer_override(tmp_path: Path) -> Non
             current_question_id="QZ",
         )
     )
-    uq = next(fc for fc in result.function_calls if fc.name == "update_quiz")
-    assert uq.arguments.get("is_correct") is False
+    assert result.function_calls == []

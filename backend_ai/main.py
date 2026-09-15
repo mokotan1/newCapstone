@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,19 +11,27 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from config import get_settings
+from local_runtime import build_chat_providers, check_local_runtime
 from models.requests import ChatRequest, TelemetryIngestRequest, TutorGradeRequest
 from models.responses import ChatResponse, TelemetryResponse, TutorGradeResponse
-from providers.groq_provider import GroqProvider
-from providers.gemini_provider import GeminiProvider
-from services.chat_service import ChatService
+from providers.base import AIProvider
 from services.chat_auth import verify_chat_api_token
+from services.chat_service import ChatService
+from services.local_ai.cuda_manifest import cuda_manifest_is_pinned
+from services.local_ai.hardware import probe_nvidia
+from services.local_ai.paths import default_local_ai_dir
+from services.local_ai.process_host import ProcessEngineHost
+from services.local_ai.readiness import build_readiness_payload
+from services.local_ai.router import router as local_ai_router
+from services.local_ai.runtime_manager import LocalRuntimeManager
 from services.locale_support import (
     all_engines_failed_message,
-    api_key_required_message,
+    local_engine_unavailable_message,
 )
 from services.quiz_bank import QuizBank
 from services.rate_guard import configure_rate_guard, enforce_chat_rate_limits
 from services.rate_limit import build_rate_limiter
+from services.sse_format import format_sse_event
 from services.telemetry_service import TelemetryService
 from services.tutor_grade import grade_tutor_answer
 from services.tutor_rag_service import TutorRAGService
@@ -36,24 +45,30 @@ logger = logging.getLogger(__name__)
 # Bootstrap
 # ---------------------------------------------------------------------------
 settings = get_settings()
+runtime_manager: LocalRuntimeManager | None = None
 
 registry = ToolRegistry()
 registry.register_many(GAME_TOOLS)
 
-primary = GroqProvider(api_key=settings.groq_api_key, model=settings.default_model_groq) if settings.groq_api_key else None
-fallback = GeminiProvider(api_key=settings.google_api_key, model=settings.default_model_gemini) if settings.google_api_key else None
+_first_available, _second_available = build_chat_providers(settings)
 
-if primary is None and fallback is None:
-    logger.critical("No AI provider API keys configured – server will reject all /chat requests")
-
-_first_available = primary or fallback
-_second_available = fallback if primary else None
+if _first_available is None:
+    logger.critical("No AI provider configured – server will reject all /chat requests")
+elif settings.ai_provider == "local":
+    runtime_status = check_local_runtime(settings)
+    if runtime_status.error:
+        logger.warning("Local AI runtime not ready: %s", runtime_status.error)
+    else:
+        logger.info(
+            "Local AI runtime ready model=%s url=%s",
+            settings.local_ai_model,
+            settings.local_ai_base_url,
+        )
 
 _backend_dir = Path(__file__).resolve().parent
 _quiz_bank = QuizBank.load(_backend_dir / settings.tutor_quiz_csv_path)
 _tutor_rag = TutorRAGService(
     index_path=_backend_dir / settings.tutor_rag_index_path,
-    api_key=settings.google_api_key,
     embedding_model=settings.tutor_embedding_model,
     min_similarity=settings.tutor_rag_min_similarity,
 )
@@ -83,8 +98,18 @@ chat_service: ChatService | None = (
 )
 
 
+def service_for_provider(provider: AIProvider) -> ChatService:
+    """Bind one request to its leased engine; local recovery stays local."""
+    return ChatService(
+        primary=provider, fallback=None, registry=registry,
+        temperature=settings.default_temperature, max_tokens=settings.max_tokens,
+        app_settings=settings, tutor_rag=_tutor_rag, quiz_bank=_quiz_bank,
+    )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    global runtime_manager
     limiter = build_rate_limiter(
         enabled=settings.rate_limit_enabled,
         redis_url=settings.redis_url,
@@ -95,23 +120,101 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.warning(
             "REDIS_URL unset — using in-process rate limiter only (not suitable for multi-replica).",
         )
+    if settings.ai_provider == "local":
+        if not settings.local_ai_control_token.strip():
+            settings.local_ai_control_token = secrets.token_urlsafe(32)
+            token_path = default_local_ai_dir() / "control.token"
+            token_path.parent.mkdir(parents=True, exist_ok=True)
+            token_path.write_text(settings.local_ai_control_token, encoding="utf-8")
+        runtime_manager = LocalRuntimeManager(
+            settings_path=default_local_ai_dir() / "settings.json",
+            host=ProcessEngineHost(settings),
+            hardware=probe_nvidia(),
+            gate0_passed=False,
+            cuda_manifest_pinned=cuda_manifest_is_pinned(
+                Path(__file__).resolve().parent / "data" / "cuda_candidate_manifest.json"
+            ),
+        )
+        await runtime_manager.attach_existing_if_present()
+        if runtime_manager.snapshot().state == "stopped":
+            await runtime_manager.queue_apply(runtime_manager.snapshot().requested_mode)
+        await runtime_manager.start_health_poll()
     try:
         yield
     finally:
+        if runtime_manager is not None:
+            await runtime_manager.aclose()
+        runtime_manager = None
         closer = getattr(limiter, "close", None)
         if closer:
             await closer()
 
 
 app = FastAPI(title="Disputatio AI Backend", lifespan=lifespan)
+app.include_router(local_ai_router)
 
 
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+def _readiness_fields() -> dict:
+    snap_state = "stopped"
+    chat_ready = False
+    requested = "cpu"
+    effective = "unknown"
+    error_code = None
+    if runtime_manager is not None:
+        snapshot = runtime_manager.snapshot()
+        snap_state = snapshot.state
+        chat_ready = snapshot.inference_ready and snapshot.model_available
+        requested = snapshot.requested_mode
+        effective = snapshot.effective_backend
+        error_code = snapshot.fallback_reason
+    elif settings.ai_provider == "local":
+        runtime = check_local_runtime(settings)
+        chat_ready = runtime.model_available
+        error_code = runtime.error
+        snap_state = "ready" if runtime.model_available else "starting"
+    rag_ready = _tutor_rag.enabled and _tutor_rag.prepare_error is None
+    return build_readiness_payload(
+        protocol_version="1",
+        instance_id=os.environ.get("LOCAL_AI_INSTANCE_ID", ""),
+        runtime_state=snap_state,
+        chat_ready=chat_ready,
+        rag_ready=rag_ready,
+        requested_device=requested,
+        effective_device=effective,
+        model_id=settings.local_ai_model,
+        error_code=error_code or _tutor_rag.prepare_error,
+        retryable=bool(error_code) and snap_state != "failed",
+    )
+
+
 @app.get("/")
-def health_check():
-    return {"status": "online", "message": "Server is Running!"}
+def health_check(request: Request):
+    verify_chat_api_token(request, settings.chat_api_token)
+    payload: dict = {"status": "online", "message": "Server is Running!"}
+    payload["readiness"] = _readiness_fields()
+    if settings.ai_provider == "local":
+        if runtime_manager is not None:
+            snapshot = runtime_manager.snapshot()
+            payload["local_runtime"] = {
+                "available": snapshot.inference_ready,
+                "model_available": snapshot.model_available,
+                "error": snapshot.fallback_reason,
+            }
+            if not snapshot.inference_ready:
+                payload["status"] = "degraded"
+            return payload
+        runtime = check_local_runtime(settings)
+        payload["local_runtime"] = {
+            "available": runtime.ollama_or_litert_available,
+            "model_available": runtime.model_available,
+            "error": runtime.error,
+        }
+        if not runtime.model_available:
+            payload["status"] = "degraded"
+    return payload
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -120,13 +223,21 @@ async def chat(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(
             status_code=500,
-            detail=api_key_required_message(payload.locale),
+            detail=local_engine_unavailable_message(payload.locale),
         )
 
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
-    result = await chat_service.chat(payload)
+    lease = None
+    if runtime_manager is not None:
+        lease = await runtime_manager.admit_and_acquire()
+    try:
+        service = service_for_provider(lease.provider) if lease is not None else chat_service
+        result = await service.chat(payload)
+    finally:
+        if lease is not None:
+            await lease.aclose()
 
     if not result.response and not result.function_calls:
         raise HTTPException(
@@ -138,9 +249,10 @@ async def chat(request: Request, payload: ChatRequest):
 
 
 @app.post("/tutor/grade", response_model=TutorGradeResponse)
-async def tutor_grade(request: TutorGradeRequest):
+async def tutor_grade(http_request: Request, payload: TutorGradeRequest):
     """LLM 없이 quiz_bank CSV로 정오만 판정합니다."""
-    result = grade_tutor_answer(request, _quiz_bank, settings)
+    verify_chat_api_token(http_request, settings.chat_api_token)
+    result = grade_tutor_answer(payload, _quiz_bank, settings)
     return result
 
 
@@ -162,15 +274,24 @@ async def chat_stream(request: Request, payload: ChatRequest):
     if chat_service is None:
         raise HTTPException(
             status_code=500,
-            detail=api_key_required_message(payload.locale),
+            detail=local_engine_unavailable_message(payload.locale),
         )
 
     verify_chat_api_token(request, settings.chat_api_token)
     await enforce_chat_rate_limits(request, payload)
 
+    lease = None
+    if runtime_manager is not None:
+        lease = await runtime_manager.admit_and_acquire()
+
     async def event_generator():
-        async for event in chat_service.stream_chat(payload):
-            yield f"data: {event.model_dump_json()}\n\n"
+        try:
+            service = service_for_provider(lease.provider) if lease is not None else chat_service
+            async for event in service.stream_chat(payload):
+                yield format_sse_event(event)
+        finally:
+            if lease is not None:
+                await lease.aclose()
 
     return StreamingResponse(
         event_generator(),
@@ -186,5 +307,6 @@ async def chat_stream(request: Request, payload: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", "8000"))
+    host = "127.0.0.1" if settings.ai_provider == "local" else "0.0.0.0"
+    uvicorn.run(app, host=host, port=port)

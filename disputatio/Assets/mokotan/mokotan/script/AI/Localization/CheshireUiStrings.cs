@@ -46,6 +46,16 @@ public static class CheshireUiStrings
         return Lookup("ReconnectRetrying", locale);
     }
 
+    public static string LocalAiNotReady(string locale)
+    {
+        return Lookup("LocalAiNotReady", locale);
+    }
+
+    public static string LocalAiDisabled(string locale)
+    {
+        return Lookup("LocalAiDisabled", locale);
+    }
+
     public static string WrongAnswerRetry(string locale)
     {
         return Lookup("WrongAnswerRetry", locale);
@@ -139,7 +149,7 @@ public static class CheshireUiStrings
         return Lookup("TutorInsufficientQuestions", locale);
     }
 
-    private static string Lookup(string stringId, string locale)
+    public static string Lookup(string stringId, string locale)
     {
         string normalized = CheshireLocaleResolver.NormalizeLocale(locale);
         ScenarioLocalizationTable table = GetTable(normalized);
@@ -180,6 +190,10 @@ public static class CheshireUiStrings
                 return HardcodedConnectionErrorPrefix(normalizedLocale);
             case "ReconnectRetrying":
                 return HardcodedReconnectRetrying(normalizedLocale);
+            case "LocalAiNotReady":
+                return HardcodedLocalAiNotReady(normalizedLocale);
+            case "LocalAiDisabled":
+                return HardcodedLocalAiDisabled(normalizedLocale);
             case "WrongAnswerRetry":
                 return HardcodedWrongAnswerRetry(normalizedLocale);
             case "WrongAnswerWithHint":
@@ -208,8 +222,90 @@ public static class CheshireUiStrings
                 return HardcodedProgressGuideFooter(normalizedLocale);
             case "TutorInsufficientQuestions":
                 return HardcodedTutorInsufficientQuestions(normalizedLocale);
+            case "SettingsTabGeneral":
+                return HardcodedSettingsTabGeneral(normalizedLocale);
+            case "SettingsSound":
+                return HardcodedSettingsSound(normalizedLocale);
+            case "SettingsFullscreenOn":
+                return HardcodedSettingsFullscreenOn(normalizedLocale);
+            case "SettingsFullscreenOff":
+                return HardcodedSettingsFullscreenOff(normalizedLocale);
+            case "SettingsAsk":
+                return HardcodedSettingsAsk(normalizedLocale);
+            case "SettingsExample":
+                return HardcodedSettingsExample(normalizedLocale);
+            case "SettingsExamplePrompt":
+                return HardcodedSettingsExamplePrompt(normalizedLocale);
+            case "SettingsSampleReply":
+                return HardcodedSettingsSampleReply(normalizedLocale);
+            case "SettingsEmptyQuestion":
+                return HardcodedSettingsEmptyQuestion(normalizedLocale);
+            case "AiSettingsTitle":
+                return HardcodedAiSettingsTitle(normalizedLocale);
+            case "AiSettingsBack":
+                return HardcodedAiSettingsBack(normalizedLocale);
+            case "AiSettingsConnecting":
+                return HardcodedAiSettingsConnecting(normalizedLocale);
+            case "AiSettingsUnavailable":
+                return HardcodedAiSettingsUnavailable(normalizedLocale);
+            case "AiSettingsApplying":
+                return HardcodedAiSettingsApplying(normalizedLocale);
+            case "SettingsPreviewReady":
+                return HardcodedSettingsPreviewReady(normalizedLocale);
             default:
                 return string.Empty;
+        }
+    }
+
+    static string HardcodedSettingsTabGeneral(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "基本設定";
+            case CheshireLocaleResolver.English:
+                return "General";
+            default:
+                return "기본 설정";
+        }
+    }
+
+    static string HardcodedSettingsSound(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "サウンド";
+            case CheshireLocaleResolver.English:
+                return "Sound";
+            default:
+                return "사운드";
+        }
+    }
+
+    static string HardcodedSettingsFullscreenOn(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "オン";
+            case CheshireLocaleResolver.English:
+                return "On";
+            default:
+                return "켜짐";
+        }
+    }
+
+    static string HardcodedSettingsFullscreenOff(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "オフ";
+            case CheshireLocaleResolver.English:
+                return "Off";
+            default:
+                return "꺼짐";
         }
     }
 
@@ -249,6 +345,32 @@ public static class CheshireUiStrings
                 return "Connection unstable. Retrying…";
             default:
                 return "연결이 원활하지 않아 다시 시도합니다…";
+        }
+    }
+
+    private static string HardcodedLocalAiNotReady(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAIの準備ができていないよ。インストールが終わったらもう一度話しかけてね。";
+            case CheshireLocaleResolver.English:
+                return "Local AI is not ready yet. Try again after installation finishes.";
+            default:
+                return "아직 로컬 AI가 준비되지 않았어. 설치가 끝나면 다시 말해 줘.";
+        }
+    }
+
+    private static string HardcodedLocalAiDisabled(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "会話AIはオフだよ。パズルはそのまま進められるよ。";
+            case CheshireLocaleResolver.English:
+                return "Dialogue AI is turned off. You can still solve puzzles.";
+            default:
+                return "지금은 대화 AI를 끄고 있어. 퍼즐은 그대로 진행할 수 있어.";
         }
     }
 
@@ -458,6 +580,149 @@ public static class CheshireUiStrings
             default:
                 return "\n[진행 안내] 위 목록은 플레이어가 한 번이라도 습득한 아이템입니다. "
                     + "인벤토리에서 소비했어도 습득 이력은 유지됩니다.";
+        }
+    }
+
+    static string HardcodedSettingsAsk(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "聞く";
+            case CheshireLocaleResolver.English:
+                return "Ask";
+            default:
+                return "묻기";
+        }
+    }
+
+    static string HardcodedSettingsExample(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "例文を入れる";
+            case CheshireLocaleResolver.English:
+                return "Fill example";
+            default:
+                return "예시 넣기";
+        }
+    }
+
+    static string HardcodedSettingsExamplePrompt(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "この屋敷で迷ったよ。どこへ行けばいい？";
+            case CheshireLocaleResolver.English:
+                return "I got lost in this house. Where should I go?";
+            default:
+                return "이 저택에서 길을 잃었어. 어디로 가야 해?";
+        }
+    }
+
+    static string HardcodedSettingsSampleReply(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "扉は多いけど、足音に耳をすませば道は見えるよ。";
+            case CheshireLocaleResolver.English:
+                return "Many doors, but the path shows itself if you listen to the footsteps.";
+            default:
+                return "문은 많지만 발소리에 귀 기울이면 길이 보여.";
+        }
+    }
+
+    static string HardcodedSettingsEmptyQuestion(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "質問を入力してください。";
+            case CheshireLocaleResolver.English:
+                return "Please enter a question.";
+            default:
+                return "질문을 입력해 주세요.";
+        }
+    }
+
+    static string HardcodedAiSettingsTitle(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAI";
+            case CheshireLocaleResolver.English:
+                return "Local AI";
+            default:
+                return "로컬 AI";
+        }
+    }
+
+    static string HardcodedAiSettingsBack(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "閉じる";
+            case CheshireLocaleResolver.English:
+                return "Close";
+            default:
+                return "닫기";
+        }
+    }
+
+    static string HardcodedAiSettingsConnecting(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAIに接続中…";
+            case CheshireLocaleResolver.English:
+                return "Connecting to local AI…";
+            default:
+                return "로컬 AI에 연결 중…";
+        }
+    }
+
+    static string HardcodedAiSettingsUnavailable(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAIは利用できません。";
+            case CheshireLocaleResolver.English:
+                return "Local AI is unavailable.";
+            default:
+                return "로컬 AI를 사용할 수 없습니다.";
+        }
+    }
+
+    static string HardcodedAiSettingsApplying(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "適用中…";
+            case CheshireLocaleResolver.English:
+                return "Applying…";
+            default:
+                return "적용 중…";
+        }
+    }
+
+    static string HardcodedSettingsPreviewReady(string locale)
+    {
+        switch (locale)
+        {
+            case CheshireLocaleResolver.Japanese:
+                return "ローカルAIの準備ができました。";
+            case CheshireLocaleResolver.English:
+                return "Local AI is ready.";
+            default:
+                return "로컬 AI가 준비되었습니다.";
         }
     }
 }

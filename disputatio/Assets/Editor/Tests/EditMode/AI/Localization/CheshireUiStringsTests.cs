@@ -80,6 +80,20 @@ public class CheshireUiStringsTests
 
     [TestCase(CheshireLocaleResolver.English)]
     [TestCase(CheshireLocaleResolver.Japanese)]
+    public void LocalAiNotReady_NonKorean_HasNoHangul(string locale)
+    {
+        AssertNoHangul(CheshireUiStrings.LocalAiNotReady(locale), nameof(CheshireUiStrings.LocalAiNotReady));
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
+    public void LocalAiDisabled_NonKorean_HasNoHangul(string locale)
+    {
+        AssertNoHangul(CheshireUiStrings.LocalAiDisabled(locale), nameof(CheshireUiStrings.LocalAiDisabled));
+    }
+
+    [TestCase(CheshireLocaleResolver.English)]
+    [TestCase(CheshireLocaleResolver.Japanese)]
     public void ConnectionErrorPrefix_NonKorean_HasNoHangul(string locale)
     {
         AssertNoHangul(CheshireUiStrings.ConnectionErrorPrefix(locale), nameof(CheshireUiStrings.ConnectionErrorPrefix));
@@ -222,5 +236,28 @@ public class CheshireUiStringsTests
     {
         StringAssert.Contains("[진행]", CheshireUiStrings.ProgressEmptySection(CheshireLocaleResolver.Korean));
         StringAssert.Contains("[진행 안내]", CheshireUiStrings.ProgressGuideFooter(CheshireLocaleResolver.Korean));
+    }
+
+    [TestCase("SettingsAsk")]
+    [TestCase("SettingsExample")]
+    [TestCase("SettingsExamplePrompt")]
+    [TestCase("SettingsSampleReply")]
+    [TestCase("SettingsEmptyQuestion")]
+    [TestCase("AiSettingsUnavailable")]
+    [TestCase("SettingsPreviewReady")]
+    public void SettingsPreviewKeys_HaveKoEnJaWithoutHangulLeak(string key)
+    {
+        CheshireUiStrings.ClearCsvOverrideForTests();
+        string ko = CheshireUiStrings.Lookup(key, CheshireLocaleResolver.Korean);
+        string en = CheshireUiStrings.Lookup(key, CheshireLocaleResolver.English);
+        string ja = CheshireUiStrings.Lookup(key, CheshireLocaleResolver.Japanese);
+
+        Assert.That(ko, Is.Not.Empty, key + " ko");
+        Assert.That(en, Is.Not.Empty, key + " en");
+        Assert.That(ja, Is.Not.Empty, key + " ja");
+        AssertNoHangul(en, key + " en");
+        AssertNoHangul(ja, key + " ja");
+        Assert.That(ja, Is.Not.EqualTo(en), key + " ja must not reuse English");
+        Assert.That(ja, Is.Not.EqualTo(ko), key + " ja must not reuse Korean");
     }
 }

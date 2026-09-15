@@ -39,7 +39,7 @@ _CURATED_CITATION_IDS: frozenset[str] = frozenset(
         "planning:47f3be566f34",
         "technical:e52de73281b4",
         "planning:b98bbfbdb019",
-        "technical:505bbb50868b",
+        "technical:ded8fb508f0d",
         "technical:ca17d157de10",
         "planning:9d4611de3ae3",
     }
@@ -458,10 +458,11 @@ def _render_ai_and_dialogue(records_by_id: Mapping[str, SourceRecord]) -> str:
 
     backend = (
         "Production stack routes Unity chat UI through FastAPI `/chat` endpoints "
-        "with Groq primary and Gemini fallback providers."
+        "to a local LiteRT Gemma runtime (`AI_PROVIDER=local`), with no Groq or "
+        "Gemini execution path."
     )
     claims.append(
-        f"- {backend} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
+        f"- {backend} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     defense = (
@@ -502,7 +503,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`backend_ai/`, CI scripts, and deploy compose under `deploy/`."
     )
     claims.append(
-        f"- {overview} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
+        f"- {overview} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     unity = (
@@ -510,7 +511,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "gameplay code under `Assets/godlotto/Script/`."
     )
     claims.append(
-        f"- {unity} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
+        f"- {unity} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     persistence = (
@@ -518,7 +519,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "server-side data includes CSV quiz banks and optional Redis rate limits."
     )
     claims.append(
-        f"- {persistence} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
+        f"- {persistence} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     deploy = (
@@ -526,7 +527,7 @@ def _render_architecture(records_by_id: Mapping[str, SourceRecord]) -> str:
         "`deploy/docker-compose.prod.yml`."
     )
     claims.append(
-        f"- {deploy} {_citation_from_id(records_by_id, 'technical:505bbb50868b')}"
+        f"- {deploy} {_citation_from_id(records_by_id, 'technical:ded8fb508f0d')}"
     )
 
     lines = [
@@ -700,20 +701,21 @@ def _render_operations() -> str:
             "1. manifest, transcript, link, encoding, and RAG corpus validation,",
             "2. `pytest tools/tests/test_wiki_rag_*.py`,",
             "3. RAG corpus rebuild plus re-validation,",
-            "4. scoped `backend_ai` RAG pytest (dummy API keys only; not the full",
+            "4. scoped `backend_ai` RAG pytest (`AI_PROVIDER=local`; not the full",
             "   backend suite),",
-            "5. `python backend_ai/scripts/build_tutor_rag_index.py --dry-run` (no",
-            "   production embedding API calls).",
+            "5. `python backend_ai/scripts/build_tutor_rag_index.py --dry-run` (local",
+            "   `local-hash-v1` embeddings; no external embedding API).",
             "",
-            "PR CI never requires or prints a production `GOOGLE_API_KEY`.",
+            "PR CI never requires or prints a production embedding API key.",
             "",
             "### Release embedding build",
             "",
             "Production embeddings run only from a **manual** `workflow_dispatch` on",
             "`wiki-rag.yml` with `build_embeddings: true`, inside the protected",
-            "`wiki-rag-release` GitHub Environment. That job supplies a masked",
-            "`GOOGLE_API_KEY` secret, rebuilds `backend_ai/data/tutor_rag_index.json`,",
-            "and fails if chunk counts or source-ID sets drift without a manifest change.",
+            "`wiki-rag-release` GitHub Environment. That job rebuilds",
+            "`backend_ai/data/tutor_rag_index.json` with local `local-hash-v1`",
+            "embeddings and fails if chunk counts or source-ID sets drift without a",
+            "manifest change.",
             "An empty committed index skips the manifest-unchanged drift guard on the",
             "first production build.",
             "",

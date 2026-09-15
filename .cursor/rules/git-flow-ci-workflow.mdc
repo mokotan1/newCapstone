@@ -66,7 +66,7 @@ alwaysApply: true
 | `scripts/CSharpSyntaxChecker` | `dotnet test scripts/CSharpSyntaxChecker/CSharpSyntaxChecker.Tests/` |
 | `.github/workflows/` | 워크플로 문법·트리거 이해; push 후 CI 확인 |
 
-CI는 `.github/workflows/ci-check.yml`(Python + C# 구문), `backend-build.yml`(`backend_ai` 변경 시)을 참고한다.
+CI는 `.github/workflows/ci-check.yml`(모든 브랜치 린트), `backend-build.yml`·`unity-client-build.yml`(`main` 진입 시 자동 빌드)을 참고한다.
 
 ## PR 전 최소 점검
 

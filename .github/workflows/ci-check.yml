@@ -67,6 +67,9 @@ jobs:
             echo "errors_found=0" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Unity harness policy contract
+        run: python -m pytest scripts/unity-harness/tests -q
+
       - name: Collect Python errors
         if: steps.syntax_check.outputs.errors_found == '1' || steps.ruff_check.outputs.errors_found == '1'
         run: |

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -18,15 +17,28 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    groq_api_key: str = ""
-    google_api_key: str = ""
     chat_api_token: str = ""
-
-    default_model_groq: str = "llama-3.3-70b-versatile"
-    default_model_gemini: str = "gemini-2.0-flash"
+    #: Loopback control API for /local-ai/*. Empty until local startup generates one.
+    local_ai_control_token: str = ""
 
     default_temperature: float = 0.7
     max_tokens: int = 512
+    #: local = LiteRT-LM / Gemma 4 E2B on loopback. Cloud providers are not used.
+    ai_provider: str = "local"
+    local_ai_base_url: str = "http://127.0.0.1:9379"
+    local_ai_model: str = "gemma4-e2b"
+    local_ai_num_ctx: int = 2048
+    local_ai_think: bool = False
+    #: Empty = health-check only; do not spawn a runtime from FastAPI.
+    local_ai_start_command: str = ""
+    #: Python environment containing the pinned LiteRT package.
+    local_ai_litert_python: str = ""
+    #: Gate 1 artifacts; this setting alone does not enable the candidate.
+    local_ai_cuda_dir: str = ""
+    dialogue_temperature: float = 0.8
+    dialogue_max_tokens: int = 64
+    dialogue_top_p: float = 0.95
+    dialogue_top_k: int = 64
     #: 모든 경로에 적용되는 프로바이더 토큰 상한(서버 강제 하드 캡).
     max_tokens_hard_cap: int = 4096
     #: Tutor ``rag_profile`` 요청에만 적용(짧은 대사·툴 호출 위주). 전역 max_tokens와 min.
@@ -47,7 +59,7 @@ class Settings(BaseSettings):
     tutor_rag_corpus_dir: str = "../docs/wiki/rag"
     tutor_quiz_csv_path: str = "data/tutor_quiz/quiz_bank.csv"
     tutor_rag_index_path: str = "data/tutor_rag_index.json"
-    tutor_embedding_model: str = "models/text-embedding-004"
+    tutor_embedding_model: str = "local-hash-v1"
     tutor_rag_top_k: int = 5
     tutor_rag_max_context_chars: int = 6000
     tutor_rag_min_similarity: float = 0.25
@@ -64,10 +76,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    # Let pydantic load .env (GROQ_API_KEY, GOOGLE_API_KEY). Legacy env name for Groq only if still empty.
-    s = Settings()
-    if not s.groq_api_key:
-        legacy = os.getenv("capstone", "")
-        if legacy:
-            s = s.model_copy(update={"groq_api_key": legacy})
-    return s
+    return Settings()

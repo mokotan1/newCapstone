@@ -1,0 +1,68 @@
+{
+  "taskId": "qa-20260730-autorun",
+  "scenarioIds": ["tutorroom.cheshire-quiz"],
+  "evidenceRoot": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454",
+  "gatewayEvidencePath": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/gateway-runs/20260730T012633Z-run-3089a0ef04f0494082a30bef43c4b7bc",
+  "status": "pass",
+  "reviewedAtUtc": "2026-07-30T01:29:00Z",
+  "gitRevision": "b836b519073a4ada683d4717591b03801bc429a1",
+  "checklist": {
+    "scenarioIdAndGitRevision": "pass",
+    "reproductionPath": "pass",
+    "stateAssertionsRecorded": "pass",
+    "requiredScreenshotsPresent": "pass",
+    "consoleDeltaReviewed": "pass",
+    "profileRestoreLeaseNoted": "pass",
+    "apiVsRealInputSeparated": "n/a"
+  },
+  "environmentDependency": {
+    "dependent": true,
+    "editorStateBeforeRuns": "False|TutorRoom",
+    "note": "Pass occurred while Editor was already on TutorRoom in Edit Mode. Sibling scenarios failed with missing-playmode-scene because qa_run does not bootstrap scenario.scene / Play Mode. This Pass is not proof that the scenario is self-bootstrapping from an arbitrary Editor scene."
+  },
+  "findings": [
+    {
+      "scenarioId": "tutorroom.cheshire-quiz",
+      "claimed": "pass",
+      "reviewed": "pass",
+      "reason": "Gateway Pass backed by reproduction path (click-quiz-input Success), 3 recorded assertions (all Passed), 2 screenshot files on disk referenced in events/report, console finalize ConsoleErrorCount=0 with no exception lines. Profile restore/lease release noted via qa_recover in playtester-results."
+    },
+    {
+      "scenarioId": "tutorroom.cheshire-quiz",
+      "claimed": "pass",
+      "reviewed": "pass",
+      "severity": "info",
+      "reason": "ENVIRONMENT_DEPENDENT: Editor active scene was already TutorRoom (Edit Mode). Same autorun’s Play Mode bootstrap gap blocked other rooms; do not generalize this Pass as environment-independent."
+    },
+    {
+      "scenarioId": "tutorroom.cheshire-quiz",
+      "claimed": "pass",
+      "reviewed": "pass",
+      "severity": "info",
+      "reason": "Both screenshots (0006-capture-quiz-input-evidence.png, 0008-auto-finalize-safety-net.png) exist (392308 bytes each) and are byte-identical (same MD5). Scene frame shows TutorRoom UI; no separate visual proof of an opened quiz-input panel beyond state assertions."
+    }
+  ],
+  "evidenceVerified": {
+    "manifestVerdict": "Pass",
+    "assertionPassedCount": 3,
+    "assertionFailedCount": 0,
+    "assertions": [
+      "assert-input-unlocked",
+      "assert-ai-idle-or-connected",
+      "assert-no-console-errors"
+    ],
+    "reproductionSteps": [
+      {
+        "commandId": "click-quiz-input",
+        "code": "Success",
+        "message": "API interaction succeeded."
+      }
+    ],
+    "screenshotsOnDisk": [
+      "screenshots/0006-capture-quiz-input-evidence.png",
+      "screenshots/0008-auto-finalize-safety-net.png"
+    ],
+    "consoleErrors": [],
+    "secretsUnredacted": false
+  }
+}

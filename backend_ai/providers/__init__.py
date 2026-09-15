@@ -1,5 +1,4 @@
 from providers.base import AIProvider
-from providers.groq_provider import GroqProvider
-from providers.gemini_provider import GeminiProvider
+from providers.litert_provider import LiteRTProvider
 
-__all__ = ["AIProvider", "GroqProvider", "GeminiProvider"]
+__all__ = ["AIProvider", "LiteRTProvider"]

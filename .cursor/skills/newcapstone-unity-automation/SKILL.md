@@ -92,6 +92,9 @@ Prefer Unity MCP for interactive editor inspection:
 
 ## Mandatory postflight (에이전트 필수)
 
+완료 기준은 `.harness/unity-verification.md`다. 활성 backend·버전은
+`.harness/unity-toolchain.json`이다. 이 스킬은 backend별 사용법과 오류 진단만 둔다.
+
 Cursor 규칙 `.cursor/rules/unity-verification-postflight.mdc`를 따른다.
 **코드·씬·프리팹 변경 후** 완료 응답 전에 아래를 실행한다. `CSharpSyntaxChecker`만으로는 부족하다.
 

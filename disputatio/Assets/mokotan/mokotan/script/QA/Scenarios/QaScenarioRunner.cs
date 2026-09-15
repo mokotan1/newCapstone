@@ -24,7 +24,13 @@ namespace Godlotto.QA.Scenarios
         /// 별도 상태입니다 — 취소는 "무언가 잘못됨"이 아니라 "호출자가 중단을 요청함"이므로,
         /// evidence 상 실패로 오염시키지 않습니다.
         /// </summary>
-        Interrupted
+        Interrupted,
+
+        /// <summary>
+        /// Play Mode/씬 준비 등 환경 문제로 실행을 시작할 수 없었습니다. 제품 어서션 실패
+        /// (<see cref="Failed"/>)와 구분합니다.
+        /// </summary>
+        Blocked
     }
 
     /// <summary><see cref="QaScenarioStepOutcome"/>가 나타낼 수 있는 명시적 스텝 결과.</summary>
@@ -174,8 +180,12 @@ namespace Godlotto.QA.Scenarios
         private readonly Func<QaDriverSnapshot> captureSnapshot;
         private readonly Func<DateTime> utcNowProvider;
         private readonly Func<byte[]> captureScreenshotPng;
+        private readonly IQaPlayModeSceneBootstrap playModeSceneBootstrap;
+        private readonly TimeSpan playModeBootstrapTimeout;
         private readonly string ownerId;
         private readonly TimeSpan leaseTtl;
+
+        private static readonly TimeSpan DefaultPlayModeBootstrapTimeout = TimeSpan.FromSeconds(60);
 
         /// <param name="driver">QA run의 session.* 생애주기를 소유하는 게이트웨이(필수).</param>
         /// <param name="sceneRegistry">씬/대상/프리셋을 해석하는 레지스트리(필수).</param>
@@ -197,6 +207,14 @@ namespace Godlotto.QA.Scenarios
         /// 스텝은 가짜 evidence를 만들어내지 않고 명시적으로 실패하며, 안전망도 아무 것도 하지
         /// 않습니다 — provider가 없다는 사실 자체를 절대 숨기지 않습니다(Fail-Safe).
         /// </param>
+        /// <param name="playModeSceneBootstrap">
+        /// Ensures Play Mode + <c>scenario.scene</c> before presets/interactions. When omitted,
+        /// runs without environment bootstrap (unit tests). Production Editor wiring must inject
+        /// an Editor implementation.
+        /// </param>
+        /// <param name="playModeBootstrapTimeout">
+        /// Max wait for Play Mode / scene readiness. Defaults to 60 seconds.
+        /// </param>
         public QaScenarioRunner(
             IQaDriver driver,
             QaSceneRegistry sceneRegistry,
@@ -208,7 +226,9 @@ namespace Godlotto.QA.Scenarios
             string ownerId = null,
             TimeSpan? leaseTtl = null,
             Func<DateTime> utcNowProvider = null,
-            Func<byte[]> captureScreenshotPng = null)
+            Func<byte[]> captureScreenshotPng = null,
+            IQaPlayModeSceneBootstrap playModeSceneBootstrap = null,
+            TimeSpan? playModeBootstrapTimeout = null)
         {
             this.driver = driver ?? throw new ArgumentNullException(nameof(driver));
             this.sceneRegistry = sceneRegistry ?? throw new ArgumentNullException(nameof(sceneRegistry));
@@ -221,6 +241,8 @@ namespace Godlotto.QA.Scenarios
             this.leaseTtl = leaseTtl ?? DefaultLeaseTtl;
             this.utcNowProvider = utcNowProvider ?? (() => DateTime.UtcNow);
             this.captureScreenshotPng = captureScreenshotPng;
+            this.playModeSceneBootstrap = playModeSceneBootstrap;
+            this.playModeBootstrapTimeout = playModeBootstrapTimeout ?? DefaultPlayModeBootstrapTimeout;
         }
 
         /// <summary>
@@ -240,7 +262,7 @@ namespace Godlotto.QA.Scenarios
             var stepOutcomes = new List<QaScenarioStepOutcome>();
 
             QaCommandResult beginSessionResult = await SafeExecuteDriverAsync(
-                QaCommand.BeginSession(scenario.Id), cancellationToken).ConfigureAwait(false);
+                QaCommand.BeginSession(scenario.Id), cancellationToken).ConfigureAwait(true);
 
             if (!beginSessionResult.IsSuccess)
             {
@@ -263,7 +285,7 @@ namespace Godlotto.QA.Scenarios
                 (outcomeCode, outcomeMessage, lastSnapshot) = await ExecuteWithinLeaseAsync(
                     scenario, runId, stepOutcomes, cancellationToken,
                     onLeaseAcquired: id => { leaseAcquired = true; leaseId = id; },
-                    onProfileBegun: () => profileBegun = true).ConfigureAwait(false);
+                    onProfileBegun: () => profileBegun = true).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -275,6 +297,10 @@ namespace Godlotto.QA.Scenarios
                 // Cleanup boundary (Task 9 Step 3): whatever happened above (success, failure,
                 // cancellation, or an unexpected exception), the QA profile must be restored and
                 // the execution lease must be released so the next run starts from a clean slate.
+                // Play Mode ownership (if this run entered it) is restored before profile so
+                // gameplay Prefs restore happens after the scene has left Play Mode.
+                SafeRestorePlayModeBootstrap();
+
                 if (profileBegun)
                 {
                     SafeRestoreProfile(scenario.Id);
@@ -300,7 +326,7 @@ namespace Godlotto.QA.Scenarios
                 ? QaCommandType.SessionEnd
                 : QaCommandType.SessionAbort;
             await SafeExecuteDriverAsync(
-                QaCommand.Create(scenario.Id, sessionCloseType), CancellationToken.None).ConfigureAwait(false);
+                QaCommand.Create(scenario.Id, sessionCloseType), CancellationToken.None).ConfigureAwait(true);
 
             return QaScenarioRunOutcome.Create(
                 scenario.Id, runId, outcomeCode, outcomeMessage, startedAtUtc, utcNowProvider(),
@@ -357,6 +383,25 @@ namespace Godlotto.QA.Scenarios
                     "Scenario references unknown scene '" + scenario.Scene + "'.", beginSnapshot);
             }
 
+            if (playModeSceneBootstrap != null)
+            {
+                QaPlayModeBootstrapResult bootstrapResult = await playModeSceneBootstrap
+                    .EnsureReadyAsync(scenario.Scene, playModeBootstrapTimeout, cancellationToken)
+                    .ConfigureAwait(true);
+                if (bootstrapResult == null || !bootstrapResult.IsSuccess)
+                {
+                    string blockedMessage = bootstrapResult != null
+                        ? bootstrapResult.Message
+                        : "BLOCKED: Play Mode scene bootstrap returned null.";
+                    if (blockedMessage.IndexOf("BLOCKED", StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        blockedMessage = "BLOCKED: " + blockedMessage;
+                    }
+
+                    return (QaScenarioRunOutcomeCode.Blocked, blockedMessage, beginSnapshot);
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(scenario.Preset))
             {
                 QaScenePresetResult presetResult = sceneAdapter.ApplyPreset(scenario.Preset);
@@ -377,7 +422,7 @@ namespace Godlotto.QA.Scenarios
                         "Cancelled before executing step '" + step.Id + "'.", lastSnapshot);
                 }
 
-                QaScenarioStepOutcome stepOutcome = await ExecuteStepAsync(step, cancellationToken).ConfigureAwait(false);
+                QaScenarioStepOutcome stepOutcome = await ExecuteStepAsync(step, cancellationToken).ConfigureAwait(true);
                 stepOutcomes.Add(stepOutcome);
                 AppendStepEvidence(step, stepOutcome);
 
@@ -426,17 +471,17 @@ namespace Godlotto.QA.Scenarios
             switch (commandKind)
             {
                 case QaScenarioCommandKind.InteractionPointer:
-                    return await ExecutePointerAsync(step, timeout, cancellationToken).ConfigureAwait(false);
+                    return await ExecutePointerAsync(step, timeout, cancellationToken).ConfigureAwait(true);
                 case QaScenarioCommandKind.InteractionDrag:
-                    return await ExecuteDragAsync(step, timeout, cancellationToken).ConfigureAwait(false);
+                    return await ExecuteDragAsync(step, timeout, cancellationToken).ConfigureAwait(true);
                 case QaScenarioCommandKind.InteractionKey:
-                    return await ExecuteKeyAsync(step, timeout, cancellationToken).ConfigureAwait(false);
+                    return await ExecuteKeyAsync(step, timeout, cancellationToken).ConfigureAwait(true);
                 case QaScenarioCommandKind.StateAssert:
-                    return await ExecuteAssertAsync(step, timeout, cancellationToken).ConfigureAwait(false);
+                    return await ExecuteAssertAsync(step, timeout, cancellationToken).ConfigureAwait(true);
                 case QaScenarioCommandKind.EvidenceCapture:
-                    return await ExecuteEvidenceCaptureAsync(step).ConfigureAwait(false);
+                    return await ExecuteEvidenceCaptureAsync(step).ConfigureAwait(true);
                 case QaScenarioCommandKind.EvidenceConsole:
-                    return await ExecuteEvidenceConsoleAsync(step).ConfigureAwait(false);
+                    return await ExecuteEvidenceConsoleAsync(step).ConfigureAwait(true);
                 default:
                     return QaScenarioStepOutcome.Failed(step.Id, "Command '" + step.Command + "' is not executable yet.");
             }
@@ -452,7 +497,7 @@ namespace Godlotto.QA.Scenarios
 
             return await RunInputAsync(
                 step.Id, timeout, cancellationToken,
-                (token) => inputDriver.ClickAsync(targetId, token)).ConfigureAwait(false);
+                (token) => inputDriver.ClickAsync(targetId, token)).ConfigureAwait(true);
         }
 
         private async Task<QaScenarioStepOutcome> ExecuteDragAsync(
@@ -470,7 +515,7 @@ namespace Godlotto.QA.Scenarios
 
             return await RunInputAsync(
                 step.Id, timeout, cancellationToken,
-                (token) => inputDriver.DragAsync(sourceId, destinationId, token)).ConfigureAwait(false);
+                (token) => inputDriver.DragAsync(sourceId, destinationId, token)).ConfigureAwait(true);
         }
 
         private async Task<QaScenarioStepOutcome> ExecuteKeyAsync(
@@ -484,7 +529,7 @@ namespace Godlotto.QA.Scenarios
             string text = step.Text ?? string.Empty;
             return await RunInputAsync(
                 step.Id, timeout, cancellationToken,
-                (token) => inputDriver.KeyAsync(targetId, text, token)).ConfigureAwait(false);
+                (token) => inputDriver.KeyAsync(targetId, text, token)).ConfigureAwait(true);
         }
 
         private async Task<QaScenarioStepOutcome> RunInputAsync(
@@ -499,7 +544,7 @@ namespace Godlotto.QA.Scenarios
             QaInputResult result;
             try
             {
-                result = await invokeDriver(linkedCts.Token).ConfigureAwait(false);
+                result = await invokeDriver(linkedCts.Token).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
             {
@@ -542,7 +587,7 @@ namespace Godlotto.QA.Scenarios
 
             var waiter = new QaConditionWaiter(captureSnapshot, utcNowProvider);
             QaWaitResult waitResult = await waiter.WaitUntilAsync(assertion, timeout, baseline: null, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
 
             switch (waitResult.Code)
             {
@@ -723,6 +768,24 @@ namespace Godlotto.QA.Scenarios
             {
                 UnityEngine.Debug.LogWarning("[QaScenarioRunner] captureSnapshot threw: " + ex.GetType().Name);
                 return null;
+            }
+        }
+
+        private void SafeRestorePlayModeBootstrap()
+        {
+            if (playModeSceneBootstrap == null)
+            {
+                return;
+            }
+
+            try
+            {
+                playModeSceneBootstrap.RestoreIfOwned();
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogWarning(
+                    "[QaScenarioRunner] Play Mode bootstrap restore threw: " + ex.GetType().Name);
             }
         }
 

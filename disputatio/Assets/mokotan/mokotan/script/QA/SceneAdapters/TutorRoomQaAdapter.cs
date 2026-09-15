@@ -3,19 +3,14 @@ using System;
 using System.Collections.Generic;
 using Godlotto.QA.Input;
 using Godlotto.QA.Scenes;
+using UnityEngine;
 
 namespace Godlotto.QA.SceneAdapters
 {
     /// <summary>
-    /// TutorRoom QA adapter (Task 12). Registration-only stub: unlike Kitchen/Hall/MaidRoom, no
-    /// dedicated C# interaction controller exists for TutorRoom at all (no
-    /// <c>TutorRoomInteractionController</c>/<c>TutorRoomPuzzleController</c> subclass was found
-    /// in <c>Assets/godlotto/Script/Interaction</c>), so there is no public API boundary at all to
-    /// call for the "cheshire quiz" flow -- it is presumably driven purely by Fungus/Inspector
-    /// data on the scene. This adapter is registered purely so <c>tutorroom.cheshire-quiz</c>
-    /// validates against the schema/registry and is discoverable via qa_list;
-    /// <see cref="TryClick"/> fails explicitly with this gap instead of fabricating a controller
-    /// or an interaction id that has no source-code evidence behind it.
+    /// TutorRoom QA adapter. <c>tutorroom.quiz-input</c> opens the real
+    /// <see cref="QuizInputHandler"/> panel (same path Fungus uses via
+    /// <c>TutorChatbot.ActivateQuizInputField</c>). Missing handler → explicit failure.
     ///
     /// Placement/assembly note: see <see cref="QaSceneAdapterRegistration"/> remarks.
     /// </summary>
@@ -29,6 +24,9 @@ namespace Godlotto.QA.SceneAdapters
             new List<QaTargetId> { QuizInputTargetId };
 
         private static readonly IReadOnlyCollection<string> DeclaredPresetIds = Array.Empty<string>();
+
+        /// <summary>EditMode hook: inject or clear the QuizInputHandler resolver.</summary>
+        internal static Func<QuizInputHandler> QuizInputHandlerResolverForTests { get; set; }
 
         public string SceneName
         {
@@ -45,6 +43,11 @@ namespace Godlotto.QA.SceneAdapters
             get { return DeclaredPresetIds; }
         }
 
+        internal static void ResetQuizInputHandlerResolverForTests()
+        {
+            QuizInputHandlerResolverForTests = null;
+        }
+
         public QaScenePresetResult ApplyPreset(string presetId)
         {
             return QaScenePresetResult.UnknownPreset(presetId);
@@ -52,9 +55,13 @@ namespace Godlotto.QA.SceneAdapters
 
         public QaSceneSnapshot CaptureSnapshot()
         {
+            QuizInputHandler handler = ResolveQuizInputHandler();
             var values = new Dictionary<string, string>
             {
-                ["gap"] = "Task 12 registration-only stub; no TutorRoom C# interaction controller exists to inspect."
+                ["quizInputFound"] = (handler != null).ToString(),
+                ["quizInputPanelActive"] = handler != null && handler.IsQuizInputPanelActive
+                    ? bool.TrueString
+                    : bool.FalseString
             };
 
             return QaSceneSnapshot.Create(SceneName, DateTime.UtcNow, values);
@@ -62,28 +69,54 @@ namespace Godlotto.QA.SceneAdapters
 
         public bool TryClick(QaTargetId targetId, out string error)
         {
-            error = BuildGapMessage(targetId);
-            return false;
+            if (targetId != QuizInputTargetId)
+            {
+                error = "TutorRoomQaAdapter does not own target '" + targetId + "'.";
+                return false;
+            }
+
+            QuizInputHandler handler = ResolveQuizInputHandler();
+            if (handler == null)
+            {
+                error =
+                    "QuizInputHandler not found in the active scene. This adapter only works " +
+                    "while '" + SceneNames.TutorRoom + "' is the active Play Mode scene with a wired quiz panel.";
+                return false;
+            }
+
+            handler.ActivateQuizInputField();
+            if (!handler.IsQuizInputPanelActive)
+            {
+                error =
+                    "QuizInputHandler.ActivateQuizInputField ran but the quiz input panel is still inactive " +
+                    "(inputPanel reference may be missing in the TutorRoom scene).";
+                return false;
+            }
+
+            error = null;
+            return true;
         }
 
         public bool TryDrag(QaTargetId sourceTargetId, QaTargetId destinationTargetId, out string error)
         {
-            error = BuildGapMessage(sourceTargetId);
+            error = "TutorRoomQaAdapter does not support drag for target '" + sourceTargetId + "'.";
             return false;
         }
 
         public bool TryKey(QaTargetId targetId, string text, out string error)
         {
-            error = BuildGapMessage(targetId);
+            error = "TutorRoomQaAdapter does not support key input for target '" + targetId + "'.";
             return false;
         }
 
-        private static string BuildGapMessage(QaTargetId targetId)
+        private static QuizInputHandler ResolveQuizInputHandler()
         {
-            return "Gap (Task 12): TutorRoomQaAdapter is a registration-only stub for target '" + targetId +
-                "' -- no TutorRoom interaction controller/interactionId exists in source yet " +
-                "(Cheshire quiz flow appears to be pure Fungus/Inspector data). Follow-up task " +
-                "must add a real TutorRoom controller boundary before this can be wired.";
+            if (QuizInputHandlerResolverForTests != null)
+            {
+                return QuizInputHandlerResolverForTests();
+            }
+
+            return UnityEngine.Object.FindFirstObjectByType<QuizInputHandler>(FindObjectsInactive.Include);
         }
     }
 }

@@ -357,11 +357,12 @@ namespace Godlotto.QA.Developer
                 }
             }
 
-            if (runnerResult.Code == DeveloperQaResultCode.Ok
-                && executeSteps
+            if (executeSteps
                 && runnerResult.Data != null
                 && runnerResult.Data.TryGetValue("state", out string state)
-                && state == DeveloperQaScenarioStates.Completed)
+                && (state == DeveloperQaScenarioStates.Completed
+                    || state == DeveloperQaScenarioStates.Failed
+                    || state == DeveloperQaScenarioStates.Cancelled))
             {
                 DeveloperQaResult restore = RestoreScenarioProfileSession();
                 if (restore.Code != DeveloperQaResultCode.Ok)

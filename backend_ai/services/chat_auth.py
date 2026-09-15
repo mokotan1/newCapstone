@@ -22,6 +22,9 @@ def _bearer_token(authorization: str) -> str:
 
 def verify_chat_api_token(request: Request, expected_token: str) -> None:
     """Require a shared chat API token only when one is configured."""
+    if "origin" in request.headers:
+        raise HTTPException(status_code=403, detail="origin_not_allowed")
+
     expected = (expected_token or "").strip()
     if not expected:
         return

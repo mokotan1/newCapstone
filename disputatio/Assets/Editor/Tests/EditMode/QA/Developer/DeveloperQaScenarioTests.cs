@@ -186,6 +186,32 @@ public class DeveloperQaScenarioTests
         Assert.IsTrue(status.Data.ContainsKey("step_index"));
     }
 
+    [Test]
+    public async Task ExecuteAsync_ScenarioRun_WhenExecutionFails_RestoresQaProfile()
+    {
+        var profile = new FakeQaProfileService();
+        var registry = new DeveloperQaCapabilityRegistry();
+        StudyRoomQaAdapterRegister(registry);
+        var service = new DeveloperQaService(registry, profile);
+
+        DeveloperQaResult run = await service.ExecuteAsync(
+            DeveloperQaCommand.Create(
+                "run-failure-restores-profile",
+                "scenario",
+                "run",
+                parameters: new Dictionary<string, string>
+                {
+                    ["scenario_id"] = ScenarioId,
+                    ["scenario_path"] = LocateScenarioJsonPath(ScenarioId)
+                }),
+            CancellationToken.None);
+
+        Assert.AreEqual(DeveloperQaResultCode.EnvironmentBlocked, run.Code, run.Message);
+        Assert.AreEqual(DeveloperQaScenarioStates.Failed, run.Data["state"]);
+        Assert.AreEqual(1, profile.RestoreCallCount);
+        Assert.IsFalse(profile.IsQaProfileActive);
+    }
+
     private static void StudyRoomQaAdapterRegister(DeveloperQaCapabilityRegistry registry)
     {
         Godlotto.QA.SceneAdapters.StudyRoomQaAdapter.RegisterCapabilities(registry);

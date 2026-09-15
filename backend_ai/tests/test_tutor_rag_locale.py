@@ -5,22 +5,30 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from services.local_embedding import DIMENSION, MODEL_ID, embed_text
 from services.tutor_rag_service import TutorRAGService
 
 
 def _write_index(path: Path, chunks: list[dict]) -> None:
     path.write_text(
-        json.dumps({"embedding_model": "test", "chunks": chunks}, ensure_ascii=False),
+        json.dumps({"embedding_model": MODEL_ID, "chunks": chunks}, ensure_ascii=False),
         encoding="utf-8",
     )
 
 
+def _unit(index: int) -> list[float]:
+    vector = [0.0] * DIMENSION
+    vector[index] = 1.0
+    return vector
+
+
 def _sample_chunk(**overrides: object) -> dict:
+    text = str(overrides.get("text") or "world lore body")
     base = {
         "id": "scenario:abc123:world-lore:0",
         "text": "world lore body",
         "locale": "ko",
-        "embedding": [1.0, 0.0],
+        "embedding": embed_text(text),
         "source_id": "scenario:abc123",
         "source_path": "시나리오/world.pdf",
         "category": "scenario",
@@ -33,7 +41,8 @@ def _sample_chunk(**overrides: object) -> dict:
 def test_empty_index_returns_empty_block(tmp_path: Path) -> None:
     idx = tmp_path / "empty.json"
     _write_index(idx, [])
-    svc = TutorRAGService(idx, api_key="", embedding_model="m")
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID)
+    assert svc.prepare_error is None
     assert svc.build_context_block("q", top_k=3, max_context_chars=1000, locale="en") == ""
 
 
@@ -45,19 +54,16 @@ def test_chunks_without_locale_metadata_unchanged(tmp_path: Path) -> None:
             {
                 "id": "a",
                 "text": "untagged body",
-                "embedding": [1.0, 0.0],
+                "embedding": embed_text("untagged body"),
                 "source_id": "technical:doc1",
                 "source_path": "docs/architecture.md",
             },
         ],
     )
-    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.0)
-
-    def fake_embed(text: str) -> list[float]:
-        return [1.0, 0.0]
-
-    svc._embed_query = fake_embed  # type: ignore[method-assign]
-    block = svc.build_context_block("q", top_k=3, max_context_chars=2000, locale="en")
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID, min_similarity=0.0)
+    block = svc.build_context_block(
+        "untagged body", top_k=3, max_context_chars=2000, locale="en"
+    )
     assert "untagged body" in block
     assert "source_id=technical:doc1" in block
     assert "source_path=docs/architecture.md" in block
@@ -71,9 +77,10 @@ def test_build_context_block_en_header_has_no_hangul(tmp_path: Path) -> None:
             _sample_chunk(text="untagged body", locale="ko"),
         ],
     )
-    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.0)
-    svc._embed_query = lambda text: [1.0, 0.0]  # type: ignore[method-assign]
-    block = svc.build_context_block("q", top_k=3, max_context_chars=2000, locale="en")
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID, min_similarity=0.0)
+    block = svc.build_context_block(
+        "untagged body", top_k=3, max_context_chars=2000, locale="en"
+    )
     assert "untagged body" in block
     assert "참고 자료" not in block
     assert "퀴즈 출제" not in block
@@ -84,6 +91,7 @@ def test_build_context_block_en_header_has_no_hangul(tmp_path: Path) -> None:
 
 def test_locale_filter_prefers_en_then_falls_back_to_ko(tmp_path: Path) -> None:
     idx = tmp_path / "loc.json"
+    shared = embed_text("shared query")
     _write_index(
         idx,
         [
@@ -91,18 +99,18 @@ def test_locale_filter_prefers_en_then_falls_back_to_ko(tmp_path: Path) -> None:
                 id="ko1",
                 locale="ko",
                 text="korean only chunk",
-                embedding=[1.0, 0.0],
+                embedding=shared,
             ),
             _sample_chunk(
                 id="en1",
                 locale="en",
                 text="english only chunk",
-                embedding=[1.0, 0.0],
+                embedding=shared,
             ),
         ],
     )
-    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.0)
-    svc._embed_query = lambda text: [1.0, 0.0]  # type: ignore[method-assign]
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID, min_similarity=0.0)
+    svc._embed_query = lambda text: shared  # type: ignore[method-assign]
 
     en_block = svc.build_context_block("q", top_k=5, max_context_chars=4000, locale="en")
     assert "english only chunk" in en_block
@@ -118,11 +126,11 @@ def test_min_similarity_threshold_returns_empty_block(tmp_path: Path) -> None:
     _write_index(
         idx,
         [
-            _sample_chunk(embedding=[1.0, 0.0]),
+            _sample_chunk(embedding=_unit(0)),
         ],
     )
-    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.99)
-    svc._embed_query = lambda text: [0.0, 1.0]  # type: ignore[method-assign]
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID, min_similarity=0.99)
+    svc._embed_query = lambda text: _unit(1)  # type: ignore[method-assign]
     block = svc.build_context_block("q", top_k=3, max_context_chars=2000, locale="ko")
     assert block == ""
 
@@ -135,10 +143,9 @@ def test_project_profile_uses_project_headers_not_quiz(tmp_path: Path) -> None:
             _sample_chunk(text="world lore body"),
         ],
     )
-    svc = TutorRAGService(idx, api_key="dummy", embedding_model="m", min_similarity=0.0)
-    svc._embed_query = lambda text: [1.0, 0.0]  # type: ignore[method-assign]
+    svc = TutorRAGService(idx, embedding_model=MODEL_ID, min_similarity=0.0)
     block = svc.build_context_block(
-        "q",
+        "world lore body",
         top_k=3,
         max_context_chars=2000,
         locale="ko",
@@ -147,4 +154,3 @@ def test_project_profile_uses_project_headers_not_quiz(tmp_path: Path) -> None:
     assert "프로젝트 참고 자료" in block
     assert "퀴즈 출제" not in block
     assert "source_id=scenario:abc123" in block
-

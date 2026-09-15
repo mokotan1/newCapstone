@@ -105,6 +105,10 @@ public class IntegratedSettingUI : MonoBehaviour
     {
         Transform searchRoot = panelRoot != null ? panelRoot.transform : transform;
         SettingDisplayControlsFactory.EnsureDisplayControls(searchRoot, ref resolutionDropdown, ref fullscreenToggle);
+        if (bgmSlider == null)
+            bgmSlider = SettingDisplayControlsFactory.FindSlider(searchRoot, "BGM Slider", "BgmSlider");
+        if (sfxSlider == null)
+            sfxSlider = SettingDisplayControlsFactory.FindSlider(searchRoot, "SFX Slider", "SfxSlider");
     }
 
     private void EnsureResolutionAudio()
@@ -141,6 +145,8 @@ public class IntegratedSettingUI : MonoBehaviour
 
     void Update()
     {
+        if (LocalAiSettingsPanel.HandleModalInput(panelRoot != null ? panelRoot : gameObject))
+            return;
         if (IsMainMenuSceneActive())
         {
             if (uiMode == UIMode.PopupPanel && panelRoot != null && panelRoot.activeSelf)

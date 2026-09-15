@@ -175,7 +175,11 @@ public class DeveloperModeController : SingletonMonoBehaviour<DeveloperModeContr
             recorder,
             () => recorder.RunDirectoryPath,
             profileService: profileService,
-            sceneRegistry: sceneRegistry);
+            sceneRegistry: sceneRegistry,
+            developerQaServiceFactory: () =>
+                Godlotto.QA.SceneAdapters.DeveloperQaServiceFactory.Create(
+                    profileService,
+                    recorder));
     }
 #endif
 #endif

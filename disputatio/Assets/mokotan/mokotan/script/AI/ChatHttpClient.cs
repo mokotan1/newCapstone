@@ -3,6 +3,7 @@ using UnityEngine.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -35,6 +36,84 @@ public class SSEEventData
     public string name;
     public Dictionary<string, object> arguments;
     public string full_text;
+}
+
+/// <summary>
+/// Reassembles SSE <c>data: {json}</c> lines that Unity's download buffer may split across reads.
+/// Parses only newline-terminated records so a JSON object split mid-chunk is not dropped.
+/// </summary>
+public sealed class ChatSseStreamParser
+{
+    private readonly StringBuilder _pending = new StringBuilder();
+
+    public IReadOnlyList<SSEEventData> Push(string chunk)
+    {
+        if (!string.IsNullOrEmpty(chunk))
+            _pending.Append(chunk);
+
+        return DrainCompleteLines(flushRemainder: false);
+    }
+
+    public IReadOnlyList<SSEEventData> Flush()
+    {
+        return DrainCompleteLines(flushRemainder: true);
+    }
+
+    private IReadOnlyList<SSEEventData> DrainCompleteLines(bool flushRemainder)
+    {
+        var events = new List<SSEEventData>();
+        while (true)
+        {
+            string buffer = _pending.ToString();
+            int newlineIndex = buffer.IndexOf('\n');
+            if (newlineIndex < 0)
+            {
+                if (flushRemainder)
+                {
+                    _pending.Clear();
+                    SSEEventData leftover = TryParseDataLine(buffer);
+                    if (leftover != null)
+                        events.Add(leftover);
+                }
+
+                break;
+            }
+
+            string line = buffer.Substring(0, newlineIndex);
+            _pending.Clear();
+            if (newlineIndex + 1 < buffer.Length)
+                _pending.Append(buffer.Substring(newlineIndex + 1));
+
+            SSEEventData evt = TryParseDataLine(line);
+            if (evt != null)
+                events.Add(evt);
+        }
+
+        return events;
+    }
+
+    private static SSEEventData TryParseDataLine(string rawLine)
+    {
+        if (string.IsNullOrEmpty(rawLine))
+            return null;
+
+        string line = rawLine.TrimEnd('\r');
+        if (!line.StartsWith("data: "))
+            return null;
+
+        string json = line.Substring(6).Trim();
+        if (string.IsNullOrEmpty(json))
+            return null;
+
+        try
+        {
+            return JsonConvert.DeserializeObject<SSEEventData>(json);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }
 
 [Serializable]
@@ -85,6 +164,12 @@ public class LocalLlamaPayload
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public HintRewritePayload hint_rewrite;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string character_facts;
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string dialogue_context;
 }
 
 /// <summary>
@@ -112,8 +197,9 @@ public interface IChatHttpCallbacks
 /// </summary>
 public sealed class ChatHttpClient
 {
-    private const int NonStreamingTimeoutSeconds = 60;
-    private const int StreamingTimeoutSeconds = 120;
+    public const int OverallTimeoutSeconds = 155;
+    private const int NonStreamingTimeoutSeconds = OverallTimeoutSeconds;
+    private const int StreamingTimeoutSeconds = OverallTimeoutSeconds;
     private const float DefaultRetryDelaySeconds = 0.5f;
     private const string AnonymousUserIdPrefsKey = "ChatHttpClient.AnonymousUserId";
 
@@ -131,6 +217,16 @@ public sealed class ChatHttpClient
     /// </summary>
     internal Func<int, ChatHttpAttemptOutcome> SimulateStreamingAttempt;
 
+    /// <summary>
+    /// EditMode seam: when set, replaces UnityWebRequest for GET / readiness.
+    /// </summary>
+    internal Func<ChatHttpAttemptOutcome> SimulateRootAttempt;
+
+    /// <summary>
+    /// EditMode seam: when set, replaces UnityWebRequest for PUT /local-ai/settings.
+    /// </summary>
+    internal Func<ChatHttpAttemptOutcome> SimulateLocalAiSettingsAttempt;
+
     /// <summary>EditMode: override realtime retry delay (0 skips WaitForSecondsRealtime).</summary>
     internal float? RetryDelaySecondsOverrideForTests;
 
@@ -145,6 +241,19 @@ public sealed class ChatHttpClient
     }
 
     public string ResolvedServerUrl => _resolveServerUrl();
+
+    public const string TutorRagProfile = "tutor";
+
+    /// <summary>
+    /// Cheshire dialogue never sends the game tool registry.
+    /// Only the tutor quiz path may request tools; <c>/tutor/grade</c> remains the grader.
+    /// </summary>
+    public static bool ResolveUseTools(string ragProfile, bool requestedUseTools)
+    {
+        if (string.Equals(ragProfile, TutorRagProfile, StringComparison.Ordinal))
+            return requestedUseTools;
+        return false;
+    }
 
     private float RetryDelaySeconds =>
         RetryDelaySecondsOverrideForTests ?? DefaultRetryDelaySeconds;
@@ -246,6 +355,7 @@ public sealed class ChatHttpClient
                 locale = locale,
             };
             _host.AugmentChatPayload(payload, promptForApi);
+            payload.use_tools = ResolveUseTools(payload.rag_profile, useTools);
             string payloadJson = JsonConvert.SerializeObject(payload);
 
             _host.OnChatHttpWaitStarted();
@@ -332,6 +442,117 @@ public sealed class ChatHttpClient
         onComplete(chatbotResponse, functionCalls);
     }
 
+    public IEnumerator FetchRootStatus(Action<long, string> onComplete)
+    {
+        if (onComplete == null)
+            yield break;
+
+        if (SimulateRootAttempt != null)
+        {
+            ChatHttpAttemptOutcome outcome = SimulateRootAttempt();
+            yield return null;
+            onComplete(outcome.ResponseCode, outcome.Body ?? "");
+            yield break;
+        }
+
+        string rootUrl = LocalAiReadiness.ResolveRootUrl(ResolvedServerUrl);
+        using (var request = UnityWebRequest.Get(rootUrl))
+        {
+            request.timeout = 3;
+            AttachChatApiToken(request);
+            AttachCertificateBypass(request);
+            yield return request.SendWebRequest();
+            string body = request.downloadHandler != null ? request.downloadHandler.text : "";
+            onComplete(request.responseCode, body);
+        }
+    }
+
+    public IEnumerator ApplyDefaultGpuSettings(Action<long, string> onComplete, string controlToken = null)
+    {
+        if (onComplete == null)
+            yield break;
+
+        if (!LocalAiControlApi.ShouldControlLocalRuntime(ResolvedServerUrl))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+
+        if (SimulateLocalAiSettingsAttempt != null)
+        {
+            ChatHttpAttemptOutcome outcome = SimulateLocalAiSettingsAttempt();
+            yield return null;
+            onComplete(outcome.ResponseCode, outcome.Body ?? "");
+            yield break;
+        }
+
+        string token = controlToken;
+        if (string.IsNullOrEmpty(token) && !TryReadDefaultControlToken(out token))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+
+        string url = LocalAiControlApi.SettingsUrl(ResolvedServerUrl);
+        byte[] payload = Encoding.UTF8.GetBytes(LocalAiControlApi.BuildSettingsBody());
+        using (var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPUT))
+        {
+            request.uploadHandler = new UploadHandlerRaw(payload);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+            request.timeout = 5;
+            AttachCertificateBypass(request);
+            yield return request.SendWebRequest();
+            string body = request.downloadHandler != null ? request.downloadHandler.text : "";
+            onComplete(request.responseCode, body);
+        }
+    }
+
+    internal static bool TryReadDefaultControlToken(out string token)
+    {
+        token = "";
+        try
+        {
+            string path = LocalAiControlApi.DefaultControlTokenPath();
+            if (!File.Exists(path))
+                return false;
+            return LocalAiControlApi.TryReadControlToken(File.ReadAllText(path), out token);
+        }
+        catch
+        {
+            token = "";
+            return false;
+        }
+    }
+
+    /// <summary>Settings transport; UI never sends HTTP or starts processes itself.</summary>
+    public static IEnumerator LocalAiControlRequest(
+        string chatUrl, string mode, Action<long, string> onComplete)
+    {
+        if (!LocalAiControlApi.ShouldControlLocalRuntime(chatUrl) ||
+            !TryReadDefaultControlToken(out string token))
+        {
+            onComplete(0, "");
+            yield break;
+        }
+        bool applying = mode != null;
+        string url = applying ? LocalAiControlApi.SettingsUrl(chatUrl) : LocalAiControlApi.StatusUrl(chatUrl);
+        using (var request = new UnityWebRequest(url, applying ? "PUT" : "GET"))
+        {
+            request.downloadHandler = new DownloadHandlerBuffer();
+            if (applying)
+            {
+                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(LocalAiControlApi.BuildSettingsBody(mode)));
+                request.SetRequestHeader("Content-Type", "application/json");
+            }
+            request.SetRequestHeader("Authorization", "Bearer " + token);
+            request.timeout = 5;
+            yield return request.SendWebRequest();
+            onComplete(request.responseCode, request.downloadHandler.text);
+        }
+    }
+
     // ---------------------------------------------------------------
     //  SSE streaming /chat/stream
     // ---------------------------------------------------------------
@@ -369,6 +590,7 @@ public sealed class ChatHttpClient
                 locale = locale,
             };
             _host.AugmentChatPayload(payload, promptForApi);
+            payload.use_tools = ResolveUseTools(payload.rag_profile, useTools);
             string payloadJson = JsonConvert.SerializeObject(payload);
 
             string streamUrl = ResolvedServerUrl.Replace("/chat", "/chat/stream");
@@ -408,6 +630,7 @@ public sealed class ChatHttpClient
     {
         string responseText = null;
         var functionCalls = new List<FunctionCallData>();
+        bool streamingSucceeded = false;
 
         for (int attempt = 0; ; attempt++)
         {
@@ -440,6 +663,7 @@ public sealed class ChatHttpClient
                 {
                     request.SetRequestHeader("Accept", "text/event-stream");
 
+                    var parser = new ChatSseStreamParser();
                     var op = request.SendWebRequest();
                     int lastProcessedIndex = 0;
                     bool done = false;
@@ -456,49 +680,29 @@ public sealed class ChatHttpClient
                                 string newData = allData.Substring(lastProcessedIndex);
                                 lastProcessedIndex = allData.Length;
 
-                                string[] lines = newData.Split('\n');
-                                foreach (string line in lines)
+                                foreach (SSEEventData evt in parser.Push(newData))
                                 {
-                                    if (!line.StartsWith("data: ")) continue;
-                                    string json = line.Substring(6).Trim();
-                                    if (string.IsNullOrEmpty(json)) continue;
-
-                                    SSEEventData evt = null;
-                                    try { evt = JsonConvert.DeserializeObject<SSEEventData>(json); }
-                                    catch { continue; }
-                                    if (evt == null) continue;
-
-                                    switch (evt.type)
+                                    if (HandleSseEvent(evt, ref fullText, functionCalls, out bool eventDone)
+                                        && eventDone)
                                     {
-                                        case "text_delta":
-                                            if (evt.content != null) fullText.Append(evt.content);
-                                            _host.OnStreamTextDelta(evt.content);
-                                            break;
-
-                                        case "function_call":
-                                            functionCalls.Add(new FunctionCallData
-                                            {
-                                                name = evt.name,
-                                                arguments = evt.arguments
-                                            });
-                                            break;
-
-                                        case "done":
-                                            if (!string.IsNullOrEmpty(evt.full_text))
-                                                fullText = new StringBuilder(evt.full_text);
-                                            done = true;
-                                            break;
-
-                                        case "error":
-                                            Debug.LogError("SSE error: " + evt.content);
-                                            done = true;
-                                            break;
+                                        done = true;
+                                        break;
                                     }
                                 }
                             }
                         }
 
-                        if (op.isDone && !done) done = true;
+                        if (op.isDone && !done)
+                        {
+                            foreach (SSEEventData evt in parser.Flush())
+                            {
+                                if (HandleSseEvent(evt, ref fullText, functionCalls, out bool eventDone)
+                                    && eventDone)
+                                    break;
+                            }
+
+                            done = true;
+                        }
                     }
 
                     if (request.result != UnityWebRequest.Result.Success && fullText.Length == 0)
@@ -515,6 +719,7 @@ public sealed class ChatHttpClient
             {
                 responseText = ChatResponseDisplayText.StripInlineFunctionTags(fullText.ToString());
                 _history.AddMessage("assistant", responseText);
+                streamingSucceeded = true;
                 break;
             }
 
@@ -525,11 +730,64 @@ public sealed class ChatHttpClient
                 continue;
             }
 
-            responseText = CheshireUiStrings.ConnectionErrorPrefix(locale) + transportError;
             break;
         }
 
+        if (!streamingSucceeded)
+        {
+            yield return ExecuteNonStreamingWithRetry(
+                payloadJson,
+                locale,
+                (text, calls) =>
+                {
+                    responseText = text;
+                    functionCalls = calls;
+                });
+        }
+
         onComplete(responseText, functionCalls);
+    }
+
+    private bool HandleSseEvent(
+        SSEEventData evt,
+        ref StringBuilder fullText,
+        List<FunctionCallData> functionCalls,
+        out bool streamDone)
+    {
+        streamDone = false;
+        if (evt == null)
+            return false;
+
+        switch (evt.type)
+        {
+            case "text_delta":
+                if (evt.content != null)
+                    fullText.Append(evt.content);
+                _host.OnStreamTextDelta(evt.content);
+                return true;
+
+            case "function_call":
+                functionCalls.Add(new FunctionCallData
+                {
+                    name = evt.name,
+                    arguments = evt.arguments
+                });
+                return true;
+
+            case "done":
+                if (!string.IsNullOrEmpty(evt.full_text))
+                    fullText = new StringBuilder(evt.full_text);
+                streamDone = true;
+                return true;
+
+            case "error":
+                Debug.LogError("SSE error: " + evt.content);
+                streamDone = true;
+                return true;
+
+            default:
+                return true;
+        }
     }
 
     private IEnumerator WaitForRetryDelay()

@@ -140,8 +140,7 @@ jobs:
       - name: Run backend RAG pytest (offline)
         working-directory: backend_ai
         env:
-          GROQ_API_KEY: dummy
-          GOOGLE_API_KEY: dummy
+          AI_PROVIDER: local
         run: >
           pytest tests/test_project_rag_index_builder.py
           tests/test_project_rag_chat_service.py
@@ -150,10 +149,8 @@ jobs:
           tests/test_tutor_chat_service.py
           -q --basetemp=../.pytest_tmp
 
-      - name: Dry-run embedding index build (no API key)
+      - name: Dry-run embedding index build
         working-directory: backend_ai
-        env:
-          GOOGLE_API_KEY: ""
         run: python scripts/build_tutor_rag_index.py --dry-run
 
   build-embeddings:
@@ -236,14 +233,7 @@ jobs:
 
       - name: Build embedding index
         working-directory: backend_ai
-        env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        run: |
-          if [ -z "${GOOGLE_API_KEY:-}" ]; then
-            echo "::error::GOOGLE_API_KEY is required in the wiki-rag-release environment."
-            exit 1
-          fi
-          python scripts/build_tutor_rag_index.py
+        run: python scripts/build_tutor_rag_index.py
 
       - name: Guard against unexpected index drift
         working-directory: backend_ai

@@ -42,8 +42,22 @@ class ChatRequest(BaseModel):
     current_question_id: str | None = Field(None, max_length=128)
     rag_top_k: int | None = Field(None, ge=1, le=20)
     hint_rewrite: HintRewritePayload | None = None
+    #: Game-authored Cheshire facts. Never treated as tool/function input.
+    character_facts: str | None = Field(None, max_length=4096)
+    #: Bounded scene/emotion/repetition context for dialogue-only turns.
+    dialogue_context: str | None = Field(None, max_length=4096)
     #: Canonical player locale (``ko``|``ja``|``en``). Aliases normalized via ``normalize_locale``.
     locale: str = "ko"
+
+    @property
+    def is_dialogue_only(self) -> bool:
+        """True when the model must emit text only (Cheshire / project RAG, not tutor)."""
+        return self.rag_profile != "tutor"
+
+    @property
+    def effective_use_tools(self) -> bool:
+        """Dialogue-only Cheshire calls never receive the game tool registry."""
+        return (not self.is_dialogue_only) and self.use_tools
 
     @field_validator("locale", mode="before")
     @classmethod

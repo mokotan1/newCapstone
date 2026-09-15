@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import pytest
-
+from config import Settings
 from models.requests import ChatRequest
 from models.responses import SSEEvent
 from providers.base import AIProvider
@@ -20,12 +20,18 @@ class _MockProvider(AIProvider):
         self._name = provider_name
         self._events = events or []
         self._should_fail = should_fail
+        self.last_tools: list[dict] | None = None
+        self.last_temperature: float | None = None
+        self.last_max_tokens: int | None = None
 
     @property
     def name(self) -> str:
         return self._name
 
     async def stream_chat(self, messages, tools=None, temperature=0.7, max_tokens=512) -> AsyncIterator[SSEEvent]:
+        self.last_tools = tools
+        self.last_temperature = temperature
+        self.last_max_tokens = max_tokens
         if self._should_fail:
             raise RuntimeError(f"{self._name} failure")
         for event in self._events:
@@ -124,6 +130,7 @@ async def test_tool_instruction_en_uses_english_markers() -> None:
             system="persona",
             locale="en",
             use_tools=True,
+            rag_profile="tutor",
         )
     )
     assert provider.last_messages is not None
@@ -133,6 +140,19 @@ async def test_tool_instruction_en_uses_english_markers() -> None:
     lower = system.lower()
     assert "tool" in lower or "function" in lower
     assert "important" in lower or "response" in lower
+
+
+@pytest.mark.asyncio
+async def test_cheshire_dialogue_omits_tool_instruction() -> None:
+    provider = _CapturingProvider([SSEEvent(type="done", full_text="ok")])
+    service = ChatService(provider, None, _build_registry())
+    await service.chat(
+        ChatRequest(prompt="hello", system="persona", locale="en", use_tools=True),
+    )
+    assert provider.last_messages is not None
+    system = provider.last_messages[0]["content"]
+    assert "Important: response format" not in system
+    assert "중요: 응답 방식" not in system
 
 
 @pytest.mark.asyncio
@@ -231,7 +251,9 @@ class TestChatServiceNonStreaming:
             registry=_build_registry(),
         )
 
-        result = await service.chat(_request())
+        result = await service.chat(
+            ChatRequest(prompt="테스트", system="튜터", use_tools=True, rag_profile="tutor"),
+        )
         assert result.response == "켁켁!"
         assert len(result.function_calls) == 2
         assert result.function_calls[0].name == "give_hint"
@@ -262,6 +284,65 @@ class TestChatServiceNonStreaming:
         result = await service.chat(request)
         assert result.response == "답변"
         assert len(result.function_calls) == 0
+
+
+def _tool_names(tools: list[dict] | None) -> set[str]:
+    if not tools:
+        return set()
+    return {str(item["function"]["name"]) for item in tools}
+
+
+@pytest.mark.asyncio
+async def test_cheshire_dialogue_never_receives_game_tool_registry() -> None:
+    """Cheshire dialogue must not expose give_hint/emote/update_quiz even if the client asks."""
+    events = [
+        SSEEvent(type="text_delta", content="켁."),
+        SSEEvent(type="done", full_text="켁."),
+    ]
+    provider = _MockProvider("groq", events)
+    service = ChatService(
+        primary=provider,
+        fallback=None,
+        registry=_build_registry(),
+    )
+
+    result = await service.chat(
+        ChatRequest(prompt="안녕", system="체셔", use_tools=True),
+    )
+
+    assert provider.last_tools is None
+    assert result.function_calls == []
+    assert "give_hint" not in _tool_names(provider.last_tools)
+    assert "update_quiz" not in _tool_names(provider.last_tools)
+    assert "emote" not in _tool_names(provider.last_tools)
+
+
+@pytest.mark.asyncio
+async def test_tutor_chat_still_receives_game_tools_when_requested() -> None:
+    events = [
+        SSEEvent(type="text_delta", content="채점 중"),
+        SSEEvent(type="done", full_text="채점 중"),
+    ]
+    provider = _MockProvider("groq", events)
+    service = ChatService(
+        primary=provider,
+        fallback=None,
+        registry=_build_registry(),
+    )
+
+    await service.chat(
+        ChatRequest(
+            prompt="골리앗",
+            system="튜터",
+            use_tools=True,
+            rag_profile="tutor",
+        ),
+    )
+
+    assert provider.last_tools is not None
+    names = _tool_names(provider.last_tools)
+    assert "update_quiz" in names
+    assert "give_hint" in names
 @pytest.mark.asyncio
 async def test_hint_rewrite_adds_trusted_policy_and_untrusted_document():
     provider = _CapturingProvider(
@@ -316,3 +397,110 @@ async def test_hint_rewrite_forbidden_term_falls_back():
     )
 
     assert result.response == "그 병은 주방 싱크대에서 물을 채워볼 수 있다."
+
+
+def test_sse_event_frame_uses_data_prefix_and_blank_line() -> None:
+    from services.sse_format import format_sse_event
+
+    frame = format_sse_event(SSEEvent(type="text_delta", content="Hello"))
+
+    assert frame.startswith("data: ")
+    assert frame.endswith("\n\n")
+    payload = frame[len("data: ") :].rstrip("\n")
+    parsed = SSEEvent.model_validate_json(payload)
+    assert parsed.type == "text_delta"
+    assert parsed.content == "Hello"
+
+
+@pytest.mark.asyncio
+async def test_dialogue_only_uses_dialogue_temperature() -> None:
+    events = [
+        SSEEvent(type="text_delta", content="켁."),
+        SSEEvent(type="done", full_text="켁."),
+    ]
+    provider = _MockProvider("groq", events)
+    settings = Settings(dialogue_temperature=0.8, default_temperature=0.7)
+    service = ChatService(
+        primary=provider,
+        fallback=None,
+        registry=_build_registry(),
+        temperature=settings.default_temperature,
+        app_settings=settings,
+    )
+
+    await service.chat(ChatRequest(prompt="안녕", system="체셔", use_tools=False))
+
+    assert provider.last_temperature == pytest.approx(0.8)
+
+
+@pytest.mark.asyncio
+async def test_tutor_chat_keeps_default_temperature() -> None:
+    events = [
+        SSEEvent(type="text_delta", content="채점"),
+        SSEEvent(type="done", full_text="채점"),
+    ]
+    provider = _MockProvider("groq", events)
+    settings = Settings(dialogue_temperature=0.8, default_temperature=0.7)
+    service = ChatService(
+        primary=provider,
+        fallback=None,
+        registry=_build_registry(),
+        temperature=settings.default_temperature,
+        app_settings=settings,
+    )
+
+    await service.chat(
+        ChatRequest(prompt="골리앗", system="튜터", use_tools=True, rag_profile="tutor"),
+    )
+
+    assert provider.last_temperature == pytest.approx(0.7)
+
+
+@pytest.mark.asyncio
+async def test_dialogue_only_replaces_json_reply_with_fallback() -> None:
+    from services.dialogue_guard import dialogue_fallback_line
+
+    events = [
+        SSEEvent(type="text_delta", content='{"name":"give_hint"}'),
+        SSEEvent(type="done", full_text='{"name":"give_hint"}'),
+    ]
+    service = ChatService(
+        primary=_MockProvider("groq", events),
+        fallback=None,
+        registry=_build_registry(),
+    )
+
+    result = await service.chat(ChatRequest(prompt="안녕", system="체셔", use_tools=False))
+    assert result.response == dialogue_fallback_line("ko")
+    assert result.function_calls == []
+
+
+@pytest.mark.asyncio
+async def test_dialogue_only_stream_forwards_deltas_live_and_drops_tools() -> None:
+    from services.dialogue_guard import dialogue_fallback_line
+
+    events = [
+        SSEEvent(type="text_delta", content="첫 문장이다. "),
+        SSEEvent(type="text_delta", content="둘째다. 셋째다."),
+        SSEEvent(
+            type="function_call",
+            name="emote",
+            arguments={"emotion": "mock"},
+        ),
+        SSEEvent(type="done", full_text="첫 문장이다. 둘째다. 셋째다."),
+    ]
+    service = ChatService(
+        primary=_MockProvider("groq", events),
+        fallback=None,
+        registry=_build_registry(),
+    )
+
+    collected = [
+        e async for e in service.stream_chat(ChatRequest(prompt="안녕", system="체셔"))
+    ]
+    deltas = [e.content for e in collected if e.type == "text_delta"]
+    done = [e for e in collected if e.type == "done"]
+
+    assert deltas == ["첫 문장이다. ", "둘째다. 셋째다."]
+    assert done[-1].full_text == dialogue_fallback_line("ko")
+    assert not any(e.type == "function_call" for e in collected)

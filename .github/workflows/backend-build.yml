@@ -2,11 +2,14 @@ name: Backend Build
 
 on:
   push:
-    branches: ["**"]
+    branches:
+      - main
     paths:
       - "backend_ai/**"
       - ".github/workflows/backend-build.yml"
   pull_request:
+    branches:
+      - main
     paths:
       - "backend_ai/**"
       - ".github/workflows/backend-build.yml"
@@ -58,8 +61,7 @@ jobs:
       - name: Run pytest
         working-directory: backend_ai
         env:
-          GROQ_API_KEY: dummy
-          GOOGLE_API_KEY: dummy
+          AI_PROVIDER: local
         run: pytest tests -q
 
       - name: Setup Docker Buildx
@@ -79,8 +81,7 @@ jobs:
       - name: Run container
         run: |
           docker run -d --name api \
-            -e GROQ_API_KEY=dummy \
-            -e GOOGLE_API_KEY=dummy \
+            -e AI_PROVIDER=local \
             -p 8000:8000 \
             backend-ai:ci
 

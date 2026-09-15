@@ -35,6 +35,14 @@ namespace Godlotto.QA.Developer
         [JsonProperty("scene")]
         public string Scene { get; set; }
 
+        /// <summary>
+        /// Room-pack identifier (design §8). Accepted as an alternative to
+        /// <see cref="Scene"/> so nested <c>Rooms/**</c> packs without an explicit
+        /// Unity scene still validate for listing and capability-probe smoke runs.
+        /// </summary>
+        [JsonProperty("roomId")]
+        public string RoomId { get; set; }
+
         [JsonProperty("steps")]
         public List<DeveloperQaScenarioStepDefinition> Steps { get; set; }
     }

@@ -1,0 +1,19 @@
+---
+description: Thin feature coordinator — real Cursor Task types only, parent implements by default
+alwaysApply: true
+---
+
+# 기능 분할 (얇은 총괄)
+
+기능을 나누거나 서브에이전트에 맡길 때 **먼저** `AGENTS.md`와
+`docs/development/feature-workflow.md`를 읽는다.
+
+- 기본 구현자는 현재 채팅(부모)이다.
+- 위임은 Cursor `Task`의 실제 타입만: `explore`, `generalPurpose`, `code-reviewer`, `qa-*`.
+- 문서의 `backend-implementer` 같은 이름은 도구가 아니다.
+- 수정 범위는 AC가 천장. 소유+테스트만 허용, 공유는 부모/Editor.
+- 분할 조건 미달이면 위임하지 않는다.
+- 리뷰는 별도 세션. 없으면 `independentReview: false`.
+- 같은 checkout 쓰기는 순차. Unity Editor는 한 명. 커밋·push는 요청이 있을 때만.
+
+상세: `.cursor/skills/newcapstone-feature-workflow/SKILL.md`

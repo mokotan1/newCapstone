@@ -1,0 +1,315 @@
+{
+  "taskId": "qa-20260730-autorun",
+  "scenarioIds": [
+    "room.hall.smoke",
+    "room.kitchen.smoke",
+    "room.maid-room.smoke",
+    "room.study-room.smoke",
+    "room.child-room.smoke",
+    "room.wife-room.smoke",
+    "room.bed-room.smoke",
+    "room.hall.happy-path",
+    "room.kitchen.happy-path",
+    "room.maid-room.happy-path",
+    "room.study-room.happy-path",
+    "room.child-room.happy-path",
+    "room.wife-room.happy-path",
+    "room.bed-room.happy-path",
+    "room.hall.guard.wrong-item",
+    "room.kitchen.guard.wrong-item",
+    "room.maid-room.guard.wrong-item",
+    "room.study-room.guard.wrong-item",
+    "room.child-room.guard.wrong-item",
+    "room.wife-room.guard.wrong-item",
+    "room.bed-room.guard.wrong-item",
+    "room.hall.guard.reentry",
+    "room.kitchen.guard.reentry",
+    "room.maid-room.guard.reentry",
+    "room.study-room.guard.reentry",
+    "room.child-room.guard.reentry",
+    "room.wife-room.guard.reentry",
+    "room.bed-room.guard.reentry",
+    "transition.hall-to-kitchen",
+    "transition.kitchen-to-maid-room",
+    "transition.maid-to-study",
+    "transition.second-hall-to-child",
+    "transition.child-to-wife",
+    "transition.wife-to-bed"
+  ],
+  "evidenceRoot": "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454",
+  "status": "ready",
+  "roomPackInventory": {
+    "hall": {
+      "area": "first-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "HallQaAdapter",
+      "unityScenes": ["Hall_animate", "Hall_playerble"],
+      "files": {
+        "smoke": "Rooms/first-floor/hall/smoke.json → room.hall.smoke",
+        "happy": "Rooms/first-floor/hall/happy-path.json → room.hall.happy-path",
+        "guardWrongItem": "Rooms/first-floor/hall/guard-wrong-item.json → room.hall.guard.wrong-item",
+        "guardReentry": "Rooms/first-floor/hall/guard-reentry.json → room.hall.guard.reentry",
+        "guardWrongInput": "MISSING (coverage_audit expects guard-wrong-input.json)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": ["hall.kitchen-quest"],
+      "developerFlatSubstitutes": ["hall-nav-autorun"]
+    },
+    "kitchen": {
+      "area": "first-floor",
+      "implementationStatus": "IMPLEMENTED",
+      "adapter": "KitchenQaAdapter",
+      "unityScenes": ["Kitchen"],
+      "files": {
+        "smoke": "Rooms/first-floor/kitchen/smoke.json → room.kitchen.smoke",
+        "happy": "Rooms/first-floor/kitchen/happy-path.json → room.kitchen.happy-path",
+        "guardWrongItem": "Rooms/first-floor/kitchen/guard-wrong-item.json → room.kitchen.guard.wrong-item",
+        "guardReentry": "Rooms/first-floor/kitchen/guard-reentry.json → room.kitchen.guard.reentry",
+        "guardWrongInput": "MISSING — file is guard-wrong-item.json (naming mismatch vs coverage_audit)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": ["kitchen.faucet-key", "kitchen.cheshire-repeat"],
+      "developerFlatSubstitutes": ["kitchen-faucet-autorun"]
+    },
+    "maid-room": {
+      "area": "first-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "MaidRoomQaAdapter",
+      "unityScenes": ["MaidEntrance", "MaidRoom"],
+      "files": {
+        "smoke": "Rooms/first-floor/maid-room/smoke.json → room.maid-room.smoke",
+        "happy": "Rooms/first-floor/maid-room/happy-path.json → room.maid-room.happy-path",
+        "guardWrongItem": "Rooms/first-floor/maid-room/guard-wrong-item.json → room.maid-room.guard.wrong-item",
+        "guardReentry": "Rooms/first-floor/maid-room/guard-reentry.json → room.maid-room.guard.reentry",
+        "guardWrongInput": "MISSING (naming; guard-wrong-item.json present)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": ["maidroom.food-effect"],
+      "developerFlatSubstitutes": ["maidroom-food-autorun"]
+    },
+    "study-room": {
+      "area": "first-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "StudyRoomQaAdapter",
+      "unityScenes": ["StudyEntrance", "StudyRoomCutScene", "StudyRoom"],
+      "files": {
+        "smoke": "Rooms/first-floor/study-room/smoke.json → room.study-room.smoke",
+        "happy": "Rooms/first-floor/study-room/happy-path.json → room.study-room.happy-path",
+        "guardWrongItem": "Rooms/first-floor/study-room/guard-wrong-item.json → room.study-room.guard.wrong-item",
+        "guardReentry": "Rooms/first-floor/study-room/guard-reentry.json → room.study-room.guard.reentry",
+        "guardWrongInput": "MISSING (naming; guard-wrong-item.json present)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": [],
+      "developerFlatSubstitutes": ["studyroom-mirror-diary"]
+    },
+    "child-room": {
+      "area": "second-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "ChildRoomQaAdapter",
+      "unityScenes": ["ChildEntrance", "ChildRoom"],
+      "files": {
+        "smoke": "Rooms/second-floor/child-room/smoke.json → room.child-room.smoke",
+        "happy": "Rooms/second-floor/child-room/happy-path.json → room.child-room.happy-path",
+        "guardWrongItem": "Rooms/second-floor/child-room/guard-wrong-item.json → room.child-room.guard.wrong-item",
+        "guardReentry": "Rooms/second-floor/child-room/guard-reentry.json → room.child-room.guard.reentry",
+        "guardWrongInput": "MISSING (naming; guard-wrong-item.json present)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": [],
+      "developerFlatSubstitutes": ["childroom-seals-autorun"]
+    },
+    "wife-room": {
+      "area": "second-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "WifeRoomQaAdapter",
+      "unityScenes": ["WifeEntrance", "WifeRoom", "DressingRoom"],
+      "files": {
+        "smoke": "Rooms/second-floor/wife-room/smoke.json → room.wife-room.smoke",
+        "happy": "Rooms/second-floor/wife-room/happy-path.json → room.wife-room.happy-path",
+        "guardWrongItem": "Rooms/second-floor/wife-room/guard-wrong-item.json → room.wife-room.guard.wrong-item",
+        "guardReentry": "Rooms/second-floor/wife-room/guard-reentry.json → room.wife-room.guard.reentry",
+        "guardWrongInput": "MISSING (naming; guard-wrong-item.json present)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": [],
+      "developerFlatSubstitutes": ["wiferoom-wallclock-autorun"]
+    },
+    "bed-room": {
+      "area": "second-floor",
+      "implementationStatus": "PARTIAL",
+      "adapter": "BedRoomQaAdapter",
+      "unityScenes": ["BedEntrance", "BedRoom"],
+      "files": {
+        "smoke": "Rooms/second-floor/bed-room/smoke.json → room.bed-room.smoke",
+        "happy": "Rooms/second-floor/bed-room/happy-path.json → room.bed-room.happy-path",
+        "guardWrongItem": "Rooms/second-floor/bed-room/guard-wrong-item.json → room.bed-room.guard.wrong-item",
+        "guardReentry": "Rooms/second-floor/bed-room/guard-reentry.json → room.bed-room.guard.reentry",
+        "guardWrongInput": "MISSING (naming; guard-wrong-item.json present)"
+      },
+      "runtimeRunnableViaQaList": false,
+      "legacyQaRunSubstitutes": [],
+      "developerFlatSubstitutes": ["bedroom-book-autorun"]
+    }
+  },
+  "transitions": [
+    {
+      "id": "transition.hall-to-kitchen",
+      "path": "Rooms/Transitions/transition.hall-to-kitchen.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    },
+    {
+      "id": "transition.kitchen-to-maid-room",
+      "path": "Rooms/Transitions/transition.kitchen-to-maid-room.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    },
+    {
+      "id": "transition.maid-to-study",
+      "path": "Rooms/Transitions/transition.maid-to-study.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    },
+    {
+      "id": "transition.second-hall-to-child",
+      "path": "Rooms/Transitions/transition.second-hall-to-child.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    },
+    {
+      "id": "transition.child-to-wife",
+      "path": "Rooms/Transitions/transition.child-to-wife.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    },
+    {
+      "id": "transition.wife-to-bed",
+      "path": "Rooms/Transitions/transition.wife-to-bed.json",
+      "schema": "transition-contract (not QaScenario v1)",
+      "qaListRunnable": false
+    }
+  ],
+  "legacyValidatedRunnableToday": {
+    "note": "These pass QaScenarioValidator + InitialSceneAdapterSerializationTests / July15Regression expected IDs and are executable via unity-cli qa_run.",
+    "byRoom": {
+      "hall": ["hall.kitchen-quest"],
+      "kitchen": ["kitchen.faucet-key", "kitchen.cheshire-repeat"],
+      "maid-room": ["maidroom.food-effect"],
+      "study-room": [],
+      "child-room": [],
+      "wife-room": [],
+      "bed-room": [],
+      "other": ["mainmenu.new-game-reset", "tutorroom.cheshire-quiz"]
+    },
+    "tests": [
+      "InitialSceneAdapterSerializationTests",
+      "July15RegressionScenarioTests",
+      "QaCommandGatewayContractTests (kitchen.faucet-key)",
+      "QaScenarioValidatorTests"
+    ]
+  },
+  "findings": [
+    {
+      "severity": "blocker",
+      "kind": "QA_INFRA_DEFECT",
+      "summary": "unity-cli qa_list returns 0 scenarioIds starting with room.* because room packs use DeveloperQa (family/name/targetId) schema while qa_list validates with QaScenarioValidator (scene/command/timeoutMs). Invalid entries get ScenarioId=TextAsset.name (e.g. smoke), not JSON id (room.kitchen.smoke). qa_run only executes IsValid scenarios matching id.",
+      "evidence": [
+        "disputatio/Assets/Editor/QA/QaUnityCliTools.cs QaList → QaCommandGateway.ListScenarios",
+        "disputatio/Assets/mokotan/mokotan/script/QA/UI/QaCommandGateway.cs ForInvalid(sourceName) + TryFindValidatedScenario",
+        "disputatio/Assets/mokotan/mokotan/script/QA/Scenarios/QaScenarioValidator.cs requires scene + command kinds",
+        "disputatio/Assets/Resources/QA/Scenarios/Rooms/first-floor/kitchen/smoke.json (no scene/command; family/name steps)",
+        "disputatio/Assets/Editor/Tests/EditMode/QA/Developer/KitchenRealInputHappyPathTests.cs validates room.kitchen.happy-path via DeveloperQaScenarioValidator"
+      ]
+    },
+    {
+      "severity": "blocker",
+      "kind": "QA_INFRA_DEFECT",
+      "summary": "DeveloperQaScenarioRunner.ResolveScenarioPath only resolves flat QA/Scenarios/<id>.json; nested Rooms/<area>/<room>/*.json paths are not discovered by id (room.kitchen.smoke → room.kitchen.smoke.json missing at top level). Even DeveloperQa cannot load room.* by id without an absolute path.",
+      "evidence": [
+        "disputatio/Assets/mokotan/mokotan/script/QA/Developer/DeveloperQaScenarioRunner.cs ResolveScenarioPath",
+        "Room packs live under Assets/Resources/QA/Scenarios/Rooms/**"
+      ]
+    },
+    {
+      "severity": "high",
+      "kind": "SPEC_MISMATCH",
+      "summary": "coverage_audit missingScenarioFiles reports kitchen:guard-wrong-input.json (and same filename for all rooms) while packs ship guard-wrong-item.json; design §8 and coverage_audit._required_scenario_files still expect guard-wrong-input.json. manifests list room.*.guard.wrong-item. Not a missing product scenario — audit/spec naming drift.",
+      "evidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/coverage.json gaps.missingScenarioFiles",
+        "scripts/qa/rooms/coverage_audit.py _required_scenario_files → guard-wrong-input.json",
+        "docs/superpowers/specs/2026-07-27-room-by-room-qa-autorun-scenarios-design.md §8 guard-wrong-input.json",
+        "Rooms/*/kitchen/guard-wrong-item.json exists with id room.kitchen.guard.wrong-item"
+      ]
+    },
+    {
+      "severity": "high",
+      "kind": "QA_INFRA_DEFECT",
+      "summary": "All 7 in-scope rooms have smoke/happy/guard-wrong-item/guard-reentry JSON on disk (28 room.* files) and adapters registered, but none are runtime-runnable today via qa_list/qa_run. Playtester must use legacy 2026-07 classic scenarios or flat *-autorun / studyroom-mirror-diary DeveloperQa files as smoke/happy substitutes.",
+      "evidence": [
+        "Rooms/first-floor/{hall,kitchen,maid-room,study-room}/",
+        "Rooms/second-floor/{child-room,wife-room,bed-room}/",
+        "QaSceneAdapterRegistration registers Hall/Kitchen/Maid/Study/Child/Wife/Bed adapters"
+      ]
+    },
+    {
+      "severity": "medium",
+      "kind": "NOT_IMPLEMENTED",
+      "summary": "Basement regions lack manifests (basement.brick/entry/extraction/hall/observation/research) — coverage gap only; out of today's first/second-floor room-pack scope.",
+      "evidence": [
+        "docs/qa/runs/2026-07-30T01-13-38Z-run-9843d454/coverage.json gaps.missingManifests"
+      ]
+    },
+    {
+      "severity": "medium",
+      "kind": "NOT_IMPLEMENTED",
+      "summary": "study-room, child-room, wife-room, bed-room have no classic QaScenarioValidator-valid legacy substitutes under 2026-07/; only DeveloperQa flat autorun JSON (also fail qa_list). Hall/kitchen/maid have classic substitutes.",
+      "evidence": [
+        "Resources/QA/Scenarios/2026-07/*.json → hall.kitchen-quest, kitchen.faucet-key, kitchen.cheshire-repeat, maidroom.food-effect only among in-scope rooms",
+        "studyroom-mirror-diary.json / childroom-seals-autorun.json / wiferoom-wallclock-autorun.json / bedroom-book-autorun.json use family/name schema"
+      ]
+    },
+    {
+      "severity": "medium",
+      "kind": "QA_INFRA_DEFECT",
+      "summary": "Transition JSON files exist for hall→kitchen→maid→study and second-hall→child→wife→bed but are transition contracts (sourceRegion/destinationRegion), not runnable QaScenario/DeveloperQa scenarios — cannot be qa_run targets.",
+      "evidence": [
+        "Rooms/Transitions/transition.*.json"
+      ]
+    },
+    {
+      "severity": "low",
+      "kind": "SPEC_MISMATCH",
+      "summary": "Hall legacy hall.kitchen-quest documents HallQaAdapter registration-only stub gap in its own assertion text; treat as PARTIAL smoke substitute, not full happy-path PASS for hall navigation.",
+      "evidence": [
+        "Resources/QA/Scenarios/2026-07/hall.kitchen-quest.json assertion description",
+        "hall manifest implementationStatus PARTIAL"
+      ]
+    },
+    {
+      "severity": "info",
+      "kind": "PRODUCT_DEFECT",
+      "summary": "No product defect asserted by inventory alone. PRODUCT_DEFECT reserved for gameplay assertion failures after a runnable scenario executes. Today's room.* blockage is infra/schema, not product behavior.",
+      "evidence": [
+        "No qa_run room.* execution possible until schema bridge exists"
+      ]
+    }
+  ],
+  "playtesterRecommendation": {
+    "immediateQaRunSmokeHappySubstitutes": {
+      "hall": "hall.kitchen-quest (PARTIAL; stub gap documented)",
+      "kitchen": "kitchen.faucet-key (primary smoke/happy substitute); kitchen.cheshire-repeat optional",
+      "maid-room": "maidroom.food-effect",
+      "study-room": "BLOCKED on qa_run — use DeveloperQa path for studyroom-mirror-diary or skip until schema bridge",
+      "child-room": "BLOCKED on qa_run — childroom-seals-autorun is DeveloperQa-only",
+      "wife-room": "BLOCKED on qa_run — wiferoom-wallclock-autorun is DeveloperQa-only",
+      "bed-room": "BLOCKED on qa_run — bedroom-book-autorun is DeveloperQa-only"
+    },
+    "doNotClaimPassFor": [
+      "room.*.smoke",
+      "room.*.happy-path",
+      "room.*.guard.*",
+      "transition.*"
+    ]
+  }
+}
