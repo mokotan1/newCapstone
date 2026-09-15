@@ -29,8 +29,6 @@ class Settings(BaseSettings):
     local_ai_model: str = "gemma4-e2b"
     local_ai_num_ctx: int = 2048
     local_ai_think: bool = False
-    #: Empty = health-check only; do not spawn a runtime from FastAPI.
-    local_ai_start_command: str = ""
     #: Python environment containing the pinned LiteRT package.
     local_ai_litert_python: str = ""
     #: Gate 1 artifacts; this setting alone does not enable the candidate.

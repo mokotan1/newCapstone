@@ -48,7 +48,6 @@ async def test_quiz_bank_prompt_context_does_not_expose_answers(tmp_path: Path) 
     provider = _CapturingProvider()
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=None,

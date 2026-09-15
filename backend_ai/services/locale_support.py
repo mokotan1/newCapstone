@@ -75,11 +75,6 @@ def local_engine_unavailable_message(locale: str = _DEFAULT_LOCALE) -> str:
     return _PLAYER_MSG_ENGINE_UNAVAILABLE[key]
 
 
-def api_key_required_message(locale: str = _DEFAULT_LOCALE) -> str:
-    """Compatibility alias; cloud API keys are not a runtime requirement."""
-    return local_engine_unavailable_message(locale)
-
-
 def all_engines_failed_message(locale: str = _DEFAULT_LOCALE) -> str:
     """Player-facing HTTP detail when every AI provider failed."""
     key = normalize_locale(locale)

@@ -43,7 +43,7 @@ newCapstone/
 
 ## AI 백엔드 (`backend_ai/`)
 
-Unity용 챗봇 API(FastAPI, Groq 우선·Gemini 폴백)입니다. 설치, 환경 변수, API 명세, Docker·배포는 아래 문서를 따릅니다.
+Unity용 챗봇 API(FastAPI, 로컬 LiteRT-LM Gemma 4 E2B 전용·클라우드 프로바이더 없음)입니다. 설치, 환경 변수, API 명세, Docker·배포는 아래 문서를 따릅니다.
 
 - **[backend_ai/README.md](backend_ai/README.md)** — 로컬 실행·API 키·엔드포인트
 

@@ -118,7 +118,6 @@ public class CheshirePromptCatalogTests
         "StudyRoomPrompt",
         "TutorRoomPrompt",
         "WifeRoomPrompt",
-        "ParrotPrompt",
     };
 
     static readonly string[] CatalogLocales =

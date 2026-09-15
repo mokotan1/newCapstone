@@ -66,7 +66,6 @@ def _tutor_service(bank: QuizBank, turns: list[list[SSEEvent]]) -> tuple[ChatSer
     provider = _QueuedSSEProvider("mock", turns)
     service = ChatService(
         primary=provider,
-        fallback=None,
         registry=_build_registry(),
         app_settings=Settings(),
         tutor_rag=None,
