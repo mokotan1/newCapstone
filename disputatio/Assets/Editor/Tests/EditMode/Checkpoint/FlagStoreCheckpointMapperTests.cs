@@ -88,6 +88,22 @@ public class FlagStoreCheckpointMapperTests
     }
 
     [Test]
+    public void Capture_SkipsEphemeralOutcomeKeys()
+    {
+        var data = new CheckpointSaveData();
+        var flags = new FlagStore();
+        flags.SetBool(SequenceBlockOutcomeMapper.GoBackKey, true);
+        flags.SetString(SequenceBlockOutcomeMapper.LoadSceneKey, "Hall");
+        flags.SetBool("quest_done", true);
+
+        FlagStoreCheckpointMapper.Capture(data, flags);
+
+        Assert.AreEqual(1, data.sequenceBooleans.Length);
+        Assert.AreEqual("quest_done", data.sequenceBooleans[0].key);
+        Assert.AreEqual(0, data.sequenceStrings.Length);
+    }
+
+    [Test]
     public void Restore_SkipsTransientKeys()
     {
         var data = new CheckpointSaveData

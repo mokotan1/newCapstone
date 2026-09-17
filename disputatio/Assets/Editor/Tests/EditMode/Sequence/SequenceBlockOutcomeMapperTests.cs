@@ -25,6 +25,14 @@ public class SequenceBlockOutcomeMapperTests
     }
 
     [Test]
+    public void IsEphemeralOutcomeKey_RecognizesReservedKeys()
+    {
+        Assert.IsTrue(SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(SequenceBlockOutcomeMapper.GoBackKey));
+        Assert.IsTrue(SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(SequenceBlockOutcomeMapper.LoadSceneKey));
+        Assert.IsFalse(SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey("quest.flag"));
+    }
+
+    [Test]
     public void ShouldGoBack_WhenTrue_AndClearResets()
     {
         var flags = new FlagStore();

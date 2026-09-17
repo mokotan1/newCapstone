@@ -10,6 +10,15 @@ namespace Godlotto.Sequence
         public const string GoBackKey = "__sequence.outcome.go_back";
         public const string LoadSceneKey = "__sequence.outcome.load_scene";
 
+        public static bool IsEphemeralOutcomeKey(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                return false;
+
+            return string.Equals(key, GoBackKey, StringComparison.Ordinal)
+                   || string.Equals(key, LoadSceneKey, StringComparison.Ordinal);
+        }
+
         public static bool ShouldGoBack(FlagStore flags)
         {
             return flags != null && flags.Has(GoBackKey) && flags.GetBool(GoBackKey);

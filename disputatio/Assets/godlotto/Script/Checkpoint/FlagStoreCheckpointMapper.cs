@@ -41,7 +41,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             FlagBoolEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.Key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
                 kept.Add(new BoolCheckpointEntry(entry.Key, entry.Value));
         }
 
@@ -57,7 +58,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             FlagIntEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.Key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
                 kept.Add(new IntCheckpointEntry(entry.Key, entry.Value));
         }
 
@@ -73,7 +75,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             FlagStringEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.Key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.Key))
                 kept.Add(new StringCheckpointEntry(entry.Key, entry.Value));
         }
 
@@ -89,7 +92,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             BoolCheckpointEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
                 kept.Add(new FlagBoolEntry(entry.key, entry.value));
         }
 
@@ -105,7 +109,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             IntCheckpointEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
                 kept.Add(new FlagIntEntry(entry.key, entry.value));
         }
 
@@ -121,7 +126,8 @@ public static class FlagStoreCheckpointMapper
         for (int i = 0; i < entries.Length; i++)
         {
             StringCheckpointEntry entry = entries[i];
-            if (ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
+            if (!SequenceBlockOutcomeMapper.IsEphemeralOutcomeKey(entry.key)
+                && ProgressSnapshotPolicy.ShouldCapturePlayerPrefsKey(entry.key))
                 kept.Add(new FlagStringEntry(entry.key, entry.value));
         }
 
