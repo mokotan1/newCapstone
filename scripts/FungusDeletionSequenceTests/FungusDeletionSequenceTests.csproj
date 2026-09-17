@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>disable</Nullable>
+    <RootNamespace>FungusDeletionSequenceTests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Sequence/**/*.cs"
+             Link="Sequence/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Checkpoint/FlagStoreCheckpointMapper.cs"
+             Link="Checkpoint/FlagStoreCheckpointMapper.cs" />
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Checkpoint/CheckpointSaveData.cs"
+             Link="Checkpoint/CheckpointSaveData.cs" />
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Checkpoint/ProgressSnapshotPolicy.cs"
+             Link="Checkpoint/ProgressSnapshotPolicy.cs" />
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Constants/FungusVariableKeys.cs"
+             Link="Constants/FungusVariableKeys.cs" />
+    <Compile Include="../../disputatio/Assets/godlotto/Script/Setting/SettingPlayerPrefsKeys.cs"
+             Link="Setting/SettingPlayerPrefsKeys.cs" />
+    <Compile Include="../../disputatio/Assets/Editor/Tests/EditMode/Sequence/**/*.cs"
+             Link="Tests/Sequence/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="../../disputatio/Assets/Editor/Tests/EditMode/Checkpoint/FlagStoreCheckpointMapperTests.cs"
+             Link="Tests/Checkpoint/FlagStoreCheckpointMapperTests.cs" />
+  </ItemGroup>
+</Project>

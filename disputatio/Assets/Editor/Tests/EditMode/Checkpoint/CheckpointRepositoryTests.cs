@@ -32,6 +32,10 @@ public class CheckpointRepositoryTests
             fungusIntegers = new[]
             {
                 new IntCheckpointEntry(ItemAcquisitionTracker.FungusVariableKey, 42)
+            },
+            sequenceBooleans = new[]
+            {
+                new BoolCheckpointEntry("door_open", true)
             }
         };
 
@@ -47,6 +51,9 @@ public class CheckpointRepositoryTests
         Assert.That(loaded.fungusIntegers.Length, Is.EqualTo(1));
         Assert.That(loaded.fungusIntegers[0].key, Is.EqualTo(ItemAcquisitionTracker.FungusVariableKey));
         Assert.That(loaded.fungusIntegers[0].value, Is.EqualTo(42));
+        Assert.That(loaded.sequenceBooleans.Length, Is.EqualTo(1));
+        Assert.That(loaded.sequenceBooleans[0].key, Is.EqualTo("door_open"));
+        Assert.That(loaded.sequenceBooleans[0].value, Is.True);
     }
 
     [Test]

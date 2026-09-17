@@ -45,8 +45,11 @@ ExportedObj/
 *.csproj
 # CI Roslyn syntax checker — not Unity-generated; must be tracked for GitHub Actions
 !scripts/CSharpSyntaxChecker/**/*.csproj
+!scripts/FungusDeletionSequenceTests/**/*.csproj
 scripts/CSharpSyntaxChecker/**/obj/
 scripts/CSharpSyntaxChecker/**/bin/
+scripts/FungusDeletionSequenceTests/**/obj/
+scripts/FungusDeletionSequenceTests/**/bin/
 *.unityproj
 *.sln
 *.suo
