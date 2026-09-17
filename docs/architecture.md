@@ -2,6 +2,7 @@
 
 > **목적**: Cursor/AI가 새 기능을 추가할 때 따를 **코드베이스 기준 문서**입니다.  
 > **원칙**: 이 문서는 저장소를 직접 조사한 내용만 기록합니다. 추측·일반론은 §8(미확인 사항)으로 분리합니다.
+> **2026-09-17 동결**: 새 Fungus 블록·`Assets/Fungus/` 패치·`*SceneMigrator`·Fungus QA 확장은 하지 않는다. 전체 씬 이전의 목표 책임은 C# 게임 규칙·단일 상태 소유자·제한된 Sequence 연출 실행으로 분리한다. 진행: `docs/development/tasks/fungus-deletion/index.md`.
 
 ---
 
@@ -64,7 +65,8 @@ newCapstone/
 | 경로 | 책임 | 새 코드 추가 시 |
 |------|------|-----------------|
 | `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
-| `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome |
+| `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequencePlayer`, `SequenceValidator`. `using Fungus` 금지 |
 | `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
@@ -454,7 +456,8 @@ graph TB
 - `Debug.Log` 남발 — **`GameLog`** 사용.
 - `SceneManager.LoadScene` 직접 호출로 **전환 중복** ( `SceneTransitionService` 우회).
 - `PlayerPrefs.DeleteAll()` without preserving settings — **`PlayDataPrefsCleaner`** 패턴 사용.
-- `Assets/Fungus/` 서드파티 **대규모 수정** (업스트림 merge 불가).
+- `Assets/Fungus/` 서드파티 **대규모 수정** (업스트림 merge 불가). 2026-09-17부터는 벤더 `Continue()` 패치도 하지 않는다.
+- 새 Fungus `Command` 상속, Flowchart 블록 추가, 그래프를 남기는 `*SceneMigrator`.
 - API 키를 Unity/저장소에 **커밋**.
 
 ---
@@ -466,7 +469,7 @@ graph TB
 1. **씬 에셋** 생성: `Assets/Scenes/Mokotan/.../MyRoom.unity`
 2. **`EditorBuildSettings`에 등록**: `ProjectSettings/EditorBuildSettings.asset` (Unity Build Settings UI)
 3. **`SceneNames`에 상수 추가**
-4. **전역 Flowchart** 변수·블록 배치; `Variablemanager` 프리팹/씬 지속 확인
+4. **전역 Flowchart** 변수·블록 배치; `Variablemanager` 프리팹/씬 지속 확인 — **동결 중 새 Flowchart를 추가하지 말 것.** 새 시퀀스는 `Godlotto.Sequence` JSON.
 5. **상호작용**:
    - 단순 복도/방: `RoomInteractionController` 또는 `CorridorEntranceController` 컴포넌트 + Inspector `InteractionRoute[]`, `BlockOutcome[]`
    - 특수 퍼즐: `RoomInteractionController` 상속 (예: `WifeRoomPuzzleController.cs`)
@@ -568,7 +571,8 @@ graph TB
 | 기능 분할 워크플로 | `AGENTS.md`, `docs/development/feature-workflow.md` |
 | Unity 하네스 정책·검증 | `.harness/unity-policy.md`, `.harness/unity-verification.md`, `.harness/unity-toolchain.json` |
 | Unity 하네스 정적 점검 | `python -m pytest scripts/unity-harness/tests -q` |
-| Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` |
+| Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` (그래프를 남기는 이관. 2026-09-17부터 목적지 아님) |
+| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/index.md` |
 
 ---
 
