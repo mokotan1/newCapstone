@@ -182,6 +182,33 @@ def test_incomplete_journal_blocks_new_run_until_recover_without_editor_restart(
     assert allowed["executionStatus"] == "ready"
 
 
+def test_uncertain_recover_does_not_mark_journal_complete(tmp_path: Path) -> None:
+    gateway = RecordingGateway(cleanup_uncertain=True)
+    coordinator = Coordinator(run_root=tmp_path, gateway=gateway)
+    coordinator.start_run(_connected_snapshot())
+    coordinator.enter_running()
+    recovered = coordinator.recover()
+
+    assert recovered["executionStatus"] == "recovery-failed"
+    assert recovered["cleanupStatus"] == "uncertain"
+    assert coordinator.state == "recovery-required"
+    blocked = Coordinator(run_root=tmp_path, gateway=RecordingGateway()).start_run(
+        _connected_snapshot()
+    )
+    assert blocked["reasonCode"] == "recovery-required"
+
+
+def test_finish_run_cleanup_failure_is_not_complete(tmp_path: Path) -> None:
+    gateway = RecordingGateway(cleanup_ok=False)
+    coordinator = Coordinator(run_root=tmp_path, gateway=gateway)
+    coordinator.start_run(_connected_snapshot())
+    coordinator.enter_running()
+    finished = coordinator.finish_run()
+    assert finished["executionStatus"] == "recovery-failed"
+    assert finished["cleanupStatus"] == "failed"
+    assert coordinator.state == "recovery-required"
+
+
 def test_preflight_block_does_not_call_cleanup(tmp_path: Path) -> None:
     gateway = RecordingGateway()
     coordinator = Coordinator(run_root=tmp_path, gateway=gateway)

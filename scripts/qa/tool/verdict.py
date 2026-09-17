@@ -7,7 +7,12 @@ from typing import Any
 
 
 def judge_scenario(record: Mapping[str, Any]) -> dict[str, Any]:
-    """시나리오 하나 판정. FAIL이 증거 누락보다 앞선다. PASS는 필수 검사가 모두 있어야 한다."""
+    """시나리오 하나 판정. FAIL이 증거 누락보다 앞선다. PASS는 필수 검사가 모두 있어야 한다.
+
+    선택 필드(라이브 경로): ``isolationPreserved=False`` → unauthorized-player-change,
+    ``recoveryStatus="failed"`` → recovery-failed, ``transportStatus="down"`` → transport-down,
+    ``dialogueStatus="unsettled"`` → dialogue-unsettled. 모두 BLOCKED 사유이며 PASS를 막는다.
+    """
     scenario_id = str(record.get("scenarioId") or "")
     if record.get("legacyManifest"):
         return {
@@ -64,6 +69,16 @@ def judge_scenario(record: Mapping[str, Any]) -> dict[str, Any]:
 
     if record.get("cancelled"):
         reason_codes.append("cancelled")
+
+    # 라이브 경로 전용 필드. 없으면(None) 이전 레코드와 호환되게 무시한다.
+    if record.get("isolationPreserved") is False:
+        reason_codes.append("unauthorized-player-change")
+    if record.get("recoveryStatus") == "failed":
+        reason_codes.append("recovery-failed")
+    if record.get("transportStatus") == "down":
+        reason_codes.append("transport-down")
+    if record.get("dialogueStatus") == "unsettled":
+        reason_codes.append("dialogue-unsettled")
 
     if not assertions:
         reason_codes.append("missing-assertion")

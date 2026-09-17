@@ -168,7 +168,7 @@ class Coordinator:
             }
         )
         self.state = "finalized"
-        self._journal["complete"] = cleanup_status != "uncertain"
+        self._journal["complete"] = cleanup_status == "restored"
         self._save_journal()
         return {
             "executionStatus": "cancelled",
@@ -182,7 +182,7 @@ class Coordinator:
     def fail_run(self, reason: str) -> dict[str, Any]:
         """실행 실패 후 정리를 시도한다. 정리가 불확실하면 다음 실행을 막는다."""
         cleanup_status = self._run_cleanup()
-        if cleanup_status == "uncertain":
+        if cleanup_status in {"failed", "uncertain"}:
             self.state = "recovery-required"
             self._journal["complete"] = False
         else:
@@ -205,8 +205,8 @@ class Coordinator:
         for resource in acquired:
             self._gateway.release_profile(resource)
         cleanup_status = self._run_cleanup()
-        self.state = "finalized" if cleanup_status != "uncertain" else "recovery-required"
-        self._journal["complete"] = cleanup_status != "uncertain"
+        self.state = "finalized" if cleanup_status == "restored" else "recovery-required"
+        self._journal["complete"] = cleanup_status == "restored"
         self._save_journal()
         return {
             "executionStatus": "blocked",
@@ -215,15 +215,41 @@ class Coordinator:
         }
 
     def recover(self) -> dict[str, Any]:
-        """미완료 저널을 cleanup한 뒤 새 실행이 가능하게 표시한다."""
-        # TODO(AC15): 실제 프로세스 강제 중단 증거는 pytest journal 외에 아직 없다.
+        """미완료 저널을 cleanup한다. 정리가 실패/불확실하면 complete로 표시하지 않는다."""
         cleanup_status = self._run_cleanup()
+        if cleanup_status in {"failed", "uncertain"}:
+            self.state = "recovery-required"
+            self._journal["complete"] = False
+            self._save_journal()
+            return {
+                "executionStatus": "recovery-failed",
+                "cleanupStatus": cleanup_status,
+            }
         self.state = "recovered"
         self._cancelled = False
         self._journal["complete"] = True
         self._save_journal()
         return {
             "executionStatus": "recovered",
+            "cleanupStatus": cleanup_status,
+        }
+
+    def finish_run(self) -> dict[str, Any]:
+        """정상 종료 경로의 cleanup. 복구 실패를 완료로 바꾸지 않는다."""
+        cleanup_status = self._run_cleanup()
+        if cleanup_status in {"failed", "uncertain"}:
+            self.state = "recovery-required"
+            self._journal["complete"] = False
+            self._save_journal()
+            return {
+                "executionStatus": "recovery-failed",
+                "cleanupStatus": cleanup_status,
+            }
+        self.state = "finalized"
+        self._journal["complete"] = True
+        self._save_journal()
+        return {
+            "executionStatus": "succeeded",
             "cleanupStatus": cleanup_status,
         }
 

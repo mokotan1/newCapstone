@@ -12,7 +12,7 @@ namespace Godlotto.QA.SceneAdapters
     /// Shared production wiring for <see cref="DeveloperQaService"/> (Task 8 + Wave 1/2).
     /// Panel bridge and CLI bridge both create services through this factory so multi-room
     /// capabilities (StudyRoom, Kitchen, MainMenu, MaidRoom, Hall, ChildRoom, WifeRoom,
-    /// BedRoom) and optional profile/evidence are registered exactly once in one place.
+    /// BedRoom, Fungus dialogue) and optional profile/evidence are registered exactly once in one place.
     /// When <see cref="EventSystem.current"/> is present, injects a Kitchen-aware RealInput
     /// driver so <c>interaction.pointer</c> steps can exercise the EventSystem path (§6.2).
     /// </summary>
@@ -20,7 +20,7 @@ namespace Godlotto.QA.SceneAdapters
     {
         /// <summary>
         /// Creates a service with StudyRoom, Kitchen, MainMenu, MaidRoom, Hall, ChildRoom,
-        /// WifeRoom, and BedRoom capabilities registered.
+        /// WifeRoom, BedRoom, and scene-agnostic Fungus dialogue capabilities registered.
         /// Pass <paramref name="evidenceRecorder"/> (e.g. Editor <c>docs/qa/runs</c> recorder)
         /// for production evidence.capture; omit in unit tests that inject their own recorder.
         /// </summary>
@@ -34,6 +34,7 @@ namespace Godlotto.QA.SceneAdapters
             MainMenuQaAdapter.RegisterCapabilities(registry);
             MaidRoomQaAdapter.RegisterCapabilities(registry);
             HallQaAdapter.RegisterCapabilities(registry);
+            FungusDialogueQaAdapter.RegisterCapabilities(registry);
             ChildRoomQaAdapter.RegisterCapabilities(registry);
             WifeRoomQaAdapter.RegisterCapabilities(registry);
             BedRoomQaAdapter.RegisterCapabilities(registry);

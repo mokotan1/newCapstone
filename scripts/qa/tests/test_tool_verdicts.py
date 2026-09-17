@@ -121,3 +121,39 @@ def test_legacy_manifest_pass_without_new_fields_is_blocked() -> None:
     )
     assert result["scenarioVerdict"] == "BLOCKED"
     assert "legacy-schema" in result["reasonCodes"]
+
+
+def test_isolation_violation_blocks_pass() -> None:
+    result = judge_scenario(_passing_record(isolationPreserved=False))
+    assert result["scenarioVerdict"] == "BLOCKED"
+    assert "unauthorized-player-change" in result["reasonCodes"]
+
+
+def test_failed_recovery_blocks_pass() -> None:
+    result = judge_scenario(_passing_record(recoveryStatus="failed"))
+    assert result["scenarioVerdict"] == "BLOCKED"
+    assert "recovery-failed" in result["reasonCodes"]
+
+
+def test_transport_down_blocks_pass() -> None:
+    result = judge_scenario(_passing_record(transportStatus="down"))
+    assert result["scenarioVerdict"] == "BLOCKED"
+    assert "transport-down" in result["reasonCodes"]
+
+
+def test_unsettled_dialogue_blocks_pass() -> None:
+    result = judge_scenario(_passing_record(dialogueStatus="unsettled"))
+    assert result["scenarioVerdict"] == "BLOCKED"
+    assert "dialogue-unsettled" in result["reasonCodes"]
+
+
+def test_passing_record_with_new_fields_still_passes() -> None:
+    result = judge_scenario(
+        _passing_record(
+            isolationPreserved=True,
+            recoveryStatus="restored",
+            transportStatus="up",
+            dialogueStatus="settled",
+        )
+    )
+    assert result["scenarioVerdict"] == "PASS"

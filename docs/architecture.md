@@ -80,7 +80,7 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
-| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음. `FungusDialogueQaAdapter`는 `fungus.dialogue.probe\|advance\|choose` (씬 무관 Say/Menu 실제 입력) |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
@@ -559,7 +559,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
-| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route / context / isolation / console / defect / reconnect / runner / live / live_coverage / status_watch; 홀→주방 hop은 `HallQaFungusHop` + heartbeat GET `/health` HTTP 코드. Status CMD는 리스너가 죽은 동안 `console`을 치지 않는다) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route / context / isolation / console / defect / reconnect / runner / live / live_coverage / status_watch / transport / lease / lifecycle / dialogue. 라이브 수직 실행은 `TransportGuard`가 timeout·health-down 이후 CLI를 보내지 않는다. `docs/qa/runs/_lease.json` 파일 lease, `Coordinator` journal, `qa_status` 격리 대조, `qa_recover` 복원, hop별 Game View screenshot·console delta를 같은 run에 남긴다. 홀→주방 hop은 `HallQaFungusHop` + `FungusDialogueQaAdapter`. 다른 방 확대는 `FUNGUS_BLOCK_CAPABILITIES`. Status CMD는 리스너가 죽은 동안 `console`을 치지 않는다) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |

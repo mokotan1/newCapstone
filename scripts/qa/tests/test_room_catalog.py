@@ -8,7 +8,6 @@ from scripts.qa.rooms.catalog import (
     region_ids,
 )
 
-
 EXPECTED_REGION_IDS = {
     # §5.1 First floor
     "hall",

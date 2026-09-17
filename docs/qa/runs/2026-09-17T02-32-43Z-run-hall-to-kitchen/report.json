@@ -1,0 +1,110 @@
+{
+  "attempts": [
+    {
+      "attemptId": "attempt-api",
+      "attemptVerdict": "FAIL",
+      "driver": "api",
+      "inputLayer": "api",
+      "reasonCodes": [
+        "path-mismatch",
+        "destination-mismatch"
+      ]
+    },
+    {
+      "attemptId": "attempt-event-system",
+      "attemptVerdict": "FAIL",
+      "driver": "event-system",
+      "inputLayer": "event-system",
+      "reasonCodes": [
+        "path-mismatch",
+        "destination-mismatch"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "reasonCodes": [
+        "assertion-failed",
+        "missing-required-evidence",
+        "console-missing"
+      ],
+      "scenarioId": "qa.tool.hall-to-kitchen",
+      "scenarioVerdict": "FAIL"
+    }
+  ],
+  "cleanupStatus": "not-applicable",
+  "counts": {
+    "blocked": 0,
+    "excluded": 0,
+    "executed": 1,
+    "failed": 1,
+    "notRun": 0,
+    "passed": 0,
+    "required": 1
+  },
+  "featureVerified": false,
+  "followOnNotComplete": [
+    "AC24-AC32",
+    "independent-review"
+  ],
+  "gatewayCalls": [
+    {
+      "layer": "api",
+      "response": {
+        "code": "Ok",
+        "data": {
+          "clicked": "True",
+          "interactionId": "left"
+        },
+        "message": "Hall kitchen-entry click dispatched (OnInteraction(\"left\")).",
+        "ok": true,
+        "rawStdout": "{\n  \"checkpointId\": null,\n  \"code\": \"Ok\",\n  \"commandId\": \"69c90ef066774ca79cdb3d06ebe2010f\",\n  \"data\": {\n    \"clicked\": \"True\",\n    \"interactionId\": \"left\"\n  },\n  \"message\": \"Hall kitchen-entry click dispatched (OnInteraction(\\\"left\\\")).\",\n  \"missingCapabilityId\": null\n}"
+      },
+      "target": "hall.nav.click-kitchen-entry"
+    },
+    {
+      "layer": "api",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "message": "Error: Hall nav assert-route failed: destination-mismatch,controller-only.\nDetails: {\"commandId\":\"019992db3bc447c1899c63fe56d7b8d9\",\"code\":\"AssertionFailed\",\"message\":\"Hall nav assert-route failed: destination-mismatch,controller-only.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"controllerFound\":\"True\",\"kitchenEntryInteractionId\":\"left\",\"activeScene\":\"Hall_playerble\",\"transitionPending\":\"False\",\"inputGateBlocked\":\"False\",\"assertPassed\":\"False\",\"reasonCodes\":\"destination-mismatch,controller-only\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+        "ok": false,
+        "rawStdout": "",
+        "returncode": 1
+      },
+      "target": "hall.nav.assert-route"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "Ok",
+        "data": {
+          "clicked": "True",
+          "interactionId": "left"
+        },
+        "message": "Hall kitchen-entry click dispatched (OnInteraction(\"left\")).",
+        "ok": true,
+        "rawStdout": "{\n  \"checkpointId\": null,\n  \"code\": \"Ok\",\n  \"commandId\": \"472fbf4d950d40dba8fc782f67e0e871\",\n  \"data\": {\n    \"clicked\": \"True\",\n    \"interactionId\": \"left\"\n  },\n  \"message\": \"Hall kitchen-entry click dispatched (OnInteraction(\\\"left\\\")).\",\n  \"missingCapabilityId\": null\n}"
+      },
+      "target": "hall.nav.click-kitchen-entry"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "message": "Error: Hall nav assert-route failed: destination-mismatch,controller-only.\nDetails: {\"commandId\":\"40d7c6631b944cc596a2e2ca6a95e5f3\",\"code\":\"AssertionFailed\",\"message\":\"Hall nav assert-route failed: destination-mismatch,controller-only.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"controllerFound\":\"True\",\"kitchenEntryInteractionId\":\"left\",\"activeScene\":\"Hall_playerble\",\"transitionPending\":\"False\",\"inputGateBlocked\":\"False\",\"assertPassed\":\"False\",\"reasonCodes\":\"destination-mismatch,controller-only\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+        "ok": false,
+        "rawStdout": "",
+        "returncode": 1
+      },
+      "target": "hall.nav.assert-route"
+    }
+  ],
+  "phase1Scope": "Hall_playerble \u2192 Hall_Left \u2192 Hall_Left2 \u2192 Kitchen",
+  "planId": "hall-to-kitchen.v1",
+  "reasonCode": "vertical-incomplete",
+  "review": {
+    "status": "missing"
+  },
+  "runId": "2026-09-17T02-32-43Z-run-hall-to-kitchen",
+  "runVerdict": "FAIL"
+}

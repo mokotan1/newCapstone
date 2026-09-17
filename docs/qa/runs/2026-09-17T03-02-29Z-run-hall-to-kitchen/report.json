@@ -1,0 +1,206 @@
+{
+  "attempts": [
+    {
+      "attemptId": "attempt-api",
+      "attemptVerdict": "FAIL",
+      "driver": "api",
+      "inputLayer": "api",
+      "reasonCodes": [
+        "path-mismatch",
+        "destination-mismatch"
+      ]
+    },
+    {
+      "attemptId": "attempt-event-system",
+      "attemptVerdict": "FAIL",
+      "driver": "event-system",
+      "inputLayer": "event-system",
+      "reasonCodes": [
+        "controller-only",
+        "path-mismatch",
+        "destination-mismatch"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "reasonCodes": [
+        "assertion-failed",
+        "missing-required-evidence",
+        "console-missing"
+      ],
+      "scenarioId": "qa.tool.hall-to-kitchen",
+      "scenarioVerdict": "FAIL"
+    }
+  ],
+  "cleanupStatus": "not-applicable",
+  "counts": {
+    "blocked": 0,
+    "excluded": 0,
+    "executed": 1,
+    "failed": 1,
+    "notRun": 0,
+    "passed": 0,
+    "required": 1
+  },
+  "featureVerified": false,
+  "followOnNotComplete": [
+    "AC24-AC32",
+    "independent-review"
+  ],
+  "gatewayCalls": [
+    {
+      "layer": "api",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {
+          "clicked": "False"
+        },
+        "message": "CorridorEntranceController not found in the active scene. This adapter only works while Hall_playerble is the active Play Mode scene.",
+        "ok": false,
+        "rawStderr": "Error: CorridorEntranceController not found in the active scene. This adapter only works while Hall_playerble is the active Play Mode scene.\nDetails: {\"commandId\":\"f7a4e56ca5ef40348090c8981b83d487\",\"code\":\"EnvironmentBlocked\",\"message\":\"CorridorEntranceController not found in the active scene. This adapter only works while Hall_playerble is the active Play Mode scene.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"clicked\":\"False\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.click-kitchen-entry"
+    },
+    {
+      "layer": "api",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {
+          "activeScene": "Hall_animate",
+          "blockName": "Front_clicked",
+          "clicked": "False"
+        },
+        "message": "Fungus block 'Front_clicked' was not found or was already executing.",
+        "ok": false,
+        "rawStderr": "Error: Fungus block 'Front_clicked' was not found or was already executing.\nDetails: {\"commandId\":\"d96f649a4022408fb25f2f40a43d6edd\",\"code\":\"EnvironmentBlocked\",\"message\":\"Fungus block 'Front_clicked' was not found or was already executing.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"clicked\":\"False\",\"blockName\":\"Front_clicked\",\"activeScene\":\"Hall_animate\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.execute-front"
+    },
+    {
+      "layer": "api",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {
+          "activeScene": "Hall_animate",
+          "blockName": "Door_Clicked",
+          "clicked": "False"
+        },
+        "message": "Fungus block 'Door_Clicked' was not found or was already executing.",
+        "ok": false,
+        "rawStderr": "Error: Fungus block 'Door_Clicked' was not found or was already executing.\nDetails: {\"commandId\":\"9315f51a486547d5829ba1f0913e8fc2\",\"code\":\"EnvironmentBlocked\",\"message\":\"Fungus block 'Door_Clicked' was not found or was already executing.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"clicked\":\"False\",\"blockName\":\"Door_Clicked\",\"activeScene\":\"Hall_animate\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.execute-door"
+    },
+    {
+      "layer": "api",
+      "response": {
+        "code": "AssertionFailed",
+        "data": {
+          "activeScene": "Hall_animate",
+          "assertPassed": "False",
+          "controllerFound": "False",
+          "inputGateBlocked": "False",
+          "kitchenEntryInteractionId": "left",
+          "reasonCodes": "destination-mismatch",
+          "transitionPending": "False"
+        },
+        "message": "Hall nav assert-route failed: destination-mismatch.",
+        "ok": false,
+        "rawStderr": "Error: Hall nav assert-route failed: destination-mismatch.\nDetails: {\"commandId\":\"e00872fb180e451c8c242fc697f130d0\",\"code\":\"AssertionFailed\",\"message\":\"Hall nav assert-route failed: destination-mismatch.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"controllerFound\":\"False\",\"kitchenEntryInteractionId\":\"left\",\"activeScene\":\"Hall_animate\",\"transitionPending\":\"False\",\"inputGateBlocked\":\"False\",\"assertPassed\":\"False\",\"reasonCodes\":\"destination-mismatch\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.assert-route"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "Ok",
+        "data": {
+          "activeScene": "Hall_animate",
+          "reset": "True"
+        },
+        "message": "Hall hop layer reset to Hall_playerble.",
+        "ok": true,
+        "rawStderr": "Update available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": "{\n  \"checkpointId\": null,\n  \"code\": \"Ok\",\n  \"commandId\": \"d9f62389fa8f40df8846fa8b03c6897b\",\n  \"data\": {\n    \"activeScene\": \"Hall_animate\",\n    \"reset\": \"True\"\n  },\n  \"message\": \"Hall hop layer reset to Hall_playerble.\",\n  \"missingCapabilityId\": null\n}"
+      },
+      "target": "hall.nav.reset-to-hall"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {},
+        "message": "RealInput driver unavailable (EventSystem/resolver missing).",
+        "ok": false,
+        "rawStderr": "Error: RealInput driver unavailable (EventSystem/resolver missing).\nDetails: {\"commandId\":\"96b09252f8a04ed99952d2e0f06bb234\",\"code\":\"EnvironmentBlocked\",\"message\":\"RealInput driver unavailable (EventSystem/resolver missing).\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.kitchen-entry"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {
+          "activeScene": "Hall_playerble",
+          "blockName": "Front_clicked",
+          "clicked": "False"
+        },
+        "message": "Fungus block 'Front_clicked' was not found or was already executing.",
+        "ok": false,
+        "rawStderr": "Error: Fungus block 'Front_clicked' was not found or was already executing.\nDetails: {\"commandId\":\"6bab0dc8102846ddb471a1b2993f2d2a\",\"code\":\"EnvironmentBlocked\",\"message\":\"Fungus block 'Front_clicked' was not found or was already executing.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"clicked\":\"False\",\"blockName\":\"Front_clicked\",\"activeScene\":\"Hall_playerble\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.execute-front"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "EnvironmentBlocked",
+        "data": {
+          "activeScene": "Hall_playerble",
+          "blockName": "Door_Clicked",
+          "clicked": "False"
+        },
+        "message": "Fungus block 'Door_Clicked' was not found or was already executing.",
+        "ok": false,
+        "rawStderr": "Error: Fungus block 'Door_Clicked' was not found or was already executing.\nDetails: {\"commandId\":\"d4f431332a9341cb95b591d4a11171c5\",\"code\":\"EnvironmentBlocked\",\"message\":\"Fungus block 'Door_Clicked' was not found or was already executing.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"clicked\":\"False\",\"blockName\":\"Door_Clicked\",\"activeScene\":\"Hall_playerble\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.execute-door"
+    },
+    {
+      "layer": "event-system",
+      "response": {
+        "code": "AssertionFailed",
+        "data": {
+          "activeScene": "Hall_playerble",
+          "assertPassed": "False",
+          "controllerFound": "True",
+          "inputGateBlocked": "False",
+          "kitchenEntryInteractionId": "left",
+          "reasonCodes": "destination-mismatch,controller-only",
+          "transitionPending": "False"
+        },
+        "message": "Hall nav assert-route failed: destination-mismatch,controller-only.",
+        "ok": false,
+        "rawStderr": "Error: Hall nav assert-route failed: destination-mismatch,controller-only.\nDetails: {\"commandId\":\"4c9e1453a8ae46bd98a08348fcfad842\",\"code\":\"AssertionFailed\",\"message\":\"Hall nav assert-route failed: destination-mismatch,controller-only.\",\"missingCapabilityId\":null,\"checkpointId\":null,\"data\":{\"controllerFound\":\"True\",\"kitchenEntryInteractionId\":\"left\",\"activeScene\":\"Hall_playerble\",\"transitionPending\":\"False\",\"inputGateBlocked\":\"False\",\"assertPassed\":\"False\",\"reasonCodes\":\"destination-mismatch,controller-only\"}}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+        "rawStdout": ""
+      },
+      "target": "hall.nav.assert-route"
+    }
+  ],
+  "phase1Scope": "Hall_playerble \u2192 Hall_Left \u2192 Hall_Left2 \u2192 Kitchen",
+  "planId": "hall-to-kitchen.v1",
+  "reasonCode": "vertical-incomplete",
+  "review": {
+    "status": "missing"
+  },
+  "runId": "2026-09-17T03-02-29Z-run-hall-to-kitchen",
+  "runVerdict": "FAIL"
+}

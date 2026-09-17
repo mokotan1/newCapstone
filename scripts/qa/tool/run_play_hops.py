@@ -106,10 +106,18 @@ def main() -> None:
     emit_progress(
         f"done {result.get('runVerdict')} {result.get('reasonCode')} verified={result.get('featureVerified')}"
     )
-    emit_progress("editor stop")
-    stop = _cli(["--timeout", "30000", "editor", "stop"], timeout=40)
-    print("stop_rc", stop.returncode)
-    raise SystemExit(0)
+    if result.get("reasonCode") == "transport-down" or result.get("transportTripped"):
+        emit_progress("skip editor stop (transport-down; no further Unity commands)")
+    else:
+        emit_progress("editor stop")
+        stop = _cli(["--timeout", "30000", "editor", "stop"], timeout=40)
+        print("stop_rc", stop.returncode)
+    verdict = str(result.get("runVerdict") or "BLOCKED")
+    if verdict == "PASS":
+        raise SystemExit(0)
+    if verdict == "FAIL":
+        raise SystemExit(1)
+    raise SystemExit(2)
 
 
 if __name__ == "__main__":

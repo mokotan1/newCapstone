@@ -1,0 +1,181 @@
+{
+  "capabilities": {
+    "code": "Ok",
+    "data": {
+      "count": "45",
+      "current_capabilities": "bedroom.book.assert-controller,bedroom.book.capture,bedroom.book.click,bedroom.book.probe,childroom.seals.assert-controller,childroom.seals.capture,childroom.seals.click-seal5,childroom.seals.probe,hall.nav.assert-route,hall.nav.capture,hall.nav.click-kitchen-entry,hall.nav.execute-door,hall.nav.execute-front,hall.nav.probe,hall.nav.reset-to-hall,kitchen.exit.assert,kitchen.faucet.assert-clicked,kitchen.faucet.capture,kitchen.faucet.click,kitchen.faucet.preset.before-faucet,kitchen.faucet.probe,kitchen.faucet.reset,kitchen.key.click,kitchen.key.probe,kitchen.sink.fill-bottle,kitchen.sink.preset.before-bottle-fill,maidroom.food.assert-effect,maidroom.food.capture,maidroom.food.click-tray,maidroom.food.probe,mainmenu.start.assert-invoked,mainmenu.start.capture,mainmenu.start.click,mainmenu.start.probe,studyroom.mirror.assert-solved,studyroom.mirror.capture,studyroom.mirror.grant-bookmark,studyroom.mirror.place-bookmark,studyroom.mirror.preset.before-placement,studyroom.mirror.probe,studyroom.mirror.reset,wiferoom.wallclock.assert-controller,wiferoom.wallclock.capture,wiferoom.wallclock.click,wiferoom.wallclock.probe"
+    },
+    "message": "count=45",
+    "ok": true,
+    "rawStderr": "Update available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.",
+    "rawStdout": "{\n  \"checkpointId\": null,\n  \"code\": \"Ok\",\n  \"commandId\": \"f17515df84b94a148910d0d476e1acb1\",\n  \"data\": {\n    \"count\": \"45\",\n    \"current_capabilities\": \"bedroom.book.assert-controller,bedroom.book.capture,bedroom.book.click,bedroom.book.probe,childroom.seals.assert-controller,childroom.seals.capture,childroom.seals.click-seal5,childroom.seals.probe,hall.nav.assert-route,hall.nav.capture,hall.nav.click-kitchen-entry,hall.nav.execute-door,hall.nav.execute-front,hall.nav.probe,hall.nav.reset-to-hall,kitchen.exit.assert,kitchen.faucet.assert-clicked,kitchen.faucet.capture,kitchen.faucet.click,kitchen.faucet.preset.before-faucet,kitchen.faucet.probe,kitchen.faucet.reset,kitchen.key.click,kitchen.key.probe,kitchen.sink.fill-bottle,kitchen.sink.preset.before-bottle-fill,maidroom.food.assert-effect,maidroom.food.capture,maidroom.food.click-tray,maidroom.food.probe,mainmenu.start.assert-invoked,mainmenu.start.capture,mainmenu.start.click,mainmenu.start.probe,studyroom.mirror.assert-solved,studyroom.mirror.capture,studyroom.mirror.grant-bookmark,studyroom.mirror.place-bookmark,studyroom.mirror.preset.before-placement,studyroom.mirror.probe,studyroom.mirror.reset,wiferoom.wallclock.assert-controller,wiferoom.wallclock.capture,wiferoom.wallclock.click,wiferoom.wallclock.probe\"\n  },\n  \"message\": \"count=45\",\n  \"missingCapabilityId\": null\n}"
+  },
+  "consoleClassification": {
+    "classification": "unclassified",
+    "reasonCodes": [
+      "console-unclassified"
+    ]
+  },
+  "defect": {
+    "accepted": true,
+    "actual": "Coverage collector does not treat this as Kitchen PASS",
+    "environment": {
+      "editorPid": "44620",
+      "health": {
+        "ok": true,
+        "pid": "44620",
+        "port": 8095,
+        "reasonCode": "ok",
+        "state": "ready"
+      }
+    },
+    "evidenceIds": [
+      "2026-09-17T02-57-26Z-live-coverage"
+    ],
+    "expected": "Kitchen arrival, transition finished, input gate open",
+    "reasonCodes": [],
+    "reproduction": [
+      "Open Hall_playerble",
+      "Enter Play Mode",
+      "Wait for HTTP health on heartbeat port",
+      "Run hall.nav hops then assert-route"
+    ],
+    "requirementId": "AC07"
+  },
+  "featureVerified": false,
+  "git": {
+    "baseRevision": "458d04e301a83835aaf98e9bb3be2ac8635c0673",
+    "diffHash": "4a4d5c8811e4f7c6fc5824ccf372413c90b7bbeb26f7280c9260e0c7b55afae8",
+    "scopedPaths": [
+      "scripts/qa/tool/",
+      "disputatio/Assets/mokotan/mokotan/script/QA/"
+    ]
+  },
+  "health": {
+    "ok": true,
+    "pid": "44620",
+    "port": 8095,
+    "reasonCode": "ok",
+    "state": "ready"
+  },
+  "heartbeat": {
+    "compileErrors": false,
+    "connectorVersion": "0.3.21",
+    "pid": 44620,
+    "port": 8095,
+    "projectPath": "D:/Capstone/newCapstone/disputatio",
+    "state": "ready",
+    "timestamp": 1789613846752,
+    "unityVersion": "6000.0.36f1"
+  },
+  "isolation": {
+    "changedFiles": [],
+    "changedKeys": [],
+    "preserved": true,
+    "reasonCodes": []
+  },
+  "preflightMatrix": {
+    "compiling": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [],
+      "mutationCalls": [],
+      "reasonCode": "compiling",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    },
+    "dirty-scene": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [],
+      "mutationCalls": [],
+      "reasonCode": "dirty-scene",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    },
+    "disconnected": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [],
+      "mutationCalls": [],
+      "reasonCode": "editor-disconnected",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    },
+    "invalid-project": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [],
+      "mutationCalls": [],
+      "reasonCode": "invalid-project",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    },
+    "lease-first": {
+      "executionStatus": "acquired",
+      "heartbeatAt": "live",
+      "owner": "qa-tool-owner-a",
+      "reasonCode": "ok"
+    },
+    "lease-second": {
+      "executionStatus": "blocked",
+      "owner": "qa-tool-owner-a",
+      "reasonCode": "ownership"
+    },
+    "missing-capability": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [
+        "hall.nav.click-kitchen-entry",
+        "hall.nav.execute-front",
+        "hall.nav.execute-door",
+        "hall.nav.reset-to-hall",
+        "hall.nav.assert-route"
+      ],
+      "mutationCalls": [],
+      "reasonCode": "missing-capability",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    },
+    "ownership": {
+      "executionStatus": "blocked",
+      "missingCapabilities": [],
+      "mutationCalls": [],
+      "reasonCode": "ownership",
+      "substitutedInputLayer": null,
+      "verificationStatus": "blocked"
+    }
+  },
+  "qaCancel": {
+    "returncode": 1,
+    "stderr": "Error: No active QA scenario run to cancel.\nDetails: {\"commandId\":\"110f17f38b0848f1b1c76bd8c6f2d894\",\"operationCode\":\"NotActive\"}\n\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+    "stdout": ""
+  },
+  "qaRecover": {
+    "returncode": 0,
+    "stderr": "\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+    "stdout": "{\n  \"operationCode\": \"Success\"\n}\n"
+  },
+  "qaStatus": {
+    "returncode": 0,
+    "stderr": "\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+    "stdout": "{\n  \"activeRunId\": \"\",\n  \"activeScenarioId\": \"\",\n  \"commandId\": \"7e99b15a510f4cbf89fb78ce611a9454\",\n  \"evidenceRunDirectoryPath\": \"\",\n  \"isQaProfileActive\": false,\n  \"isScenarioRunning\": false,\n  \"registeredSceneNames\": [\n    \"MainMenuScene\",\n    \"Kitchen\",\n    \"Hall_playerble\",\n    \"MaidRoom\",\n    \"TutorRoom\",\n    \"StudyRoom\",\n    \"ChildRoom\",\n    \"WifeRoom\",\n    \"BedRoom\"\n  ]\n}\n"
+  },
+  "qaStatusAfterRecover": {
+    "returncode": 0,
+    "stderr": "\nUpdate available: v0.3.21 \u2192 v0.4.1\nRun \"unity-cli update\" to upgrade.\n",
+    "stdout": "{\n  \"activeRunId\": \"\",\n  \"activeScenarioId\": \"\",\n  \"commandId\": \"f0c78b0fe8ca4eef833ef954e9ff2025\",\n  \"evidenceRunDirectoryPath\": \"\",\n  \"isQaProfileActive\": false,\n  \"isScenarioRunning\": false,\n  \"registeredSceneNames\": [\n    \"MainMenuScene\",\n    \"Kitchen\",\n    \"Hall_playerble\",\n    \"MaidRoom\",\n    \"TutorRoom\",\n    \"StudyRoom\",\n    \"ChildRoom\",\n    \"WifeRoom\",\n    \"BedRoom\"\n  ]\n}\n"
+  },
+  "reconnectSamePid": {
+    "healthOk": true,
+    "heartbeatPid": "44620",
+    "statusPid": "44620"
+  },
+  "reuse": {
+    "reasonCodes": [],
+    "reusable": true
+  },
+  "review": {
+    "status": "missing"
+  },
+  "status": {
+    "editorConnected": true,
+    "editorPid": "44620",
+    "raw": "Unity: ready\n  Project: D:/Capstone/newCapstone/disputatio\n  Version: 6000.0.36f1\n  Connector: 0.3.21\n  PID:     44620\n"
+  }
+}

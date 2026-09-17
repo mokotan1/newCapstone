@@ -156,3 +156,118 @@ def test_missing_independent_review_forbids_feature_verified(tmp_path: Path) -> 
     )
     assert result["featureVerified"] is False
     assert result["review"]["status"] == "missing"
+
+
+def test_transport_down_stops_remaining_hops(tmp_path: Path) -> None:
+    ok = {
+        "ok": True,
+        "code": "Ok",
+        "data": {"activeScene": "Hall_playerble"},
+    }
+    down = {
+        "ok": False,
+        "code": "TransportDown",
+        "refused": False,
+        "reason": "cli-timeout",
+    }
+    gateway = RecordingLiveGateway(responses=[ok, down])
+    result = run_hall_to_kitchen(
+        run_root=tmp_path,
+        gateway=gateway,
+        snapshot=_ready_snapshot(),
+        previous_connection={"editorPid": 111, "leaseId": "lease-a", "editorConnected": True},
+    )
+    targets = [call["target"] for call in gateway.calls]
+    assert "hall.nav.reset-to-hall" in targets
+    assert "hall.kitchen-entry" not in targets
+    assert "hall.nav.execute-door" not in targets
+    assert result["runVerdict"] == "BLOCKED"
+    assert result["reasonCode"] == "transport-down"
+    assert result["featureVerified"] is False
+
+
+def test_file_lease_conflict_blocks_before_mutations(tmp_path: Path) -> None:
+    lease_path = tmp_path / "_lease.json"
+    lease_path.write_text(
+        '{"owner": "qa-playtester", "pid": 1, "acquiredAt": "t0"}\n',
+        encoding="utf-8",
+    )
+    gateway = RecordingLiveGateway()
+    result = run_hall_to_kitchen(
+        run_root=tmp_path / "run",
+        gateway=gateway,
+        snapshot=_ready_snapshot(),
+        previous_connection={"editorPid": 111, "leaseId": "lease-a", "editorConnected": True},
+        lease_path=lease_path,
+        lease_owner="qa-tool",
+        pid_alive=lambda _pid: True,
+        now="t1",
+    )
+    assert result["reasonCode"] == "ownership"
+    assert result["runVerdict"] == "BLOCKED"
+    assert gateway.calls == []
+
+
+def test_lifecycle_evidence_and_failed_recover_cannot_pass(tmp_path: Path) -> None:
+    png = b"\x89PNG\r\n\x1a\nIHDRIEND"
+
+    class _Lifecycle:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def snapshot_player_store(self) -> dict[str, object]:
+            self.calls.append("snapshot")
+            return {"keys": {"isQaProfileActive": "False"}, "files": {}}
+
+        def recover(self) -> dict[str, object]:
+            self.calls.append("recover")
+            return {"ok": False, "uncertain": True, "code": "Error"}
+
+        def cancel(self) -> dict[str, object]:
+            self.calls.append("cancel")
+            return {"ok": True}
+
+        def capture_screenshot(self, output_path: Path) -> dict[str, object]:
+            self.calls.append("screenshot")
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(png)
+            return {"ok": True, "path": str(output_path)}
+
+        def capture_console(self) -> dict[str, object]:
+            self.calls.append("console")
+            return {"ok": True, "entries": []}
+
+    kitchen = {
+        "ok": True,
+        "code": "Ok",
+        "data": {
+            "activeScene": "Kitchen",
+            "controllerFound": "False",
+            "transitionPending": "False",
+            "inputGateBlocked": "False",
+            "assertPassed": "True",
+        },
+        "scenesVisited": [
+            "Hall_playerble",
+            "Hall_Left",
+            "Hall_Left2",
+            "Kitchen",
+        ],
+        "driver": "api",
+        "inputLayer": "api",
+    }
+    gateway = RecordingLiveGateway(responses=[kitchen] * 40)
+    lifecycle = _Lifecycle()
+    result = run_hall_to_kitchen(
+        run_root=tmp_path,
+        gateway=gateway,
+        snapshot=_ready_snapshot(),
+        previous_connection={"editorPid": 111, "leaseId": "lease-a", "editorConnected": True},
+        lifecycle=lifecycle,
+    )
+    assert "recover" in lifecycle.calls
+    assert "screenshot" in lifecycle.calls
+    assert "console" in lifecycle.calls
+    assert result["runVerdict"] != "PASS"
+    assert result["cleanupStatus"] in {"uncertain", "failed"}
+    assert result["featureVerified"] is False

@@ -5,6 +5,7 @@ from __future__ import annotations
 from scripts.qa.tool.hall_route import (
     WIRED_HALL_TO_KITCHEN,
     compare_plan_to_wiring,
+    hop_capabilities_from_plan,
     judge_hall_attempt,
     record_dual_layer_attempts,
 )
@@ -106,3 +107,11 @@ def test_dual_layer_attempts_reset_and_record_distinct_drivers() -> None:
     judged = [judge_hall_attempt(item) for item in attempts]
     assert judged[0]["attemptVerdict"] == "PASS"
     assert judged[1]["attemptVerdict"] == "PASS"
+
+
+def test_hop_capabilities_follow_wired_fungus_blocks() -> None:
+    hops = hop_capabilities_from_plan(build_hall_to_kitchen_plan())
+    assert hops == [
+        ("hall.nav.execute-front", "Hall_Left2"),
+        ("hall.nav.execute-door", "Kitchen"),
+    ]

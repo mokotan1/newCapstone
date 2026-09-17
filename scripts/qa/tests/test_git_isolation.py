@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import subprocess
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Callable, Sequence
 
 import pytest
-
 from autorun.git_isolation import (
     GitIsolationSession,
     UnownedDirtyChangesError,

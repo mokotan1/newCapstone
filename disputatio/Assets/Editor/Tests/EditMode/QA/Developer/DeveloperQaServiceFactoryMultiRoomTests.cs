@@ -32,6 +32,9 @@ public sealed class DeveloperQaServiceFactoryMultiRoomTests
         Assert.That(ids, Does.Contain("maidroom.food.assert-effect"));
         Assert.That(ids, Does.Contain("hall.nav.click-kitchen-entry"));
         Assert.That(ids, Does.Contain("hall.nav.assert-route"));
+        Assert.That(ids, Does.Contain("fungus.dialogue.probe"));
+        Assert.That(ids, Does.Contain("fungus.dialogue.advance"));
+        Assert.That(ids, Does.Contain("fungus.dialogue.choose"));
     }
 
     [Test]

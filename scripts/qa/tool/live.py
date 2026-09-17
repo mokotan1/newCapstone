@@ -24,6 +24,9 @@ REQUIRED_HALL_CAPABILITY_IDS: tuple[str, ...] = (
     "hall.nav.execute-door",
     "hall.nav.reset-to-hall",
     "hall.nav.assert-route",
+    "fungus.dialogue.probe",
+    "fungus.dialogue.advance",
+    "fungus.dialogue.choose",
 )
 
 

@@ -7,13 +7,56 @@ from pathlib import Path
 from time import sleep
 from typing import Any
 
+from scripts.qa.tool.coordinator import Coordinator
+from scripts.qa.tool.dialogue import settle_dialogue
+from scripts.qa.tool.lease import pid_is_alive
+from scripts.qa.tool.lifecycle import UnityCliLifecycle
 from scripts.qa.tool.live import (
     UnityCliGateway,
+    _run_cli,
     build_live_snapshot,
     parse_capability_ids,
+    probe_health_http,
+    read_heartbeat_file,
 )
 from scripts.qa.tool.progress import emit_progress
 from scripts.qa.tool.runner import run_hall_to_kitchen
+from scripts.qa.tool.transport import TRANSPORT_DOWN_CODE, TransportGuard
+
+LEASE_PATH = Path("docs/qa/runs/_lease.json")
+LEASE_OWNER = "qa-tool"
+
+
+class _LifecycleQaGateway:
+    """Coordinator cleanup가 실제 qa_recover를 호출하도록 연결한다."""
+
+    def __init__(self, lifecycle: UnityCliLifecycle) -> None:
+        self._lifecycle = lifecycle
+
+    def mutate(self, command_id: str, name: str) -> dict[str, Any]:
+        """라이브 hop은 VerticalGateway가 담당한다. 여기선 저널용 성공만 남긴다."""
+        return {"ok": True, "commandId": command_id, "name": name}
+
+    def query_command(self, command_id: str) -> dict[str, Any]:
+        """유실 mutation 재전송 금지. 상태만 있다고 보고한다."""
+        return {"found": True, "commandId": command_id}
+
+    def switch_profile(self, profile_id: str) -> dict[str, Any]:
+        """프로필 전환은 qa_status 격리가 담당. 부분 실패 테스트용 계약만 맞춘다."""
+        return {"ok": True, "acquired": [profile_id]}
+
+    def release_profile(self, profile_id: str) -> None:
+        """부분 획득 롤백. 라이브 경로에서는 switch가 성공만 반환한다."""
+        return
+
+    def cleanup(self) -> dict[str, Any]:
+        """qa_recover 결과를 coordinator complete 규칙으로 변환한다."""
+        result = self._lifecycle.recover()
+        if str(result.get("code") or "") == TRANSPORT_DOWN_CODE:
+            return {"ok": False, "uncertain": True}
+        if result.get("uncertain"):
+            return {"ok": False, "uncertain": True}
+        return {"ok": bool(result.get("ok")), "uncertain": False}
 
 
 def run_stale_pid_probe(run_root: Path, current_pid: str, previous_pid: str) -> dict[str, Any]:
@@ -50,9 +93,7 @@ def run_live_vertical(
     capability_payload: dict[str, Any],
     previous_connection: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """라이브 UnityCliGateway로 Hall→Kitchen 수직 실행을 돌린다. Kitchen 미도착이면 PASS가 아니다."""
-    # TODO(AC19): screenshot 파일 수집·console classify·qa_recover는 아직 이 함수 밖이다.
-    # TODO(AC06): event-system 레이어는 아직 api invoke와 동일하다. interaction.pointer로 분리할 것.
+    """TransportGuard + lease + journal + qa_recover + 대사 진행 + 증거 수집으로 수직 실행한다."""
     snapshot = build_live_snapshot(
         status_text,
         parse_capability_ids(capability_payload),
@@ -60,15 +101,40 @@ def run_live_vertical(
     )
     if previous_connection is None:
         snapshot["leaseId"] = str(snapshot.get("editorPid") or "")
-    gateway = UnityCliGateway(progress=emit_progress)
-    return run_hall_to_kitchen(
+
+    heartbeat = read_heartbeat_file()
+    try:
+        port = int(heartbeat.get("port") or 0)
+    except (TypeError, ValueError):
+        port = 0
+
+    def health_probe() -> bool:
+        """heartbeat 포트의 /health가 200이어야 다음 CLI를 보낸다."""
+        return port > 0 and probe_health_http(port)
+
+    inner = UnityCliGateway(progress=emit_progress)
+    gateway = TransportGuard(inner, health_probe=health_probe)
+    lifecycle = UnityCliLifecycle(runner=_run_cli, health_probe=health_probe)
+    coordinator = Coordinator(run_root=run_root, gateway=_LifecycleQaGateway(lifecycle))
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    result = run_hall_to_kitchen(
         run_root=run_root,
         gateway=gateway,
         snapshot=snapshot,
         previous_connection=previous_connection,
         wait_attempts=40,
         wait_sleep=sleep,
+        lease_path=LEASE_PATH,
+        lease_owner=LEASE_OWNER,
+        pid_alive=pid_is_alive,
+        now=now,
+        coordinator=coordinator,
+        lifecycle=lifecycle,
+        settle_dialogue=settle_dialogue,
     )
+    result["transportTripped"] = bool(gateway.tripped)
+    result["transportReason"] = gateway.trip_reason
+    return result
 
 
 def utc_run_root(suffix: str) -> Path:

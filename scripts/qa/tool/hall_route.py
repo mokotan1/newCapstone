@@ -43,6 +43,31 @@ def expected_scenes() -> list[str]:
     ]
 
 
+FUNGUS_BLOCK_CAPABILITIES: dict[str, str] = {
+    "Front_clicked": "hall.nav.execute-front",
+    "Door_Clicked": "hall.nav.execute-door",
+}
+
+
+def hop_capabilities_from_plan(plan: Mapping[str, Any]) -> list[tuple[str, str]]:
+    """첫 클릭 hop 이후의 Fungus 블록을 (capabilityId, nextScene)으로 펼친다.
+
+    아직 매핑이 없는 방·복도는 건너뛴다. 다른 방으로 확대할 때는
+    ``FUNGUS_BLOCK_CAPABILITIES``에 씬 YAML 블록 이름만 추가하면 된다.
+    """
+    target = plan.get("target") if isinstance(plan.get("target"), Mapping) else {}
+    hops = list(target.get("hops") or [])
+    sequence: list[tuple[str, str]] = []
+    for hop in hops[1:]:
+        if not isinstance(hop, Mapping):
+            continue
+        capability_id = FUNGUS_BLOCK_CAPABILITIES.get(str(hop.get("fungusBlock") or ""))
+        if not capability_id:
+            continue
+        sequence.append((capability_id, str(hop.get("nextScene") or "")))
+    return sequence
+
+
 def compare_plan_to_wiring(plan: Mapping[str, Any]) -> dict[str, Any]:
     """계획이 씬 YAML에 고정한 hop과 같은지 본다. 직접 Kitchen hop은 spec-mismatch다."""
     target = plan.get("target") if isinstance(plan.get("target"), Mapping) else {}
