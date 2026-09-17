@@ -5,8 +5,8 @@
 - 최종 범위: 전체 씬·공용 자산의 Fungus 제거. Kitchen은 후보일 뿐.
 - 브랜치: `feature/fungus-deletion-framework` (base `develop`)
 - **마스터 계획**: [MASTER-PLAN.md](./MASTER-PLAN.md)
-- cloud 완료: **P0–P7** (코드·standalone 테스트·P0 CLI). Unity EditMode·씬 YAML 마이그레이션(R1/R2)은 인계.
-- 다음: Windows `unity-cli test --mode EditMode --filter Sequence`
+- cloud 완료: **P0–P7**. **R1** BasementHallway 파일럿(코드·JSON·Editor 메뉴)까지 push.
+- 다음: Unity에서 **Basement Hallway Sequence Pilot** 실행 → PlayMode로 문 5개 씬 전환 확인. `unity-cli EditMode --filter Sequence`
 
 ## 동결
 

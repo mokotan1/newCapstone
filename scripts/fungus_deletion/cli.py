@@ -11,7 +11,11 @@ from fungus_deletion.scanner import scan_csharp_tree, top_files_by_hits
 
 
 def _default_scenes_root(repo_root: Path) -> Path:
-    return repo_root / "disputatio" / "Assets" / "Scenes"
+    primary = repo_root / "disputatio" / "Assets" / "Scenes"
+    if primary.is_dir():
+        return primary
+    fallback = repo_root / "Assets" / "Scenes"
+    return fallback if fallback.is_dir() else primary
 
 
 def _default_script_root(repo_root: Path) -> Path:

@@ -14,7 +14,7 @@
 | **P5** | RoomInteraction Sequence 브리지 | ✅ | ⏸ | `P5-interaction-bridge.md` |
 | **P6** | outcome 예약 플래그 + 체크포인트 제외 | ✅ | ⏸ | `P6-outcome-flags.md` |
 | **P7** | standalone NUnit harness (저장소 내) | ✅ | — | `scripts/FungusDeletionSequenceTests/` |
-| **R1** | 씬 YAML 마이그레이션 (Kitchen 등) | 🚫 동결 | — | 승인·별도 PR |
+| **R1** | 씬 Fungus → Sequence 삭제 (4단계) | 🔧 진행 중 | Editor | [R1-deletion-process.md](./R1-deletion-process.md), BasementHallway 파일럿 |
 | **R2** | Windows SayDialog PlayMode 검증 | ⏸ | 수동 | unity-cli |
 
 ⏸ = 이 Linux cloud 환경에서 실행 불가. 🚫 = 정책상 본 브랜치 범위 밖.

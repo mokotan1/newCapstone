@@ -19,4 +19,10 @@ public static class SceneNames
     public const string HallLeft = "Hall_Left";
     public const string HallLeft2 = "Hall_Left2";
     public const string SettingScene = "SettingScene";
+    public const string Basement = "Basement";
+    public const string BasementHallway = "BasementHallway";
+    public const string BasementBrickRoom = "BasementBrickRoom";
+    public const string BasementExtractionRoom = "BasementExtractionRoom";
+    public const string BasementObservationRoom = "BasementObservationRoom";
+    public const string BasementResearchRoom = "BasementResearchRoom";
 }
