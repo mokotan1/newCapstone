@@ -1,6 +1,6 @@
 # P3-async-ui / wait·say 호스트와 입력 게이트
 
-- state: running
+- state: done (Unity EditMode 남음)
 - phase: P3 (R1)
 - allowedFiles: `disputatio/Assets/godlotto/Script/Sequence/**`, `disputatio/Assets/godlotto/Script/Interaction/SequenceInputGateLock.cs`, `disputatio/Assets/Editor/Tests/EditMode/Sequence/SequenceSessionTests.cs`, `docs/architecture.md`, 본 task 폴더
 - excluded: 씬/프리팹, SayDialog 연결, Variablemanager 이중 기록, FlagStore 싱글톤, Kitchen Flowchart 제거, 벤더 패치

@@ -4,8 +4,8 @@
 
 - 최종 범위: 전체 씬·공용 자산의 Fungus 제거. Kitchen은 후보일 뿐.
 - 브랜치: `feature/fungus-deletion-framework` (base `develop`)
-- 현재 단계: **P3 비동기·UI 계약**. Unity EditMode는 이 Linux checkout에서 실행 불가.
-- 다음: Windows에서 `--filter SequenceSessionTests`. 씬 일괄 변경 금지. FlagStore 싱글톤 금지.
+- 현재 단계: **P4 Sequence 라우팅**. Unity EditMode 미실행. 씬 일괄 변경 금지.
+- 다음: Windows `--filter SequenceRouterTests`. `RoomInteractionController` 연결은 별도 패킷. FlagStore 싱글톤 금지.
 
 ## 동결
 
@@ -20,17 +20,16 @@
 | checkedAt | 2026-09-17 |
 | Editor | 없음. unity-cli blocked |
 | independentReview | false |
-| 다음 명령 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter SequenceSessionTests` |
+| 다음 명령 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter SequenceRouterTests` |
 
-## P3 AC
+## P4 AC
 
-- `wait`(ms) / `say`는 `ISequenceHost`만 호출. Thread.Sleep 없음. FlagStore에 쓰지 않음
-- `SequenceSession`은 문서를 먼저 검증한 뒤 입력을 잠그고, 예외가 나도 해제
-- 호스트 없는 `wait`/`say`는 `async_required`, 플래그 불변
-- Unity 입력은 `SequenceInputGateLock` → `InteractionInputGate`. Sequence 폴더는 Interaction을 참조하지 않음
+- `SequenceCatalog.Register`는 문서를 검사한 뒤 interactionId를 저장. 잘못된 문서·중복 id는 등록하지 않음
+- `SequenceRouter.Play`는 등록된 문서만 `SequenceSession`으로 실행. 없는 id는 `unknown_route`, 입력 미잠금
+- Fungus 블록을 호출하지 않음
 
 ## 검증 (이 checkout)
 
-- `/tmp/p3-async-ui-tests` NUnit: 구현 전 7 fail / 31 pass, 구현 후 38 pass / 0 fail.
+- `/tmp/p4-routing-tests` NUnit: 구현 전 6 fail / 38 pass, 구현 후 44 pass / 0 fail.
 - `dotnet run --project scripts/CSharpSyntaxChecker -- disputatio/Assets`: exit 0
 - Unity EditMode: 미실행 (tool-missing)

@@ -1,18 +1,15 @@
-# TODO — Fungus 삭제 P3
+# TODO — Fungus 삭제 P4
 
 ## 목표
-Sequence wait/say를 호스트에 넘기고, 세션 재생 동안만 입력을 잠근다.
+interactionId → Sequence 문서 라우팅. Fungus 블록을 호출하지 않음.
 
 ## 진행 중인 항목
-- P3 비동기·UI 계약. Unity EditMode는 이 환경에서 미실행.
+- P4 Sequence 라우팅 TDD (RED → GREEN).
 
 ## 남은 항목
-- Windows unity-cli EditMode: SequenceSessionTests 포함
-- 씬 이전. FlagStore 싱글톤 금지
-- Unity SayDialog 호스트 연결
+- RoomInteractionController 연결 (씬 변경 없음)
+- Unity SayDialog 호스트
+- 씬 이전
 
 ## 검증 결과
-- standalone NUnit `/tmp/p3-async-ui-tests`: RED 7 fail/31 pass → GREEN 38 pass
-- CSharpSyntaxChecker: exit 0. Tests 3 pass
-- Unity compile/EditMode: blocked (no Editor)
-- independentReview: false
+- 미실행
