@@ -1,19 +1,21 @@
-# TODO — Fungus 삭제 P5/P6
+# TODO — Fungus 삭제 마스터 계획
 
 ## 목표
-RoomInteraction Sequence 브리지 + outcome 예약 플래그.
+MASTER-PLAN P0–P7 cloud 완료.
 
-## 달성
-- P5: InteractionRoute sequence 필드, Loader, SequenceHost, SayDialog 호스트, Controller 연동
-- P6: SequenceBlockOutcomeMapper + ApplySequenceOutcomes
+## 달성 (2026-09-17 cloud)
+- P0 inventory/scanner CLI + pytest
+- P1–P6 (기존 + outcome 체크포인트 제외 + 예제 JSON)
+- P7 `scripts/FungusDeletionSequenceTests` (51 pass)
+- Wiki architecture transcript/hash 동기화 (validate GREEN)
 
-## 남은 항목
-- Windows Unity EditMode: RoomInteractionSequenceControllerTests, SequenceDocumentLoaderTests, SequenceBlockOutcomeMapperTests
-- 씬 Inspector에 Sequence JSON (승인된 마이그레이션만)
-- P0 inventory/scanner (원격 미포함)
+## 인계 (본 환경 불가)
+- R1 씬 YAML 마이그레이션 (동결)
+- R2 Windows Unity EditMode 전체 Sequence 필터
+- independentReview: false
 
 ## 검증
-- standalone `/tmp/p5-sequence-tests`: 18 pass
-- CSharpSyntaxChecker disputatio/Assets: exit 0
-- Unity EditMode: blocked (no Editor)
-- independentReview: false
+- `dotnet test scripts/FungusDeletionSequenceTests/FungusDeletionSequenceTests.csproj` → 51 pass
+- `PYTHONPATH=scripts pytest scripts/fungus_deletion/tests -q` → 3 pass
+- `CSharpSyntaxChecker disputatio/Assets` → exit 0
+- `python3 tools/wiki_rag/validate.py ...` → passed

@@ -578,7 +578,7 @@ graph TB
 | Unity 하네스 정책·검증 | `.harness/unity-policy.md`, `.harness/unity-verification.md`, `.harness/unity-toolchain.json` |
 | Unity 하네스 정적 점검 | `python -m pytest scripts/unity-harness/tests -q` |
 | Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` (그래프를 남기는 이관. 2026-09-17부터 목적지 아님) |
-| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/index.md` |
+| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/MASTER-PLAN.md`, `index.md` |
 
 ---
 

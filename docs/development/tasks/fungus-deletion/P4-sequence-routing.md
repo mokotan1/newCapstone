@@ -1,6 +1,6 @@
 # P4-sequence-routing / interactionId → Sequence 문서
 
-- state: running
+- state: done (Unity EditMode 남음)
 - phase: P4 (R1)
 - allowedFiles: `disputatio/Assets/godlotto/Script/Sequence/**`, `disputatio/Assets/Editor/Tests/EditMode/Sequence/SequenceRouterTests.cs`, `docs/architecture.md`, 본 task 폴더
 - excluded: 씬/프리팹, RoomInteractionController 개조, Fungus 블록 실행, FlagStore 싱글톤, Kitchen Flowchart 제거
