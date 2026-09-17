@@ -319,7 +319,7 @@ namespace Godlotto.Interaction
             GameLog.LogWarning($"{LogPrefix} GoBack requested but no BackNavigator or fixed route was found.");
         }
 
-        bool RequestSceneTransition(string sceneName)
+        protected virtual bool RequestSceneTransition(string sceneName)
         {
             if (SceneLoadHandlerForTests != null)
             {

@@ -5,8 +5,8 @@
 - 최종 범위: 전체 씬·공용 자산의 Fungus 제거. Kitchen은 후보일 뿐.
 - 브랜치: `feature/fungus-deletion-framework` (base `develop`)
 - **마스터 계획**: [MASTER-PLAN.md](./MASTER-PLAN.md)
-- cloud 완료: **P0–P7**. **R1** BasementHallway 파일럿(코드·JSON·Editor 메뉴)까지 push.
-- 다음: Unity에서 **Basement Hallway Sequence Pilot** 실행 → PlayMode로 문 5개 씬 전환 확인. `unity-cli EditMode --filter Sequence`
+- **R1.5** 페이드 + 지하 단순 방 Flowchart 제거 메뉴 추가.
+- 다음: Unity **Basement Hallway Sequence Pilot** + **Basement Simple Rooms Remove Flowchart** 실행 후 PlayMode.
 
 ## 동결
 

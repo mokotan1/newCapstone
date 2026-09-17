@@ -16,11 +16,11 @@
 | Sequence JSON | `Assets/godlotto/SequenceExamples/BasementHallway/*.json` |
 | 적용 (Editor) | **Tools → Godlotto → Fungus Deletion → Basement Hallway Sequence Pilot** |
 | Fungus 잔류 | `Start` 블록(입장 페이드 인)만 유지 |
-| 알려진 차이 | 문 클릭 시 **페이드 아웃 없이** `SceneTransitionService` 직행 (R1.5에서 C# 페이드 추가 예정) |
+| 페이드 | R1.5 `GameplayScreenFade` — Fungus 문 블록과 동일 targetAlpha/duration |
 
 ## 다음 후보 (Inventory risk 낮은 순)
 
-- `Basement*Room` (Start+Fade only) — GameStarted 페이드를 C#로 옮긴 뒤 Flowchart 제거
+- `Basement*Room` (Start+Fade only) — **Tools → Basement Simple Rooms Remove Flowchart** (R1.5)
 - `*Entrance` — Menu/Say는 Glass Menu 이후; `CorridorEntranceController` 패턴 유지
 - Kitchen / Hall — 고위험, 마지막
 

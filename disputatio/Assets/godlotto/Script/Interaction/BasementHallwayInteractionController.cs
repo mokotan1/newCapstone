@@ -8,5 +8,17 @@ namespace Godlotto.Interaction
         protected override string LogPrefix => "[BasementHallway]";
 
         protected override bool ShouldUseSceneInteractionGate(string interactionId, string blockName) => false;
+
+        protected override bool RequestSceneTransition(string sceneName)
+        {
+            if (SceneLoadHandlerForTests != null)
+                return base.RequestSceneTransition(sceneName);
+
+            GameplayScreenFade.FadeOutThenLoadScene(
+                sceneName,
+                GameplayScreenFade.BasementDoorFadeTargetAlpha,
+                GameplayScreenFade.BasementTransitionDurationSeconds);
+            return true;
+        }
     }
 }

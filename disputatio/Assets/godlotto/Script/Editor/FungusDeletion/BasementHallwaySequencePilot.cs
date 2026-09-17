@@ -72,7 +72,7 @@ public static class BasementHallwaySequencePilot
         Debug.Log(
             "[BasementHallwaySequencePilot] Applied Sequence routes and disabled "
             + disabled
-            + " Fungus ObjectClicked handler(s). Fade-out before load is not in Sequence yet (see R1-deletion-process.md).");
+            + " Fungus ObjectClicked handler(s). Scene loads use GameplayScreenFade (Basement parity).");
     }
 
     static void WriteWorldClicks(SerializedProperty worldClicksProp, Scene scene)
