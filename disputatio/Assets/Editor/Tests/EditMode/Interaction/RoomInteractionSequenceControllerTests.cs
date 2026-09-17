@@ -147,6 +147,50 @@ public class RoomInteractionSequenceControllerTests
     }
 
     [Test]
+    public void OnInteraction_SequenceRoute_GoBackOutcome_InvokesGoBackHandler()
+    {
+        var document = new SequenceDocument
+        {
+            schemaVersion = SequenceLimits.CurrentSchemaVersion,
+            blocks = new[]
+            {
+                new SequenceBlock
+                {
+                    id = "start",
+                    commands = new[]
+                    {
+                        new SequenceOp
+                        {
+                            command = "set_bool",
+                            key = SequenceBlockOutcomeMapper.GoBackKey,
+                            bool_value = true
+                        }
+                    }
+                }
+            }
+        };
+        sequenceHost.RegisterForTests("back", document, "start");
+
+        SetPrivateField(controller, "routes", new[]
+        {
+            new InteractionRoute
+            {
+                interactionId = "back",
+                sequenceStartBlock = "start",
+                sequenceDocument = CreateTextAsset("{}")
+            }
+        });
+        RebuildLookupCaches(controller);
+
+        bool goBack = false;
+        RoomInteractionController.GoBackHandlerForTests = () => goBack = true;
+
+        controller.OnInteraction("back");
+
+        Assert.IsTrue(goBack);
+    }
+
+    [Test]
     public void OnInteraction_SequenceOnlyRoute_WithoutHost_LogsAndSkipsFungus()
     {
         SetPrivateField(controller, "sequenceHost", null);

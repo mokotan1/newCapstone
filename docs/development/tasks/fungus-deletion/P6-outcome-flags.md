@@ -17,7 +17,12 @@
 | `__sequence.outcome.go_back` | bool | `BackNavigator` / 고정 복귀 씬 |
 | `__sequence.outcome.load_scene` | string | `SceneTransitionService.LoadSceneSafely` |
 
+## 체크포인트
+
+- `FlagStoreCheckpointMapper`는 outcome 예약 키를 capture/restore하지 않음 (`IsEphemeralOutcomeKey`)
+
 ## 검증
 
 - `SequenceBlockOutcomeMapperTests` (standalone + Unity EditMode)
+- `FlagStoreCheckpointMapperTests.Capture_SkipsEphemeralOutcomeKeys`
 - `RoomInteractionSequenceControllerTests.OnInteraction_SequenceRoute_LoadSceneOutcome_InvokesSceneHandler`
