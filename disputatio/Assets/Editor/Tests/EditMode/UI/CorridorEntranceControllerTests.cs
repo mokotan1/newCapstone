@@ -61,6 +61,7 @@ public class CorridorEntranceControllerTests
     public void TearDown()
     {
         RoomInteractionController.ResetStateForTests();
+        SceneTransitionService.ResetForTests();
         FungusDialogueBridge.ResetForTests();
         foreach (var runner in Object.FindObjectsByType<DeferredClickCleanup>(FindObjectsSortMode.None))
             Object.DestroyImmediate(runner.gameObject);
@@ -121,6 +122,50 @@ public class CorridorEntranceControllerTests
     {
         string requestedScene = null;
         SceneTransitionService.SetLoadedScenesForTests(SceneNames.HallAnimate, SceneNames.HallPlayable);
+        RoomInteractionController.SceneLoadHandlerForTests = sceneName =>
+        {
+            requestedScene = sceneName;
+            return true;
+        };
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "IsPlayedAnimation";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsNull(requestedScene);
+    }
+
+    /// <summary>
+    /// 에디터에서 Hall_playerble을 시작 씬으로 Play하면 입장 연출 씬을 요청하지 않아야 합니다.
+    /// </summary>
+    [Test]
+    public void OnBlockEnd_HallAnimationWhenPlayStartsOnHallPlayable_DoesNotRequestSceneLoad()
+    {
+        string requestedScene = null;
+        SceneTransitionService.SetLoadedScenesForTests(string.Empty, SceneNames.HallPlayable);
+        RoomInteractionController.SceneLoadHandlerForTests = sceneName =>
+        {
+            requestedScene = sceneName;
+            return true;
+        };
+
+        var block = root.AddComponent<Block>();
+        block.BlockName = "IsPlayedAnimation";
+
+        controller.InvokeBlockEndForTests(block);
+
+        Assert.IsNull(requestedScene);
+    }
+
+    /// <summary>
+    /// 복도에서 홀로 돌아와도 GameStarted 연출 로드가 다시 걸리지 않아야 합니다.
+    /// </summary>
+    [Test]
+    public void OnBlockEnd_HallAnimationWhenReturningFromHallLeft_DoesNotRequestSceneLoad()
+    {
+        string requestedScene = null;
+        SceneTransitionService.SetLoadedScenesForTests(SceneNames.HallLeft, SceneNames.HallPlayable);
         RoomInteractionController.SceneLoadHandlerForTests = sceneName =>
         {
             requestedScene = sceneName;

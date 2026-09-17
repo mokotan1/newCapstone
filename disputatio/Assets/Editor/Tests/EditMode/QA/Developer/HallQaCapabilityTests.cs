@@ -14,6 +14,9 @@ public class HallQaCapabilityTests
     private static readonly string[] ExpectedIds =
     {
         "hall.nav.click-kitchen-entry",
+        "hall.nav.execute-front",
+        "hall.nav.execute-door",
+        "hall.nav.reset-to-hall",
         "hall.nav.probe",
         "hall.nav.assert-route",
         "hall.nav.capture"
@@ -62,6 +65,7 @@ public class HallQaCapabilityTests
             DeveloperQaCommand.Create("c1", "interaction", "invoke", "hall.nav.assert-route"),
             CancellationToken.None);
         Assert.AreEqual(DeveloperQaResultCode.AssertionFailed, result.Code);
+        StringAssert.Contains("destination-mismatch", result.Message);
     }
 }
 #endif

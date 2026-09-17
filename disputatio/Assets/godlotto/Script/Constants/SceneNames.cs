@@ -16,5 +16,7 @@ public static class SceneNames
     public const string HallPlayable = "Hall_playerble";
     public const string HallAnimate = "Hall_animate";
     public const string HallRight = "Hall_Right";
+    public const string HallLeft = "Hall_Left";
+    public const string HallLeft2 = "Hall_Left2";
     public const string SettingScene = "SettingScene";
 }

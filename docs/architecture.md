@@ -48,7 +48,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun, qa/tool 등)
 ├── installer/           # 로컬 AI 라이선스 NOTICE·첫 실행 체크리스트
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
@@ -80,6 +80,7 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
@@ -135,7 +136,10 @@ newCapstone/
 public const string MainMenu = "MainMenuScene";
 public const string Kitchen = "Kitchen";
 public const string StudyRoom = "StudyRoom";
-// ...
+public const string HallPlayable = "Hall_playerble";
+public const string HallAnimate = "Hall_animate";
+public const string HallLeft = "Hall_Left";
+public const string HallLeft2 = "Hall_Left2";
 ```
 
 **대표 플로우 (빌드 설정·코드 기준)**
@@ -282,7 +286,7 @@ flowchart LR
 |--------|------|
 | `SceneInteractionController` | `TryInteract(id)` — 연타·대사 중·전환 중 차단 |
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
-| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생 |
+| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. `Hall_playerble`의 `IsPlayedAnimation` → `Hall_animate` 로드는 허브에서 스킵한다. 입장 연출은 `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
@@ -555,6 +559,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route / context / isolation / console / defect / reconnect / runner / live / live_coverage / status_watch; 홀→주방 hop은 `HallQaFungusHop` + heartbeat GET `/health` HTTP 코드. Status CMD는 리스너가 죽은 동안 `console`을 치지 않는다) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |
