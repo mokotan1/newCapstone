@@ -66,7 +66,7 @@ newCapstone/
 |------|------|-----------------|
 | `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
 | `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
-| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequenceSession`, `SequenceCatalog`, `SequenceRouter`. 클릭 id → 문서. `using Fungus` 금지 |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequenceSession`, `SequenceCatalog`, `SequenceRouter`, `SequenceDocumentLoader`, `SequenceBlockOutcomeMapper`(예약 outcome 키). `using Fungus` 금지 |
 | `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷. Sequence 플래그는 `FlagStoreCheckpointMapper`만 `sequence*` 배열에 기록 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
@@ -405,7 +405,7 @@ graph TB
 
 1. **씬 이름**은 `SceneNames`에 상수 추가 후 사용 (`godlotto/Script/Constants/SceneNames.cs`).
 2. **Fungus 변수 키**는 `FungusVariableKeys`에 추가 (`godlotto/Script/Constants/FungusVariableKeys.cs`).
-3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome** 또는 **`SequenceRouter`** 패턴을 따릅니다. 동결 중 새 Flowchart 블록은 추가하지 말 것.
+3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome**, **`RoomInteractionSequenceHost` + Sequence JSON**, 또는 **`SequenceRouter`** 패턴을 따릅니다. Sequence 종료 씬 전환은 `SequenceBlockOutcomeMapper` 예약 키(`__sequence.outcome.*`)로 표현. 동결 중 새 Flowchart 블록은 추가하지 말 것.
 4. **씬 load**는 `SceneTransitionService.LoadSceneSafely` 사용.
 5. **클릭 진입** 전 `SceneInteractionController.TryInteract(interactionId)` 호출.
 6. **로그**는 릴리스에 남기지 않을 진단은 `GameLog.Log` (`Core/GameLog.cs`); 실제 버그는 `Debug.LogError` 유지.

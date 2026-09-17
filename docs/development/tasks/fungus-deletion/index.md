@@ -4,8 +4,8 @@
 
 - 최종 범위: 전체 씬·공용 자산의 Fungus 제거. Kitchen은 후보일 뿐.
 - 브랜치: `feature/fungus-deletion-framework` (base `develop`)
-- 현재 단계: **P4 Sequence 라우팅**. Unity EditMode 미실행. 씬 일괄 변경 금지.
-- 다음: Windows `--filter SequenceRouterTests`. `RoomInteractionController` 연결은 별도 패킷. FlagStore 싱글톤 금지.
+- 현재 단계: **P6 outcome 플래그**까지 cloud 구현 완료. Unity EditMode 미실행. 씬 일괄 YAML 변경 금지.
+- 다음: Windows EditMode — `RoomInteractionSequenceControllerTests`, `SequenceDocumentLoaderTests`, `SequenceBlockOutcomeMapperTests`. 이후 씬별 Inspector에 Sequence JSON 붙이기(승인된 마이그레이션만).
 
 ## 동결
 
@@ -20,7 +20,7 @@
 | checkedAt | 2026-09-17 |
 | Editor | 없음. unity-cli blocked |
 | independentReview | false |
-| 다음 명령 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter SequenceRouterTests` |
+| 다음 명령 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter RoomInteractionSequenceControllerTests` |
 
 ## P4 AC
 

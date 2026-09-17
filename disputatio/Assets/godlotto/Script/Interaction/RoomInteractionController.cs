@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Fungus;
 using Godlotto.ModalInput;
+using Godlotto.Sequence;
 using UnityEngine;
 
 namespace Godlotto.Interaction
@@ -20,8 +21,11 @@ namespace Godlotto.Interaction
         [SerializeField] InteractionRoute[] routes = Array.Empty<InteractionRoute>();
         [SerializeField] BlockOutcome[] blockOutcomes = Array.Empty<BlockOutcome>();
         [SerializeField] PanelCloseBinding[] panelCloses = Array.Empty<PanelCloseBinding>();
+        [SerializeField] RoomInteractionSequenceHost sequenceHost;
 
         readonly Dictionary<string, string> blockNameByInteractionId = new Dictionary<string, string>();
+        readonly Dictionary<string, InteractionRoute> interactionRouteById =
+            new Dictionary<string, InteractionRoute>(StringComparer.Ordinal);
         readonly Dictionary<string, BlockOutcome> outcomeByBlockName = new Dictionary<string, BlockOutcome>();
         readonly Dictionary<string, GameObject> panelByCloseId = new Dictionary<string, GameObject>();
 
@@ -106,6 +110,21 @@ namespace Godlotto.Interaction
         {
             if (string.IsNullOrWhiteSpace(interactionId))
                 return;
+
+            if (!interactionRouteById.TryGetValue(interactionId, out InteractionRoute route))
+            {
+                LogIgnored($"Unknown interaction id '{interactionId}'.");
+                return;
+            }
+
+            if (IsSequenceRoute(route))
+            {
+                if (TryPlaySequence(interactionId))
+                    return;
+
+                LogIgnored($"Sequence playback failed for '{interactionId}'.");
+                return;
+            }
 
             if (!blockNameByInteractionId.TryGetValue(interactionId, out string blockName))
             {
@@ -212,6 +231,29 @@ namespace Godlotto.Interaction
         {
         }
 
+        internal void ApplySequenceOutcomes(FlagStore flags)
+        {
+            if (flags == null)
+                return;
+
+            if (SequenceBlockOutcomeMapper.ShouldGoBack(flags))
+            {
+                ResetIsClicked();
+                DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+                RequestGoBack();
+                SequenceBlockOutcomeMapper.Clear(flags);
+                return;
+            }
+
+            if (SequenceBlockOutcomeMapper.TryGetLoadScene(flags, out string sceneName))
+            {
+                ResetIsClicked();
+                if (!RequestSceneTransition(sceneName))
+                    DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+                SequenceBlockOutcomeMapper.Clear(flags);
+            }
+        }
+
         protected virtual void ApplyBlockOutcome(Block block, BlockOutcome outcome)
         {
             if (outcome.openPanel != null)
@@ -288,19 +330,55 @@ namespace Godlotto.Interaction
             return SceneTransitionService.LoadSceneSafely(sceneName);
         }
 
+        internal void RegisterSequenceRoutes(SequenceCatalog catalog)
+        {
+            if (catalog == null)
+                return;
+
+            foreach (InteractionRoute route in routes)
+            {
+                if (route == null || !IsSequenceRoute(route))
+                    continue;
+
+                SequenceDocument document = SequenceDocumentLoader.Parse(route.sequenceDocument.text);
+                catalog.Register(route.interactionId, document, route.sequenceStartBlock);
+            }
+        }
+
+        static bool IsSequenceRoute(InteractionRoute route)
+        {
+            return route != null
+                   && route.sequenceDocument != null
+                   && !string.IsNullOrWhiteSpace(route.sequenceStartBlock);
+        }
+
+        bool TryPlaySequence(string interactionId)
+        {
+            if (RoomInteractionSequenceHost.SequencePlayHandlerForTests != null)
+                return RoomInteractionSequenceHost.SequencePlayHandlerForTests(interactionId);
+
+            if (sequenceHost == null)
+                sequenceHost = GetComponent<RoomInteractionSequenceHost>();
+
+            return sequenceHost != null && sequenceHost.TryPlay(interactionId);
+        }
+
         void BuildLookupCaches()
         {
             blockNameByInteractionId.Clear();
+            interactionRouteById.Clear();
             outcomeByBlockName.Clear();
             panelByCloseId.Clear();
 
             foreach (InteractionRoute route in routes)
             {
-                if (route == null || string.IsNullOrWhiteSpace(route.interactionId)
-                    || string.IsNullOrWhiteSpace(route.fungusBlockName))
+                if (route == null || string.IsNullOrWhiteSpace(route.interactionId))
                     continue;
 
-                blockNameByInteractionId[route.interactionId] = route.fungusBlockName;
+                interactionRouteById[route.interactionId] = route;
+
+                if (!string.IsNullOrWhiteSpace(route.fungusBlockName))
+                    blockNameByInteractionId[route.interactionId] = route.fungusBlockName;
             }
 
             foreach (BlockOutcome outcome in blockOutcomes)
@@ -337,6 +415,7 @@ namespace Godlotto.Interaction
             SceneInteractionController.ResetForTests();
             FungusDialogueBridge.ResetForTests();
             SceneTransitionService.ResetForTests();
+            RoomInteractionSequenceHost.ResetForTests();
         }
 
         internal void InvokeBlockEndForTests(Block block) => OnBlockEnd(block);
@@ -414,6 +493,8 @@ namespace Godlotto.Interaction
     {
         public string interactionId;
         public string fungusBlockName;
+        public TextAsset sequenceDocument;
+        public string sequenceStartBlock;
     }
 
     [Serializable]
