@@ -299,41 +299,43 @@ AC07은 목적지 도착 요구이며, 현재 홀 왼쪽 클릭 한 번이 즉�
 
 ## 12. AC 대응표 (구현 현황)
 
-기록일: 2026-09-15. 검증 명령: `python -m pytest scripts/qa/tests -q` (이 세션 88 passed, coordinator 포함 시 증가). 라이브 Editor 실행 0회. `independentReview: false`.
+기록일: 2026-09-17. 검증 명령: `python -m pytest scripts/qa/tests -q` (130 passed). Play Mode 수직 1회 (`DisableDomainReload` + heartbeat `/health` 포트 8097, PID 46172). Kitchen 미도착. `independentReview: false`. `featureVerified` 금지.
 
-배선 조사 (AC08, 씬 YAML 정적 읽기, PlayMode 아님):
+계약 pytest는 100%다. 1단계 AC01–AC23의 **게임플레이 검증 passed**는 100%가 아니다. AC24–AC32는 이번 범위 밖.
+
+배선 조사 (AC08, 씬 YAML 정적 읽기):
 
 - `Hall_playerble` `CorridorEntranceController` `left` / `Left_Clicked` → `Hall_Left`
 - `Hall_Left` Fungus `Front_clicked` LoadScene → `Hall_Left2`
 - `Hall_Left2` Fungus `Door_Clicked` LoadScene → `Kitchen`
 - `Hall_Left` / `Hall_Left2`에는 C# `interactionId`가 없다 (Clickable2D).
-- `transition.hall-to-kitchen.json`은 중간 씬 없이 `scene.Kitchen`만 적는다. 이 hop을 생략한 계획은 `spec-mismatch`다.
-- `HallQaAdapter` assert-route는 `HallQaRouteAssertion`으로 Kitchen 도착·전환 종료·입력 게이트를 본다. EditMode 단위 테스트만; 라이브 Kitchen 도착은 NOT_RUN.
+- `HallQaFungusHop`이 `Front_clicked` / `Door_Clicked` / `reset-to-hall` capability를 등록한다.
+- 라이브 2026-09-17 Play Mode: 시작 씬이 `Hall_animate`라 첫 click EnvironmentBlocked. reset 후 `Hall_playerble` + `controllerFound=True`. pointer는 RealInput 없음. assert-route FAIL `destination-mismatch`. 보고서 `docs/qa/runs/2026-09-17T03-02-29Z-run-hall-to-kitchen/`. 커버리지 `docs/qa/runs/2026-09-17T02-57-26Z-live-coverage/`.
 
 | AC | status | implementationFiles | testOrAction | executionStatus | verificationStatus | limitations |
 |---|---|---|---|---|---|---|
 | AC01 | unit-green | `scripts/qa/tool/plan.py` | `pytest scripts/qa/tests/test_tool_plan.py` | succeeded | passed | 라이브 계획 CLI 없음 |
-| AC02 | partial | `scripts/qa/tool/preflight.py` | `test_tool_preflight.py` 스냅샷 | succeeded | NOT_RUN | 실제 Editor 미연결/dirty/compile 미주입 |
-| AC03 | partial | `preflight.py` + `rooms/preflight.py` | 같은 파일 | succeeded | NOT_RUN | live registry는 fixture |
-| AC04 | partial | `preflight.acquire_lease` | in-memory store | succeeded | NOT_RUN | 실제 Gateway lease 아님 |
-| AC05 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 격리 프로파일 미연결 |
-| AC06 | partial | `scripts/qa/tool/hall_route.py` | `test_tool_hall_route.py` 이중 attempt 기록 | succeeded | NOT_RUN | api/event-system 실실행·reset은 fixture |
-| AC07 | partial | `HallQaRouteAssertion.cs`, `HallQaAdapter.cs` | `HallQaRouteAssertionTests`, `HallQaCapabilityTests` | NOT_RUN | NOT_RUN | EditMode 단위만. 라이브 Kitchen 도착·화면 없음 |
-| AC08 | unit-green | `hall_route.py` + 씬 YAML | 정적 hop 고정, 생략 시 spec-mismatch | succeeded | passed | PlayMode hop 미확인. `Hall_Left`/`Hall_Left2`에 C# interactionId 없음 |
+| AC02 | partial | `preflight.evaluate_injected_preflight_matrix` | pytest + `coverage.json` preflightMatrix | succeeded | partial | 라이브 스냅샷에 사유 주입. Editor를 실제로 끊거나 dirty로 만들지는 않음 |
+| AC03 | partial | `preflight.py` | live `capability.list` 45개 + missing 주입 | succeeded | partial | 라이브 registry 관측. 누락은 스냅샷 주입 |
+| AC04 | partial | `preflight.acquire_lease` | in-memory + matrix lease-second ownership | succeeded | partial | 실제 QaLeaseService 이중 writer는 아님 |
+| AC05 | partial | `isolation.py` | live qa_status 프로필 플래그 전후 동일 | succeeded | partial | PlayerPrefs dump 없음. 프로필 키만 대조 |
+| AC06 | partial | `runner.py` pointer + reset | Play Mode pointer invoke | succeeded | FAIL | `interaction.pointer` 실호출. RealInput/EventSystem missing. execute-front/door는 fungus |
+| AC07 | partial | `HallQaRouteAssertion.cs`, `HallQaFungusHop.cs` | Play Mode hops + assert-route | succeeded | FAIL | Kitchen 미도착. Hall_animate 시작, 이후 Hall_playerble controller-only 거절 관측 |
+| AC08 | unit-green | `hall_route.py` + `SceneNames.HallLeft/HallLeft2` | 정적 hop 고정 | succeeded | passed | PlayMode에서 Front/Door 블록 미실행 성공 |
 | AC09 | unit-green | `scripts/qa/tool/verdict.py` | `test_tool_verdicts.py` | succeeded | passed | — |
 | AC10 | unit-green | `scripts/qa/tool/evidence.py` | `test_tool_evidence.py` | succeeded | passed | — |
-| AC11 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 콘솔 분류기 없음 |
-| AC12 | partial | `scripts/qa/tool/coordinator.py` | `test_tool_coordinator.py` | succeeded | NOT_RUN | RecordingGateway만 |
-| AC13 | partial | `coordinator.py` | 같은 파일 | succeeded | NOT_RUN | 실제 mutation 유실 없음 |
-| AC14 | partial | `coordinator.py` | 같은 파일 | succeeded | NOT_RUN | 실제 profile/cleanup 없음 |
-| AC15 | partial | `coordinator.py` journal | 같은 파일 | succeeded | NOT_RUN | 프로세스 강제 중단 아님 |
-| AC16 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | diffHash 없음 |
+| AC11 | unit-green | `scripts/qa/tool/console.py` | live console → unclassified | succeeded | partial | 라이브 경고 덤프를 novel unclassified로 분류. 시나리오 PASS 아님 |
+| AC12 | partial | `coordinator.py` | live `qa_cancel` | succeeded | partial | 활성 시나리오 없이 cancel. 실행 중 취소는 아님 |
+| AC13 | partial | `coordinator.py` | pytest RecordingGateway | succeeded | NOT_RUN | 실제 mutation 유실 없음 |
+| AC14 | partial | `coordinator.py` | live `qa_recover` | succeeded | partial | recover 호출됨. profile 부분실패 주입은 fixture |
+| AC15 | partial | `coordinator.py` journal | pytest | succeeded | NOT_RUN | 강제 중단 후 recover 저널 라이브 없음 |
+| AC16 | unit-green | `context.read_git_worktree` | live diffHash 안정 | succeeded | passed | scoped `scripts/qa/tool/` + Hall QA C# |
 | AC17 | unit-green | `verdict.py` | `test_tool_verdicts.py` | succeeded | passed | — |
-| AC18 | unit-green | `scripts/qa/tool/report.py` | `test_tool_report.py` | succeeded | passed | — |
-| AC19 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | stub만으로 완료 금지 |
-| AC20 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | — |
+| AC18 | unit-green | `scripts/qa/tool/report.py` | 라이브 report.json/md | succeeded | passed | — |
+| AC19 | partial | `runner.py`, `live.py`, `run_play_hops.py` | Play Mode `qa_dev_exec` hops | succeeded | FAIL | stub 아님. Play HTTP는 DisableDomainReload로 한 번 생존. Kitchen 미도착. `featureVerified=false` |
+| AC20 | unit-green | `defect.py` | live coverage defect packet | succeeded | passed | 제품 트리 불변. Kitchen 미도착을 결함 패킷으로 기록 |
 | AC21 | unit-green | `scripts/qa/tool/normalize.py` | `test_tool_normalize.py` | succeeded | passed | result_contract 래핑 |
-| AC22 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | domain reload 없음 |
-| AC23 | NOT_RUN | — | — | NOT_RUN | NOT_RUN | 독립 리뷰 없음. verified 금지 |
+| AC22 | partial | `reconnect.py`, `wait_until_http_ready` | heartbeat 포트 health. PID 46172 playing | succeeded | partial | 포트 8095→8096/8097 재바인드 관측. domain reload 켠 채로는 리스너 사망. DisableDomainReload 후에도 긴 probe 루프 중 리스너 재사망 |
+| AC23 | unit-green | `runner.py` review 필드 | 라이브 `review.status=missing` | succeeded | NOT_RUN | 독립 리뷰 없음. verified 금지 |
 
-`reviewReference`: 없음. `evidencePaths`: pytest 로컬 출력만. 런 디렉터리 보고서 없음.
+`reviewReference`: 없음. `evidencePaths`: `docs/qa/runs/2026-09-17T03-02-29Z-run-hall-to-kitchen/`, `docs/qa/runs/2026-09-17T02-57-26Z-live-coverage/`, `docs/qa/runs/2026-09-17T02-32-43Z-run-hall-to-kitchen/`. pytest 130 passed.

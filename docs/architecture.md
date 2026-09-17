@@ -136,7 +136,10 @@ newCapstone/
 public const string MainMenu = "MainMenuScene";
 public const string Kitchen = "Kitchen";
 public const string StudyRoom = "StudyRoom";
-// ...
+public const string HallPlayable = "Hall_playerble";
+public const string HallAnimate = "Hall_animate";
+public const string HallLeft = "Hall_Left";
+public const string HallLeft2 = "Hall_Left2";
 ```
 
 **대표 플로우 (빌드 설정·코드 기준)**
@@ -283,7 +286,7 @@ flowchart LR
 |--------|------|
 | `SceneInteractionController` | `TryInteract(id)` — 연타·대사 중·전환 중 차단 |
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
-| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생 |
+| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. `Hall_playerble`의 `IsPlayedAnimation` → `Hall_animate` 로드는 허브에서 스킵한다. 입장 연출은 `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
@@ -556,7 +559,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
-| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route; 홀→주방 통합 1단계) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route / context / isolation / console / defect / reconnect / runner / live / live_coverage / status_watch; 홀→주방 hop은 `HallQaFungusHop` + heartbeat GET `/health` HTTP 코드. Status CMD는 리스너가 죽은 동안 `console`을 치지 않는다) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |

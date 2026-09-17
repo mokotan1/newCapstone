@@ -45,6 +45,7 @@ _HALL_SCENARIO_ID = "qa.tool.hall-to-kitchen"
 
 
 def _canonicalize(value: Any) -> Any:
+    """planHash용으로 키를 정렬하고 mapping list를 안정 정렬한다."""
     if isinstance(value, Mapping):
         return {key: _canonicalize(value[key]) for key in sorted(value)}
     if isinstance(value, list):
@@ -59,7 +60,7 @@ def _canonicalize(value: Any) -> Any:
 
 
 def canonical_json_hash(payload: Mapping[str, Any] | str | bytes) -> str:
-    """Return a SHA-256 hex digest of canonical JSON (sorted keys and mapping lists)."""
+    """정규 JSON의 SHA-256 hex digest를 반환한다. 키 정렬·매핑 리스트 정렬을 포함한다."""
     if isinstance(payload, bytes):
         canonical = payload
     elif isinstance(payload, str):
@@ -74,12 +75,14 @@ def canonical_json_hash(payload: Mapping[str, Any] | str | bytes) -> str:
 
 
 def _require_non_empty_string(value: Any, label: str) -> str:
+    """빈 문자열이 아닌 필수 문자열을 꺼낸다. 아니면 PlanError."""
     if not isinstance(value, str) or not value.strip():
         raise PlanError(f"{label} must be a non-empty string")
     return value
 
 
 def _require_unique_ids(values: Any, label: str) -> list[str]:
+    """ID 목록에 빈 값·중복이 없는지 검사한다."""
     if not isinstance(values, list) or not values:
         raise PlanError(f"{label} must be a non-empty list")
     ids: list[str] = []
@@ -94,7 +97,7 @@ def _require_unique_ids(values: Any, label: str) -> list[str]:
 
 
 def build_plan(payload: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate and freeze a QA execution plan. Rejects empty required fields and duplicate IDs."""
+    """필수 필드·중복 ID·timeout을 검사해 실행 계획을 고정한다."""
     if not isinstance(payload, Mapping):
         raise PlanError("plan must be a JSON object")
 
@@ -181,6 +184,7 @@ def build_plan(payload: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _hall_to_kitchen_scenario() -> dict[str, Any]:
+    """1단계 홀→주방 시나리오 본문이다. hop은 씬 YAML 고정값을 그대로 쓴다."""
     hops = list(WIRED_HALL_TO_KITCHEN["hops"])
     return {
         "id": _HALL_SCENARIO_ID,
@@ -237,7 +241,7 @@ def _hall_to_kitchen_scenario() -> dict[str, Any]:
 
 
 def build_hall_to_kitchen_plan() -> dict[str, Any]:
-    """Return the frozen phase-1 Hall → Kitchen execution plan."""
+    """1단계 Hall→Kitchen 실행 계획을 반환한다. 직접 Kitchen hop은 넣지 않는다."""
     scenario = _hall_to_kitchen_scenario()
     first_hop = WIRED_HALL_TO_KITCHEN["hops"][0]
     payload: dict[str, Any] = {

@@ -36,6 +36,7 @@ WIRED_HALL_TO_KITCHEN: dict[str, Any] = {
 
 
 def expected_scenes() -> list[str]:
+    """홀→주방 hop 순서의 씬 이름 목록을 반환한다 (시작 씬들 + Kitchen)."""
     hops = WIRED_HALL_TO_KITCHEN["hops"]
     return [str(hop["scene"]) for hop in hops] + [
         str(WIRED_HALL_TO_KITCHEN["destination"])
@@ -43,7 +44,7 @@ def expected_scenes() -> list[str]:
 
 
 def compare_plan_to_wiring(plan: Mapping[str, Any]) -> dict[str, Any]:
-    """Reject plans that invent a direct Hall→Kitchen hop or omit wired corridors."""
+    """계획이 씬 YAML에 고정한 hop과 같은지 본다. 직접 Kitchen hop은 spec-mismatch다."""
     target = plan.get("target") if isinstance(plan.get("target"), Mapping) else {}
     plan_scenes = list(target.get("expectedScenes") or [])
     wired = expected_scenes()
@@ -69,7 +70,7 @@ def compare_plan_to_wiring(plan: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def judge_hall_attempt(record: Mapping[str, Any]) -> dict[str, Any]:
-    """Kitchen arrival, hop sequence, and input recovery. Controller presence is never enough."""
+    """Kitchen 도착·hop 순서·입력 복구를 판정한다. 컨트롤러 존재만으로는 PASS가 아니다."""
     reasons: list[str] = []
     wired = expected_scenes()
     visited = [str(item) for item in (record.get("scenesVisited") or [])]
@@ -104,7 +105,7 @@ def judge_hall_attempt(record: Mapping[str, Any]) -> dict[str, Any]:
 def record_dual_layer_attempts(
     raw_attempts: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Stamp distinct attempt IDs after an implied reset to Hall_playerble."""
+    """api와 event-system attempt를 구분된 attemptId로 기록한다. 사이에는 Hall reset이 있다고 본다."""
     recorded: list[dict[str, Any]] = []
     for index, raw in enumerate(raw_attempts):
         item = dict(raw)

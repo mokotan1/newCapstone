@@ -4,4 +4,4 @@ from __future__ import annotations
 
 
 class PlanError(ValueError):
-    """Raised when a QA execution plan is missing required fields or has duplicate IDs."""
+    """실행 계획이 필수 필드를 빠뜨리거나 ID가 중복일 때 올린다."""

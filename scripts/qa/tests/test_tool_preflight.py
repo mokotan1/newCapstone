@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from scripts.qa.rooms.preflight import missing_required_capabilities
-from scripts.qa.tool.preflight import acquire_lease, evaluate_preflight
+from scripts.qa.tool.preflight import (
+    acquire_lease,
+    evaluate_injected_preflight_matrix,
+    evaluate_preflight,
+)
 
 
 def _ready_snapshot(**overrides: object) -> dict[str, object]:
@@ -96,3 +100,19 @@ def test_second_owner_is_rejected_while_first_heartbeat_holds() -> None:
     assert again["executionStatus"] == "acquired"
     assert store["owner"] == "qa-run-1"
     assert store["heartbeatAt"] == "2026-09-15T06:00:02Z"
+
+
+def test_injected_matrix_blocks_each_reason_without_mutations() -> None:
+    matrix = evaluate_injected_preflight_matrix(_ready_snapshot())
+    assert matrix["disconnected"]["reasonCode"] == "editor-disconnected"
+    assert matrix["invalid-project"]["reasonCode"] == "invalid-project"
+    assert matrix["compiling"]["reasonCode"] == "compiling"
+    assert matrix["dirty-scene"]["reasonCode"] == "dirty-scene"
+    assert matrix["ownership"]["reasonCode"] == "ownership"
+    assert matrix["missing-capability"]["reasonCode"] == "missing-capability"
+    assert matrix["lease-first"]["executionStatus"] == "acquired"
+    assert matrix["lease-second"]["reasonCode"] == "ownership"
+    for key, result in matrix.items():
+        if key.startswith("lease-"):
+            continue
+        assert result["mutationCalls"] == []

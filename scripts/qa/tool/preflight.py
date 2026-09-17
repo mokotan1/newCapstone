@@ -16,6 +16,7 @@ from scripts.unity_harness.result_contract import (
 
 
 def _blocked(reason_code: str, **extra: Any) -> dict[str, Any]:
+    """preflight 차단 결과를 만든다. mutationCalls는 항상 빈 목록이다."""
     payload: dict[str, Any] = {
         "executionStatus": "blocked",
         "verificationStatus": "blocked",
@@ -29,6 +30,7 @@ def _blocked(reason_code: str, **extra: Any) -> dict[str, Any]:
 
 
 def _ready() -> dict[str, Any]:
+    """Editor/lease/capability가 준비됐을 때의 preflight 성공 스냅샷이다."""
     return {
         "executionStatus": "ready",
         "verificationStatus": "not-applicable",
@@ -40,7 +42,7 @@ def _ready() -> dict[str, Any]:
 
 
 def evaluate_preflight(snapshot: Mapping[str, Any]) -> dict[str, Any]:
-    """Classify Editor/project/lease/capability blockers. mutationCalls stays empty."""
+    """Editor 연결·프로젝트·컴파일·dirty·lease·capability 누락을 실행 전에 분류한다."""
     if not snapshot.get("editorConnected"):
         return _blocked("editor-disconnected")
 
@@ -78,7 +80,7 @@ def acquire_lease(
     owner: str,
     heartbeat_at: str,
 ) -> dict[str, Any]:
-    """Grant a single in-memory lease. A second owner is blocked; the current owner may heartbeat."""
+    """인메모리 lease를 한 owner만 갖게 한다. 다른 owner는 ownership으로 막는다."""
     current = store.get("owner")
     if current and current != owner:
         return {
@@ -93,4 +95,24 @@ def acquire_lease(
         "reasonCode": "ok",
         "owner": owner,
         "heartbeatAt": heartbeat_at,
+    }
+
+
+def evaluate_injected_preflight_matrix(baseline: Mapping[str, Any]) -> dict[str, Any]:
+    """라이브 스냅샷을 복사해 AC02–AC04 차단 사유를 각각 주입한다. mutation은 0회다."""
+    base = dict(baseline)
+    lease_store: dict[str, Any] = {}
+    first = acquire_lease(lease_store, owner="qa-tool-owner-a", heartbeat_at="live")
+    second = acquire_lease(lease_store, owner="qa-tool-owner-b", heartbeat_at="live+1")
+    return {
+        "disconnected": evaluate_preflight({**base, "editorConnected": False}),
+        "invalid-project": evaluate_preflight({**base, "projectPath": "other-project"}),
+        "compiling": evaluate_preflight({**base, "compiling": True}),
+        "dirty-scene": evaluate_preflight({**base, "dirtyScene": True}),
+        "ownership": evaluate_preflight(
+            {**base, "currentLeaseOwner": "qa-playtester", "requestedOwner": "qa-tool"}
+        ),
+        "missing-capability": evaluate_preflight({**base, "liveCapabilityIds": []}),
+        "lease-first": first,
+        "lease-second": second,
     }

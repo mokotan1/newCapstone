@@ -9,7 +9,7 @@ from scripts.qa.autorun.report import sanitize_for_report
 
 
 def build_report(run: Mapping[str, Any]) -> tuple[dict[str, Any], str]:
-    """Return (json_payload, markdown) that agree on verdicts, exclusions, cleanup, and review."""
+    """JSON과 Markdown 보고서를 같은 판정·제외·복원·리뷰 값으로 만든다."""
     payload = sanitize_for_report(dict(run))
     if not isinstance(payload, dict):
         payload = dict(run)

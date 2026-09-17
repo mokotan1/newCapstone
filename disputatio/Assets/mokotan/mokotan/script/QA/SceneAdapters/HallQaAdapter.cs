@@ -22,6 +22,7 @@ namespace Godlotto.QA.SceneAdapters
     /// No ForceSolve; missing controller → explicit failure (click → EnvironmentBlocked).
     /// assert-route uses <see cref="HallQaRouteAssertion"/>: Kitchen arrival, transition
     /// finished, and open input gate. Controller presence in Hall is not a pass.
+    /// Intermediate hops Hall_Left/Hall_Left2 are Fungus blocks via <see cref="HallQaFungusHop"/>.
     ///
     /// Placement/assembly note: see <see cref="QaSceneAdapterRegistration"/> remarks.
     /// </summary>
@@ -85,6 +86,33 @@ namespace Godlotto.QA.SceneAdapters
                     "{}",
                     "{clicked:bool}"),
                 _ => MapClick(adapter));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    HallQaFungusHop.ExecuteFrontCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{clicked:bool,blockName:string,activeScene:string}"),
+                _ => HallQaFungusHop.MapExecute(HallQaFungusHop.FrontBlockName));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    HallQaFungusHop.ExecuteDoorCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{clicked:bool,blockName:string,activeScene:string}"),
+                _ => HallQaFungusHop.MapExecute(HallQaFungusHop.DoorBlockName));
+
+            registry.Register(
+                new DeveloperQaCapability(
+                    HallQaFungusHop.ResetToHallCapabilityId,
+                    sceneId,
+                    DeveloperQaCapabilityKind.Interaction,
+                    "{}",
+                    "{reset:bool,activeScene:string}"),
+                _ => HallQaFungusHop.MapResetToHall());
 
             registry.Register(
                 new DeveloperQaCapability(

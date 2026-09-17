@@ -7,7 +7,7 @@ from typing import Any
 
 
 def judge_scenario(record: Mapping[str, Any]) -> dict[str, Any]:
-    """Judge one scenario. FAIL beats missing evidence; PASS requires every required check."""
+    """시나리오 하나 판정. FAIL이 증거 누락보다 앞선다. PASS는 필수 검사가 모두 있어야 한다."""
     scenario_id = str(record.get("scenarioId") or "")
     if record.get("legacyManifest"):
         return {
@@ -84,13 +84,14 @@ def judge_scenario(record: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def aggregate_run(cases: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Aggregate required cases. Exclusions are counted and never shrink the required denominator."""
+    """필수 케이스를 합산한다. 제외 항목은 세지만 분모를 줄이지 않는다."""
     required = [
         case for case in cases if case.get("required") and not case.get("excluded")
     ]
     excluded = [case for case in cases if case.get("excluded")]
 
     def _count(verdict: str) -> int:
+        """required 케이스 중 해당 판정 개수를 센다."""
         return sum(1 for case in required if case.get("scenarioVerdict") == verdict)
 
     passed = _count("PASS")

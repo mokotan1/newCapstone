@@ -11,11 +11,12 @@ _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
 def _is_decodable_png(data: bytes) -> bool:
+    """바이트가 PNG 시그니처와 IHDR/IEND를 가졌는지 본다. 내용은 수정하지 않는다."""
     return data.startswith(_PNG_SIGNATURE) and b"IHDR" in data and b"IEND" in data
 
 
 def validate_artifact(run_root: Path, artifact: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate one artifact against the run root. Path escape and bad files cannot PASS."""
+    """스크린샷 한 개를 run root 기준으로 검증한다. 경로 탈출·손상 파일은 PASS가 아니다."""
     artifact_id = str(artifact.get("id") or "")
     relative = str(artifact.get("relativePath") or "")
     reason_codes: list[str] = []

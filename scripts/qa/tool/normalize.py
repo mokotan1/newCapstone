@@ -17,7 +17,7 @@ _COUNT_KEYS: tuple[str, ...] = (
 
 
 def normalize_test_adapter_result(raw: Mapping[str, Any]) -> dict[str, Any]:
-    """Preserve unknown counts as null. Zero executed and real failures cannot be passed."""
+    """테스트 어댑터 결과를 정규화한다. 실행 0건과 실제 실패는 passed가 될 수 없다."""
     missing = [key for key in _COUNT_KEYS if raw.get(key) is None]
     if missing:
         payload: dict[str, Any] = {
