@@ -1,6 +1,6 @@
 # P1-sequence-contract / FlagStore 타입 정책과 Sequence 사전 검증
 
-- state: running
+- state: done (Unity EditMode 남음)
 - phase: P1 (R1)
 - allowedFiles: `disputatio/Assets/godlotto/Script/Sequence/**`, `disputatio/Assets/Editor/Tests/EditMode/Sequence/**`, `docs/architecture.md`, 본 task 폴더
 - excluded: 씬/프리팹, Variablemanager 이중 기록, Kitchen Flowchart 제거, 벤더 패치, 커밋은 cloud 절차로 수행

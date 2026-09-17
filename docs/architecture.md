@@ -66,8 +66,8 @@ newCapstone/
 |------|------|-----------------|
 | `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
 | `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
-| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequencePlayer`, `SequenceValidator`. `using Fungus` 금지 |
-| `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷 |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `FlagSnapshot`, `SequencePlayer`, `SequenceValidator`. `Export`/`Import`는 검증 후 통째 교체. `using Fungus` 금지 |
+| `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷. Sequence 플래그는 `FlagStoreCheckpointMapper`만 `sequence*` 배열에 기록 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
 | `Assets/godlotto/Script/Core/` | `SingletonMonoBehaviour`, `GameLog` | 씬 간 유지 싱글톤, dev 로그 |
@@ -231,7 +231,10 @@ flowchart LR
 **`CheckpointSaveData` 필드** (`godlotto/Script/Checkpoint/CheckpointSaveData.cs`):
 
 - `resumeSceneName`, `checkpointId`, `checkpointType`, `unlockedRoomKey`
-- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]`
+- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]` (레거시 Variablemanager)
+- `sequenceBooleans[]`, `sequenceIntegers[]`, `sequenceStrings[]` (`FlagStore` 스냅샷. Mapper만 기록)
+
+`FlagStoreCheckpointMapper`는 `fungus*`와 Variablemanager를 읽거나 쓰지 않는다. `RoomUnlockCheckpointService`는 아직 Fungus Collector만 호출한다 (세션 FlagStore 소유자가 없음).
 
 **방 해금 체크포인트 정의** (`RoomCheckpointDefinition.cs`):  
 `ElectricOn`→Kitchen, `UsedStudyKey`→StudyRoom, … `UsedBedKey`→BedRoom (Order 10~70)
@@ -240,7 +243,8 @@ flowchart LR
 
 | 상태 | 위치 | 비고 |
 |------|------|------|
-| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근 |
+| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
+| 시퀀스 플래그 | `FlagStore` (주입) | Checkpoint `sequence*` 배열로만 영속. 전역 Manager 없음 |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |
@@ -406,7 +410,7 @@ graph TB
 6. **로그**는 릴리스에 남기지 않을 진단은 `GameLog.Log` (`Core/GameLog.cs`); 실제 버그는 `Debug.LogError` 유지.
 7. **싱글톤 매니저**는 `SingletonMonoBehaviour<T>` + `PersistAcrossScenes` override (`Core/SingletonMonoBehaviour.cs`).
 8. **AI URL**은 `ServerConfig.ChatUrl`(루프백 플래그 vs 클라우드 URL) 또는 chatbot Inspector `localServerUrl`. 로컬 Gemma 데스크톱은 루프백을 켠다. 클라우드 QA는 플래그를 끄거나 Inspector로 EC2 URL을 지정한다. `ServerConfigTests`와 불일치하는 하드코딩 금지.
-9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것.
+9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것. Sequence 키는 `FlagStoreCheckpointMapper` + 같은 Policy.
 10. **테스트**: EditMode 순수 로직 → `Assets/Editor/Tests/EditMode/`; 백엔드 → `backend_ai/tests/`.
 
 ### 파일 위치·네이밍
@@ -427,7 +431,7 @@ graph TB
 
 ### 상태 관리 패턴
 
-- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` 스냅샷.
+- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` `fungus*` 스냅샷. Sequence 플래그는 `FlagStore` + `sequence*`만. 같은 키를 두 배열에 쓰지 않는다.
 - **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`.
 - **설정**: PlayerPrefs (`SettingPlayerPrefsKeys`만 — 키 문자열 변경 금지, 주석에 명시). 로컬 대화 AI 끄기는 별도 키 `LocalAi.ChatDisabled` (`LocalAiReadiness`).
 - **AI 대화**: 인스턴스별 `ChatHistoryManager` (씬마다 chatbot 컴포넌트).
@@ -508,8 +512,9 @@ graph TB
 | 종류 | 절차 |
 |------|------|
 | **인벤토리 아이템** | `Item` ScriptableObject (`Assets/godlotto/Item/`), 고유 `itemId` 1~30, `ItemAcquisitionTracker` 연동 |
-| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy → `CheckpointRepositoryTests` |
+| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy 또는 `FlagStoreCheckpointMapper` → `CheckpointRepositoryTests` |
 | **Fungus 플래그** | `FungusVariableKeys` + Flowchart 변수 선언 + Collector boolean/int/string 배열 |
+| **Sequence 플래그** | `FlagStore` Set/Get + Mapper `sequence*` 배열. Variablemanager 이중 기록 금지 |
 | **튜터 퀴즈** | `backend_ai/data/tutor_quiz/quiz_bank.csv` (KO/JA/EN 컬럼) + `validate_quiz_bank.py` |
 | **Cheshire 프롬프트** | `disputatio/Assets/Resources/CheshirePrompts/{ko,ja,en}/` + `validate_cheshire_prompts.py` |
 | **RAG 문서** | `backend_ai/data/tutor_rag/*.md` + `build_tutor_rag_index.py` (chunk에 `locale` 메타) |

@@ -1,17 +1,18 @@
-# TODO — Fungus 삭제 P1
+# TODO — Fungus 삭제 P2
 
 ## 목표
-FlagStore 타입 충돌 실패와 Sequence 문서 사전 검증.
+FlagStore 스냅샷을 Checkpoint `sequence*`에 저장·복원. Fungus 배열과 이중 기록 금지.
 
 ## 진행 중인 항목
-- P1 Sequence 계약. Unity EditMode는 이 환경에서 미실행.
+- P2 세이브 계약. Unity EditMode는 이 환경에서 미실행.
 
 ## 남은 항목
-- Windows unity-cli EditMode 두 필터
-- P2 세이브 계약
-- 커밋 후 PR (cloud 절차)
+- Windows unity-cli EditMode: FlagStoreSnapshotTests, FlagStoreCheckpointMapperTests, CheckpointRepositoryTests
+- P3 async/UI
+- 씬 이전. FlagStore 싱글톤 금지
 
 ## 검증 결과
-- standalone xunit: GREEN after RED
+- standalone NUnit `/tmp/p2-save-contract-tests`: RED 11 fail/20 pass → GREEN 31 pass
+- CSharpSyntaxChecker: exit 0. Tests 3 pass
 - Unity compile/EditMode: blocked (no Editor)
 - independentReview: false
