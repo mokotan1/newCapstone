@@ -10,7 +10,9 @@ namespace Godlotto.Sequence
             "set_bool",
             "set_int",
             "set_string",
-            "if_bool"
+            "if_bool",
+            "wait",
+            "say"
         };
 
         public static void Validate(SequenceDocument document)
@@ -108,6 +110,24 @@ namespace Godlotto.Sequence
                     RequireBlock(ids, op.else_block);
                     AddEdge(ifEdges, blockId, op.then_block);
                     AddEdge(ifEdges, blockId, op.else_block);
+                    return;
+                case "wait":
+                    if (op.int_value < 0)
+                    {
+                        throw new SequencePlayException(
+                            "invalid_document",
+                            "wait in '" + blockId + "' has negative duration.");
+                    }
+
+                    return;
+                case "say":
+                    if (string.IsNullOrWhiteSpace(op.string_value))
+                    {
+                        throw new SequencePlayException(
+                            "invalid_document",
+                            "say in '" + blockId + "' missing text.");
+                    }
+
                     return;
                 default:
                     throw new SequencePlayException("invalid_document", "Unknown command '" + op.command + "'.");

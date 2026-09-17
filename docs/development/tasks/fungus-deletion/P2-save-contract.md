@@ -1,6 +1,6 @@
 # P2-save-contract / FlagStore 스냅샷과 Checkpoint 분리 기록
 
-- state: running
+- state: done (Unity EditMode 남음)
 - phase: P2 (R1)
 - allowedFiles: `disputatio/Assets/godlotto/Script/Sequence/**`, `disputatio/Assets/godlotto/Script/Checkpoint/CheckpointSaveData.cs`, `CheckpointRepository.cs`, `FlagStoreCheckpointMapper.cs`, `disputatio/Assets/Editor/Tests/EditMode/Sequence/**`, `disputatio/Assets/Editor/Tests/EditMode/Checkpoint/FlagStoreCheckpointMapperTests.cs`, `CheckpointRepositoryTests.cs`, `docs/architecture.md`, 본 task 폴더
 - excluded: 씬/프리팹, Variablemanager 이중 기록, RoomUnlockCheckpointService에 FlagStore 싱글톤, Kitchen Flowchart 제거, 벤더 패치

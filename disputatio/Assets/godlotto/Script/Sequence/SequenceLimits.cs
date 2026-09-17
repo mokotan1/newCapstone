@@ -6,5 +6,6 @@ namespace Godlotto.Sequence
         public const int MaxBlockCount = 128;
         public const int MaxCommandsPerDocument = 512;
         public const int MaxIfDepth = 16;
+        public const string InputLockReason = "sequence";
     }
 }

@@ -66,7 +66,7 @@ newCapstone/
 |------|------|-----------------|
 | `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
 | `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
-| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `FlagSnapshot`, `SequencePlayer`, `SequenceValidator`. `Export`/`Import`는 검증 후 통째 교체. `using Fungus` 금지 |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `FlagSnapshot`, `SequencePlayer`, `SequenceSession`, `SequenceValidator`. `wait`/`say`는 `ISequenceHost`에만 넘김. `using Fungus` 금지 |
 | `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷. Sequence 플래그는 `FlagStoreCheckpointMapper`만 `sequence*` 배열에 기록 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
@@ -244,7 +244,7 @@ flowchart LR
 | 상태 | 위치 | 비고 |
 |------|------|------|
 | 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
-| 시퀀스 플래그 | `FlagStore` (주입) | Checkpoint `sequence*` 배열로만 영속. 전역 Manager 없음 |
+| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`(ms)·`say`는 호스트가 처리. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason` |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |
@@ -296,6 +296,7 @@ flowchart LR
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
+| `SequenceInputGateLock` | `ISequenceInputLock` → `InteractionInputGate`. Sequence 폴더는 Interaction을 참조하지 않음 |
 | `ClickInteractionCleanup` | `isClicked` / UI 경계 후 정리 |
 
 **의존**: Fungus `Flowchart`, `BlockSignals` ← C# controller ← UI/월드 Collider2D
@@ -432,7 +433,7 @@ graph TB
 ### 상태 관리 패턴
 
 - **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` `fungus*` 스냅샷. Sequence 플래그는 `FlagStore` + `sequence*`만. 같은 키를 두 배열에 쓰지 않는다.
-- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`.
+- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`. Sequence 연출은 `SequenceSession`이 `ISequenceInputLock`으로 잠그고, Unity 쪽 구현은 `SequenceInputGateLock`.
 - **설정**: PlayerPrefs (`SettingPlayerPrefsKeys`만 — 키 문자열 변경 금지, 주석에 명시). 로컬 대화 AI 끄기는 별도 키 `LocalAi.ChatDisabled` (`LocalAiReadiness`).
 - **AI 대화**: 인스턴스별 `ChatHistoryManager` (씬마다 chatbot 컴포넌트).
 
