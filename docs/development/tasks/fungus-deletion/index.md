@@ -6,7 +6,8 @@
 - 브랜치: `feature/fungus-deletion-framework` (base `develop`)
 - **마스터 계획**: [MASTER-PLAN.md](./MASTER-PLAN.md)
 - **R1.5** 페이드 + 지하 단순 방 Flowchart 제거 메뉴 추가.
-- 다음: Unity **Basement Hallway Sequence Pilot** + **Basement Simple Rooms Remove Flowchart** 실행 후 PlayMode.
+- **진행률**: [PROGRESS.md](./PROGRESS.md) — Start+Fade **8씬** git 반영, 가중 실행 지수 **≥50%**.
+- 다음: Unity **Basement Hallway Sequence Pilot** PlayMode · EditMode 테스트 (Windows).
 
 ## 동결
 

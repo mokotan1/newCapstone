@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-_BLOCK_NAME_RE = re.compile(r"^\s*(?:-\s+)?m_Name:\s+(.+)$", re.MULTILINE)
 _FLOWCHART_MARKER = "Flowchart:"
 _SCENE_GLOB = "**/*.unity"
 
@@ -28,10 +27,10 @@ def scan_scene_file(scene_path: Path) -> SceneFlowchartReport:
     text = scene_path.read_text(encoding="utf-8", errors="replace")
     rel = scene_path.as_posix()
     blocks: list[str] = []
-    if "Flowchart" in text or "m_Blocks:" in text:
-        for match in _BLOCK_NAME_RE.finditer(text):
+    if "Flowchart" in text or "blockName:" in text:
+        for match in re.finditer(r"^\s*blockName:\s*(.+)$", text, re.MULTILINE):
             name = match.group(1).strip()
-            if name and not name.startswith("---"):
+            if name:
                 blocks.append(name)
     execute_refs = text.count("ExecuteBlock")
     clickable_refs = text.count("Clickable2D")

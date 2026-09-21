@@ -36,7 +36,7 @@ dotnet run --project scripts/CSharpSyntaxChecker/CSharpSyntaxChecker.csproj -- d
 
 # P0 리포트 생성
 python3 -m pytest scripts/fungus_deletion/tests -q
-python3 -m fungus_deletion.cli inventory --repo-root .
+python3 -m fungus_deletion.cli --repo-root . inventory
 
 # Windows Editor
 .\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter Sequence

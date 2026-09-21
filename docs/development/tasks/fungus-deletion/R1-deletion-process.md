@@ -2,10 +2,11 @@
 
 ## 4단계 (반복)
 
-1. **Inventory** — `python3 -m fungus_deletion.cli inventory --repo-root .` 로 씬·블록·ExecuteBlock 밀도 확인
-2. **Sequence 대체** — `InteractionRoute` + JSON + `RoomInteractionSequenceHost` (Fungus 블록 호출 중단)
-3. **Fungus 블록 은퇴** — 해당 `ObjectClicked` / UI `ExecuteBlock` 비활성화
-4. **Flowchart 축소** — 사용 블록 0이면 GameObject 제거 (Start·페이드 등 잔존 시 유지)
+1. **Inventory** — `python3 -m fungus_deletion.cli --repo-root . inventory` 로 씬·블록·ExecuteBlock 밀도 확인
+2. **Start+Fade 자동 제거** — `python3 -m fungus_deletion.cli --repo-root . strip-start-fade --apply` (8씬, `PROGRESS.md` 참고)
+3. **Sequence 대체** — `InteractionRoute` + JSON + `RoomInteractionSequenceHost` (Fungus 블록 호출 중단)
+4. **Fungus 블록 은퇴** — 해당 `ObjectClicked` / UI `ExecuteBlock` 비활성화
+5. **Flowchart 축소** — 사용 블록 0이면 GameObject 제거 (Start·페이드 등 잔존 시 유지)
 
 ## 파일럿: BasementHallway
 

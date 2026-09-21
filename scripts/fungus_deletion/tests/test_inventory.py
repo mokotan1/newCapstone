@@ -8,7 +8,7 @@ from fungus_deletion.inventory import scan_scene_file, summarize
 def test_scan_scene_file_counts_execute_block(tmp_path: Path) -> None:
     scene = tmp_path / "Sample.unity"
     scene.write_text(
-        "m_Blocks:\n  - m_Name: Start\nExecuteBlock\nClickable2D\n",
+        "Flowchart:\n  blockName: Start\nExecuteBlock\nClickable2D\n",
         encoding="utf-8",
     )
     report = scan_scene_file(scene)
