@@ -5,8 +5,8 @@
 - 최종 범위: **전체 씬·공용 프리팹·전역 상태·저장·대화·QA의 Fungus 제거**. Kitchen은 검증 후보 하나이며 최종 목표/필수 선행 방이 아니다.
 - 전체 계획: [Fungus 제거 및 프레임워크 재정립 master plan](../../../superpowers/plans/2026-09-17-fungus-deletion-framework-master-plan.md)
 - 실행 환경/모델: Codex 부모. 이전 Cursor Grok 4.6 기록은 과거 실행 정보이며, 이 세션의 도구·모델 배정을 뜻하지 않는다.
-- 현재 단계: **P0 리스너 확인 완료. P1 Sequence 계약 verified. P3 route-state 교체는 독립 리뷰 중이다.** 플레이와 라이브 QA는 미검증이다.
-- 다음 작업: C# route state 검토를 마친 뒤 대사·선택을 대체할 다음 P3 실행 경로를 정한다.
+- 현재 단계: **P0 리스너·P1 Sequence·P3 route-state verified (EditMode).** P2 저장 거부 슬라이스는 EditMode 통과, independentReview false. 플레이와 라이브 QA는 미검증이다.
+- 다음 작업: 제품 씬 42개의 Save Point 명령을 뺐다. 시작 블록은 Game Started가 이어 실행한다. 남은 구현은 대사. 플레이 QA는 아직.
 - 원장: [migration-inventory.md](migration-inventory.md) / `migration-inventory.json` / `.csv`
 - 구현 범위: P0는 조사·문서. 게임 씬/프리팹/패키지는 변경하지 않음. S1 Sequence 소스와 architecture 동결 배너는 워킹트리에 보존.
 - 우선순위: 사용자 지시와 저장소 정책 다음으로 master plan.
@@ -51,20 +51,20 @@
 |------|------|
 | runner | Codex Agent (부모) |
 | modelId | current session inherited |
-| checkedAt | 2026-09-21T04:29Z |
+| checkedAt | 2026-09-22T02:01Z |
 | capabilities | repo-read, file-write, shell, Unity CLI (`disputatio` ready) |
 | assignment | 위임 없음. P0는 부모 순차 |
-| Editor 소유권 | Unity PID 40088 ready. QA playtester lease 미확인. Play/QA를 시작하기 전 lease를 다시 확인한다. |
+| Editor 소유권 | Unity PID 48440 ready (2026-09-22 status). QA playtester lease 미확인. Play/QA 전 lease 재확인. |
 | stash 보존 | `stash@{qa}` 메시지 `preserve-qa-tool-integration-wip-2026-09-17` — qa-tool-integration 미커밋. 이 브랜치에서 pop 하지 말 것 |
-| 다음 단계 | `P0-infra-unity-cli-listener.md` 다음 `P1-sequence-contract.md`. 커밋은 사용자 요청 시에만 |
+| 다음 단계 | 제품 씬 Save Point 명령 제거됨. 이어하기는 `Checkpoint.Latest.v1`. 다음은 대사. 커밋은 사용자 요청 시에만. 플레이 QA 전 |
 
 ## 결과 (P0)
 
 - 브랜치: `feature/fungus-deletion-framework` from `develop`/`e1de9505`
 - 스캔: 씬 129, 제품 56, 제품 블록 397, 제품 명령 2063, GUID 참조 파일 241, C# Fungus 파일 149
 - 미등록 씬 0, 미분류 명령/블록 0
-- 리스너: 2026-09-21 `status` → ready, exit 0, PID 40088
-- 라이브 QA: 미실행. EditMode는 P1에서 아래 결과로 재실행함.
+- 리스너: 2026-09-22 `status` → ready, exit 0, PID 48440 (`P0-infra-unity-cli-listener.md` verified)
+- 라이브 QA: 미실행. EditMode는 P1·P3에서 아래 결과로 재실행함.
 - independentReview: false
 - 다음 명령: `.\scripts\unity-cli.cmd --project disputatio status`
 
@@ -79,10 +79,23 @@
 
 - 실제 변경 파일: Sequence 런타임 4파일 + EditMode 테스트 2파일 + `.meta`, 스펙/계획/index, `docs/architecture.md` 동결 배너
 
-## P3 첫 실제 교체 — C# route state (review 중)
+## P3 첫 실제 교체 — C# route state (verified)
 
+- 패킷: [P3-route-state.md](P3-route-state.md)
 - 범위: `SceneTracker`와 `BackNavigator`가 Flowchart `PrevScene`을 쓰거나 읽지 않고 `SceneRouteState`의 세션 route 상태만 사용한다. 고정 복귀 경로, 모달 입력 차단, fallback은 유지한다.
 - 제외: `SceneName`·`SavePointKey`는 아직 Fungus SavePoint/블록이 읽으므로 유지한다. 씬·프리팹 직렬화와 Flowchart 블록은 이 패킷에서 수정하지 않는다.
-- RED: `SceneRouteStateTests`가 없는 C# route 상태에서 컴파일 오류를 확인했다.
-- GREEN: `editor refresh --compile` exit 0; `SceneRouteStateTests` 2/2, `BackNavigatorTests` 10/10, `FlagStoreTests` 8/8, `SequencePlayerTests` 18/18.
-- independentReview: true. 별도 R3 리뷰는 Critical/Important 0건으로 ready 판정했다. 이전 `PrevScene` 직렬화 필드와 Fungus 변수 선언은 런타임에서 더 읽지 않으며, 씬·프리팹 정리 패킷에서 제거한다.
+- GREEN (2026-09-22): `editor refresh --compile` exit 0, console `[]`; `SceneRouteStateTests` 2/2, `BackNavigatorTests` 10/10, `FlagStoreTests` 8/8, `SequencePlayerTests` 18/18.
+- independentReview: true (2026-09-21 R3 리뷰). 씬·프리팹 `PrevScene` 직렬화 정리는 후속 패킷.
+
+## P2 첫 슬라이스 — 저장 전 검증 (EditMode만, 리뷰 전)
+
+- 패킷: [P2-checkpoint-save-guard.md](P2-checkpoint-save-guard.md)
+- 범위: `CheckpointRepository.Save`가 공백 `resumeSceneName`, 공백 Fungus 키, 키 중복·타입 충돌을 쓰기 전에 거절하고 이전 체크포인트를 유지한다.
+- GREEN (2026-09-22): compile exit 0, console `[]`; RED 4 failed 후 `CheckpointRepositoryTests` 7/7, `CheckpointServiceTests` 6/6.
+- independentReview: false. G2(변환·원본 보존 전체·독립 리뷰)는 미달.
+
+## P2 세이브 키 대응표 (문서)
+
+- 패킷: [P2-save-key-map.md](P2-save-key-map.md)
+- 이어하기는 `Checkpoint.Latest.v1`. 새 게임은 설정 4키만 남기고 `DoSaveReset()`은 호출하지 않는다. 씬 YAML의 Save Point 명령은 남아 있다.
+- 빌드 씬 변수 76개와, JSON 밖 PlayerPrefs 진행 키를 적었다. 코드 변경 없음. 플레이 미실행.

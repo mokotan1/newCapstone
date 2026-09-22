@@ -1770,7 +1770,6 @@ GameObject:
   - component: {fileID: 918238819}
   - component: {fileID: 918238823}
   - component: {fileID: 918238824}
-  - component: {fileID: 918238827}
   - component: {fileID: 918238828}
   - component: {fileID: 918238829}
   m_Layer: 0
@@ -1967,7 +1966,6 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 918238777}
   commandList:
-  - {fileID: 918238827}
   - {fileID: 918238795}
   - {fileID: 918238820}
   - {fileID: 918238818}
@@ -3082,28 +3080,6 @@ MonoBehaviour:
   targetObject: {fileID: 960540736}
   methodName: GoBack
   delay: 0
---- !u!114 &918238827
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 918238767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b115619cb83b4d6ab8047d0e9407403, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 315
-  indentLevel: 0
-  isStartPoint: 1
-  keyMode: 1
-  customKey: '{SavePointKey}'
-  keySeparator: _
-  descriptionMode: 0
-  customDescription: 
-  fireEvent: 1
-  resumeOnLoad: 1
 --- !u!114 &918238828
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -4892,4 +4868,3 @@ SceneRoots:
   - {fileID: 1128656803}
   - {fileID: 1329258762}
   - {fileID: 638979954}
-  - {fileID: 1931588757}

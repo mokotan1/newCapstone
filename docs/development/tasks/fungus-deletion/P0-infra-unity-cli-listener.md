@@ -1,6 +1,6 @@
 # P0-infra-unity-cli-listener / Unity CLI 리스너 복구
 
-- state: planned
+- state: verified
 - phase: P0 인프라 (R3 하네스, 게임 코드 변경 없음)
 - prerequisites: G0 문서. 라이브 QA·P1 EditMode 검증이 listener health에 의존
 - baseRevision: e1de9505 + P0 inventory 워킹트리
@@ -18,30 +18,31 @@
 
 ## 실행
 
-- [ ] 관련 코드/참조/에셋 조사 및 AC 확정
-- [ ] 의미 있는 실패/회귀 테스트 또는 baseline 확보 (status 실패가 baseline)
-- [ ] AC 범위 내 최소 구현 + 구 경로 제거 (구현 없음, Editor 연결만)
-- [ ] 관련 컴파일/테스트/씬 재로드/플레이 검증 (status only)
-- [ ] 위험도에 맞는 독립 리뷰 및 지적 수정 (R3이지만 이번 패킷은 연결 확인. independentReview: false)
-- [ ] 원장·index·인계 갱신
+- [x] 관련 코드/참조/에셋 조사 및 AC 확정
+- [x] baseline: 2026-09-17 health timeout 기록
+- [x] AC 범위 내 최소 구현 (Editor 연결만)
+- [x] status + P1/P3 EditMode 재검증 (2026-09-21, 2026-09-22)
+- [x] independentReview: false (연결 확인 패킷)
+- [x] index·인계 갱신
 
 ## 증거
 
-- command / exitCode / executed / passed / failed / skipped: 미실행
-- runRoot / screenshots / consoleDelta:
-- before/after behavior and state: 직전 세션 compile/stop timeout 122s
-- reviewSession / findings / resolution:
+- command / exitCode / executed / passed / failed / skipped:
+  - 2026-09-22 `status` → exit 0, ready, PID 48440
+- runRoot / screenshots / consoleDelta: 없음
+- before/after behavior and state: listener reachable; compile + EditMode filters 실행 가능
+- reviewSession / findings / resolution: 해당 없음
 
 ## 중단 또는 완료 인계
 
-- completedACs: 없음
-- incompleteACs: status ready
+- completedACs: status ready, health 2xx
+- incompleteACs: Play/QA lease 확인은 플레이 작업 전에 재수행
 - changedFiles / diffIdentity: 없음
-- lastVerifiedCommand / result: 없음
-- currentEditorProject / pid / mode / dirty / lease / activeOperation: 미확인 (리스너 다운)
-- unfinishedProcess / runId / uncertainMutation: 이전 compile timeout — 재전송 금지
-- blocker: Unity health endpoint unreachable
-- lastObservedFailure: `timed out waiting for Unity listener`
-- nextAction: 사용자가 Editor를 연 뒤 status 한 번만
-- nextCommand: `.\scripts\unity-cli.cmd --project disputatio status`
-- doNotRepeat: health timeout 후 editor refresh/compile 재전송, Fungus Continue 패치
+- lastVerifiedCommand / result: 2026-09-22 `status` exit 0
+- currentEditorProject / pid / mode: `D:/Capstone/newCapstone/disputatio`, PID 48440, ready
+- unfinishedProcess / runId / uncertainMutation: 없음
+- blocker: 없음
+- lastObservedFailure: 2026-09-17 `timed out waiting for Unity listener` (해소)
+- nextAction: P2 패킷 설계 또는 P3 대사 슬라이스
+- nextCommand: 작업 패킷의 EditMode `--filter` 실행
+- doNotRepeat: health timeout 후 동일 mutation 무한 재전송, Fungus Continue 패치

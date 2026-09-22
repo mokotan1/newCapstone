@@ -34,6 +34,7 @@ python tools/wiki_rag/build_wiki.py --manifest docs/wiki/_meta/source-manifest.y
 - [AI and Dialogue](AI-and-Dialogue.md)
 - [Architecture](Architecture.md)
 - [Development History](Development-History.md)
+- [Fungus deletion status](Fungus-Framework.md)
 - [Operations](OPERATIONS.md)
 
 ## Source indexes

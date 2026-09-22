@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -64,5 +65,76 @@ public class CheckpointRepositoryTests
 
         Assert.That(CheckpointRepository.HasCheckpoint(), Is.False);
         Assert.That(PlayerPrefs.GetFloat(SettingPlayerPrefsKeys.BgmVolume), Is.EqualTo(0.25f).Within(0.001f));
+    }
+
+    [Test]
+    public void Save_WhenResumeSceneBlank_ThrowsAndKeepsPreviousCheckpoint()
+    {
+        CheckpointRepository.Save(ValidStudyRoomCheckpoint());
+        CheckpointSaveData invalid = ValidStudyRoomCheckpoint();
+        invalid.resumeSceneName = "  ";
+        invalid.checkpointId = "should-not-replace";
+
+        Assert.Throws<ArgumentException>(() => CheckpointRepository.Save(invalid));
+
+        Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
+        Assert.That(loaded.checkpointId, Is.EqualTo("unlock_study_room"));
+        Assert.That(loaded.resumeSceneName, Is.EqualTo(SceneNames.StudyRoom));
+    }
+
+    [Test]
+    public void Save_WhenFungusKeyBlank_ThrowsAndDoesNotWrite()
+    {
+        CheckpointSaveData invalid = ValidStudyRoomCheckpoint();
+        invalid.fungusBooleans = new[] { new BoolCheckpointEntry("  ", true) };
+
+        Assert.Throws<ArgumentException>(() => CheckpointRepository.Save(invalid));
+        Assert.That(CheckpointRepository.HasCheckpoint(), Is.False);
+    }
+
+    [Test]
+    public void Save_WhenSameKeyHasTwoTypes_ThrowsAndKeepsPreviousCheckpoint()
+    {
+        CheckpointRepository.Save(ValidStudyRoomCheckpoint());
+        CheckpointSaveData invalid = ValidStudyRoomCheckpoint();
+        invalid.checkpointId = "should-not-replace";
+        invalid.fungusBooleans = new[] { new BoolCheckpointEntry(FungusVariableKeys.ElectricOn, true) };
+        invalid.fungusIntegers = new[] { new IntCheckpointEntry(FungusVariableKeys.ElectricOn, 1) };
+
+        Assert.Throws<ArgumentException>(() => CheckpointRepository.Save(invalid));
+
+        Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
+        Assert.That(loaded.checkpointId, Is.EqualTo("unlock_study_room"));
+    }
+
+    [Test]
+    public void Save_WhenFungusKeyRepeatedInOneArray_ThrowsAndKeepsPreviousCheckpoint()
+    {
+        CheckpointRepository.Save(ValidStudyRoomCheckpoint());
+        CheckpointSaveData invalid = ValidStudyRoomCheckpoint();
+        invalid.checkpointId = "should-not-replace";
+        invalid.fungusStrings = new[]
+        {
+            new StringCheckpointEntry(FungusVariableKeys.InventoryItemIds, "1"),
+            new StringCheckpointEntry(FungusVariableKeys.InventoryItemIds, "2")
+        };
+
+        Assert.Throws<ArgumentException>(() => CheckpointRepository.Save(invalid));
+
+        Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
+        Assert.That(loaded.checkpointId, Is.EqualTo("unlock_study_room"));
+    }
+
+    static CheckpointSaveData ValidStudyRoomCheckpoint()
+    {
+        return new CheckpointSaveData
+        {
+            version = 1,
+            checkpointId = "unlock_study_room",
+            checkpointType = CheckpointType.RoomUnlock,
+            unlockedRoomKey = FungusVariableKeys.UsedStudyKey,
+            resumeSceneName = SceneNames.StudyRoom,
+            resumeSpawnId = "room_start"
+        };
     }
 }

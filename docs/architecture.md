@@ -64,11 +64,19 @@ newCapstone/
 
 | 경로 | 책임 | 새 코드 추가 시 |
 |------|------|-----------------|
-| `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
-| `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
+| `Assets/godlotto/Script/` | **팀 핵심 게임 로직** | 구역 지도는 `docs/development/script-zones.md`. 루트에 남은 게임 스크립트는 `AssemblyInfo.EditorTests.cs`뿐 |
+| `Assets/godlotto/Script/SceneFlow/` | 씬 전환, 뒤로가기, 현재 씬 이름 | `SceneTransitionService`, `SceneRouteState`, `SceneInteractionController`, `BackNavigator`, `SceneTracker`, `SceneNameSetter` |
+| `Assets/godlotto/Script/Interaction/` | 방 클릭, 문, 퍼즐 판정 (`Godlotto.Interaction`) | 방 컨트롤러와 루트에서 옮긴 퍼즐·`ItemPickup`. 새 경로는 SequencePlayer로 이전 중 |
+| `Assets/godlotto/Script/Dialogue/` | Flowchart 찾기, Variablemanager, Fungus 대사 브리지 | `FlowchartLocator`, `VariablemanagerSingleton`, `FungusDialogueBridge`. 시퀀스·메뉴·로그는 `Sequence`, `FungusCommands`, `DialogueLog` |
+| `Assets/godlotto/Script/Stage/` | 드래그, 클릭 정리, 씬 유지 오브젝트, 인벤토리 화면 | 연출 루트 스크립트. 타이틀은 `Title`, 미니게임은 `Minigame` |
+| `Assets/godlotto/Script/Minigame/` | 미니게임 | `Assets` 루트에 있던 7개 |
+| `Assets/godlotto/Script/Title/` | 타이틀 화면 | `MainMenu` 포함. 파일은 쪼개지 않음 |
+| `Assets/godlotto/Script/Setting/` | 소리, 화면, 설정 창 | 루트에 있던 설정 스크립트. `Sound`는 재생 |
+| `Assets/mokotan/mokotan/script/Stage/` | 나침반, 타이머, 주방 노출 연출 | 체셔 AI가 아님 |
+| `Assets/mokotan/mokotan/script/Dialogue/` | `DialogueData` | 대사 데이터 |
 | `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`는 키별 단일 타입을 강제하고, `SequencePlayer`는 문서 전체 검증 후에만 실행한다. `using Fungus` 금지 |
-| `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷 |
-| `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
+| `Assets/godlotto/Script/Progress/` | 이어하기 JSON, 인벤토리 내용, 획득 플래그, 자물쇠·달력·다이얼·책 페이지 | 진행/세이브 구역. 체크포인트는 `Progress/Checkpoint` |
+| `Assets/godlotto/Script/Constants/` | `SceneNames` | 씬 이름 상수 (매직 스트링 금지). `FungusVariableKeys`는 `Script/Progress` |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
 | `Assets/godlotto/Script/Core/` | `SingletonMonoBehaviour`, `GameLog` | 씬 간 유지 싱글톤, dev 로그 |
 | `Assets/godlotto/Script/Config/` | `ServerConfig` ScriptableObject | AI 서버 URL 기본값 |
@@ -120,13 +128,13 @@ newCapstone/
 
 1. **빌드 첫 씬**: `Assets/Scenes/godlotto/MainMenuScene.unity`  
    (`disputatio/ProjectSettings/EditorBuildSettings.asset` index 0)
-2. **`MainMenu`** (`disputatio/Assets/godlotto/Script/MainMenu.cs`):
+2. **`MainMenu`** (`disputatio/Assets/godlotto/Script/Title/MainMenu.cs`):
    - **새 게임**: `PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings()` — 진행만 초기화, BGM/SFX/해상도 PlayerPrefs 유지
    - **이어하기**: `CheckpointLoadCoordinator.LoadLatestOrFallback(SceneNames.MainScene)`
    - 실제 **새 게임 씬 전환**은 Inspector에서 버튼→Fungus 블록 연결로 처리 (`MainMenu.OnStartButton`은 PlayerPrefs 정리만 수행)
 3. **씬 로드 시 공통**:
    - `VariablemanagerSingleton` — `DontDestroyOnLoad`로 전역 Flowchart 오브젝트 유지
-   - `SceneNameSetter` — Fungus `SceneName`, `SavePointKey` 갱신
+   - `SceneNameSetter` — Fungus `SceneName`만 기록한다. 씬의 Save Point 명령은 없다.
    - `InventoryManager` — `PersistAcrossScenes == true` 싱글톤
 
 ### 씬/“라우트” 흐름 (웹 라우트 없음 → Unity SceneManager)
@@ -162,9 +170,9 @@ flowchart TD
 
 | 메커니즘 | 파일 | 용도 |
 |----------|------|------|
-| `SceneTransitionService.LoadSceneSafely` | `godlotto/Script/Interaction/SceneTransitionService.cs` | 중복 LoadScene 방지 (권장) |
+| `SceneTransitionService.LoadSceneSafely` | `godlotto/Script/SceneFlow/SceneTransitionService.cs` | 중복 LoadScene 방지 (권장) |
 | `RoomInteractionController` BlockOutcome | `godlotto/Script/Interaction/RoomInteractionController.cs` | Fungus 블록 종료 후 `openPanel` / `resetIsClicked` / loadScene / goBack |
-| `BackNavigator.GoBack` | `godlotto/Script/BackNavigator.cs` | 고정 복귀 테이블 또는 `PrevScene` Fungus 변수 |
+| `BackNavigator.GoBack` | `godlotto/Script/SceneFlow/BackNavigator.cs` | 고정 복귀 테이블 또는 세션 `SceneRouteState` |
 | `SceneManager.LoadScene` (직접) | 여러 레거시·맵 UI | 점진적으로 Interaction 레이어로 이전 중 |
 
 **복귀 고정 테이블 예** (`BackNavigator.TryResolveFixedReturnScene`):
@@ -228,10 +236,12 @@ flowchart LR
     Coord --> Apply[ProgressSnapshotApplier.Apply]
 ```
 
-**`CheckpointSaveData` 필드** (`godlotto/Script/Checkpoint/CheckpointSaveData.cs`):
+**`CheckpointSaveData` 필드** (`godlotto/Script/Progress/Checkpoint/CheckpointSaveData.cs`):
 
 - `resumeSceneName`, `checkpointId`, `checkpointType`, `unlockedRoomKey`
 - `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]`
+
+`CheckpointRepository.Save`는 PlayerPrefs에 쓰기 전에 `resumeSceneName` 공백, Fungus 스냅샷 키 공백, 같은 키의 중복·타입 충돌을 `ArgumentException`으로 거절한다. 거절된 저장은 `Checkpoint.Latest.v1`을 바꾸지 않는다.
 
 **방 해금 체크포인트 정의** (`RoomCheckpointDefinition.cs`):  
 `ElectricOn`→Kitchen, `UsedStudyKey`→StudyRoom, … `UsedBedKey`→BedRoom (Order 10~70)
@@ -399,7 +409,7 @@ graph TB
 ### 새 기능 추가 시 따라야 할 규칙
 
 1. **씬 이름**은 `SceneNames`에 상수 추가 후 사용 (`godlotto/Script/Constants/SceneNames.cs`).
-2. **Fungus 변수 키**는 `FungusVariableKeys`에 추가 (`godlotto/Script/Constants/FungusVariableKeys.cs`).
+2. **Fungus 변수 키**는 `FungusVariableKeys`에 추가 (`godlotto/Script/Progress/FungusVariableKeys.cs`).
 3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome** 패턴을 따릅니다. 기존 마이그레이션 참고: `godlotto/Script/Editor/CorridorEntranceSceneMigrator.cs`, `docs/fungus-room-migration-plan.md`.
 4. **씬 load**는 `SceneTransitionService.LoadSceneSafely` 사용.
 5. **클릭 진입** 전 `SceneInteractionController.TryInteract(interactionId)` 호출.
@@ -420,7 +430,7 @@ graph TB
 | Cheshire 프롬프트 | `Assets/Resources/CheshirePrompts/{ko,ja,en}/` | `{Key}.txt` + `.meta`; 검증 `validate_cheshire_prompts.py` |
 | Locale 해석 | `mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, `CheshireUiStrings` |
 | Scenario CSV | `Assets/Resources/Scenario/` | `the_unholy_dialogue.csv`, `the_unholy_speakers.csv`, `cheshire_ui_strings.csv` (+ `ScenarioLocalizationTable`) |
-| 상수 | `godlotto/Script/Constants/` | `*Keys`, `SceneNames` |
+| 상수 | `godlotto/Script/Constants/`의 `SceneNames`. `FungusVariableKeys`는 `Script/Progress` | `SceneNames` |
 | 에디터 마이그레이션 | `godlotto/Script/Editor/` | `*SceneMigrator` |
 | API·서비스 | `backend_ai/services/` | `*_service.py` |
 | LLM tool schema | `backend_ai/tools/game_tools.py` + `registry` |
@@ -527,7 +537,7 @@ graph TB
 | **`SceneNames.MainScene` ("MainScene")** | `MainMenu` 이어하기 fallback, Jumpscare retry에 사용되나 **`MainScene.unity` 파일 없음**, `EditorBuildSettings`에도 없음 | 의도된 fallback 씬명(예: `Hall_playerble`) 확인; 상수·빌드 설정 정렬 |
 | **새 게임 시작 씬** | `MainMenu.OnStartButton`은 PlayerPrefs만 지우고 **LoadScene 호출 없음** — 실제 전환은 Fungus/버튼 Inspector | `MainMenuScene.unity` Flowchart·Button onClick 추적 |
 | **`IntroScene` vs `Opening_Office`** | 빌드 목록에 둘 다 존재; 정확한 오프닝 순서는 씬 내 Flowchart 의존 | 플레이through 또는 Fungus 블록 문서화 |
-| **Fungus Save Point vs Checkpoint** | `SaveManager`/`SavePointKey`와 `CheckpointRepository` **병존**; 어떤 메뉴가 어느系를 쓰는지 코드만으로 단일 정책 불명 | 기획·`docs/superpowers/plans/2026-05-11-remove-custom-save-system.md`와 런타임 확인 |
+| **Fungus Save Point vs Checkpoint** | 이어하기는 `CheckpointLoadCoordinator`. 새 게임은 C#이 인벤토리를 비우고 `DoSaveReset()`은 호출하지 않음. `SceneNameSetter`는 `SavePointKey`를 쓰지 않음. 인벤토리는 Fungus 로드 신호로 복원하지 않음. 제품 씬 42개의 Save Point 명령은 뺐다. 시작 블록은 Game Started가 첫 남은 명령부터 실행한다. Fungus 예제 씬은 그대로다. 키 목록은 `docs/development/tasks/fungus-deletion/P2-save-key-map.md` | 대사 이전. 플레이 QA는 아직 |
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |
 | **Unity 공식 CLI / Pipeline** | 2026-09-10: `unity` 1.0.0-beta.5. 이 브랜치에 `com.unity.pipeline` `0.6.0-exp.1` (manifest+lock). 이 worktree `disputatio`를 6000.0.36f1로 열면 `unity status` ready, Pipeline 서버 `127.0.0.1:7800`. 공식 `qa_*` 명령은 0개. 활성 backend는 `legacy-unity-cli` | 공식 QA 이식 전 `[CliCommand]` API 확인. 기록: `.harness/official-cli-compat.md` |
@@ -548,16 +558,16 @@ graph TB
 
 | 작업 | 경로 |
 |------|------|
-| 메인 메뉴 | `disputatio/Assets/godlotto/Script/MainMenu.cs` |
+| 메인 메뉴 | `disputatio/Assets/godlotto/Script/Title/MainMenu.cs` |
 | 빌드 씬 목록 | `disputatio/ProjectSettings/EditorBuildSettings.asset` |
-| 씬 전환 | `disputatio/Assets/godlotto/Script/Interaction/SceneTransitionService.cs` |
+| 씬 전환 | `disputatio/Assets/godlotto/Script/SceneFlow/SceneTransitionService.cs` |
 | 방 클릭 | `disputatio/Assets/godlotto/Script/Interaction/RoomInteractionController.cs` |
-| 체크포인트 저장 | `disputatio/Assets/godlotto/Script/Checkpoint/CheckpointRepository.cs` |
+| 체크포인트 저장 | `disputatio/Assets/godlotto/Script/Progress/Checkpoint/CheckpointRepository.cs` |
 | AI HTTP | `disputatio/Assets/mokotan/mokotan/script/AI/ChatHttpClient.cs` |
 | Cheshire locale/프롬프트 | `.../AI/Localization/CheshireLocaleResolver.cs`, `CheshirePromptCatalog.cs` |
 | Cheshire 프롬프트 txt | `disputatio/Assets/Resources/CheshirePrompts/` |
 | AI 서버 URL | `disputatio/Assets/godlotto/Script/Config/ServerConfig.cs` |
-| 메인메뉴 복귀 시 DDOL 정리 | `disputatio/Assets/godlotto/Script/DontDestroyGameplayCleanup.cs` (모든 "메인메뉴로" 버튼이 공유) |
+| 메인메뉴 복귀 시 DDOL 정리 | `disputatio/Assets/godlotto/Script/Stage/DontDestroyGameplayCleanup.cs` (모든 "메인메뉴로" 버튼이 공유) |
 | FastAPI 진입 | `backend_ai/main.py` |
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |

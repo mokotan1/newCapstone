@@ -4512,7 +4512,6 @@ GameObject:
   - component: {fileID: 1313011547}
   - component: {fileID: 1313011548}
   - component: {fileID: 1313011551}
-  - component: {fileID: 1313011552}
   - component: {fileID: 1313011553}
   - component: {fileID: 1313011555}
   - component: {fileID: 1313011556}
@@ -4745,7 +4744,6 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 1313011473}
   commandList:
-  - {fileID: 1313011552}
   - {fileID: 1313011555}
   - {fileID: 1313011556}
   - {fileID: 1313011547}
@@ -7139,28 +7137,6 @@ MonoBehaviour:
   vector3Data:
     vector3Ref: {fileID: 0}
     vector3Val: {x: 0, y: 0, z: 0}
---- !u!114 &1313011552
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1313011441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b115619cb83b4d6ab8047d0e9407403, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 96
-  indentLevel: 0
-  isStartPoint: 1
-  keyMode: 1
-  customKey: '{SavePointKey}'
-  keySeparator: _
-  descriptionMode: 0
-  customDescription: 
-  fireEvent: 1
-  resumeOnLoad: 1
 --- !u!114 &1313011553
 MonoBehaviour:
   m_ObjectHideFlags: 2

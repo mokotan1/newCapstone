@@ -70,16 +70,44 @@ public class MainMenuNewGameResetTests
     }
 
     [Test]
-    public void OnStartButton_RaisesSaveResetAndClearsInventoryDragState()
+    public void OnStartButton_ClearsInventoryWithoutFungusSaveReset()
     {
         InventorySlot.draggedItem = dragItem;
         SetPrivateStaticDragIcon(new GameObject("DragIcon"));
 
-        mainMenu.OnStartButton();
+        GameObject createdInventory = null;
+        if (InventoryManager.Instance == null)
+        {
+            createdInventory = new GameObject("InventoryManagerNewGameTest");
+            InventoryManager added = createdInventory.AddComponent<InventoryManager>();
+            if (InventoryManager.Instance == null)
+                SetSingletonInstance(added);
+        }
 
-        Assert.IsTrue(saveResetRaised, "새 게임 시작 시 Fungus SaveReset 신호가 발행되어야 합니다.");
-        Assert.IsNull(InventorySlot.draggedItem);
-        Assert.IsNull(GetPrivateStaticDragIcon());
+        InventoryManager inventory = InventoryManager.Instance;
+        Assert.IsNotNull(inventory);
+        inventory.ClearItemsForNewGame();
+        Item carried = ScriptableObject.CreateInstance<Item>();
+        carried.itemId = 4;
+        carried.itemName = "NewGameResetItem";
+        inventory.AddItem(carried);
+        Assert.AreEqual(1, inventory.Items.Count);
+
+        try
+        {
+            mainMenu.OnStartButton();
+
+            Assert.IsFalse(saveResetRaised, "새 게임은 Fungus SaveReset 신호를 발행하지 않습니다.");
+            Assert.AreEqual(0, inventory.Items.Count);
+            Assert.IsNull(InventorySlot.draggedItem);
+            Assert.IsNull(GetPrivateStaticDragIcon());
+        }
+        finally
+        {
+            Object.DestroyImmediate(carried);
+            if (createdInventory != null)
+                Object.DestroyImmediate(createdInventory);
+        }
     }
 
     [Test]
@@ -137,6 +165,15 @@ public class MainMenuNewGameResetTests
             onStartIndex,
             executeBlockIndex,
             "MainMenu.OnStartButton must run before Flowchart.ExecuteBlock(\"StartButton\") so prefs/runtime reset completes before the opening scene loads.");
+    }
+
+    static void SetSingletonInstance(InventoryManager inventory)
+    {
+        FieldInfo field = typeof(SingletonMonoBehaviour<InventoryManager>).GetField(
+            "_instance",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.IsNotNull(field);
+        field.SetValue(null, inventory);
     }
 
     private void HandleSaveReset()
@@ -203,7 +240,7 @@ public class MainMenuNewGameResetTests
         Match match = Regex.Match(
             sceneText,
             $@"--- !u!{Regex.Escape(unityType)} &{Regex.Escape(fileId)}\r?\n(?:(?!^--- ).)*",
-            RegexOptions.Multiline);
+            RegexOptions.Multiline | RegexOptions.Singleline);
         Assert.IsTrue(match.Success, $"Could not find !u!{unityType} &{fileId}.");
         return match.Value;
     }
