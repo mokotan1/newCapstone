@@ -216,6 +216,7 @@ def _render_home(
         "- [AI and Dialogue](AI-and-Dialogue.md)",
         "- [Architecture](Architecture.md)",
         "- [Development History](Development-History.md)",
+        "- [Fungus deletion status](Fungus-Framework.md)",
         "- [Operations](OPERATIONS.md)",
         "",
         "## Source indexes",

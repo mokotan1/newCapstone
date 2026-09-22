@@ -1113,7 +1113,6 @@ GameObject:
   - component: {fileID: 687597821}
   - component: {fileID: 687597820}
   - component: {fileID: 687597825}
-  - component: {fileID: 687597826}
   - component: {fileID: 687597827}
   - component: {fileID: 687597828}
   - component: {fileID: 687597829}
@@ -1205,7 +1204,6 @@ MonoBehaviour:
   description: 
   eventHandler: {fileID: 687597761}
   commandList:
-  - {fileID: 687597826}
   - {fileID: 687597810}
   - {fileID: 687597809}
   - {fileID: 687597808}
@@ -4326,28 +4324,6 @@ MonoBehaviour:
   suppressBlockAutoSelect: 0
   clickableObject: {fileID: 338081695}
   waitFrames: 1
---- !u!114 &687597826
-MonoBehaviour:
-  m_ObjectHideFlags: 2
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 687597759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b115619cb83b4d6ab8047d0e9407403, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemId: 189
-  indentLevel: 0
-  isStartPoint: 1
-  keyMode: 1
-  customKey: '{SavePointKey}'
-  keySeparator: _
-  descriptionMode: 0
-  customDescription: 
-  fireEvent: 1
-  resumeOnLoad: 1
 --- !u!114 &687597827
 MonoBehaviour:
   m_ObjectHideFlags: 2

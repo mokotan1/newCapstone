@@ -60,13 +60,11 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
     void OnEnable()
     {
         SaveManagerSignals.OnSaveReset += OnSaveReset;
-        SaveManagerSignals.OnSavePointLoaded += OnSavePointLoaded;
     }
 
     void OnDisable()
     {
         SaveManagerSignals.OnSaveReset -= OnSaveReset;
-        SaveManagerSignals.OnSavePointLoaded -= OnSavePointLoaded;
     }
 
     void Start()
@@ -308,45 +306,17 @@ public class InventoryManager : SingletonMonoBehaviour<InventoryManager>
             targetflowchart.SetBooleanVariable(FungusVariableKeys.PressTab, pressTab);
     }
 
+    public void ClearItemsForNewGame()
+    {
+        items.Clear();
+        if (selectedItem != null)
+            DeselectItem();
+        UpdateUI();
+    }
+
     private void OnSaveReset()
     {
-        items.Clear();
-        if (selectedItem != null)
-            DeselectItem();
-        UpdateUI();
-    }
-
-    private void OnSavePointLoaded(string savePointKey)
-    {
-        RestoreInventoryFromFlowchart();
-    }
-
-    private void RestoreInventoryFromFlowchart()
-    {
-        Flowchart fc = FlowchartLocator.Find();
-        if (fc == null) return;
-
-        string raw = fc.GetStringVariable(FungusVariableKeys.InventoryItemIds);
-        items.Clear();
-        if (selectedItem != null)
-            DeselectItem();
-
-        if (!string.IsNullOrEmpty(raw))
-        {
-            foreach (string idStr in raw.Split(','))
-            {
-                if (int.TryParse(idStr, out int id))
-                {
-                    Item found = ItemLookup.FindById(id);
-                    if (found != null)
-                        items.Add(found);
-                    else
-                        GameLog.LogWarning($"[InventoryManager] 복원 실패: itemId={id} 에 해당하는 Item을 찾을 수 없습니다.");
-                }
-            }
-        }
-
-        UpdateUI();
+        ClearItemsForNewGame();
     }
 
     private Flowchart ResolveFlowchart()

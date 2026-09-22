@@ -152,6 +152,13 @@ def test_home_lists_only_extracted_or_reviewable_sources(
     assert "report:72ed55d40f51" not in home
 
 
+def test_home_links_fungus_framework_status(tmp_path: Path) -> None:
+    build_wiki(manifest=sample_manifest(tmp_path), wiki_root=tmp_path)
+    home = (tmp_path / "Home.md").read_text(encoding="utf-8")
+
+    assert "[Fungus deletion status](Fungus-Framework.md)" in home
+
+
 def test_home_excludes_pending_hwp_by_source_id(tmp_path: Path) -> None:
     build_wiki(manifest=sample_manifest(tmp_path), wiki_root=tmp_path)
     home = (tmp_path / "Home.md").read_text(encoding="utf-8")
