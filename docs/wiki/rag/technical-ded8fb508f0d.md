@@ -1,7 +1,7 @@
 ---
 source_id: technical:ded8fb508f0d
 source_path: docs/architecture.md
-source_sha256: ded8fb508f0d6e13b27d699ba1b45a54f8c3d6849d91290463ae3f331ba54d17
+source_sha256: 3a10889ad599c2aaa8161cf79325c356cdca66d265ccb2d26e21492f2b9361e9
 source_type: md
 category: technical
 title: architecture
@@ -13,6 +13,7 @@ rag_eligible: true
 
 > **목적**: Cursor/AI가 새 기능을 추가할 때 따를 **코드베이스 기준 문서**입니다.
 > **원칙**: 이 문서는 저장소를 직접 조사한 내용만 기록합니다. 추측·일반론은 §8(미확인 사항)으로 분리합니다.
+> **2026-09-17 동결**: 새 Fungus 블록·`Assets/Fungus/` 패치·`*SceneMigrator`·Fungus QA 확장은 하지 않는다. 전체 씬 이전의 목표 책임은 C# 게임 규칙·단일 상태 소유자·제한된 Sequence 연출 실행으로 분리한다. 진행: `docs/development/tasks/fungus-deletion/index.md`.
 
 ---
 
@@ -59,7 +60,7 @@ README에는 **민원 번호 33**으로도 표기되어 있습니다.
 newCapstone/
 ├── disputatio/          # Unity 프로젝트 (게임 본체)
 ├── backend_ai/          # FastAPI AI 백엔드
-├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun 등)
+├── scripts/             # CI·로컬 보조 도구 (CSharpSyntaxChecker, install_local_ai.ps1, qa/autorun, qa/tool 등)
 ├── installer/           # 로컬 AI 라이선스 NOTICE·첫 실행 체크리스트
 ├── deploy/              # 운영 compose, Caddy, postdeploy 스크립트
 ├── docs/                # 기획·마이그레이션·본 아키텍처 문서
@@ -75,8 +76,9 @@ newCapstone/
 | 경로 | 책임 | 새 코드 추가 시 |
 |------|------|-----------------|
 | `Assets/godlotto/Script/` | **팀 핵심 게임 로직**: 인벤토리, 체크포인트, 설정, 씬 네비, Fungus 커스텀 커맨드 | 대부분의 게임play·UI·세이브 기능 |
-| `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome |
-| `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷 |
+| `Assets/godlotto/Script/Interaction/` | **씬 상호작용 프레임워크** (`Godlotto.Interaction`) | 방/복도 클릭, Fungus 블록 실행, 씬 전환 outcome. 새 경로는 SequencePlayer로 이전 중 |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequenceSession`, `SequenceCatalog`, `SequenceRouter`, `SequenceDocumentLoader`, `SequenceBlockOutcomeMapper`(예약 outcome 키). `using Fungus` 금지 |
+| `Assets/godlotto/Script/Checkpoint/` | PlayerPrefs 체크포인트 저장·복원 | 이어하기, 방 해금 스냅샷. Sequence 플래그는 `FlagStoreCheckpointMapper`만 `sequence*` 배열에 기록 |
 | `Assets/godlotto/Script/Constants/` | `SceneNames`, `FungusVariableKeys` | 씬·변수 이름 상수 (매직 스트링 금지) |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
 | `Assets/godlotto/Script/Core/` | `SingletonMonoBehaviour`, `GameLog` | 씬 간 유지 싱글톤, dev 로그 |
@@ -91,6 +93,7 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
 
 ### 백엔드 (`backend_ai/`)
@@ -146,7 +149,10 @@ newCapstone/
 public const string MainMenu = "MainMenuScene";
 public const string Kitchen = "Kitchen";
 public const string StudyRoom = "StudyRoom";
-// ...
+public const string HallPlayable = "Hall_playerble";
+public const string HallAnimate = "Hall_animate";
+public const string HallLeft = "Hall_Left";
+public const string HallLeft2 = "Hall_Left2";
 ```
 
 **대표 플로우 (빌드 설정·코드 기준)**
@@ -236,7 +242,10 @@ flowchart LR
 **`CheckpointSaveData` 필드** (`godlotto/Script/Checkpoint/CheckpointSaveData.cs`):
 
 - `resumeSceneName`, `checkpointId`, `checkpointType`, `unlockedRoomKey`
-- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]`
+- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]` (레거시 Variablemanager)
+- `sequenceBooleans[]`, `sequenceIntegers[]`, `sequenceStrings[]` (`FlagStore` 스냅샷. Mapper만 기록)
+
+`FlagStoreCheckpointMapper`는 `fungus*`와 Variablemanager를 읽거나 쓰지 않는다. `RoomUnlockCheckpointService`는 아직 Fungus Collector만 호출한다 (세션 FlagStore 소유자가 없음).
 
 **방 해금 체크포인트 정의** (`RoomCheckpointDefinition.cs`):
 `ElectricOn`→Kitchen, `UsedStudyKey`→StudyRoom, … `UsedBedKey`→BedRoom (Order 10~70)
@@ -245,7 +254,8 @@ flowchart LR
 
 | 상태 | 위치 | 비고 |
 |------|------|------|
-| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근 |
+| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
+| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`(ms)·`say`는 호스트가 처리. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason` |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |
@@ -293,10 +303,11 @@ flowchart LR
 |--------|------|
 | `SceneInteractionController` | `TryInteract(id)` — 연타·대사 중·전환 중 차단 |
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
-| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생 |
+| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. `Hall_playerble`의 `IsPlayedAnimation` → `Hall_animate` 로드는 허브에서 스킵한다. 입장 연출은 `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
+| `SequenceInputGateLock` | `ISequenceInputLock` → `InteractionInputGate`. Sequence 폴더는 Interaction을 참조하지 않음 |
 | `ClickInteractionCleanup` | `isClicked` / UI 경계 후 정리 |
 
 **의존**: Fungus `Flowchart`, `BlockSignals` ← C# controller ← UI/월드 Collider2D
@@ -310,7 +321,7 @@ flowchart LR
 | `LocalAiControlApi` | 루프백 전용 `/local-ai/*` URL·JSON·control.token 경로. 기본 요청 장치는 GPU(CUDA 경로). 챗봇·씬은 프로세스 spawn 없음 |
 | `LocalAiRuntimeHost` / `LocalAiEditorBootstrap` / `LocalAiPlayerBootstrap` | 공통 Supervisor만 시작·재연결. Job handle은 Unity 도메인에 두지 않음. batchmode 자동 시작 없음. Play Stop은 서버 종료가 아님 |
 | `LocalAiEndpointResolver` | 세션 파일의 chat/stream/grade/status 주소. Inspector 원격 URL로 돌아가지 않음 |
-| `LocalAiSettingsPanel` | 설정창 체셔 AI 영역. CPU/GPU/자동 적용, `requested_mode`와 `effective_backend` 분리 표시. 프로세스 제어 없음 |
+| `LocalAiSettingsPanel` | 설정창 체셔 AI 영역. CPU/GPU/자동 적용, 선택·호버·누름 ColorTint. 임베드 패널은 탭을 열면 모드 버튼이 클릭 가능하고 적용 후 다시 활성화. `requested_mode`와 `effective_backend` 분리 표시. 프로세스 제어 없음 |
 | `LocalAiReadiness` | `127.0.0.1`/`localhost` 채팅 URL만 로컬 모델 준비 여부를 강제. PlayerPrefs `LocalAi.ChatDisabled` 로 대화 AI만 끄기 |
 | `ChatSseStreamParser` | Unity download-buffer가 JSON을 쪼개도 `data:` 줄이 완성된 뒤에만 파싱 |
 | `ChatHistoryManager` | system prompt·히스토리; `CheshirePromptCatalog`로 BaseSystem/ChesterVoiceCommon 로드 |
@@ -328,7 +339,8 @@ flowchart LR
 
 **프롬프트 Resources** (`Assets/Resources/CheshirePrompts/{ko,ja,en}/`):
 
-- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`, `ParrotPrompt`
+- 필수 키: `BaseSystem`, `ChesterVoiceCommon`, `introPrompt`, `KitchenPrompt`, `MainBedroomPrompt`, `SonRoomPrompt`, `StudyRoomPrompt`, `TutorRoomPrompt`, `WifeRoomPrompt`
+- `Resources/` 루트에는 프롬프트 `.txt`를 두지 않는다 (2026-09-15에 `CheshirePrompts/ko/`와 중복이던 루트 사본 제거)
 - 선택 키: `HintPolicy_{Novice,Intermediate,Expert}`, `Fragment_*` (세 locale 모두 비어 있지 않은 UTF-8)
 - 검증: `backend_ai/scripts/validate_cheshire_prompts.py` · EditMode `CheshirePromptCatalogTests`
 
@@ -356,10 +368,10 @@ flowchart LR
 
 | 모듈 | 역할 |
 |------|------|
-| `ChatService` | 로컬 LiteRT 전용, 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
-| `dialogue_guard` | 체셔 1–2문장 대사 sanitize (빈/JSON/장문 → 로케일 폴백) |
+| `ChatService` | 단일 로컬 프로바이더(`primary`)만 받는다. 클라우드 2차 프로바이더(`fallback`) 인자는 2026-09-15 제거. 대화 전용 온도·가드, tool 주입(locale별 `_TOOL_INSTRUCTIONS`, 튜터만), tutor RAG; `response_language_instruction(locale)` |
+| `dialogue_guard` | 체셔 대사 sanitize (빈/JSON → 로케일 폴백, 장문은 마침표 기준 앞 2문장 유지. `!`/`?`/말버릇은 문장 수로 세지 않음) |
 | `sse_format` | `data: {JSON}\\n\\n` SSE 프레임 |
-| `local_runtime` | LiteRT primary (`AI_PROVIDER=local`), 루프백 `GET /v1/models` |
+| `local_runtime` | `build_chat_provider` → LiteRT 단일 프로바이더 (`AI_PROVIDER=local`), 루프백 `GET /v1/models` 헬스. FastAPI는 런타임을 spawn하지 않는다 (`LOCAL_AI_START_COMMAND` 경로 제거; 기동은 Supervisor 소유) |
 | `locale_support` | `normalize_locale`, 플레이어 대면 오류·API 키/엔진 실패 문구·응답 언어 지시 (Unity resolver와 동일 규칙) |
 | `TutorRAGService` | `tutor_rag_index.json` 로컬 `local-hash-v1` 검색; Google 임베딩 인덱스는 준비 실패. chunk `locale` 메타가 있으면 필터, 없으면 전체·없으면 KO 폴백 |
 | `QuizBank` | CSV 로드; multi-locale 컬럼(`question_*`, `acceptable_answers_*`, `reference_snippet_*`; 빈 셀 → KO); `format_bank_context_block` chrome locale별 |
@@ -404,13 +416,13 @@ graph TB
 
 1. **씬 이름**은 `SceneNames`에 상수 추가 후 사용 (`godlotto/Script/Constants/SceneNames.cs`).
 2. **Fungus 변수 키**는 `FungusVariableKeys`에 추가 (`godlotto/Script/Constants/FungusVariableKeys.cs`).
-3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome** 패턴을 따릅니다. 기존 마이그레이션 참고: `godlotto/Script/Editor/CorridorEntranceSceneMigrator.cs`, `docs/fungus-room-migration-plan.md`.
+3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome**, **`RoomInteractionSequenceHost` + Sequence JSON**, 또는 **`SequenceRouter`** 패턴을 따릅니다. Sequence 종료 씬 전환은 `SequenceBlockOutcomeMapper` 예약 키(`__sequence.outcome.*`)로 표현. 동결 중 새 Flowchart 블록은 추가하지 말 것.
 4. **씬 load**는 `SceneTransitionService.LoadSceneSafely` 사용.
 5. **클릭 진입** 전 `SceneInteractionController.TryInteract(interactionId)` 호출.
 6. **로그**는 릴리스에 남기지 않을 진단은 `GameLog.Log` (`Core/GameLog.cs`); 실제 버그는 `Debug.LogError` 유지.
 7. **싱글톤 매니저**는 `SingletonMonoBehaviour<T>` + `PersistAcrossScenes` override (`Core/SingletonMonoBehaviour.cs`).
 8. **AI URL**은 `ServerConfig.ChatUrl`(루프백 플래그 vs 클라우드 URL) 또는 chatbot Inspector `localServerUrl`. 로컬 Gemma 데스크톱은 루프백을 켠다. 클라우드 QA는 플래그를 끄거나 Inspector로 EC2 URL을 지정한다. `ServerConfigTests`와 불일치하는 하드코딩 금지.
-9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것.
+9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것. Sequence 키는 `FlagStoreCheckpointMapper` + 같은 Policy.
 10. **테스트**: EditMode 순수 로직 → `Assets/Editor/Tests/EditMode/`; 백엔드 → `backend_ai/tests/`.
 
 ### 파일 위치·네이밍
@@ -431,8 +443,8 @@ graph TB
 
 ### 상태 관리 패턴
 
-- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` 스냅샷.
-- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`.
+- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` `fungus*` 스냅샷. Sequence 플래그는 `FlagStore` + `sequence*`만. 같은 키를 두 배열에 쓰지 않는다.
+- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`. Sequence 연출은 `SequenceSession`이 `ISequenceInputLock`으로 잠그고, Unity 쪽 구현은 `SequenceInputGateLock`.
 - **설정**: PlayerPrefs (`SettingPlayerPrefsKeys`만 — 키 문자열 변경 금지, 주석에 명시). 로컬 대화 AI 끄기는 별도 키 `LocalAi.ChatDisabled` (`LocalAiReadiness`).
 - **AI 대화**: 인스턴스별 `ChatHistoryManager` (씬마다 chatbot 컴포넌트).
 
@@ -460,7 +472,8 @@ graph TB
 - `Debug.Log` 남발 — **`GameLog`** 사용.
 - `SceneManager.LoadScene` 직접 호출로 **전환 중복** ( `SceneTransitionService` 우회).
 - `PlayerPrefs.DeleteAll()` without preserving settings — **`PlayDataPrefsCleaner`** 패턴 사용.
-- `Assets/Fungus/` 서드파티 **대규모 수정** (업스트림 merge 불가).
+- `Assets/Fungus/` 서드파티 **대규모 수정** (업스트림 merge 불가). 2026-09-17부터는 벤더 `Continue()` 패치도 하지 않는다.
+- 새 Fungus `Command` 상속, Flowchart 블록 추가, 그래프를 남기는 `*SceneMigrator`.
 - API 키를 Unity/저장소에 **커밋**.
 
 ---
@@ -472,12 +485,12 @@ graph TB
 1. **씬 에셋** 생성: `Assets/Scenes/Mokotan/.../MyRoom.unity`
 2. **`EditorBuildSettings`에 등록**: `ProjectSettings/EditorBuildSettings.asset` (Unity Build Settings UI)
 3. **`SceneNames`에 상수 추가**
-4. **전역 Flowchart** 변수·블록 배치; `Variablemanager` 프리팹/씬 지속 확인
+4. **전역 Flowchart** 변수·블록 배치; `Variablemanager` 프리팹/씬 지속 확인 — **동결 중 새 Flowchart를 추가하지 말 것.** 새 시퀀스는 `Godlotto.Sequence` JSON.
 5. **상호작용**:
    - 단순 복도/방: `RoomInteractionController` 또는 `CorridorEntranceController` 컴포넌트 + Inspector `InteractionRoute[]`, `BlockOutcome[]`
    - 특수 퍼즐: `RoomInteractionController` 상속 (예: `WifeRoomPuzzleController.cs`)
 6. **복귀 경로**: `BackNavigator.TryResolveFixedReturnScene`에 case 추가 또는 Fungus `PrevScene` 설정
-7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions` + `RoomUnlockCheckpointTrigger` on Fungus 이벤트
+7. **체크포인트(선택)**: `RoomCheckpointDefinition.Definitions`에 정의 추가 후 해금 지점에서 `RoomUnlockCheckpointService.SaveRoomUnlock(unlockKey)` 호출 (예: `WorldItemDropZone`)
 8. **EditMode 테스트** 추가: `Assets/Editor/Tests/EditMode/...`
 
 ### 튜토리얼 퀘스트 단계 연결
@@ -511,8 +524,9 @@ graph TB
 | 종류 | 절차 |
 |------|------|
 | **인벤토리 아이템** | `Item` ScriptableObject (`Assets/godlotto/Item/`), 고유 `itemId` 1~30, `ItemAcquisitionTracker` 연동 |
-| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy → `CheckpointRepositoryTests` |
+| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy 또는 `FlagStoreCheckpointMapper` → `CheckpointRepositoryTests` |
 | **Fungus 플래그** | `FungusVariableKeys` + Flowchart 변수 선언 + Collector boolean/int/string 배열 |
+| **Sequence 플래그** | `FlagStore` Set/Get + Mapper `sequence*` 배열. Variablemanager 이중 기록 금지 |
 | **튜터 퀴즈** | `backend_ai/data/tutor_quiz/quiz_bank.csv` (KO/JA/EN 컬럼) + `validate_quiz_bank.py` |
 | **Cheshire 프롬프트** | `disputatio/Assets/Resources/CheshirePrompts/{ko,ja,en}/` + `validate_cheshire_prompts.py` |
 | **RAG 문서** | `backend_ai/data/tutor_rag/*.md` + `build_tutor_rag_index.py` (chunk에 `locale` 메타) |
@@ -534,6 +548,7 @@ graph TB
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |
 | **Unity 공식 CLI / Pipeline** | 2026-09-10: `unity` 1.0.0-beta.5. 이 브랜치에 `com.unity.pipeline` `0.6.0-exp.1` (manifest+lock). 이 worktree `disputatio`를 6000.0.36f1로 열면 `unity status` ready, Pipeline 서버 `127.0.0.1:7800`. 공식 `qa_*` 명령은 0개. 활성 backend는 `legacy-unity-cli` | 공식 QA 이식 전 `[CliCommand]` API 확인. 기록: `.harness/official-cli-compat.md` |
+| **legacy unity-cli HTTP 포트** | 업스트림 커넥터 0.3.21은 `HttpListener`를 8090–8099만 시도하고 `Stop()`만 호출한다. 도메인 리로드마다 HTTP.sys prefix가 새면 10개 포트가 한 Unity PID에 묶이고 `Failed to start HTTP server — no available port`가 난다. 이 클론은 `Packages/com.youngwoocho02.unity-cli-connector`에 `Abort()`와 8090–8153 창을 핀한다 (`0.3.21-newcapstone.1`) | 이미 샌 리스너는 Unity Editor를 한 번 재시작해야 해제된다. 이후 리로드는 Abort로 같은 포트를 재사용해야 한다 |
 | **legacy test 결과 파싱** | NUnit XML·`Passed/Failed/Skipped` stdout은 `scripts.unity_harness.result_contract`가 분류. unity-cli 라이브 출력 형식은 Editor 연결 시 재확인 | `python -m scripts.unity_harness.classify_cli`에 실제 로그를 넣어 대조 |
 | **체셔 50케이스 eval** | 스위트·스코어러·게이트 테스트 있음. 라이브 2026-09-03 재측정(`dialogue_max_tokens=64`, `num_ctx=2048`, 스트림 가드 통과): `gemma4-e2b` / LiteRT-LM, Windows AMD64 (Intel), 50/50 유효, 폴백 0, JSON/툴 누출 0, 날조 사실 0, 완료 p50 4.9s / p95 5.6s, 첫 `text_delta`(TTFT) p50 3.7s / p95 3.7s. Groq 미사용. 한 대 측정이며 최소 사양 조사는 아님. 말끝(깍/삐약/푸드덕)은 하드 게이트가 아님 | 재측정: `cd backend_ai` 후 `AI_PROVIDER=local python -m tests.evals.run_cheshire_eval`. 게이트: 유효 ≥ 90%, 누출 0, 날조 0 |
 | **LiteRT GPU Gate 0** | 2026-09-07 이 PC 실측: RTX 4060 Ti, nvidia-smi **8188 MiB**, `litert-lm==0.16.1` + `gemma4-e2b`, 게임 전용 `--config` (`backend: gpu`), 포트 **9378**(기존 9379 외부 LiteRT는 종료하지 않음). 로그: NVIDIA 어댑터 + decode 전 노드 `LITERT_WEBGPU`, **CUDA 아님**(Direct3D 12/WebGPU), OpenCL context 실패, `libLiteRtTopKWebGpuSampler.dll` 없음. 워밍업 후 5샘플 완료 p50 **1.94s** / TTFT p50 **1.83s**(CPU 2026-09-03 완료 p50 4.9s / TTFT 3.7s보다 빠르나 8GB SLO **1s 미달**). 판정 `slo_miss`. FastAPI `gate0_passed`는 `False` | 재측정: `python -m tests.evals.run_gate0_litert_gpu --port 9378` |
@@ -541,7 +556,6 @@ graph TB
 | **Windows 게임 설치본** | `scripts/install_local_ai.ps1`·`installer/CHECKLIST.md`는 플래너. 실제 게임+런타임 패키징 설치 프로그램은 없음. Gate 1 아티팩트는 `%LOCALAPPDATA%/Disputatio/local-ai/cuda`에 동의 후 다운로드 | 패키징 파이프라인 확정 |
 | **Unity EditMode 하네스** | 이 클론에서 2026-09-15 unity-cli `ready`(Unity 6000.0.36f1). `ChatHttpClientTests` 37, `TutorQuizGraderTests` 10, `LocalAiEndpointResolverTests` 7, `ServerConfigTests` 10, `LocalAiSettingsResumeTests` 7, `SettingsCheshirePreviewGateTests` 11 통과. 다른 머신에 Unity 인스턴스가 없으면 compile/test 불가 | `.\scripts\unity-cli.cmd --project disputatio test --mode EditMode --filter ChatHttpClientTests` |
 | **Redis in prod** | `REDIS_URL` 비면 in-process rate limit (멀티 replica 부적합) — 운영 `.env` 미포함 | 서버 `/opt/newcapstone/.env` |
-| **WebGL 빌드** | `deploy/serve_webgl_brotli.py` 존재; 게임 WebGL 배포 파이프라인은 본 문서 범위에서 미검증 | 빌드 타겟·CI 확인 |
 | **Tutor RAG 인덱스 비어 있음** | `backend_ai/data/tutor_rag_index.json`이 `chunks: []` (임베딩 미생성). locale 필터는 동작하나 검색 컨텍스트는 항상 빈 결과 | `build_tutor_rag_index.py`로 인덱스 재생성 후 커밋/배포 |
 | **EN/JA 프롬프트의 KO 제어 태그** | `[진행]`, `[시스템: …]`, `[문제 은행]` 등 일부 대괄호 태그가 EN/JA 본문에 KO로 잔존 (의도적 클라이언트 주입 태그). 본문 서술은 EN/JA | Task 6 이후 주입 prefix 로컬라이즈 여부·태그 키 안정성 점검 |
 
@@ -565,6 +579,7 @@ graph TB
 | LLM tools | `backend_ai/tools/game_tools.py` |
 | CI (lint, 모든 PR/push) | `.github/workflows/ci-check.yml` → `scripts/CSharpSyntaxChecker/` |
 | QA autorun orchestrator | `scripts/qa/autorun/` (classify / checkpoint / git isolation / state machine) |
+| QA tool contracts | `scripts/qa/tool/` (plan / verdict / evidence / report / normalize / preflight / coordinator / hall_route / context / isolation / console / defect / reconnect / runner / live / live_coverage / status_watch; 홀→주방 hop은 `HallQaFungusHop` + heartbeat GET `/health` HTTP 코드. Status CMD는 리스너가 죽은 동안 `console`을 치지 않는다) |
 | QA autorun tests | `python -m pytest scripts/qa/tests -q` |
 | CI (backend 빌드, `main`만) | `.github/workflows/backend-build.yml` |
 | CI (Unity 빌드, `main`만) | `.github/workflows/unity-client-build.yml` |
@@ -573,8 +588,9 @@ graph TB
 | 기능 분할 워크플로 | `AGENTS.md`, `docs/development/feature-workflow.md` |
 | Unity 하네스 정책·검증 | `.harness/unity-policy.md`, `.harness/unity-verification.md`, `.harness/unity-toolchain.json` |
 | Unity 하네스 정적 점검 | `python -m pytest scripts/unity-harness/tests -q` |
-| Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` |
+| Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` (그래프를 남기는 이관. 2026-09-17부터 목적지 아님) |
+| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/MASTER-PLAN.md`, `index.md` |
 
 ---
 
-*문서 버전: 저장소 조사 기준 2026-09-03 (체셔 로컬 Gemma 4 E2B·URL 이중 모드·dialogue_guard 반영). 변경 시 §8 불일치 항목부터 재검증하세요.*
+*문서 버전: 저장소 조사 기준 2026-09-15 (미사용 아키텍처 정리: ChatService 단일 프로바이더, ParrotChatbot·RoomUnlockCheckpointTrigger·루트 Resources 프롬프트 사본·WebGL 서빙 스크립트·backend_ai 온호스트 배포 스크립트 제거). 변경 시 §8 불일치 항목부터 재검증하세요.*

@@ -21,6 +21,9 @@ public class CheckpointSaveData
     public BoolCheckpointEntry[] fungusBooleans = new BoolCheckpointEntry[0];
     public IntCheckpointEntry[] fungusIntegers = new IntCheckpointEntry[0];
     public StringCheckpointEntry[] fungusStrings = new StringCheckpointEntry[0];
+    public BoolCheckpointEntry[] sequenceBooleans = new BoolCheckpointEntry[0];
+    public IntCheckpointEntry[] sequenceIntegers = new IntCheckpointEntry[0];
+    public StringCheckpointEntry[] sequenceStrings = new StringCheckpointEntry[0];
 }
 
 [Serializable]
