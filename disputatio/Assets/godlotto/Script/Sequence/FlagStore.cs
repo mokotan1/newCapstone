@@ -5,106 +5,226 @@ namespace Godlotto.Sequence
 {
     public sealed class FlagStore
     {
+        enum FlagKind
+        {
+            Bool,
+            Int,
+            String
+        }
+
+        readonly Dictionary<string, FlagKind> kinds = new Dictionary<string, FlagKind>();
         readonly Dictionary<string, bool> bools = new Dictionary<string, bool>();
         readonly Dictionary<string, int> ints = new Dictionary<string, int>();
         readonly Dictionary<string, string> strings = new Dictionary<string, string>();
-        readonly Dictionary<string, FlagValueType> types = new Dictionary<string, FlagValueType>();
 
         public bool Has(string key)
         {
             RequireKey(key);
-            return bools.ContainsKey(key) || ints.ContainsKey(key) || strings.ContainsKey(key);
+            return kinds.ContainsKey(key);
         }
 
-        public bool GetBool(string key, bool defaultValue = false)
+        public bool GetBool(string key)
         {
-            RequireKey(key);
-            RequireType(key, FlagValueType.Bool);
-            return bools.TryGetValue(key, out bool value) ? value : defaultValue;
+            RequireKind(key, FlagKind.Bool);
+            return bools[key];
         }
 
         public void SetBool(string key, bool value)
         {
-            RequireKey(key);
-            RegisterType(key, FlagValueType.Bool);
+            Bind(key, FlagKind.Bool);
             bools[key] = value;
         }
 
-        public int GetInt(string key, int defaultValue = 0)
+        public int GetInt(string key)
         {
-            RequireKey(key);
-            RequireType(key, FlagValueType.Int);
-            return ints.TryGetValue(key, out int value) ? value : defaultValue;
+            RequireKind(key, FlagKind.Int);
+            return ints[key];
         }
 
         public void SetInt(string key, int value)
         {
-            RequireKey(key);
-            RegisterType(key, FlagValueType.Int);
+            Bind(key, FlagKind.Int);
             ints[key] = value;
         }
 
-        public string GetString(string key, string defaultValue = "")
+        public string GetString(string key)
         {
-            RequireKey(key);
-            RequireType(key, FlagValueType.String);
-            return strings.TryGetValue(key, out string value) ? value : defaultValue;
+            RequireKind(key, FlagKind.String);
+            return strings[key];
         }
 
         public void SetString(string key, string value)
         {
-            RequireKey(key);
-            RegisterType(key, FlagValueType.String);
+            Bind(key, FlagKind.String);
             strings[key] = value ?? "";
         }
 
-        public void Clear()
+        public FlagSnapshot Export()
         {
+            return new FlagSnapshot
+            {
+                Bools = ExportBools(),
+                Ints = ExportInts(),
+                Strings = ExportStrings()
+            };
+        }
+
+        public void Import(FlagSnapshot snapshot)
+        {
+            if (snapshot == null)
+                throw new ArgumentNullException(nameof(snapshot));
+
+            var nextKinds = new Dictionary<string, FlagKind>();
+            var nextBools = new Dictionary<string, bool>();
+            var nextInts = new Dictionary<string, int>();
+            var nextStrings = new Dictionary<string, string>();
+
+            CollectBools(snapshot.Bools, nextKinds, nextBools);
+            CollectInts(snapshot.Ints, nextKinds, nextInts);
+            CollectStrings(snapshot.Strings, nextKinds, nextStrings);
+
+            kinds.Clear();
             bools.Clear();
             ints.Clear();
             strings.Clear();
-            types.Clear();
+            foreach (KeyValuePair<string, FlagKind> pair in nextKinds)
+                kinds[pair.Key] = pair.Value;
+            foreach (KeyValuePair<string, bool> pair in nextBools)
+                bools[pair.Key] = pair.Value;
+            foreach (KeyValuePair<string, int> pair in nextInts)
+                ints[pair.Key] = pair.Value;
+            foreach (KeyValuePair<string, string> pair in nextStrings)
+                strings[pair.Key] = pair.Value;
+        }
+
+        void Bind(string key, FlagKind kind)
+        {
+            RequireKey(key);
+            FlagKind existing;
+            if (kinds.TryGetValue(key, out existing) && existing != kind)
+            {
+                throw new SequencePlayException(
+                    "type_mismatch",
+                    "Flag '" + key + "' is " + existing + ", not " + kind + ".");
+            }
+
+            kinds[key] = kind;
+        }
+
+        void RequireKind(string key, FlagKind kind)
+        {
+            RequireKey(key);
+            FlagKind existing;
+            if (!kinds.TryGetValue(key, out existing))
+            {
+                throw new SequencePlayException("missing_key", "Flag '" + key + "' is not set.");
+            }
+
+            if (existing != kind)
+            {
+                throw new SequencePlayException(
+                    "type_mismatch",
+                    "Flag '" + key + "' is " + existing + ", not " + kind + ".");
+            }
         }
 
         static void RequireKey(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentException("Flag key must be non-empty.", nameof(key));
+                throw new SequencePlayException("empty_key", "Flag key must be non-empty.");
         }
 
-        void RegisterType(string key, FlagValueType requestedType)
+        FlagBoolEntry[] ExportBools()
         {
-            if (types.TryGetValue(key, out FlagValueType existingType))
-            {
-                if (existingType != requestedType)
-                    throw TypeMismatch(key, existingType, requestedType);
+            var entries = new FlagBoolEntry[bools.Count];
+            int i = 0;
+            foreach (KeyValuePair<string, bool> pair in bools)
+                entries[i++] = new FlagBoolEntry(pair.Key, pair.Value);
+            return entries;
+        }
+
+        FlagIntEntry[] ExportInts()
+        {
+            var entries = new FlagIntEntry[ints.Count];
+            int i = 0;
+            foreach (KeyValuePair<string, int> pair in ints)
+                entries[i++] = new FlagIntEntry(pair.Key, pair.Value);
+            return entries;
+        }
+
+        FlagStringEntry[] ExportStrings()
+        {
+            var entries = new FlagStringEntry[strings.Count];
+            int i = 0;
+            foreach (KeyValuePair<string, string> pair in strings)
+                entries[i++] = new FlagStringEntry(pair.Key, pair.Value);
+            return entries;
+        }
+
+        static void CollectBools(
+            FlagBoolEntry[] entries,
+            Dictionary<string, FlagKind> nextKinds,
+            Dictionary<string, bool> nextBools)
+        {
+            if (entries == null)
                 return;
+            for (int i = 0; i < entries.Length; i++)
+            {
+                string key = entries[i].Key;
+                BindNext(nextKinds, key, FlagKind.Bool);
+                nextBools[key] = entries[i].Value;
+            }
+        }
+
+        static void CollectInts(
+            FlagIntEntry[] entries,
+            Dictionary<string, FlagKind> nextKinds,
+            Dictionary<string, int> nextInts)
+        {
+            if (entries == null)
+                return;
+            for (int i = 0; i < entries.Length; i++)
+            {
+                string key = entries[i].Key;
+                BindNext(nextKinds, key, FlagKind.Int);
+                nextInts[key] = entries[i].Value;
+            }
+        }
+
+        static void CollectStrings(
+            FlagStringEntry[] entries,
+            Dictionary<string, FlagKind> nextKinds,
+            Dictionary<string, string> nextStrings)
+        {
+            if (entries == null)
+                return;
+            for (int i = 0; i < entries.Length; i++)
+            {
+                string key = entries[i].Key;
+                BindNext(nextKinds, key, FlagKind.String);
+                nextStrings[key] = entries[i].Value ?? "";
+            }
+        }
+
+        static void BindNext(Dictionary<string, FlagKind> nextKinds, string key, FlagKind kind)
+        {
+            RequireKey(key);
+            FlagKind existing;
+            if (nextKinds.TryGetValue(key, out existing))
+            {
+                if (existing != kind)
+                {
+                    throw new SequencePlayException(
+                        "type_mismatch",
+                        "Flag '" + key + "' is " + existing + ", not " + kind + ".");
+                }
+
+                throw new SequencePlayException(
+                    "invalid_document",
+                    "Duplicate flag '" + key + "'.");
             }
 
-            types[key] = requestedType;
-        }
-
-        void RequireType(string key, FlagValueType requestedType)
-        {
-            if (types.TryGetValue(key, out FlagValueType existingType) && existingType != requestedType)
-                throw TypeMismatch(key, existingType, requestedType);
-        }
-
-        static InvalidOperationException TypeMismatch(
-            string key,
-            FlagValueType existingType,
-            FlagValueType requestedType)
-        {
-            return new InvalidOperationException(
-                "Flag key '" + key + "' is registered as " + existingType +
-                " and cannot be used as " + requestedType + ".");
-        }
-
-        enum FlagValueType
-        {
-            Bool,
-            Int,
-            String
+            nextKinds[key] = kind;
         }
     }
 }

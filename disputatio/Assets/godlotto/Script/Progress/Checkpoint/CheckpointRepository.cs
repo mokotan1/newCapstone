@@ -70,6 +70,12 @@ public static class CheckpointRepository
             data.fungusIntegers = new IntCheckpointEntry[0];
         if (data.fungusStrings == null)
             data.fungusStrings = new StringCheckpointEntry[0];
+        if (data.sequenceBooleans == null)
+            data.sequenceBooleans = new BoolCheckpointEntry[0];
+        if (data.sequenceIntegers == null)
+            data.sequenceIntegers = new IntCheckpointEntry[0];
+        if (data.sequenceStrings == null)
+            data.sequenceStrings = new StringCheckpointEntry[0];
 
         return true;
     }

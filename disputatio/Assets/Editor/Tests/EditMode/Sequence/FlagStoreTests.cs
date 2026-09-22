@@ -1,82 +1,72 @@
 using Godlotto.Sequence;
 using NUnit.Framework;
-using System;
 
 [TestFixture]
 public class FlagStoreTests
 {
     [Test]
-    public void SetBool_GetBool_RoundTrips()
+    public void SetBool_RoundTrips()
     {
         var store = new FlagStore();
-        store.SetBool("GetBottle", true);
-        Assert.That(store.GetBool("GetBottle"), Is.True);
-        Assert.That(store.Has("GetBottle"), Is.True);
+        store.SetBool("door_open", true);
+        Assert.IsTrue(store.GetBool("door_open"));
+        Assert.IsTrue(store.Has("door_open"));
     }
 
     [Test]
-    public void GetBool_MissingKey_ReturnsDefault()
+    public void SetInt_RoundTrips()
     {
         var store = new FlagStore();
-        Assert.That(store.GetBool("missing"), Is.False);
-        Assert.That(store.GetBool("missing", true), Is.True);
+        store.SetInt("count", 3);
+        Assert.AreEqual(3, store.GetInt("count"));
     }
 
     [Test]
-    public void SetInt_And_SetString_RoundTrip()
+    public void SetString_RoundTrips()
     {
         var store = new FlagStore();
-        store.SetInt("CorrectAnswerCount", 3);
-        store.SetString("SceneName", "Kitchen");
-        Assert.That(store.GetInt("CorrectAnswerCount"), Is.EqualTo(3));
-        Assert.That(store.GetString("SceneName"), Is.EqualTo("Kitchen"));
+        store.SetString("scene", "Kitchen");
+        Assert.AreEqual("Kitchen", store.GetString("scene"));
     }
 
     [Test]
-    public void Clear_RemovesAllKeys()
+    public void EmptyKey_Throws()
     {
         var store = new FlagStore();
-        store.SetBool("GetBottle", true);
-        store.Clear();
-        Assert.That(store.Has("GetBottle"), Is.False);
+        Assert.Throws<SequencePlayException>(() => store.SetBool(" ", true));
+        Assert.Throws<SequencePlayException>(() => store.GetBool(""));
     }
 
     [Test]
-    public void SetBool_EmptyKey_Throws()
+    public void Has_IsFalse_ForUnknownKey()
     {
         var store = new FlagStore();
-        Assert.Throws<ArgumentException>(() => store.SetBool("", true));
-        Assert.Throws<ArgumentException>(() => store.SetBool(null, true));
+        Assert.IsFalse(store.Has("missing"));
     }
 
     [Test]
-    public void SetValueWithDifferentTypeForExistingKey_Throws()
+    public void SetInt_AfterSetBool_SameKey_Throws()
     {
         var store = new FlagStore();
-        store.SetBool("shared", true);
-
-        var ex = Assert.Throws<InvalidOperationException>(() => store.SetInt("shared", 1));
-
-        StringAssert.Contains("shared", ex.Message);
-        Assert.That(store.GetBool("shared"), Is.True);
+        store.SetBool("flag", true);
+        Assert.Throws<SequencePlayException>(() => store.SetInt("flag", 1));
+        Assert.IsTrue(store.GetBool("flag"));
     }
 
     [Test]
-    public void GetValueWithDifferentTypeForExistingKey_Throws()
+    public void GetBool_AfterSetInt_Throws_NotFalse()
     {
         var store = new FlagStore();
-        store.SetString("shared", "Kitchen");
-
-        var ex = Assert.Throws<InvalidOperationException>(() => store.GetBool("shared"));
-
-        StringAssert.Contains("shared", ex.Message);
+        store.SetInt("n", 2);
+        SequencePlayException ex = Assert.Throws<SequencePlayException>(() => store.GetBool("n"));
+        Assert.AreEqual("type_mismatch", ex.Code);
     }
 
     [Test]
-    public void SetBool_WhitespaceKey_Throws()
+    public void GetBool_MissingKey_Throws_NotFalse()
     {
         var store = new FlagStore();
-
-        Assert.Throws<ArgumentException>(() => store.SetBool("   ", true));
+        SequencePlayException ex = Assert.Throws<SequencePlayException>(() => store.GetBool("nope"));
+        Assert.AreEqual("missing_key", ex.Code);
     }
 }

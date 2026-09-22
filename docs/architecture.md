@@ -2,7 +2,7 @@
 
 > **목적**: Cursor/AI가 새 기능을 추가할 때 따를 **코드베이스 기준 문서**입니다.  
 > **원칙**: 이 문서는 저장소를 직접 조사한 내용만 기록합니다. 추측·일반론은 §8(미확인 사항)으로 분리합니다.
-> **2026-09-17 동결**: 새 Fungus 블록·`Assets/Fungus/` 패치·`*SceneMigrator`·Fungus QA 확장은 하지 않는다. 전체 씬 이전의 목표 책임은 C# 게임 규칙·단일 상태 소유자·제한된 Sequence 연출 실행으로 분리한다. 새 구조의 실제 구현 상태와 단계별 게이트는 `docs/superpowers/plans/2026-09-17-fungus-deletion-framework-master-plan.md`를 따른다. 진행: `docs/development/tasks/fungus-deletion/index.md`.
+> **2026-09-17 동결**: 새 Fungus 블록·`Assets/Fungus/` 패치·`*SceneMigrator`·Fungus QA 확장은 하지 않는다. 전체 씬 이전의 목표 책임은 C# 게임 규칙·단일 상태 소유자·제한된 Sequence 연출 실행으로 분리한다. 계획: `docs/development/tasks/fungus-deletion/MASTER-PLAN.md`, `docs/superpowers/plans/2026-09-17-fungus-deletion-framework-master-plan.md`. 진행: `docs/development/tasks/fungus-deletion/index.md`.
 
 ---
 
@@ -74,8 +74,8 @@ newCapstone/
 | `Assets/godlotto/Script/Setting/` | 소리, 화면, 설정 창 | 루트에 있던 설정 스크립트. `Sound`는 재생 |
 | `Assets/mokotan/mokotan/script/Stage/` | 나침반, 타이머, 주방 노출 연출 | 체셔 AI가 아님 |
 | `Assets/mokotan/mokotan/script/Dialogue/` | `DialogueData` | 대사 데이터 |
-| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`는 키별 단일 타입을 강제하고, `SequencePlayer`는 문서 전체 검증 후에만 실행한다. `using Fungus` 금지 |
-| `Assets/godlotto/Script/Progress/` | 이어하기 JSON, 인벤토리 내용, 획득 플래그, 자물쇠·달력·다이얼·책 페이지 | 진행/세이브 구역. 체크포인트는 `Progress/Checkpoint` |
+| `Assets/godlotto/Script/Sequence/` | **Fungus 없는 시퀀스 런타임** (`Godlotto.Sequence`) | `FlagStore`, `SequenceSession`, `SequenceCatalog`, `SequenceRouter`, `SequenceDocumentLoader`, `SequenceBlockOutcomeMapper`. `using Fungus` 금지 |
+| `Assets/godlotto/Script/Progress/` | 이어하기 JSON, 인벤토리 내용, 획득 플래그, 자물쇠·달력·다이얼·책 페이지 | 진행/세이브 구역. 체크포인트는 `Progress/Checkpoint`. Sequence 플래그는 `FlagStoreCheckpointMapper` |
 | `Assets/godlotto/Script/Constants/` | `SceneNames` | 씬 이름 상수 (매직 스트링 금지). `FungusVariableKeys`는 `Script/Progress` |
 | `Assets/godlotto/Script/Quest/` | `QuestTrackerState`, `TutorialQuestProgressAdapter`, `TutorialQuestGameBridge` | 튜토리얼 퀘스트 HUD·월드 이벤트 브리지 |
 | `Assets/godlotto/Script/Core/` | `SingletonMonoBehaviour`, `GameLog` | 씬 간 유지 싱글톤, dev 로그 |
@@ -239,7 +239,10 @@ flowchart LR
 **`CheckpointSaveData` 필드** (`godlotto/Script/Progress/Checkpoint/CheckpointSaveData.cs`):
 
 - `resumeSceneName`, `checkpointId`, `checkpointType`, `unlockedRoomKey`
-- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]`
+- `itemIds[]`, `fungusBooleans[]`, `fungusIntegers[]`, `fungusStrings[]` (레거시 Variablemanager)
+- `sequenceBooleans[]`, `sequenceIntegers[]`, `sequenceStrings[]` (`FlagStore` 스냅샷. Mapper만 기록)
+
+`FlagStoreCheckpointMapper`는 `fungus*`와 Variablemanager를 읽거나 쓰지 않는다. `RoomUnlockCheckpointService`는 아직 Fungus Collector만 호출한다 (세션 FlagStore 소유자가 없음).
 
 `CheckpointRepository.Save`는 PlayerPrefs에 쓰기 전에 `resumeSceneName` 공백, Fungus 스냅샷 키 공백, 같은 키의 중복·타입 충돌을 `ArgumentException`으로 거절한다. 거절된 저장은 `Checkpoint.Latest.v1`을 바꾸지 않는다.
 
@@ -250,7 +253,8 @@ flowchart LR
 
 | 상태 | 위치 | 비고 |
 |------|------|------|
-| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근 |
+| 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
+| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`(ms)·`say`는 호스트가 처리. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason` |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |
@@ -302,6 +306,7 @@ flowchart LR
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
+| `SequenceInputGateLock` | `ISequenceInputLock` → `InteractionInputGate`. Sequence 폴더는 Interaction을 참조하지 않음 |
 | `ClickInteractionCleanup` | `isClicked` / UI 경계 후 정리 |
 
 **의존**: Fungus `Flowchart`, `BlockSignals` ← C# controller ← UI/월드 Collider2D
@@ -410,13 +415,13 @@ graph TB
 
 1. **씬 이름**은 `SceneNames`에 상수 추가 후 사용 (`godlotto/Script/Constants/SceneNames.cs`).
 2. **Fungus 변수 키**는 `FungusVariableKeys`에 추가 (`godlotto/Script/Progress/FungusVariableKeys.cs`).
-3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome** 패턴을 따릅니다. 기존 마이그레이션 참고: `godlotto/Script/Editor/CorridorEntranceSceneMigrator.cs`, `docs/fungus-room-migration-plan.md`.
+3. **방/복도 클릭·씬 전환**은 새 Fungus `LoadScene` 커맨드 대신 **`RoomInteractionController` + BlockOutcome**, **`RoomInteractionSequenceHost` + Sequence JSON**, 또는 **`SequenceRouter`** 패턴을 따릅니다. Sequence 종료 씬 전환은 `SequenceBlockOutcomeMapper` 예약 키(`__sequence.outcome.*`)로 표현. 동결 중 새 Flowchart 블록은 추가하지 말 것.
 4. **씬 load**는 `SceneTransitionService.LoadSceneSafely` 사용.
 5. **클릭 진입** 전 `SceneInteractionController.TryInteract(interactionId)` 호출.
 6. **로그**는 릴리스에 남기지 않을 진단은 `GameLog.Log` (`Core/GameLog.cs`); 실제 버그는 `Debug.LogError` 유지.
 7. **싱글톤 매니저**는 `SingletonMonoBehaviour<T>` + `PersistAcrossScenes` override (`Core/SingletonMonoBehaviour.cs`).
 8. **AI URL**은 `ServerConfig.ChatUrl`(루프백 플래그 vs 클라우드 URL) 또는 chatbot Inspector `localServerUrl`. 로컬 Gemma 데스크톱은 루프백을 켠다. 클라우드 QA는 플래그를 끄거나 Inspector로 EC2 URL을 지정한다. `ServerConfigTests`와 불일치하는 하드코딩 금지.
-9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것.
+9. **체크포인트에 넣을 Fungus 키**는 `ProgressSnapshotPolicy` / `ProgressSnapshotCollector`의 capture 목록과 맞출 것. Sequence 키는 `FlagStoreCheckpointMapper` + 같은 Policy.
 10. **테스트**: EditMode 순수 로직 → `Assets/Editor/Tests/EditMode/`; 백엔드 → `backend_ai/tests/`.
 
 ### 파일 위치·네이밍
@@ -437,8 +442,8 @@ graph TB
 
 ### 상태 관리 패턴
 
-- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` 스냅샷.
-- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`.
+- **글로벌 진행**: Fungus bool/int/string on `Variablemanager` + 필요 시 `CheckpointSaveData` `fungus*` 스냅샷. Sequence 플래그는 `FlagStore` + `sequence*`만. 같은 키를 두 배열에 쓰지 않는다.
+- **UI/세션**: MonoBehaviour 필드 + `InteractionInputGate`. Sequence 연출은 `SequenceSession`이 `ISequenceInputLock`으로 잠그고, Unity 쪽 구현은 `SequenceInputGateLock`.
 - **설정**: PlayerPrefs (`SettingPlayerPrefsKeys`만 — 키 문자열 변경 금지, 주석에 명시). 로컬 대화 AI 끄기는 별도 키 `LocalAi.ChatDisabled` (`LocalAiReadiness`).
 - **AI 대화**: 인스턴스별 `ChatHistoryManager` (씬마다 chatbot 컴포넌트).
 
@@ -518,8 +523,9 @@ graph TB
 | 종류 | 절차 |
 |------|------|
 | **인벤토리 아이템** | `Item` ScriptableObject (`Assets/godlotto/Item/`), 고유 `itemId` 1~30, `ItemAcquisitionTracker` 연동 |
-| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy → `CheckpointRepositoryTests` |
+| **체크포인트 필드** | `CheckpointSaveData` 필드 추가 → Collector/Applier/Policy 또는 `FlagStoreCheckpointMapper` → `CheckpointRepositoryTests` |
 | **Fungus 플래그** | `FungusVariableKeys` + Flowchart 변수 선언 + Collector boolean/int/string 배열 |
+| **Sequence 플래그** | `FlagStore` Set/Get + Mapper `sequence*` 배열. Variablemanager 이중 기록 금지 |
 | **튜터 퀴즈** | `backend_ai/data/tutor_quiz/quiz_bank.csv` (KO/JA/EN 컬럼) + `validate_quiz_bank.py` |
 | **Cheshire 프롬프트** | `disputatio/Assets/Resources/CheshirePrompts/{ko,ja,en}/` + `validate_cheshire_prompts.py` |
 | **RAG 문서** | `backend_ai/data/tutor_rag/*.md` + `build_tutor_rag_index.py` (chunk에 `locale` 메타) |
@@ -582,8 +588,7 @@ graph TB
 | Unity 하네스 정책·검증 | `.harness/unity-policy.md`, `.harness/unity-verification.md`, `.harness/unity-toolchain.json` |
 | Unity 하네스 정적 점검 | `python -m pytest scripts/unity-harness/tests -q` |
 | Fungus 마이그레이션 계획 | `docs/fungus-room-migration-plan.md` (그래프를 남기는 이관. 2026-09-17부터 목적지 아님) |
-| Fungus 삭제 스펙 | `docs/superpowers/specs/2026-09-17-fungus-deletion-runtime-design.md` |
-| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/index.md` |
+| Fungus 삭제 진행 | `docs/development/tasks/fungus-deletion/MASTER-PLAN.md`, `index.md`, `docs/superpowers/specs/2026-09-17-fungus-deletion-runtime-design.md` |
 
 ---
 
