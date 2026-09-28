@@ -28,6 +28,7 @@ public class RoomInteractionSequenceControllerTests
 
         SetPrivateField(controller, "flowchart", flowchart);
         SetPrivateField(controller, "sequenceHost", sequenceHost);
+        SetPrivateField(sequenceHost, "controller", controller);
     }
 
     [TearDown]
@@ -139,7 +140,11 @@ public class RoomInteractionSequenceControllerTests
         RebuildLookupCaches(controller);
 
         string loaded = null;
-        RoomInteractionController.SceneLoadHandlerForTests = scene => loaded = scene;
+        RoomInteractionController.SceneLoadHandlerForTests = scene =>
+        {
+            loaded = scene;
+            return true;
+        };
 
         controller.OnInteraction("exit");
 
@@ -194,6 +199,7 @@ public class RoomInteractionSequenceControllerTests
     public void OnInteraction_SequenceOnlyRoute_WithoutHost_LogsAndSkipsFungus()
     {
         SetPrivateField(controller, "sequenceHost", null);
+        Object.DestroyImmediate(sequenceHost);
         SetPrivateField(controller, "routes", new[]
         {
             new InteractionRoute

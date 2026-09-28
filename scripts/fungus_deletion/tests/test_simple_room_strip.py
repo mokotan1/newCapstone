@@ -30,7 +30,7 @@ def test_apply_roundtrip_on_fixture_copy(tmp_path: Path) -> None:
 
 
 def test_basement_unity_already_stripped() -> None:
-    scene = Path("/workspace/disputatio/Assets/Scenes/Mokotan/Basement.unity")
+    scene = Path(__file__).resolve().parents[3] / "disputatio/Assets/Scenes/Mokotan/Basement.unity"
     text = scene.read_text(encoding="utf-8")
     assert "m_Name: Flowchart" not in text
     assert "0e1f2a3b4c5d6e7f8091a2b3c4d5e6f7" in text

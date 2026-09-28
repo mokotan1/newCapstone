@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Fungus;
 using Godlotto.Interaction;
 using UnityEditor;
@@ -44,6 +43,8 @@ public static class BasementHallwaySequencePilot
             return;
         }
 
+        Fungus.EventHandler[] retiredHandlers = ResolveRetiredDoorHandlers(flowchart);
+
         GameObject root = GameObject.Find(InteractionRootName);
         if (root == null)
             root = new GameObject(InteractionRootName);
@@ -66,7 +67,7 @@ public static class BasementHallwaySequencePilot
         hostSo.FindProperty("controller").objectReferenceValue = controller;
         hostSo.ApplyModifiedPropertiesWithoutUndo();
 
-        int disabled = DisableRetiredDoorHandlers(flowchart);
+        int disabled = DisableRetiredDoorHandlers(retiredHandlers);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         Debug.Log(
@@ -122,26 +123,40 @@ public static class BasementHallwaySequencePilot
         }
     }
 
-    static int DisableRetiredDoorHandlers(Flowchart flowchart)
+    static Fungus.EventHandler[] ResolveRetiredDoorHandlers(Flowchart flowchart)
     {
-        int disabled = 0;
-        var retired = new HashSet<string>(RetiredDoorBlockNames, StringComparer.Ordinal);
         Block[] blocks = flowchart.GetComponentsInChildren<Block>(true);
-        for (int i = 0; i < blocks.Length; i++)
+        var handlers = new Fungus.EventHandler[RetiredDoorBlockNames.Length];
+        for (int i = 0; i < RetiredDoorBlockNames.Length; i++)
         {
-            Block block = blocks[i];
-            if (block == null || !retired.Contains(block.BlockName))
-                continue;
-
-            EventHandler handler = block.GetComponent<EventHandler>();
-            if (handler != null && handler.enabled)
+            Block block = Array.Find(
+                blocks,
+                candidate => candidate != null
+                    && string.Equals(candidate.BlockName, RetiredDoorBlockNames[i], StringComparison.Ordinal));
+            Fungus.EventHandler handler = block != null ? block._EventHandler : null;
+            if (!(handler is ObjectClicked) || handler.ParentBlock != block)
             {
-                handler.enabled = false;
-                disabled++;
-                EditorUtility.SetDirty(handler);
+                throw new InvalidOperationException(
+                    "Missing ObjectClicked handler for " + RetiredDoorBlockNames[i]);
             }
+
+            handlers[i] = handler;
         }
 
+        return handlers;
+    }
+
+    static int DisableRetiredDoorHandlers(Fungus.EventHandler[] handlers)
+    {
+        int disabled = 0;
+        foreach (Fungus.EventHandler handler in handlers)
+        {
+            if (!handler.enabled)
+                continue;
+            handler.enabled = false;
+            disabled++;
+            EditorUtility.SetDirty(handler);
+        }
         return disabled;
     }
 

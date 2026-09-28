@@ -2,6 +2,8 @@
 
 갱신: 2026-09-21 (cloud, `feature/fungus-deletion-framework`)
 
+2026-09-28 로컬 작업 트리: 사용자 요청으로 `BetaEnd`를 제거 대상에서 제외했다. `BasementResearchRoom`, `MainMenuScene`, `IntroScene`까지 Flowchart 완전 제거는 **11/55씬 = 20.0%**(커밋 기준 8/55씬 ≈ 14.5%). 지하 복도는 문 블록만 Sequence로 옮겼고 Flowchart `Start`가 남아 있다. QA 도구 문제로 플레이 검증을 뒤로 미뤘고 사용자 요청으로 리뷰 에이전트는 실행하지 않는다. 새 변경은 `verified`가 아니다. 아래 56씬 표는 범위 변경 전의 역사적 기준이다.
+
 ## 1. 전체 게임 Flowchart 제거율 (씬 기준)
 
 | 지표 | 값 |
@@ -32,7 +34,7 @@
 | 항목 | 상태 |
 |------|------|
 | `BasementHallway.unity` Sequence Pilot | Editor 메뉴 적용 후 커밋 필요 |
-| `BasementResearchRoom` (Desk 등) | Simple strip 대상 아님 |
+| `BasementResearchRoom` (Desk 등) | 전용 Editor 파일럿으로 로컬 작업 트리에서 Flowchart 제거; 플레이 QA·독립 리뷰 대기 |
 | Hallway `Start` 페이드 C# 이전 | R1 4단계 |
 | EditMode `BasementHallwayInteractionControllerTests` | Windows unity-cli |
 

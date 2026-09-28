@@ -1,3 +1,5 @@
+using System;
+using Godlotto.Interaction;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -9,6 +11,9 @@ public class MainMenu : MonoBehaviour
 
     private int currentButtonIndex = 0;
     private Vector3 lastMousePosition;
+    private bool newGameStarted;
+    private Func<string, bool> requestSceneTransition =
+        sceneName => SceneTransitionService.LoadSceneSafely(sceneName);
 
     void Awake()
     {
@@ -102,9 +107,11 @@ public class MainMenu : MonoBehaviour
     // --- 버튼 핸들러 ---
     public void OnStartButton()
     {
-        // ▼▼▼ [핵심 수정] 다음 씬으로 가기 전에 커서를 무조건 보이게 하고 잠금을 풉니다. ▼▼▼
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        if (newGameStarted || SceneTransitionService.IsTransitionPending)
+            return;
+
+        newGameStarted = true;
+        UnlockCursorForSceneChange();
 
         // 새 게임 시작 시 진행 데이터만 초기화하고 오디오/화면 설정은 유지합니다.
         PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings();
@@ -115,12 +122,8 @@ public class MainMenu : MonoBehaviour
 
         GameLog.Log("게임 시작! (커서 잠금 해제 완료)");
 
-        // (참고) 만약 여기서 코드로 씬을 이동한다면:
-        // SceneManager.LoadScene("GameScene");
-        
-        // (참고) 만약 버튼에 Fungus 블록이 연결되어 있다면:
-        // 이 함수가 실행된 후 Fungus가 씬을 이동시키므로, 
-        // 위에서 커서를 풀어주면 다음 씬에서도 풀린 채로 시작됩니다.
+        if (!requestSceneTransition(SceneNames.IntroScene))
+            newGameStarted = false;
     }
 
     public void OnLoadButton()

@@ -287,6 +287,108 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!1 &679195767
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 679195770}
+  - component: {fileID: 679195769}
+  - component: {fileID: 679195768}
+  m_Layer: 0
+  m_Name: BasementHallwaySequenceInteraction
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &679195768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679195767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a4c5d6e7f8091a2b3c4d5e6f708192a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sayHost: {fileID: 0}
+  controller: {fileID: 679195769}
+--- !u!114 &679195769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679195767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowchart: {fileID: 881030003}
+  backNavigator: {fileID: 0}
+  enableDebugLogging: 0
+  worldClicks:
+  - interactionId: door_brick
+    collider: {fileID: 881030106}
+    clickable: {fileID: 881030101}
+  - interactionId: door_extraction
+    collider: {fileID: 881030105}
+    clickable: {fileID: 881030100}
+  - interactionId: door_observation
+    collider: {fileID: 881030107}
+    clickable: {fileID: 881030102}
+  - interactionId: door_research
+    collider: {fileID: 881030108}
+    clickable: {fileID: 881030103}
+  - interactionId: entry_upper
+    collider: {fileID: 881030109}
+    clickable: {fileID: 881030104}
+  routes:
+  - interactionId: door_brick
+    fungusBlockName: 
+    sequenceDocument: {fileID: 4900000, guid: a1b2c3d4e5f6478990a1b2c3d4e5f601, type: 3}
+    sequenceStartBlock: start
+  - interactionId: door_extraction
+    fungusBlockName: 
+    sequenceDocument: {fileID: 4900000, guid: a1b2c3d4e5f6478990a1b2c3d4e5f602, type: 3}
+    sequenceStartBlock: start
+  - interactionId: door_observation
+    fungusBlockName: 
+    sequenceDocument: {fileID: 4900000, guid: a1b2c3d4e5f6478990a1b2c3d4e5f603, type: 3}
+    sequenceStartBlock: start
+  - interactionId: door_research
+    fungusBlockName: 
+    sequenceDocument: {fileID: 4900000, guid: a1b2c3d4e5f6478990a1b2c3d4e5f604, type: 3}
+    sequenceStartBlock: start
+  - interactionId: entry_upper
+    fungusBlockName: 
+    sequenceDocument: {fileID: 4900000, guid: a1b2c3d4e5f6478990a1b2c3d4e5f605, type: 3}
+    sequenceStartBlock: start
+  blockOutcomes: []
+  panelCloses: []
+  sequenceHost: {fileID: 679195768}
+--- !u!4 &679195770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679195767}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &880010001
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,7 +981,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 881030001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -962,7 +1064,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 881030001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -1045,7 +1147,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 881030001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -1128,7 +1230,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 881030001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -1211,7 +1313,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 881030001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49012bdc794e429686c1eff7d9ced90, type: 3}
   m_Name: 
@@ -2769,6 +2871,6 @@ SceneRoots:
   - {fileID: 880010021}
   - {fileID: 881030002}
   - {fileID: 1493308671}
-  - {fileID: 1561921856}
   - {fileID: 2045569447}
   - {fileID: 1151417337}
+  - {fileID: 679195770}

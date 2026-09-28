@@ -30,7 +30,7 @@ namespace Godlotto.Interaction
                 return;
             }
 
-            EnsureBlackFadeTexture(cameraManager);
+            SetBlackFadeTexture(cameraManager);
             cameraManager.Fade(targetAlpha, durationSeconds, onComplete);
         }
 
@@ -61,11 +61,8 @@ namespace Godlotto.Interaction
             return cameraManager != null;
         }
 
-        static void EnsureBlackFadeTexture(CameraManager cameraManager)
+        static void SetBlackFadeTexture(CameraManager cameraManager)
         {
-            if (cameraManager.ScreenFadeTexture != null)
-                return;
-
             cameraManager.ScreenFadeTexture = CameraManager.CreateColorTexture(Color.black, 32, 32);
         }
     }

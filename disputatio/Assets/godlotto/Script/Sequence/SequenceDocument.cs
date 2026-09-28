@@ -2,6 +2,7 @@ using System;
 
 namespace Godlotto.Sequence
 {
+    [Serializable]
     public sealed class SequenceDocument
     {
         public int schemaVersion;
@@ -26,12 +27,14 @@ namespace Godlotto.Sequence
         }
     }
 
+    [Serializable]
     public sealed class SequenceBlock
     {
         public string id;
         public SequenceOp[] commands;
     }
 
+    [Serializable]
     public sealed class SequenceOp
     {
         public string command;
