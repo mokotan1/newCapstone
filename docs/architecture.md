@@ -131,7 +131,7 @@ newCapstone/
 2. **`MainMenu`** (`disputatio/Assets/godlotto/Script/Title/MainMenu.cs`):
    - **새 게임**: `PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings()` — 진행만 초기화, BGM/SFX/해상도 PlayerPrefs 유지
    - **이어하기**: `CheckpointLoadCoordinator.LoadLatestOrFallback(SceneNames.MainScene)`
-   - 실제 **새 게임 씬 전환**은 Inspector에서 버튼→Fungus 블록 연결로 처리 (`MainMenu.OnStartButton`은 PlayerPrefs 정리만 수행)
+   - **새 게임 씬 전환**: `OnStartButton`이 진행·인벤토리 초기화 후 `SceneTransitionService.LoadSceneSafely(SceneNames.IntroScene)`을 호출한다. `MainMenuScene`의 Start 버튼은 이 메서드만 호출하며 Flowchart는 제거했다. 플레이 QA는 보류 중이다.
 3. **씬 로드 시 공통**:
    - `VariablemanagerSingleton` — `DontDestroyOnLoad`로 전역 Flowchart 오브젝트 유지
    - `SceneNameSetter` — Fungus `SceneName`만 기록한다. 씬의 Save Point 명령은 없다.
@@ -156,7 +156,7 @@ public const string HallLeft2 = "Hall_Left2";
 
 ```mermaid
 flowchart TD
-    MM[MainMenuScene] -->|새 게임 Fungus| Intro[IntroScene / Opening_*]
+    MM[MainMenuScene] -->|새 게임 C#| Intro[IntroScene / Opening_*]
     MM -->|이어하기| CP[CheckpointLoadCoordinator]
     CP --> Resume[resumeSceneName 씬]
     Intro --> Game[Mokotan 1F/2F/Basement 씬들]
@@ -541,8 +541,8 @@ graph TB
 |------|------|----------------|
 | **로컬 LLM autostart AC01–AC18** | 코드: Supervisor·Resolver·Bootstrap·Job Object·로컬 RAG `local-hash-v1`·Groq/Gemini 실행 경로 제거·Origin 거부·대기열 429·오프라인 소스 패키지 SHA. Live Editor 세션은 `127.0.0.1:11144`에서 `Failed`/`gpu_initialization_failed`. AC05 Python 없는 VM, AC02 망차단, AC16 Gate 0 동결, playtester, 독립 리뷰는 없음 | `docs/qa/runs/20260915T014800Z-run-local-llm-autostart-ac/report.md`, `docs/superpowers/specs/2026-09-15-local-llm-gate0-decision.md` |
 | **`SceneNames.MainScene` ("MainScene")** | `MainMenu` 이어하기 fallback, Jumpscare retry에 사용되나 **`MainScene.unity` 파일 없음**, `EditorBuildSettings`에도 없음 | 의도된 fallback 씬명(예: `Hall_playerble`) 확인; 상수·빌드 설정 정렬 |
-| **새 게임 시작 씬** | `MainMenu.OnStartButton`은 PlayerPrefs만 지우고 **LoadScene 호출 없음** — 실제 전환은 Fungus/버튼 Inspector | `MainMenuScene.unity` Flowchart·Button onClick 추적 |
-| **`IntroScene` vs `Opening_Office`** | 빌드 목록에 둘 다 존재; 정확한 오프닝 순서는 씬 내 Flowchart 의존 | 플레이through 또는 Fungus 블록 문서화 |
+| **새 게임 시작 씬** | 현재 브랜치에서 Start 버튼 → `MainMenu.OnStartButton` → `IntroScene`으로 C# 이전, MainMenu Flowchart 제거. 관련 EditMode 6/6 통과 | QA 도구 복구 후 격리 프로필에서 클릭·전환·설정 보존 확인 |
+| **`IntroScene` vs `Opening_Office`** | 현재 브랜치에서 Intro의 단일 `start` Flowchart를 C# 연출로 옮겼다. 순서 끝은 `Opening_Office` 로드 | 플레이 QA로 이미지·효과음·페이드·실제 씬 전환 확인 |
 | **Fungus Save Point vs Checkpoint** | 이어하기는 `CheckpointLoadCoordinator`. 새 게임은 C#이 인벤토리를 비우고 `DoSaveReset()`은 호출하지 않음. `SceneNameSetter`는 `SavePointKey`를 쓰지 않음. 인벤토리는 Fungus 로드 신호로 복원하지 않음. 제품 씬 42개의 Save Point 명령은 뺐다. 시작 블록은 Game Started가 첫 남은 명령부터 실행한다. Fungus 예제 씬은 그대로다. 키 목록은 `docs/development/tasks/fungus-deletion/P2-save-key-map.md` | 대사 이전. 플레이 QA는 아직 |
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |

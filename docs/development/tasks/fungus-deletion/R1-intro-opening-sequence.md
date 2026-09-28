@@ -33,6 +33,6 @@
 - `dotnet run --no-restore --project scripts/CSharpSyntaxChecker/CSharpSyntaxChecker.csproj -- disputatio/Assets`: exit 0. 일반 `dotnet run`은 사용자 NuGet.Config 읽기 권한 때문에 실패했으며 `--no-restore`로 기존 assets를 사용했다.
 - Unity Editor 6000.0.36f1에서 `editor refresh --compile`: 컴파일 완료.
 - Editor에서 `IntroScene`을 열어 원본 Flowchart 1개·블록 1개, 네 이미지 각각 1개, `PostExposureController` 1개를 확인한 뒤 대상 씬만 저장했다.
-- 씬 재로드: Flowchart 0, `IntroOpeningSequence` 1, 이미지/노출 참조 5개 유지, 초기 이미지 active 상태 `true,false,false,false`, dirty=false.
+- 씬 재로드: Flowchart 0, `IntroOpeningSequence` 1, 이미지/노출 참조 5개 유지, 초기 이미지 active 상태 `true,false,false,false`, dirty=false. `IntroScene`과 `Opening_Office`는 모두 빌드 씬 목록에 있다.
 - EditMode Console 오류·경고 출력 `[]`. `SettingPanelManager`의 누락 스크립트 1개는 HEAD 씬에도 같은 GUID로 존재하는 기존 상태다.
 - 씬 재직렬화에서 빈 `m_Name`/`m_EditorClassIdentifier`의 Unity 표준 공백 때문에 이 씬의 `git diff --check`는 경고를 낸다. 그 외 변경은 컨트롤러 추가, Flowchart 제거, 삭제된 Flowchart 선택 참조 정리다.
