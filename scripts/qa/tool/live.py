@@ -252,6 +252,48 @@ class UnityCliGateway:
         )
         return payload
 
+    def run_scenario(self, scenario_id: str, timeout_ms: int = 120000) -> dict[str, Any]:
+        """Run one validated scenario through QaCommandGateway.RunScenarioAsync.
+
+        This is the high-level autorun contract: lease/profile/reset/cleanup
+        stay inside Unity's gateway instead of being approximated by a series
+        of external ``qa_dev_exec`` calls.
+        """
+        completed = self._runner(
+            [
+                "qa_run",
+                "--scenario_id",
+                scenario_id,
+                "--timeout_ms",
+                str(max(0, int(timeout_ms))),
+            ]
+        )
+        payload = _coerce_payload(completed)
+        # qa_run uses the gateway envelope names operationCode/outcomeCode
+        # rather than the lower-level qa_dev_exec code/data names.
+        raw = _extract_json_object(str(payload.get("rawStdout") or ""))
+        if isinstance(raw, dict):
+            operation = str(raw.get("operationCode") or "")
+            payload["code"] = "Ok" if operation == "Success" else operation or payload.get("code", "Error")
+            payload["ok"] = operation == "Success"
+            if raw.get("outcomeCode") is not None:
+                payload["outcomeCode"] = raw.get("outcomeCode")
+            payload["outcomeMessage"] = raw.get("outcomeMessage")
+            payload["commandId"] = raw.get("commandId")
+        status = _coerce_payload(self._runner(["qa_status"]))
+        status_raw = _extract_json_object(str(status.get("rawStdout") or ""))
+        if isinstance(status_raw, dict):
+            payload["evidenceRunDirectoryPath"] = status_raw.get("evidenceRunDirectoryPath")
+            payload["qaStatus"] = {
+                "activeRunId": status_raw.get("activeRunId", ""),
+                "activeScenarioId": status_raw.get("activeScenarioId", ""),
+                "isQaProfileActive": status_raw.get("isQaProfileActive"),
+                "isScenarioRunning": status_raw.get("isScenarioRunning"),
+            }
+        payload.setdefault("scenarioId", scenario_id)
+        self.calls.append({"command": "qa_run", "scenarioId": scenario_id, "payload": payload})
+        return payload
+
 
 def _cli_executable() -> str:
     """로컬에 설치된 unity-cli.exe 경로를 반환한다. cmd.exe 재파싱을 피하기 위함이다."""
@@ -269,14 +311,22 @@ def _decode(blob: object) -> str:
 
 def _run_cli(args: Sequence[str]) -> dict[str, Any]:
     """unity-cli.exe를 disputatio 프로젝트에 대해 한 번 실행한다."""
-    # TODO(AC19): timeout 시 Editor stop/qa_recover가 아직 이 함수 안에 없다.
+    # qa_run owns per-step limits; the outer process must allow the declared
+    # overall timeout plus a small transport margin instead of cutting it off
+    # at the old fixed 90 second limit.
+    timeout_seconds = CLI_TIMEOUT_SECONDS
+    if "--timeout_ms" in args:
+        try:
+            timeout_seconds = max(timeout_seconds, int(args[list(args).index("--timeout_ms") + 1]) / 1000.0 + 10.0)
+        except (IndexError, TypeError, ValueError):
+            timeout_seconds = CLI_TIMEOUT_SECONDS
     command = [_cli_executable(), *CLI_PROJECT, *[str(item) for item in args]]
     try:
         completed = subprocess.run(
             command,
             capture_output=True,
             check=False,
-            timeout=CLI_TIMEOUT_SECONDS,
+            timeout=timeout_seconds,
         )
     except subprocess.TimeoutExpired as exc:
         return {
