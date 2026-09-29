@@ -29,7 +29,6 @@ newCapstone/
 - **Fungus** — 대화·시퀀싱
 - **Cinemachine** — 카메라
 - **Input System** — 입력
-- **Post Processing**, **Timeline**, **Newtonsoft.Json** (UPM)
 
 ### 실행 방법
 

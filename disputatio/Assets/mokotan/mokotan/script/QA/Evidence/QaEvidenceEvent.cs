@@ -118,7 +118,16 @@ namespace Godlotto.QA.Evidence
         /// </summary>
         public static QaEvidenceEvent ForCommandResult(string commandId, string resultCode, string message)
         {
-            return Create(QaEvidenceEventType.CommandResult, commandId, resultCode, null, message);
+            return ForCommandResult(commandId, resultCode, message, null);
+        }
+
+        public static QaEvidenceEvent ForCommandResult(
+            string commandId,
+            string resultCode,
+            string message,
+            IReadOnlyDictionary<string, string> data)
+        {
+            return Create(QaEvidenceEventType.CommandResult, commandId, resultCode, null, message, data);
         }
 
         /// <summary>런타임에서 이미 순서/시각이 정해진 사본을 만듭니다. 원본은 변경되지 않습니다.</summary>

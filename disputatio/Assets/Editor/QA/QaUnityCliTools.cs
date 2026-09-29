@@ -62,11 +62,13 @@ namespace Godlotto.QA.EditorCli
                 profileService: profileService,
                 sceneRegistry: sceneRegistry,
                 captureScreenshotPng: CaptureMidRunScreenshotPng,
+                realInputDriver: Godlotto.QA.SceneAdapters.DeveloperQaServiceFactory.TryCreateRealInputDriver(),
                 developerQaServiceFactory: () =>
                     Godlotto.QA.SceneAdapters.DeveloperQaServiceFactory.Create(
                         profileService,
                         recorder),
-                playModeSceneBootstrap: new EditorQaPlayModeSceneBootstrap());
+                playModeSceneBootstrap: new EditorQaPlayModeSceneBootstrap(),
+                captureSnapshot: EditorQaLiveSnapshotProbe.CreateCaptureCallback());
         }
 
         /// <summary>

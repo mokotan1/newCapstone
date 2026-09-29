@@ -318,6 +318,13 @@ namespace Godlotto.QA.Scenarios
 
         private QaAssertionResult EvaluateInputUnlocked(QaDriverSnapshot current)
         {
+            if (!current.InputGateObserved)
+            {
+                return QaAssertionResult.Fail(
+                    Description + " -- input gate was not observed from a live source.",
+                    "(not observed)");
+            }
+
             string observed = current.InputGateLocked.ToString(CultureInfo.InvariantCulture);
             return !current.InputGateLocked
                 ? QaAssertionResult.Pass(Description + " -- input gate is open.", observed)
@@ -326,6 +333,20 @@ namespace Godlotto.QA.Scenarios
 
         private static QaAssertionResult EvaluateNoNewConsoleError(QaDriverSnapshot current, QaDriverSnapshot baseline)
         {
+            if (!current.ConsoleErrorObserved)
+            {
+                return QaAssertionResult.Fail(
+                    "No new console errors since baseline -- console error count was not observed from a live source.",
+                    "(not observed)");
+            }
+
+            if (baseline != null && !baseline.ConsoleErrorObserved)
+            {
+                return QaAssertionResult.Fail(
+                    "No new console errors since baseline -- baseline console count was not observed.",
+                    "(baseline not observed)");
+            }
+
             int baselineCount = baseline?.ConsoleErrorCount ?? 0;
             int currentCount = current.ConsoleErrorCount;
             string observed = currentCount.ToString(CultureInfo.InvariantCulture) +

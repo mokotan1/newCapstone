@@ -66,7 +66,7 @@ namespace Godlotto.QA.Developer
             _profileService = profileService;
             _evidenceRecorder = evidenceRecorder;
             _realInputDriver = realInputDriver;
-            _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteStepCommandAsync);
+            _scenarioRunner = new DeveloperQaScenarioRunner(ExecuteScenarioStepWithEvidenceAsync);
         }
 
         public async Task<DeveloperQaResult> ExecuteAsync(
@@ -364,6 +364,7 @@ namespace Godlotto.QA.Developer
                     || state == DeveloperQaScenarioStates.Failed
                     || state == DeveloperQaScenarioStates.Cancelled))
             {
+                FinalizeScenarioEvidence();
                 DeveloperQaResult restore = RestoreScenarioProfileSession();
                 if (restore.Code != DeveloperQaResultCode.Ok)
                 {
@@ -384,6 +385,7 @@ namespace Godlotto.QA.Developer
         private DeveloperQaResult CancelScenario()
         {
             DeveloperQaResult cancelResult = _scenarioRunner.Cancel();
+            FinalizeScenarioEvidence();
             DeveloperQaResult restoreResult = RestoreScenarioProfileSession();
             if (restoreResult.Code != DeveloperQaResultCode.Ok
                 && restoreResult.Code != DeveloperQaResultCode.EnvironmentBlocked)
@@ -462,6 +464,60 @@ namespace Godlotto.QA.Developer
         /// Executes one scenario step without re-entering <c>scenario.*</c> commands
         /// (avoids recursive run/resume/cancel from JSON steps).
         /// </summary>
+        private async Task<DeveloperQaResult> ExecuteScenarioStepWithEvidenceAsync(
+            DeveloperQaCommand command,
+            CancellationToken cancellationToken)
+        {
+            DeveloperQaResult result = await ExecuteStepCommandAsync(command, cancellationToken).ConfigureAwait(true);
+            RecordStepEvidence(command, result);
+            return result;
+        }
+
+        private void RecordStepEvidence(DeveloperQaCommand command, DeveloperQaResult result)
+        {
+            if (_evidenceRecorder == null || command == null)
+            {
+                return;
+            }
+
+            try
+            {
+                string code = result != null && result.Code == DeveloperQaResultCode.Ok ? "Success" : "Failed";
+                IReadOnlyDictionary<string, string> data = QaDeveloperStepEvidenceBuilder.ForDeveloperStep(
+                    command.Id,
+                    command.Family,
+                    command.Name,
+                    command.TargetId,
+                    result);
+                _evidenceRecorder.AppendEvent(QaEvidenceEvent.ForCommandResult(
+                    command.Id,
+                    code,
+                    result != null ? result.Message : "null step result",
+                    data));
+            }
+            catch (Exception)
+            {
+                // Evidence must never break step execution.
+            }
+        }
+
+        private void FinalizeScenarioEvidence()
+        {
+            if (_evidenceRecorder == null)
+            {
+                return;
+            }
+
+            try
+            {
+                _evidenceRecorder.Finalize(null);
+            }
+            catch (Exception)
+            {
+                // Finalize failures are surfaced via manifest validation, not hidden here.
+            }
+        }
+
         private Task<DeveloperQaResult> ExecuteStepCommandAsync(
             DeveloperQaCommand command,
             CancellationToken cancellationToken)

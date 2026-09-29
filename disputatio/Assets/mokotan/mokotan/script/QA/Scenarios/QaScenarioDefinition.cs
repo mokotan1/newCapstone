@@ -147,6 +147,10 @@ namespace Godlotto.QA.Scenarios
         /// <summary>이 스텝의 최대 대기 시간(밀리초). 항상 양수여야 합니다.</summary>
         [JsonProperty("timeoutMs")]
         public int TimeoutMs { get; set; }
+
+        /// <summary>선택적 스텝 파라미터(예: pointer <c>mode=realInput</c>).</summary>
+        [JsonProperty("parameters")]
+        public Dictionary<string, string> Parameters { get; set; }
     }
 
     /// <summary>시나리오 JSON의 <c>steps[].assertion</c> 객체를 반영하는 배선 DTO.</summary>

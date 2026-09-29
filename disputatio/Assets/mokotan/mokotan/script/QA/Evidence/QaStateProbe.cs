@@ -73,6 +73,11 @@ namespace Godlotto.QA.Evidence
         /// </summary>
         public QaDriverSnapshot Capture(string runId = null)
         {
+            var observations = new QaSnapshotObservations(
+                sceneNameObserved: sceneNameProvider != null,
+                inputGateObserved: inputGateLockedProvider != null,
+                consoleErrorObserved: consoleErrorCountProvider != null);
+
             return QaDriverSnapshot.Create(
                 runId: runId,
                 capturedAtUtc: utcNowProvider(),
@@ -88,7 +93,8 @@ namespace Godlotto.QA.Evidence
                 flowchartIdleStates: SafeInvoke(flowchartIdleStatesProvider, EmptyFlagMap, nameof(flowchartIdleStatesProvider)),
                 aiConnectionState: SafeInvoke(
                     aiConnectionStateProvider, QaAiConnectionState.Idle, nameof(aiConnectionStateProvider)),
-                consoleErrorCount: SafeInvoke(consoleErrorCountProvider, 0, nameof(consoleErrorCountProvider)));
+                consoleErrorCount: SafeInvoke(consoleErrorCountProvider, 0, nameof(consoleErrorCountProvider)),
+                observations: observations);
         }
 
         private static T SafeInvoke<T>(Func<T> provider, T fallback, string providerName)

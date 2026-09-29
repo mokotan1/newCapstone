@@ -58,6 +58,25 @@ public class CheckpointRepositoryTests
     }
 
     [Test]
+    public void Save_DefaultsVersionAndTimestampBeforeRoundTrip()
+    {
+        var data = new CheckpointSaveData
+        {
+            version = 0,
+            createdAtUtc = string.Empty,
+            resumeSceneName = SceneNames.StudyRoom
+        };
+
+        CheckpointRepository.Save(data);
+
+        Assert.That(data.version, Is.EqualTo(1));
+        Assert.That(DateTime.TryParse(data.createdAtUtc, out _), Is.True);
+        Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
+        Assert.That(loaded.version, Is.EqualTo(1));
+        Assert.That(loaded.createdAtUtc, Is.EqualTo(data.createdAtUtc));
+    }
+
+    [Test]
     public void Clear_RemovesCheckpointButPreservesSettings()
     {
         PlayerPrefs.SetFloat(SettingPlayerPrefsKeys.BgmVolume, 0.25f);
@@ -87,6 +106,33 @@ public class CheckpointRepositoryTests
         Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
         Assert.That(loaded.checkpointId, Is.EqualTo("unlock_study_room"));
         Assert.That(loaded.resumeSceneName, Is.EqualTo(SceneNames.StudyRoom));
+    }
+
+    [Test]
+    public void Save_WhenDataNull_ThrowsArgumentNullAndKeepsPreviousCheckpoint()
+    {
+        CheckpointRepository.Save(ValidStudyRoomCheckpoint());
+
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(() => CheckpointRepository.Save(null));
+
+        Assert.That(exception.ParamName, Is.EqualTo("data"));
+        Assert.That(CheckpointRepository.TryLoad(out CheckpointSaveData loaded), Is.True);
+        Assert.That(loaded.checkpointId, Is.EqualTo("unlock_study_room"));
+    }
+
+    [Test]
+    public void Save_WhenValidationFails_DoesNotApplyDefaultsToInput()
+    {
+        CheckpointSaveData invalid = ValidStudyRoomCheckpoint();
+        invalid.version = 0;
+        invalid.createdAtUtc = null;
+        invalid.resumeSceneName = "  ";
+
+        Assert.Throws<ArgumentException>(() => CheckpointRepository.Save(invalid));
+
+        Assert.That(invalid.version, Is.EqualTo(0));
+        Assert.That(invalid.createdAtUtc, Is.Null);
+        Assert.That(CheckpointRepository.HasCheckpoint(), Is.False);
     }
 
     [Test]

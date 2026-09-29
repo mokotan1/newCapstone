@@ -48,6 +48,10 @@ namespace Godlotto.QA.Evidence
         public const string TargetInteractablePrefix = "TargetInteractable.";
         public const string FlowchartIdlePrefix = "FlowchartIdle.";
 
+        public const string SceneNameObservedKey = QaSnapshotObservations.SceneNameObservedKey;
+        public const string InputGateObservedKey = QaSnapshotObservations.InputGateObservedKey;
+        public const string ConsoleErrorObservedKey = QaSnapshotObservations.ConsoleErrorObservedKey;
+
         private static readonly IReadOnlyList<int> EmptyItemIds = new ReadOnlyCollection<int>(new List<int>());
         private static readonly IReadOnlyList<string> EmptyStringList = new ReadOnlyCollection<string>(new List<string>());
         private static readonly IReadOnlyDictionary<string, bool> EmptyFlagMap =
@@ -92,6 +96,12 @@ namespace Godlotto.QA.Evidence
         /// <summary>캡처 시점까지 기록된 Console 오류 누적 개수(원본 로그 텍스트는 포함하지 않음).</summary>
         public int ConsoleErrorCount { get; }
 
+        public bool SceneNameObserved { get; }
+
+        public bool InputGateObserved { get; }
+
+        public bool ConsoleErrorObserved { get; }
+
         /// <summary>
         /// 위 모든 허용목록 필드를 평탄화한 얕은 key-value 뷰. evidence 로그 첨부와
         /// <c>QaAssertion.FieldEquals</c>/<c>FieldBoolean</c> 조회에 사용됩니다. 절대 null이 아닙니다.
@@ -110,7 +120,8 @@ namespace Godlotto.QA.Evidence
             bool inputGateLocked,
             IReadOnlyDictionary<string, bool> flowchartIdleStates,
             QaAiConnectionState aiConnectionState,
-            int consoleErrorCount)
+            int consoleErrorCount,
+            QaSnapshotObservations observations)
         {
             RunId = runId ?? string.Empty;
             CapturedAtUtc = capturedAtUtc;
@@ -124,6 +135,10 @@ namespace Godlotto.QA.Evidence
             FlowchartIdleStates = flowchartIdleStates ?? EmptyFlagMap;
             AiConnectionState = aiConnectionState;
             ConsoleErrorCount = consoleErrorCount;
+            observations = observations ?? QaSnapshotObservations.AllObserved();
+            SceneNameObserved = observations.SceneNameObserved;
+            InputGateObserved = observations.InputGateObserved;
+            ConsoleErrorObserved = observations.ConsoleErrorObserved;
             Values = BuildFlatValues(this);
         }
 
@@ -144,7 +159,8 @@ namespace Godlotto.QA.Evidence
             bool inputGateLocked = false,
             IReadOnlyDictionary<string, bool> flowchartIdleStates = null,
             QaAiConnectionState aiConnectionState = QaAiConnectionState.Idle,
-            int consoleErrorCount = 0)
+            int consoleErrorCount = 0,
+            QaSnapshotObservations observations = null)
         {
             return new QaDriverSnapshot(
                 runId,
@@ -158,7 +174,8 @@ namespace Godlotto.QA.Evidence
                 inputGateLocked,
                 CopyMap(flowchartIdleStates),
                 aiConnectionState,
-                consoleErrorCount);
+                consoleErrorCount,
+                observations);
         }
 
         private static IReadOnlyList<int> CopyList(IReadOnlyList<int> source, IReadOnlyList<int> empty)
@@ -188,7 +205,10 @@ namespace Godlotto.QA.Evidence
                 [AiConnectionStateKey] = snapshot.AiConnectionState.ToString(),
                 [ConsoleErrorCountKey] = snapshot.ConsoleErrorCount.ToString(CultureInfo.InvariantCulture),
                 [InventoryItemIdsKey] = FormatIntList(snapshot.InventoryItemIds),
-                [QuestCompletedStepIdsKey] = FormatStringList(snapshot.QuestCompletedStepIds)
+                [QuestCompletedStepIdsKey] = FormatStringList(snapshot.QuestCompletedStepIds),
+                [SceneNameObservedKey] = snapshot.SceneNameObserved.ToString(CultureInfo.InvariantCulture),
+                [InputGateObservedKey] = snapshot.InputGateObserved.ToString(CultureInfo.InvariantCulture),
+                [ConsoleErrorObservedKey] = snapshot.ConsoleErrorObserved.ToString(CultureInfo.InvariantCulture)
             };
 
             AppendFlagMap(flat, TargetActivePrefix, snapshot.TargetActiveStates);

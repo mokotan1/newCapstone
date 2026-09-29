@@ -230,6 +230,8 @@ namespace Godlotto.QA.Gateway
         private readonly QaScenarioValidator scenarioValidator;
         private readonly DeveloperQaScenarioValidator developerScenarioValidator;
         private readonly QaScenarioRunner scenarioRunner;
+        private readonly IQaInputDriver apiInputDriver;
+        private readonly IQaInputDriver configuredRealInputDriver;
         private readonly Func<string> evidenceRunDirectoryProvider;
         private readonly Func<IReadOnlyList<(string Name, string Json)>> scenarioSourceProvider;
         private readonly Func<IDeveloperQaService> developerQaServiceFactory;
@@ -284,6 +286,10 @@ namespace Godlotto.QA.Gateway
         /// Ensures Play Mode + <c>scenario.scene</c> before classic runner presets. Editor
         /// installer must inject a real implementation; omitted in pure unit tests.
         /// </param>
+        /// <param name="captureSnapshot">
+        /// Live snapshot provider for assertions and evidence. When omitted, uses an empty
+        /// <see cref="QaStateProbe"/> whose missing observations fail closed during asserts.
+        /// </param>
         public QaCommandGateway(
             IQaEvidenceRecorder evidenceRecorder,
             Func<string> evidenceRunDirectoryProvider = null,
@@ -295,7 +301,8 @@ namespace Godlotto.QA.Gateway
             IQaInputDriver inputDriver = null,
             IQaInputDriver realInputDriver = null,
             Func<IDeveloperQaService> developerQaServiceFactory = null,
-            IQaPlayModeSceneBootstrap playModeSceneBootstrap = null)
+            IQaPlayModeSceneBootstrap playModeSceneBootstrap = null,
+            Func<QaDriverSnapshot> captureSnapshot = null)
         {
             this.evidenceRecorder = evidenceRecorder ?? throw new ArgumentNullException(nameof(evidenceRecorder));
             this.evidenceRunDirectoryProvider = evidenceRunDirectoryProvider;
@@ -309,17 +316,18 @@ namespace Godlotto.QA.Gateway
             this.developerQaServiceFactory = developerQaServiceFactory
                 ?? (() => new DeveloperQaService());
             this.playModeSceneBootstrap = playModeSceneBootstrap;
-            this.inputDriver = inputDriver
-                ?? realInputDriver
-                ?? new QaApiInputDriver(ResolveInteractable);
+            this.configuredRealInputDriver = realInputDriver;
+            this.apiInputDriver = inputDriver ?? new QaApiInputDriver(ResolveInteractable);
+            Func<QaDriverSnapshot> snapshotProvider = captureSnapshot ?? (() => new QaStateProbe().Capture());
             this.scenarioRunner = new QaScenarioRunner(
                 this.driver,
                 this.sceneRegistry,
                 this.profileService,
                 this.leaseService,
-                this.inputDriver,
+                this.apiInputDriver,
                 this.evidenceRecorder,
-                captureSnapshot: () => new QaStateProbe().Capture(),
+                snapshotProvider,
+                realInputDriver: this.configuredRealInputDriver,
                 ownerId: DefaultOwnerId,
                 captureScreenshotPng: captureScreenshotPng,
                 playModeSceneBootstrap: playModeSceneBootstrap);
@@ -963,8 +971,19 @@ namespace Godlotto.QA.Gateway
                     return QaScenarioRunOutcomeCode.Passed;
                 }
 
-                // Ok without completed state still means the request executed (e.g. deferred).
-                return QaScenarioRunOutcomeCode.Passed;
+                if (result.Data != null
+                    && result.Data.TryGetValue("state", out string deferredState)
+                    && string.Equals(deferredState, DeveloperQaScenarioStates.Running, StringComparison.Ordinal))
+                {
+                    return QaScenarioRunOutcomeCode.Failed;
+                }
+
+                return QaScenarioRunOutcomeCode.Failed;
+            }
+
+            if (result.Code == DeveloperQaResultCode.EnvironmentBlocked)
+            {
+                return QaScenarioRunOutcomeCode.Blocked;
             }
 
             return QaScenarioRunOutcomeCode.Failed;

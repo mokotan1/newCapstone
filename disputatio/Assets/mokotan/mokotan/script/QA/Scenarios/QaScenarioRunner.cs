@@ -175,7 +175,8 @@ namespace Godlotto.QA.Scenarios
         private readonly QaSceneRegistry sceneRegistry;
         private readonly IQaProfileService profileService;
         private readonly QaLeaseService leaseService;
-        private readonly IQaInputDriver inputDriver;
+        private readonly IQaInputDriver apiInputDriver;
+        private readonly IQaInputDriver realInputDriver;
         private readonly IQaEvidenceRecorder evidenceRecorder;
         private readonly Func<QaDriverSnapshot> captureSnapshot;
         private readonly Func<DateTime> utcNowProvider;
@@ -191,7 +192,11 @@ namespace Godlotto.QA.Scenarios
         /// <param name="sceneRegistry">씬/대상/프리셋을 해석하는 레지스트리(필수).</param>
         /// <param name="profileService">일반 진행 PlayerPrefs를 격리하는 서비스(필수).</param>
         /// <param name="leaseService">단일 활성 writer를 강제하는 리스 서비스(필수).</param>
-        /// <param name="inputDriver">클릭/드래그/키 입력을 실행하는 드라이버(필수).</param>
+        /// <param name="inputDriver">API 클릭/드래그/키 입력 드라이버(필수).</param>
+        /// <param name="realInputDriver">
+        /// EventSystem RealInput 드라이버(선택). pointer 스텝이 RealInput을 요구할 때 없으면
+        /// 명시적으로 실패합니다 — API로 대체하지 않습니다.
+        /// </param>
         /// <param name="evidenceRecorder">append-only evidence 기록기(필수).</param>
         /// <param name="captureSnapshot">
         /// 어서션 평가·evidence 첨부에 쓸 <see cref="QaDriverSnapshot"/>을 캡처하는 콜백(필수).
@@ -223,6 +228,7 @@ namespace Godlotto.QA.Scenarios
             IQaInputDriver inputDriver,
             IQaEvidenceRecorder evidenceRecorder,
             Func<QaDriverSnapshot> captureSnapshot,
+            IQaInputDriver realInputDriver = null,
             string ownerId = null,
             TimeSpan? leaseTtl = null,
             Func<DateTime> utcNowProvider = null,
@@ -234,7 +240,8 @@ namespace Godlotto.QA.Scenarios
             this.sceneRegistry = sceneRegistry ?? throw new ArgumentNullException(nameof(sceneRegistry));
             this.profileService = profileService ?? throw new ArgumentNullException(nameof(profileService));
             this.leaseService = leaseService ?? throw new ArgumentNullException(nameof(leaseService));
-            this.inputDriver = inputDriver ?? throw new ArgumentNullException(nameof(inputDriver));
+            this.apiInputDriver = inputDriver ?? throw new ArgumentNullException(nameof(inputDriver));
+            this.realInputDriver = realInputDriver;
             this.evidenceRecorder = evidenceRecorder ?? throw new ArgumentNullException(nameof(evidenceRecorder));
             this.captureSnapshot = captureSnapshot ?? throw new ArgumentNullException(nameof(captureSnapshot));
             this.ownerId = string.IsNullOrWhiteSpace(ownerId) ? DefaultOwnerId : ownerId;
@@ -424,7 +431,7 @@ namespace Godlotto.QA.Scenarios
 
                 QaScenarioStepOutcome stepOutcome = await ExecuteStepAsync(step, cancellationToken).ConfigureAwait(true);
                 stepOutcomes.Add(stepOutcome);
-                AppendStepEvidence(step, stepOutcome);
+                AppendStepEvidence(step, stepOutcome, inputResult: null);
 
                 if (stepOutcome.Snapshot != null)
                 {
@@ -495,9 +502,14 @@ namespace Godlotto.QA.Scenarios
                 return QaScenarioStepOutcome.Failed(step.Id, "Invalid target: " + targetError);
             }
 
+            if (!TryResolveInputDriver(step, out IQaInputDriver driver, out string driverError))
+            {
+                return QaScenarioStepOutcome.Failed(step.Id, driverError);
+            }
+
             return await RunInputAsync(
-                step.Id, timeout, cancellationToken,
-                (token) => inputDriver.ClickAsync(targetId, token)).ConfigureAwait(true);
+                step, targetId, timeout, cancellationToken,
+                (token) => driver.ClickAsync(targetId, token)).ConfigureAwait(true);
         }
 
         private async Task<QaScenarioStepOutcome> ExecuteDragAsync(
@@ -513,9 +525,14 @@ namespace Godlotto.QA.Scenarios
                 return QaScenarioStepOutcome.Failed(step.Id, "Invalid destinationTarget: " + destinationError);
             }
 
+            if (!TryResolveInputDriver(step, out IQaInputDriver driver, out string driverError))
+            {
+                return QaScenarioStepOutcome.Failed(step.Id, driverError);
+            }
+
             return await RunInputAsync(
-                step.Id, timeout, cancellationToken,
-                (token) => inputDriver.DragAsync(sourceId, destinationId, token)).ConfigureAwait(true);
+                step, sourceId, timeout, cancellationToken,
+                (token) => driver.DragAsync(sourceId, destinationId, token)).ConfigureAwait(true);
         }
 
         private async Task<QaScenarioStepOutcome> ExecuteKeyAsync(
@@ -527,17 +544,48 @@ namespace Godlotto.QA.Scenarios
             }
 
             string text = step.Text ?? string.Empty;
+            if (!TryResolveInputDriver(step, out IQaInputDriver driver, out string driverError))
+            {
+                return QaScenarioStepOutcome.Failed(step.Id, driverError);
+            }
+
             return await RunInputAsync(
-                step.Id, timeout, cancellationToken,
-                (token) => inputDriver.KeyAsync(targetId, text, token)).ConfigureAwait(true);
+                step, targetId, timeout, cancellationToken,
+                (token) => driver.KeyAsync(targetId, text, token)).ConfigureAwait(true);
+        }
+
+        private bool TryResolveInputDriver(
+            QaScenarioStepDefinition step,
+            out IQaInputDriver driver,
+            out string error)
+        {
+            if (QaStepEvidenceBuilder.StepRequiresRealInput(step))
+            {
+                if (realInputDriver == null)
+                {
+                    driver = null;
+                    error = "RealInput driver is not configured; refusing to route pointer input through API.";
+                    return false;
+                }
+
+                driver = realInputDriver;
+                error = null;
+                return true;
+            }
+
+            driver = apiInputDriver;
+            error = null;
+            return true;
         }
 
         private async Task<QaScenarioStepOutcome> RunInputAsync(
-            string stepId,
+            QaScenarioStepDefinition step,
+            QaTargetId targetId,
             TimeSpan timeout,
             CancellationToken cancellationToken,
             Func<CancellationToken, Task<QaInputResult>> invokeDriver)
         {
+            string stepId = step.Id;
             using var timeoutCts = new CancellationTokenSource(timeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
@@ -562,9 +610,11 @@ namespace Godlotto.QA.Scenarios
                 return QaScenarioStepOutcome.Cancelled(stepId, result.Message);
             }
 
-            return result.IsSuccess
+            QaScenarioStepOutcome outcome = result.IsSuccess
                 ? QaScenarioStepOutcome.Success(stepId, result.Message)
                 : QaScenarioStepOutcome.Failed(stepId, result.Message);
+            AppendInputStepEvidence(step, targetId, result, outcome);
+            return outcome;
         }
 
         private async Task<QaScenarioStepOutcome> ExecuteAssertAsync(
@@ -858,8 +908,46 @@ namespace Godlotto.QA.Scenarios
             }
         }
 
-        private void AppendStepEvidence(QaScenarioStepDefinition step, QaScenarioStepOutcome outcome)
+        private void AppendInputStepEvidence(
+            QaScenarioStepDefinition step,
+            QaTargetId targetId,
+            QaInputResult result,
+            QaScenarioStepOutcome outcome)
         {
+            if (outcome.WasCancelled)
+            {
+                AppendNoteSafely(step.Id, "Step '" + step.Id + "' cancelled: " + outcome.Message);
+                return;
+            }
+
+            try
+            {
+                IReadOnlyDictionary<string, string> data = QaStepEvidenceBuilder.ForInputStep(
+                    step,
+                    targetId.IsNone ? string.Empty : targetId.Value,
+                    result);
+                evidenceRecorder.AppendEvent(QaEvidenceEvent.ForCommandResult(
+                    step.Id,
+                    outcome.IsSuccess ? "Success" : "Failed",
+                    outcome.Message,
+                    data));
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogWarning("[QaScenarioRunner] Evidence AppendEvent threw: " + ex.GetType().Name);
+            }
+        }
+
+        private void AppendStepEvidence(
+            QaScenarioStepDefinition step,
+            QaScenarioStepOutcome outcome,
+            QaInputResult inputResult)
+        {
+            if (inputResult != null)
+            {
+                return;
+            }
+
             if (outcome.WasCancelled)
             {
                 AppendNoteSafely(step.Id, "Step '" + step.Id + "' cancelled: " + outcome.Message);
@@ -870,9 +958,17 @@ namespace Godlotto.QA.Scenarios
             {
                 if (string.Equals(step.Command, QaScenarioSchema.CommandStateAssert, StringComparison.Ordinal))
                 {
-                    evidenceRecorder.AppendEvent(QaEvidenceEvent.ForAssertion(step.Id, outcome.IsSuccess, outcome.Message));
+                    IReadOnlyDictionary<string, string> data = QaStepEvidenceBuilder.ForAssertionStep(
+                        step.Id,
+                        outcome.IsSuccess
+                            ? QaAssertionResult.Pass(outcome.Message, outcome.Snapshot?.InputGateLocked.ToString() ?? string.Empty)
+                            : QaAssertionResult.Fail(outcome.Message, outcome.Snapshot?.InputGateLocked.ToString() ?? string.Empty),
+                        outcome.Snapshot);
+                    evidenceRecorder.AppendEvent(QaEvidenceEvent.ForAssertion(
+                        step.Id, outcome.IsSuccess, outcome.Message, data));
                 }
-                else
+                else if (string.Equals(step.Command, QaScenarioSchema.CommandEvidenceCapture, StringComparison.Ordinal)
+                         || string.Equals(step.Command, QaScenarioSchema.CommandEvidenceConsole, StringComparison.Ordinal))
                 {
                     evidenceRecorder.AppendEvent(QaEvidenceEvent.ForCommandResult(
                         step.Id, outcome.IsSuccess ? "Success" : "Failed", outcome.Message));
