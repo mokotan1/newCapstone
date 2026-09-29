@@ -90,8 +90,12 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
-| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `BasementHallwayQaAdapter`는 문 5개 Sequence 클릭·도착 assert·복도 재진입(Fungus 없음). `controllerFound`만으로는 통과하지 않음 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
+
+`BasementHallway` 문 5개는 `RoomInteractionSequenceHost`와 JSON 라우트로 연결했고 기존 `ObjectClicked` 처리기는 비활성화했다. `Start` Flowchart 페이드는 아직 유지한다. 플레이 QA·독립 리뷰 전이므로 이 씬의 이전을 verified로 취급하지 않는다.
+
+`BasementResearchRoom`은 전용 `BasementResearchDeskOpener`가 책상 클릭으로 패널을 열고 기존 `PanelBackspaceCloser`가 닫는다. `BasementRoomEnterFade`가 입장 페이드를 담당하며 이 씬의 Flowchart는 제거했다. 플레이 QA·독립 리뷰 전이므로 verified는 아니다.
 
 ### 백엔드 (`backend_ai/`)
 

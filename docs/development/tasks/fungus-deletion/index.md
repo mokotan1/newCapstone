@@ -21,7 +21,7 @@
 | 합침 | 로컬 세이브·폴더 정리와 원격 R1 진행을 merge |
 | independentReview | 세이브·Save Point 제거는 false |
 | stash | `preserve-qa-tool-integration-wip-2026-09-17` 는 pop 하지 말 것 |
-| 다음 | 지하 복도 격리 플레이 QA·독립 리뷰 후 대사 이전 |
+| 다음 | BasementHallway QA 어댑터·시나리오 추가됨. 라이브 `qa_run`·EditMode 후 Start 페이드·대사 이전 |
 
 ## 로컬에서 확인한 EditMode (merge 전)
 
