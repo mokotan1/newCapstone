@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Fungus;
+using Godlotto.Interaction;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -17,20 +19,29 @@ public class MainMenuNewGameResetTests
     private MainMenu mainMenu;
     private Item dragItem;
     private bool saveResetRaised;
+    private List<string> transitionRequests;
 
     [SetUp]
     public void SetUp()
     {
+        SceneTransitionService.ResetForTests();
         mainMenuObject = new GameObject("MainMenu");
         mainMenu = mainMenuObject.AddComponent<MainMenu>();
         dragItem = ScriptableObject.CreateInstance<Item>();
         saveResetRaised = false;
+        transitionRequests = new List<string>();
+        SetTransitionRequest(sceneName =>
+        {
+            transitionRequests.Add(sceneName);
+            return true;
+        });
         SaveManagerSignals.OnSaveReset += HandleSaveReset;
     }
 
     [TearDown]
     public void TearDown()
     {
+        SceneTransitionService.ResetForTests();
         SaveManagerSignals.OnSaveReset -= HandleSaveReset;
         InventorySlot.ClearDragState();
 
@@ -111,7 +122,66 @@ public class MainMenuNewGameResetTests
     }
 
     [Test]
-    public void MainMenuScene_StartButton_InvokesOnStartButtonBeforeFlowchartStartButton()
+    public void OnStartButton_RequestsIntroSceneOnceAfterProgressReset()
+    {
+        PlayerPrefs.SetInt(JunkKey, 99);
+        PlayerPrefs.Save();
+        InventorySlot.draggedItem = dragItem;
+        SetTransitionRequest(sceneName =>
+        {
+            Assert.IsFalse(PlayerPrefs.HasKey(JunkKey), "Progress must be cleared before the scene transition.");
+            Assert.IsNull(InventorySlot.draggedItem, "Drag state must be cleared before the scene transition.");
+            transitionRequests.Add(sceneName);
+            return true;
+        });
+
+        mainMenu.OnStartButton();
+        mainMenu.OnStartButton();
+
+        Assert.That(transitionRequests, Is.EqualTo(new[] { SceneNames.IntroScene }));
+    }
+
+    [Test]
+    public void OnStartButton_AllowsRetryWhenTransitionIsRejected()
+    {
+        SetTransitionRequest(sceneName =>
+        {
+            transitionRequests.Add(sceneName);
+            return transitionRequests.Count > 1;
+        });
+
+        mainMenu.OnStartButton();
+        mainMenu.OnStartButton();
+        mainMenu.OnStartButton();
+
+        Assert.That(transitionRequests, Is.EqualTo(new[] { SceneNames.IntroScene, SceneNames.IntroScene }));
+    }
+
+    [Test]
+    public void OnStartButton_DoesNotClearProgressWhileAnotherTransitionIsPending()
+    {
+        PlayerPrefs.SetInt(JunkKey, 99);
+        PlayerPrefs.SetInt(LastBookPageKey, 7);
+        PlayerPrefs.Save();
+        InventorySlot.draggedItem = dragItem;
+        SceneTransitionService.SetTransitionPendingForTests(true, "OtherScene");
+
+        mainMenu.OnStartButton();
+
+        Assert.That(PlayerPrefs.GetInt(JunkKey), Is.EqualTo(99));
+        Assert.That(PlayerPrefs.GetInt(LastBookPageKey), Is.EqualTo(7));
+        Assert.That(InventorySlot.draggedItem, Is.SameAs(dragItem));
+        Assert.That(transitionRequests, Is.Empty);
+
+        SceneTransitionService.SetTransitionPendingForTests(false);
+        mainMenu.OnStartButton();
+
+        Assert.That(PlayerPrefs.HasKey(JunkKey), Is.False);
+        Assert.That(transitionRequests, Is.EqualTo(new[] { SceneNames.IntroScene }));
+    }
+
+    [Test]
+    public void MainMenuScene_StartButton_InvokesOnlyOnStartButton()
     {
         string sceneText = ReadMainMenuSceneText();
         string startButtonObject = FindGameObjectBlock(sceneText, StartButtonObjectName);
@@ -132,39 +202,20 @@ public class MainMenuNewGameResetTests
             callsYaml,
             @"- m_Target:[\s\S]*?(?=\r?\n      - m_Target:|\z)",
             RegexOptions.Multiline);
-        Assert.GreaterOrEqual(
-            callEntries.Count,
-            2,
-            "StartButton must wire both MainMenu.OnStartButton and Flowchart.ExecuteBlock.");
+        Assert.AreEqual(1, callEntries.Count, "StartButton must have one persistent scene-start handler.");
 
-        int onStartIndex = -1;
-        int executeBlockIndex = -1;
-        for (int i = 0; i < callEntries.Count; i++)
-        {
-            string entry = callEntries[i].Value;
-            if (entry.Contains("m_MethodName: OnStartButton")
-                && entry.Contains("m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp"))
-            {
-                onStartIndex = i;
-            }
+        string entry = callEntries[0].Value;
+        Assert.That(entry, Does.Contain("m_MethodName: OnStartButton"));
+        Assert.That(entry, Does.Contain("m_TargetAssemblyTypeName: MainMenu, Assembly-CSharp"));
+    }
 
-            if (entry.Contains("m_MethodName: ExecuteBlock")
-                && entry.Contains("m_TargetAssemblyTypeName: Fungus.Flowchart, Fungus")
-                && entry.Contains("m_StringArgument: StartButton"))
-            {
-                executeBlockIndex = i;
-            }
-        }
-
-        Assert.GreaterOrEqual(onStartIndex, 0, "StartButton must invoke MainMenu.OnStartButton.");
-        Assert.GreaterOrEqual(
-            executeBlockIndex,
-            0,
-            "StartButton must invoke Flowchart.ExecuteBlock(\"StartButton\").");
-        Assert.Less(
-            onStartIndex,
-            executeBlockIndex,
-            "MainMenu.OnStartButton must run before Flowchart.ExecuteBlock(\"StartButton\") so prefs/runtime reset completes before the opening scene loads.");
+    private void SetTransitionRequest(System.Func<string, bool> request)
+    {
+        FieldInfo field = typeof(MainMenu).GetField(
+            "requestSceneTransition",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(field);
+        field.SetValue(mainMenu, request);
     }
 
     static void SetSingletonInstance(InventoryManager inventory)

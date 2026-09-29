@@ -52,6 +52,27 @@ def render_report(run_summary: Mapping[str, Any]) -> str:
         f"- Verdict: `{verdict}`",
         f"- State: `{safe.get('state', 'UNKNOWN')}`",
     ]
+    scenario_id = safe.get("scenario_id")
+    if scenario_id:
+        lines.append(f"- Scenario: `{scenario_id}`")
+    evidence_path = safe.get("evidenceRunDirectoryPath")
+    if not evidence_path:
+        response = safe.get("response")
+        if isinstance(response, Mapping):
+            evidence_path = response.get("evidenceRunDirectoryPath")
+    if not evidence_path and isinstance(safe.get("cases"), list):
+        for case in safe["cases"]:
+            if isinstance(case, Mapping):
+                evidence = case.get("evidence")
+                if isinstance(evidence, Mapping) and evidence.get("path"):
+                    evidence_path = evidence["path"]
+                    break
+                response = case.get("response")
+                if isinstance(response, Mapping) and response.get("evidenceRunDirectoryPath"):
+                    evidence_path = response["evidenceRunDirectoryPath"]
+                    break
+    if evidence_path:
+        lines.append(f"- Unity evidence: `{evidence_path}`")
     classification = safe.get("classification")
     if classification:
         lines.append(f"- Classification: `{classification}`")

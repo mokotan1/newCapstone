@@ -28,12 +28,14 @@ public class RoomInteractionSequenceControllerTests
 
         SetPrivateField(controller, "flowchart", flowchart);
         SetPrivateField(controller, "sequenceHost", sequenceHost);
+        SetPrivateField(sequenceHost, "controller", controller);
     }
 
     [TearDown]
     public void TearDown()
     {
         RoomInteractionController.ResetStateForTests();
+        RoomInteractionSequenceHost.ResetForTests();
         if (root != null)
             Object.DestroyImmediate(root);
     }
@@ -139,7 +141,11 @@ public class RoomInteractionSequenceControllerTests
         RebuildLookupCaches(controller);
 
         string loaded = null;
-        RoomInteractionController.SceneLoadHandlerForTests = scene => loaded = scene;
+        RoomInteractionController.SceneLoadHandlerForTests = scene =>
+        {
+            loaded = scene;
+            return true;
+        };
 
         controller.OnInteraction("exit");
 
@@ -194,6 +200,7 @@ public class RoomInteractionSequenceControllerTests
     public void OnInteraction_SequenceOnlyRoute_WithoutHost_LogsAndSkipsFungus()
     {
         SetPrivateField(controller, "sequenceHost", null);
+        Object.DestroyImmediate(sequenceHost);
         SetPrivateField(controller, "routes", new[]
         {
             new InteractionRoute
@@ -216,6 +223,99 @@ public class RoomInteractionSequenceControllerTests
         controller.OnInteraction("look");
 
         Assert.IsFalse(fungusCalled);
+    }
+
+    [Test]
+    public void OnInteraction_SequenceSay_AppliesOutcomesOnceAfterHostCompletes()
+    {
+        var gated = new GatedSequenceHost();
+        RoomInteractionSequenceHost.HostForTests = gated;
+
+        var document = new SequenceDocument
+        {
+            schemaVersion = SequenceLimits.CurrentSchemaVersion,
+            blocks = new[]
+            {
+                new SequenceBlock
+                {
+                    id = "start",
+                    commands = new[]
+                    {
+                        new SequenceOp { command = "say", key = "maid", string_value = "잠겨 있다." },
+                        new SequenceOp
+                        {
+                            command = "set_string",
+                            key = SequenceBlockOutcomeMapper.LoadSceneKey,
+                            string_value = "BasementBrickRoom"
+                        }
+                    }
+                }
+            }
+        };
+        sequenceHost.RegisterForTests("look", document, "start");
+
+        string loaded = null;
+        RoomInteractionController.SceneLoadHandlerForTests = scene =>
+        {
+            loaded = scene;
+            return true;
+        };
+
+        SetPrivateField(controller, "routes", new[]
+        {
+            new InteractionRoute
+            {
+                interactionId = "look",
+                sequenceStartBlock = "start",
+                sequenceDocument = CreateTextAsset("{\"schemaVersion\":1,\"blocks\":[]}")
+            }
+        });
+        RebuildLookupCaches(controller);
+
+        controller.OnInteraction("look");
+
+        Assert.IsNull(loaded);
+        Assert.AreEqual(0, sequenceHost.OutcomesAppliedCountForTests);
+
+        gated.CompletePending();
+        sequenceHost.PumpPendingPlayForTests();
+
+        Assert.AreEqual("BasementBrickRoom", loaded);
+        Assert.AreEqual(1, sequenceHost.OutcomesAppliedCountForTests);
+    }
+
+    sealed class GatedSequenceHost : ISequenceHost
+    {
+        System.Threading.Tasks.TaskCompletionSource<bool> pending;
+
+        public System.Threading.Tasks.Task WaitAsync(
+            int milliseconds,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            return Gate(cancellationToken);
+        }
+
+        public System.Threading.Tasks.Task SayAsync(
+            string speaker,
+            string line,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            return Gate(cancellationToken);
+        }
+
+        public void CompletePending()
+        {
+            Assert.IsNotNull(pending);
+            pending.TrySetResult(true);
+        }
+
+        System.Threading.Tasks.Task Gate(System.Threading.CancellationToken cancellationToken)
+        {
+            pending = new System.Threading.Tasks.TaskCompletionSource<bool>();
+            if (cancellationToken.CanBeCanceled)
+                cancellationToken.Register(() => pending.TrySetCanceled(cancellationToken));
+            return pending.Task;
+        }
     }
 
     static TextAsset CreateTextAsset(string json)

@@ -18,6 +18,8 @@ public static class SceneNames
     public const string HallRight = "Hall_Right";
     public const string HallLeft = "Hall_Left";
     public const string HallLeft2 = "Hall_Left2";
+    public const string SecondFloorMainHall = "2floorMainHall";
+    public const string BetaEnd = "BetaEnd";
     public const string SettingScene = "SettingScene";
     public const string Basement = "Basement";
     public const string BasementHallway = "BasementHallway";

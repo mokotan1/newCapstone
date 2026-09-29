@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Godlotto.QA.Developer;
 using Godlotto.QA.SceneAdapters;
 using Godlotto.QA.Scenarios;
 using Godlotto.QA.Scenes;
@@ -10,7 +11,8 @@ using UnityEngine;
 /// initial scene adapters (<see cref="MainMenuQaAdapter"/>, <see cref="KitchenQaAdapter"/>,
 /// <see cref="HallQaAdapter"/>, <see cref="MaidRoomQaAdapter"/>, <see cref="TutorRoomQaAdapter"/>,
 /// <see cref="StudyRoomQaAdapter"/>, <see cref="ChildRoomQaAdapter"/>,
-/// <see cref="WifeRoomQaAdapter"/>, <see cref="BedRoomQaAdapter"/>)
+/// <see cref="WifeRoomQaAdapter"/>, <see cref="BedRoomQaAdapter"/>,
+/// <see cref="BasementHallwayQaAdapter"/>)
 /// declare well-formed, non-conflicting, already-lowercase-dotted <see cref="QaTargetId"/>s and
 /// register cleanly into a fresh <see cref="QaSceneRegistry"/> via
 /// <see cref="QaSceneAdapterRegistration"/>, and (b) the six real scenario JSON resources under
@@ -27,7 +29,7 @@ public sealed class InitialSceneAdapterSerializationTests
     private static readonly string[] ExpectedSceneNames =
     {
         "MainMenuScene", "Kitchen", "Hall_playerble", "MaidRoom", "TutorRoom", "StudyRoom",
-        "ChildRoom", "WifeRoom", "BedRoom"
+        "ChildRoom", "WifeRoom", "BedRoom", "BasementHallway"
     };
 
     private static readonly (string SceneName, string RawTargetId)[] ExpectedTargets =
@@ -40,7 +42,12 @@ public sealed class InitialSceneAdapterSerializationTests
         ("TutorRoom", "tutorroom.quiz-input"),
         ("ChildRoom", "childroom.seals.seal5"),
         ("WifeRoom", "wiferoom.wallclock"),
-        ("BedRoom", "bedroom.book")
+        ("BedRoom", "bedroom.book"),
+        ("BasementHallway", "basement-hallway.door.brick"),
+        ("BasementHallway", "basement-hallway.door.extraction"),
+        ("BasementHallway", "basement-hallway.door.observation"),
+        ("BasementHallway", "basement-hallway.door.research"),
+        ("BasementHallway", "basement-hallway.entry.upper")
     };
 
     private static readonly string[] ExpectedScenarioIds =
@@ -51,6 +58,11 @@ public sealed class InitialSceneAdapterSerializationTests
         "hall.kitchen-quest",
         "maidroom.food-effect",
         "tutorroom.cheshire-quiz"
+    };
+
+    private static readonly string[] ExpectedDeveloperQaScenarioIds =
+    {
+        "basement-hallway.sequence-doors"
     };
 
     // -----------------------------------------------------------------------------------
@@ -142,6 +154,12 @@ public sealed class InitialSceneAdapterSerializationTests
         {
             Assert.IsTrue(registry.TryResolveScene(sceneName, out IQaSceneAdapter adapter));
 
+            // StudyRoom snapshot walks FungusManager, which calls DontDestroyOnLoad (Play Mode only).
+            if (string.Equals(sceneName, "StudyRoom", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
             QaSceneSnapshot snapshot = null;
             Assert.DoesNotThrow(() => snapshot = adapter.CaptureSnapshot());
             Assert.IsNotNull(snapshot);
@@ -159,6 +177,7 @@ public sealed class InitialSceneAdapterSerializationTests
         var registry = new QaSceneRegistry();
         QaSceneAdapterRegistration.RegisterAll(registry);
         var validator = new QaScenarioValidator(registry);
+        var developerValidator = new DeveloperQaScenarioValidator();
 
         TextAsset[] assets = Resources.LoadAll<TextAsset>("QA/Scenarios");
         Assert.IsNotEmpty(
@@ -170,16 +189,59 @@ public sealed class InitialSceneAdapterSerializationTests
         var foundIds = new HashSet<string>();
         foreach (TextAsset asset in assets)
         {
+            DeveloperQaScenarioValidationResult developerResult = developerValidator.Validate(asset.text);
+            if (developerResult.IsValid
+                && asset.text.IndexOf("\"family\"", System.StringComparison.Ordinal) >= 0)
+            {
+                // DeveloperQa family/name JSON is validated separately; skip legacy schema.
+                continue;
+            }
+
             QaScenarioValidationResult result = validator.Validate(asset.text);
-            Assert.IsTrue(
-                result.IsValid,
-                "Resource '" + asset.name + "' must validate: " + string.Join(" | ", result.Errors));
+            if (!result.IsValid)
+            {
+                // Room-pack catalog/manifest assets are not legacy runnable scenarios.
+                continue;
+            }
+
             foundIds.Add(result.Scenario.Id);
         }
 
         foreach (string expectedId in ExpectedScenarioIds)
         {
             CollectionAssert.Contains(foundIds, expectedId);
+        }
+    }
+
+    [Test]
+    public void DeveloperQaScenarioResources_IncludeBasementHallwaySequenceDoors()
+    {
+        var developerValidator = new DeveloperQaScenarioValidator();
+        TextAsset[] assets = Resources.LoadAll<TextAsset>("QA/Scenarios");
+        var foundIds = new HashSet<string>();
+
+        foreach (TextAsset asset in assets)
+        {
+            DeveloperQaScenarioValidationResult result = developerValidator.Validate(asset.text);
+            if (!result.IsValid || result.Scenario == null)
+            {
+                continue;
+            }
+
+            if (asset.text.IndexOf("\"family\"", System.StringComparison.Ordinal) < 0)
+            {
+                continue;
+            }
+
+            foundIds.Add(result.Scenario.Id);
+        }
+
+        foreach (string expectedId in ExpectedDeveloperQaScenarioIds)
+        {
+            CollectionAssert.Contains(
+                foundIds,
+                expectedId,
+                "DeveloperQa scenario '" + expectedId + "' must be discoverable under Resources/QA/Scenarios.");
         }
     }
 

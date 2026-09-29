@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "basement-hallway.sequence-doors",
+  "scene": "BasementHallway",
+  "steps": [
+    { "id": "click-brick", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.click-door-brick" },
+    { "id": "assert-brick", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.assert-route" },
+    { "id": "reset-1", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.reset-to-hallway" },
+    { "id": "click-extraction", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.click-door-extraction" },
+    { "id": "assert-extraction", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.assert-route" },
+    { "id": "reset-2", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.reset-to-hallway" },
+    { "id": "click-observation", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.click-door-observation" },
+    { "id": "assert-observation", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.assert-route" },
+    { "id": "reset-3", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.reset-to-hallway" },
+    { "id": "click-research", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.click-door-research" },
+    { "id": "assert-research", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.assert-route" },
+    { "id": "reset-4", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.reset-to-hallway" },
+    { "id": "click-entry-upper", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.click-entry-upper" },
+    { "id": "assert-entry-upper", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.assert-route" },
+    { "id": "probe", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.probe" },
+    { "id": "capture", "family": "interaction", "name": "invoke", "targetId": "basement-hallway.nav.capture" },
+    { "id": "evidence", "family": "evidence", "name": "capture" }
+  ]
+}

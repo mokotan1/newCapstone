@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Godlotto.Sequence;
 using NUnit.Framework;
 
@@ -143,18 +146,149 @@ public class SequenceSessionTests
         Assert.IsFalse(flags.Has("touched"));
     }
 
+    [Test]
+    public void PlayAsync_Wait_DoesNotApplyLaterFlagsUntilHostCompletes()
+    {
+        var flags = new FlagStore();
+        var host = new GatedHost();
+        var input = new FakeInputLock();
+        var session = new SequenceSession(flags, host, input);
+        SequenceDocument doc = Doc(
+            Block(
+                "start",
+                new SequenceOp { command = "wait", int_value = 250 },
+                new SequenceOp { command = "set_bool", key = "ready", bool_value = true }));
+
+        Task play = session.PlayAsync(doc, "start");
+
+        Assert.IsFalse(play.IsCompleted);
+        Assert.IsFalse(flags.Has("ready"));
+        Assert.IsTrue(input.IsBlocked);
+        CollectionAssert.AreEqual(new[] { "wait:250" }, host.Events);
+
+        host.CompletePending();
+
+        Assert.IsTrue(play.IsCompleted);
+        Assert.IsTrue(flags.GetBool("ready"));
+        Assert.IsFalse(input.IsBlocked);
+        Assert.AreEqual(input.BlockCount, input.UnblockCount);
+    }
+
+    [Test]
+    public void PlayAsync_Say_DoesNotRunNextCommandUntilHostCompletes()
+    {
+        var flags = new FlagStore();
+        var host = new GatedHost();
+        var session = new SequenceSession(flags, host, new FakeInputLock());
+        SequenceDocument doc = Doc(
+            Block(
+                "start",
+                new SequenceOp { command = "say", key = "maid", string_value = "문이 잠겨 있다." },
+                new SequenceOp { command = "set_bool", key = "after_say", bool_value = true }));
+
+        Task play = session.PlayAsync(doc, "start");
+
+        Assert.IsFalse(play.IsCompleted);
+        Assert.IsFalse(flags.Has("after_say"));
+        CollectionAssert.AreEqual(new[] { "say:maid:문이 잠겨 있다." }, host.Events);
+
+        host.CompletePending();
+
+        Assert.IsTrue(play.IsCompleted);
+        Assert.IsTrue(flags.GetBool("after_say"));
+    }
+
+    [Test]
+    public void Play_SyncIncomplete_CancelsAndUnlocksInput()
+    {
+        var flags = new FlagStore();
+        var host = new GatedHost();
+        var input = new FakeInputLock();
+        var session = new SequenceSession(flags, host, input);
+        SequenceDocument doc = Doc(
+            Block(
+                "start",
+                new SequenceOp { command = "wait", int_value = 100 },
+                new SequenceOp { command = "set_bool", key = "ready", bool_value = true }));
+
+        SequencePlayException ex = Assert.Throws<SequencePlayException>(() => session.Play(doc, "start"));
+        Assert.AreEqual("async_required", ex.Code);
+        Assert.IsFalse(flags.Has("ready"));
+        Assert.IsFalse(input.IsBlocked);
+        Assert.AreEqual(input.BlockCount, input.UnblockCount);
+    }
+
+    [Test]
+    public void PlayAsync_Cancel_UnlocksInputWithoutLaterFlags()
+    {
+        var flags = new FlagStore();
+        var host = new GatedHost();
+        var input = new FakeInputLock();
+        var session = new SequenceSession(flags, host, input);
+        var cts = new CancellationTokenSource();
+        SequenceDocument doc = Doc(
+            Block(
+                "start",
+                new SequenceOp { command = "wait", int_value = 100 },
+                new SequenceOp { command = "set_bool", key = "ready", bool_value = true }));
+
+        Task play = session.PlayAsync(doc, "start", cts.Token);
+        Assert.IsTrue(input.IsBlocked);
+
+        cts.Cancel();
+        host.CompletePending();
+
+        Assert.IsTrue(play.IsCompleted);
+        Assert.Throws<System.OperationCanceledException>(() => play.GetAwaiter().GetResult());
+        Assert.IsFalse(flags.Has("ready"));
+        Assert.IsFalse(input.IsBlocked);
+        Assert.AreEqual(input.BlockCount, input.UnblockCount);
+    }
+
     sealed class FakeHost : ISequenceHost
     {
         public readonly List<string> Events = new List<string>();
 
-        public void Wait(int milliseconds)
+        public Task WaitAsync(int milliseconds, CancellationToken cancellationToken)
         {
             Events.Add("wait:" + milliseconds);
+            return Task.CompletedTask;
         }
 
-        public void Say(string speaker, string line)
+        public Task SayAsync(string speaker, string line, CancellationToken cancellationToken)
         {
             Events.Add("say:" + speaker + ":" + line);
+            return Task.CompletedTask;
+        }
+    }
+
+    sealed class GatedHost : ISequenceHost
+    {
+        public readonly List<string> Events = new List<string>();
+        TaskCompletionSource<bool> pending;
+
+        public Task WaitAsync(int milliseconds, CancellationToken cancellationToken)
+        {
+            Events.Add("wait:" + milliseconds);
+            return Gate(cancellationToken);
+        }
+
+        public Task SayAsync(string speaker, string line, CancellationToken cancellationToken)
+        {
+            Events.Add("say:" + speaker + ":" + line);
+            return Gate(cancellationToken);
+        }
+
+        public void CompletePending()
+        {
+            Assert.IsNotNull(pending);
+            pending.TrySetResult(true);
+        }
+
+        Task Gate(CancellationToken cancellationToken)
+        {
+            pending = new TaskCompletionSource<bool>();
+            return pending.Task;
         }
     }
 

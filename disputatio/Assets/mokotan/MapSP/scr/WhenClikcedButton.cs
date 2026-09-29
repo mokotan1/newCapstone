@@ -102,9 +102,8 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
         // 매 씬 로드마다 Variablemanager Flowchart를 다시 묶어 잘못된 차트·stale 참조를 방지합니다.
         FindGlobalManager();
 
-        // Variablemanager를 못 찾는 씬에서도 전역(Fungus Global) fallback으로 상태를 갱신한다.
-        if (globalFlowchart != null)
-            globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, false);
+        // HallGlobalStateHost / Variablemanager 경로로 isClicked 해제
+        FlowchartLocator.SetBoolean(FungusVariableKeys.IsClicked, false);
 
         UpdateAllRoomStates(); // 씬 로드 시 상태 갱신
     }
@@ -137,7 +136,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
                 rect.SetAsLastSibling();
             }
 
-            if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, true);
+            FlowchartLocator.SetBoolean(FungusVariableKeys.IsClicked, true);
         }
     }
 
@@ -150,7 +149,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
             panelToActivate.transform.SetParent(this.transform);
         }
 
-        if (globalFlowchart != null) globalFlowchart.SetBooleanVariable(FungusVariableKeys.IsClicked, false);
+        FlowchartLocator.SetBoolean(FungusVariableKeys.IsClicked, false);
         ClickInteractionCleanup.ResetAfterUiBoundary(globalFlowchart);
     }
 
@@ -231,12 +230,7 @@ public class WhenClikcedButton : SingletonMonoBehaviour<WhenClikcedButton>
         if (string.IsNullOrEmpty(key))
             return false;
 
-        // 1) 씬의 Variablemanager(Flowchart) 값을 우선
-        if (globalFlowchart != null && globalFlowchart.GetBooleanVariable(key))
-            return true;
-
-        // 2) 변수 항목 누락/씬 교체 시에도 Fungus 전역 저장소를 fallback으로 조회
-        return FlowchartLocator.GetFungusGlobalBoolean(key);
+        return FlowchartLocator.GetBoolean(key);
     }
 
     private static bool IsJumpscareBlockingMap()

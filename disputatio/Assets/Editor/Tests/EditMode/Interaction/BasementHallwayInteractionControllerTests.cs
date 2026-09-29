@@ -35,7 +35,7 @@ public class BasementHallwayInteractionControllerTests
         {
             fadeCalled = true;
             capturedAlpha = alpha;
-            onComplete?.Invoke();
+            Assert.NotNull(onComplete);
         };
 
         var method = typeof(RoomInteractionController).GetMethod(

@@ -16,6 +16,15 @@ from .orchestrator import (
     OrchestratorState,
 )
 from .report import render_report, sanitize_for_report
+from .scenario_runner import (
+    Scenario,
+    ScenarioGateway,
+    ScenarioRunner,
+    ScenarioValidationError,
+    discover_scenarios,
+    load_scenario,
+    run_scenarios,
+)
 
 __all__ = [
     "AutorunOrchestrator",
@@ -33,4 +42,11 @@ __all__ = [
     "render_report",
     "sanitize_for_report",
     "save_checkpoint",
+    "Scenario",
+    "ScenarioGateway",
+    "ScenarioRunner",
+    "ScenarioValidationError",
+    "discover_scenarios",
+    "load_scenario",
+    "run_scenarios",
 ]

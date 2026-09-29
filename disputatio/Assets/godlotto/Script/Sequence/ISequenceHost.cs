@@ -1,9 +1,12 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Godlotto.Sequence
 {
     public interface ISequenceHost
     {
-        void Wait(int milliseconds);
+        Task WaitAsync(int milliseconds, CancellationToken cancellationToken);
 
-        void Say(string speaker, string line);
+        Task SayAsync(string speaker, string line, CancellationToken cancellationToken);
     }
 }

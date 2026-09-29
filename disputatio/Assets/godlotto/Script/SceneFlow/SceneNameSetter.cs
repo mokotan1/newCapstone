@@ -32,19 +32,17 @@ public class SceneNameSetter : MonoBehaviour
 
     private void UpdateSceneVariables(string currentSceneName)
     {
+        HallGlobalStateHost.EnsureInstance();
+        HallGlobalStateHost.Instance.SetString(HallGlobalStateKeys.PrevScene, currentSceneName);
+
         Flowchart fc = FlowchartLocator.Find();
-        if (fc == null)
+        if (fc != null)
         {
-            GameLog.LogWarning("[SceneNameSetter] Variablemanager Flowchart를 찾지 못했습니다.");
-            return;
+            globalFlowchart = fc;
+            if (!string.IsNullOrEmpty(sceneVarName))
+                fc.SetStringVariable(sceneVarName, currentSceneName);
         }
 
-        globalFlowchart = fc;
-
-        if (!string.IsNullOrEmpty(sceneVarName))
-        {
-            fc.SetStringVariable(sceneVarName, currentSceneName);
-            GameLog.Log($"[SceneNameSetter] SceneName → '{currentSceneName}'");
-        }
+        GameLog.Log($"[SceneNameSetter] SceneName → '{currentSceneName}'");
     }
 }

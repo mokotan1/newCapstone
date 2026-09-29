@@ -90,8 +90,12 @@ newCapstone/
 | `Assets/Fungus/` | 서드파티 Fungus (수정 최소화) | Fungus 코어 변경 지양 |
 | `Assets/Resources/` | `ServerConfig`, `CheshirePrompts/{ko,ja,en}/`, `QA/Scenarios/*.json` | 런타임 `Resources.Load` 대상; DeveloperQa 시나리오 JSON |
 | `Assets/mokotan/.../script/QA/Developer/` | `DeveloperQaService`, scenario runner (`scenario.run\|resume\|cancel\|status`) | Editor/dev-only Developer Mode QA 계약 |
-| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `controllerFound`만으로는 통과하지 않음 |
+| `Assets/mokotan/.../script/QA/SceneAdapters/` | 방별 QA adapter | Hall `assert-route`는 `HallQaRouteAssertion`: Kitchen 도착·전환 종료·입력 게이트 해제만 PASS. `BasementHallwayQaAdapter`는 문 5개 Sequence 클릭·도착 assert·복도 재진입(Fungus 없음). `controllerFound`만으로는 통과하지 않음 |
 | `Assets/mokotan/.../AI/Localization/` | `CheshireLocaleResolver`, `CheshirePromptCatalog`, fragment helpers | Fungus 언어 → `ko`\|`ja`\|`en`, 프롬프트 카탈로그 |
+
+`BasementHallway` 문 5개는 `RoomInteractionSequenceHost`와 JSON 라우트로 연결했고 기존 `ObjectClicked` 처리기는 비활성화했다. 입장 페이드는 `BasementRoomEnterFade`(Start FadeScreen과 동일 1s/alpha 0)이며 Flowchart는 제거했다. live `qa_run` Passed. 독립 리뷰 전이므로 verified로 취급하지 않는다.
+
+`BasementResearchRoom`은 전용 `BasementResearchDeskOpener`가 책상 클릭으로 패널을 열고 기존 `PanelBackspaceCloser`가 닫는다. `BasementRoomEnterFade`가 입장 페이드를 담당하며 이 씬의 Flowchart는 제거했다. 플레이 QA·독립 리뷰 전이므로 verified는 아니다.
 
 ### 백엔드 (`backend_ai/`)
 
@@ -131,7 +135,7 @@ newCapstone/
 2. **`MainMenu`** (`disputatio/Assets/godlotto/Script/Title/MainMenu.cs`):
    - **새 게임**: `PlayDataPrefsCleaner.ClearProgressPreserveAudioVideoSettings()` — 진행만 초기화, BGM/SFX/해상도 PlayerPrefs 유지
    - **이어하기**: `CheckpointLoadCoordinator.LoadLatestOrFallback(SceneNames.MainScene)`
-   - 실제 **새 게임 씬 전환**은 Inspector에서 버튼→Fungus 블록 연결로 처리 (`MainMenu.OnStartButton`은 PlayerPrefs 정리만 수행)
+   - **새 게임 씬 전환**: `OnStartButton`이 진행·인벤토리 초기화 후 `SceneTransitionService.LoadSceneSafely(SceneNames.IntroScene)`을 호출한다. `MainMenuScene`의 Start 버튼은 이 메서드만 호출하며 Flowchart는 제거했다. 플레이 QA는 보류 중이다.
 3. **씬 로드 시 공통**:
    - `VariablemanagerSingleton` — `DontDestroyOnLoad`로 전역 Flowchart 오브젝트 유지
    - `SceneNameSetter` — Fungus `SceneName`만 기록한다. 씬의 Save Point 명령은 없다.
@@ -156,7 +160,7 @@ public const string HallLeft2 = "Hall_Left2";
 
 ```mermaid
 flowchart TD
-    MM[MainMenuScene] -->|새 게임 Fungus| Intro[IntroScene / Opening_*]
+    MM[MainMenuScene] -->|새 게임 C#| Intro[IntroScene / Opening_*]
     MM -->|이어하기| CP[CheckpointLoadCoordinator]
     CP --> Resume[resumeSceneName 씬]
     Intro --> Game[Mokotan 1F/2F/Basement 씬들]
@@ -254,7 +258,7 @@ flowchart LR
 | 상태 | 위치 | 비고 |
 |------|------|------|
 | 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
-| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`(ms)·`say`는 호스트가 처리. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason` |
+| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`/`say`는 `WaitAsync`/`SayAsync`로 await. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason`; 취소·OnDisable 시 잠금 해제 |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |
@@ -302,7 +306,9 @@ flowchart LR
 |--------|------|
 | `SceneInteractionController` | `TryInteract(id)` — 연타·대사 중·전환 중 차단 |
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
-| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. `Hall_playerble`의 `IsPlayedAnimation` → `Hall_animate` 로드는 허브에서 스킵한다. 입장 연출은 `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
+| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. **`Hall_playerble`에서는 제거됨** — 허브는 `HallPlayableController`가 담당. 다른 복도 씬에서 `IsPlayedAnimation` → `Hall_animate` 로드 규칙은 유지. 입장 연출: `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
+| `HallPlayableController` | `Hall_playerble` 허브: right/left/stair/basement/unlock/map. Fungus Flowchart 없이 Say/Menu + fade load. 허브에서 `Hall_animate` 재로드 금지 |
+| `HallGlobalStateHost` | Variablemanager 대체 C# 전역 플래그(`DontDestroyOnLoad`). `FlowchartLocator.Get/SetBoolean`이 호스트 우선·이중 기록 금지 |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
@@ -349,8 +355,8 @@ flowchart LR
 |--------|------|
 | `InventoryManager` | 아이템 CRUD UI, Tab 토글, Fungus `pressTab` |
 | `Item` / `ItemPickup` | ScriptableObject 아이템, `itemId` 1~30 |
-| `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색 |
-| `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` |
+| `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색; `HallGlobalStateHost`가 있으면 Get/SetBoolean은 호스트만 사용 |
+| `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` (레거시; `HallGlobalStateHost` 도입 씬에서는 제거) |
 | `DontDestroyGameplayCleanup` | 메인메뉴 복귀 시 DDOL 게임플레이 루트(Fungus 전역 변수·퀘스트 트래커) 정리 정책의 단일 소유자. `GlobalSettingManager`(BGM/SFX/전체화면/해상도)와 호출자 자신만 보존. `InGameSettingsPanel`·`EndSceneManager`·`IntegratedSettingUI`·`SettingPanelButtonActions`의 모든 "메인메뉴로" 진입점이 공유 |
 | `AudioController` | BGM 등 (`SingletonMonoBehaviour`) |
 | `OpeningMentionController` | 오프닝 씬 Bell/Fence (Interaction 패턴 예시) |
@@ -541,8 +547,8 @@ graph TB
 |------|------|----------------|
 | **로컬 LLM autostart AC01–AC18** | 코드: Supervisor·Resolver·Bootstrap·Job Object·로컬 RAG `local-hash-v1`·Groq/Gemini 실행 경로 제거·Origin 거부·대기열 429·오프라인 소스 패키지 SHA. Live Editor 세션은 `127.0.0.1:11144`에서 `Failed`/`gpu_initialization_failed`. AC05 Python 없는 VM, AC02 망차단, AC16 Gate 0 동결, playtester, 독립 리뷰는 없음 | `docs/qa/runs/20260915T014800Z-run-local-llm-autostart-ac/report.md`, `docs/superpowers/specs/2026-09-15-local-llm-gate0-decision.md` |
 | **`SceneNames.MainScene` ("MainScene")** | `MainMenu` 이어하기 fallback, Jumpscare retry에 사용되나 **`MainScene.unity` 파일 없음**, `EditorBuildSettings`에도 없음 | 의도된 fallback 씬명(예: `Hall_playerble`) 확인; 상수·빌드 설정 정렬 |
-| **새 게임 시작 씬** | `MainMenu.OnStartButton`은 PlayerPrefs만 지우고 **LoadScene 호출 없음** — 실제 전환은 Fungus/버튼 Inspector | `MainMenuScene.unity` Flowchart·Button onClick 추적 |
-| **`IntroScene` vs `Opening_Office`** | 빌드 목록에 둘 다 존재; 정확한 오프닝 순서는 씬 내 Flowchart 의존 | 플레이through 또는 Fungus 블록 문서화 |
+| **새 게임 시작 씬** | 현재 브랜치에서 Start 버튼 → `MainMenu.OnStartButton` → `IntroScene`으로 C# 이전, MainMenu Flowchart 제거. 관련 EditMode 6/6 통과 | QA 도구 복구 후 격리 프로필에서 클릭·전환·설정 보존 확인 |
+| **`IntroScene` vs `Opening_Office`** | 현재 브랜치에서 Intro의 단일 `start` Flowchart를 C# 연출로 옮겼다. 순서 끝은 `Opening_Office` 로드 | 플레이 QA로 이미지·효과음·페이드·실제 씬 전환 확인 |
 | **Fungus Save Point vs Checkpoint** | 이어하기는 `CheckpointLoadCoordinator`. 새 게임은 C#이 인벤토리를 비우고 `DoSaveReset()`은 호출하지 않음. `SceneNameSetter`는 `SavePointKey`를 쓰지 않음. 인벤토리는 Fungus 로드 신호로 복원하지 않음. 제품 씬 42개의 Save Point 명령은 뺐다. 시작 블록은 Game Started가 첫 남은 명령부터 실행한다. Fungus 예제 씬은 그대로다. 키 목록은 `docs/development/tasks/fungus-deletion/P2-save-key-map.md` | 대사 이전. 플레이 QA는 아직 |
 | **`resumeSpawnId`** | `CheckpointSaveData`에 필드 있으나 **`ProgressSnapshotApplier`에서 spawn 적용 코드 미확인** | 스폰 시스템 존재 여부 씬 검색 |
 | **운영 HTTPS URL** | `ServerConfig` 클라우드 필드·`deploy/Caddyfile` 도메인과 Unity 최종 URL이 코드만으로 불명. 저장소에 `Resources/ServerConfig.asset` 없음 | 배포 환경·로컬 빌드는 `UseLocalLoopback` |

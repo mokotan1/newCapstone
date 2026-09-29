@@ -128,14 +128,21 @@ public class SequenceRouterTests
     {
         public readonly List<string> Events = new List<string>();
 
-        public void Wait(int milliseconds)
+        public System.Threading.Tasks.Task WaitAsync(
+            int milliseconds,
+            System.Threading.CancellationToken cancellationToken)
         {
             Events.Add("wait:" + milliseconds);
+            return System.Threading.Tasks.Task.CompletedTask;
         }
 
-        public void Say(string speaker, string line)
+        public System.Threading.Tasks.Task SayAsync(
+            string speaker,
+            string line,
+            System.Threading.CancellationToken cancellationToken)
         {
             Events.Add("say:" + speaker + ":" + line);
+            return System.Threading.Tasks.Task.CompletedTask;
         }
     }
 

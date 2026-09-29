@@ -8,7 +8,6 @@ public class OpeningMentionControllerTests
 {
     GameObject root;
     OpeningMentionController controller;
-    Flowchart flowchart;
 
     [SetUp]
     public void SetUp()
@@ -19,13 +18,7 @@ public class OpeningMentionControllerTests
         SceneInteractionController.BlockDuringSceneTransition = false;
 
         root = new GameObject("OpeningMentionTestRoot");
-        flowchart = root.AddComponent<Flowchart>();
         controller = root.AddComponent<OpeningMentionController>();
-
-        var flowchartField = typeof(OpeningMentionController).GetField(
-            "flowchart",
-            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        flowchartField?.SetValue(controller, flowchart);
     }
 
     [TearDown]
@@ -51,11 +44,18 @@ public class OpeningMentionControllerTests
     [Test]
     public void OnFenceClicked_DuringBellSequence_IsIgnored()
     {
+        string loaded = null;
+        OpeningMentionController.SceneLoadHandlerForTests = scene =>
+        {
+            loaded = scene;
+            return true;
+        };
         controller.SimulateBellSequenceStartForTests();
+        controller.SimulateIsCallForTests(true);
 
         controller.OnFenceClicked();
 
-        Assert.IsFalse(controller.IsPendingFenceSceneTransitionForTests);
+        Assert.IsNull(loaded);
     }
 
     [Test]
@@ -71,7 +71,7 @@ public class OpeningMentionControllerTests
     }
 
     [Test]
-    public void OnBlockEnd_FenceBlockWithPendingTransition_RequestsSceneLoad()
+    public void CompleteBell_MarksCallSoFenceCanTransition()
     {
         string requestedScene = null;
         OpeningMentionController.SceneLoadHandlerForTests = sceneName =>
@@ -80,53 +80,22 @@ public class OpeningMentionControllerTests
             return true;
         };
 
-        controller.SimulateFenceTransitionPendingForTests(true);
+        controller.CompleteBellMarkingCallForTests();
+        Assert.IsTrue(controller.IsCallForTests);
 
-        var block = root.AddComponent<Block>();
-        block.BlockName = "Fance_Clicked";
-
-        controller.InvokeBlockEndForTests(block);
+        controller.RequestOpenSceneTransitionForTests();
 
         Assert.AreEqual("Opening_Mention _open", requestedScene);
-        Assert.IsFalse(controller.IsPendingFenceSceneTransitionForTests);
     }
 
     [Test]
-    public void OnBlockEnd_BellBlock_ClearsBellSequenceGate()
+    public void CompleteBell_ClearsBellSequenceGate()
     {
         controller.SimulateBellSequenceStartForTests();
-
-        var block = root.AddComponent<Block>();
-        block.BlockName = "Bell_Clicked";
-
-        controller.InvokeBlockEndForTests(block);
+        controller.CompleteBellMarkingCallForTests();
 
         Assert.IsFalse(controller.IsBellSequenceActiveForTests);
         Assert.IsFalse(InteractionInputGate.IsBlocked);
-    }
-
-    [Test]
-    public void OnBlockEnd_BellBlock_ResetsIsClickedAndPreservesWindowClicked()
-    {
-        AddBooleanVariable(flowchart, FungusVariableKeys.IsClicked, true);
-        AddBooleanVariable(flowchart, FungusVariableKeys.WindowClicked, true);
-        controller.SimulateBellSequenceStartForTests();
-
-        var block = root.AddComponent<Block>();
-        block.BlockName = "Bell_Clicked";
-
-        controller.InvokeBlockEndForTests(block);
-
-        Assert.IsFalse(flowchart.GetBooleanVariable(FungusVariableKeys.IsClicked));
-        Assert.IsTrue(flowchart.GetBooleanVariable(FungusVariableKeys.WindowClicked));
-    }
-
-    static void AddBooleanVariable(Flowchart target, string key, bool value)
-    {
-        BooleanVariable variable = target.gameObject.AddComponent<BooleanVariable>();
-        variable.Key = key;
-        variable.Scope = VariableScope.Public;
-        variable.Value = value;
-        target.Variables.Add(variable);
+        Assert.IsTrue(controller.IsCallForTests);
     }
 }

@@ -15,6 +15,8 @@ public class SequenceDocumentLoaderTests
         Assert.AreEqual(1, document.schemaVersion);
         Assert.AreEqual(1, document.blocks.Length);
         Assert.AreEqual("start", document.blocks[0].id);
+        Assert.AreEqual("set_bool", document.blocks[0].commands[0].command);
+        Assert.IsTrue(document.blocks[0].commands[0].bool_value);
     }
 
     [Test]

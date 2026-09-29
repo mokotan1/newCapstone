@@ -24,12 +24,20 @@ namespace Godlotto.Sequence
                 document = System.Text.Json.JsonSerializer.Deserialize<SequenceDocument>(json, options);
 #endif
             }
-            catch (Exception ex) when (ex is ArgumentException or System.Text.Json.JsonException)
+            catch (ArgumentException ex)
             {
                 throw new SequencePlayException(
                     "invalid_document",
                     "Sequence JSON parse failed: " + ex.Message);
             }
+#if !UNITY_5_3_OR_NEWER
+            catch (System.Text.Json.JsonException ex)
+            {
+                throw new SequencePlayException(
+                    "invalid_document",
+                    "Sequence JSON parse failed: " + ex.Message);
+            }
+#endif
 
             if (document == null)
             {

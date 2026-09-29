@@ -1,11 +1,11 @@
 using System;
+using System.Collections;
 using Fungus;
 using Godlotto.Interaction;
 using UnityEngine;
 
 /// <summary>
-/// Opening_Mention / Opening_Mention _open 씬의 Bell·fance 상호작용을 C#에서 조율합니다.
-/// Fungus 블록은 대사·연출만 담당하고, 클릭 입력·연타 방지·씬 전환 결정은 여기서 처리합니다.
+/// Opening_Mention Bell·fence 상호작용과 Start 입장 페이드를 Fungus Flowchart 없이 실행합니다.
 /// </summary>
 public class OpeningMentionController : MonoBehaviour
 {
@@ -15,22 +15,42 @@ public class OpeningMentionController : MonoBehaviour
     public const string BellSequenceGateReason = "opening_mention_bell_sequence";
     const float GameplayPlaneZ = 0f;
 
-    [SerializeField] Flowchart flowchart;
+    static readonly string[] BellLines =
+    {
+        "반응이 없다.  \n아무도 살지 않는 것 같다.\n",
+        "일단 철창이 열리는지 확인해 보자"
+    };
+
+    const string FenceBeforeBellLine = "일단 초인종을 눌러보자.";
+    const string FenceAfterBellLine = "문이 잠겨 있지 않는 듯 하다";
+
     [SerializeField] Collider2D fenceCollider;
     [SerializeField] Clickable2D fenceClickable;
     [SerializeField] bool enableFenceInteraction = true;
-    [SerializeField] string bellBlockName = "Bell_Clicked";
-    [SerializeField] string fenceBlockName = "Fance_Clicked";
     [SerializeField] string openSceneName = "Opening_Mention _open";
     [SerializeField] bool enableDebugLogging;
+    [SerializeField] float startFadeDurationSeconds = 1f;
+    [SerializeField] float startFadeTargetAlpha = 0f;
+    [SerializeField] float exitFadeDurationSeconds = 1f;
+    [SerializeField] float exitFadeTargetAlpha = 1f;
+    [SerializeField] int fenceOpenSfxIndex = 21;
 
     bool bellSequenceActive;
-    bool pendingFenceSceneTransition;
+    bool isCall;
+    bool started;
 
     void Awake()
     {
         if (fenceClickable != null)
             fenceClickable.enabled = false;
+    }
+
+    void Start()
+    {
+        if (started)
+            return;
+        started = true;
+        StartCoroutine(PlayStartFade());
     }
 
     void Update()
@@ -47,17 +67,9 @@ public class OpeningMentionController : MonoBehaviour
         OnFenceClicked();
     }
 
-    void OnEnable()
-    {
-        BlockSignals.OnBlockEnd -= OnBlockEnd;
-        BlockSignals.OnBlockEnd += OnBlockEnd;
-    }
-
     void OnDisable()
     {
-        BlockSignals.OnBlockEnd -= OnBlockEnd;
         EndBellSequence();
-        pendingFenceSceneTransition = false;
     }
 
     /// <summary>UI Bell 버튼 OnClick 진입점.</summary>
@@ -74,9 +86,7 @@ public class OpeningMentionController : MonoBehaviour
 
         bellSequenceActive = true;
         InteractionInputGate.Block(BellSequenceGateReason);
-
-        if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, bellBlockName))
-            EndBellSequence();
+        StartCoroutine(PlayBellSequence());
     }
 
     /// <summary>fance 월드 클릭 진입점.</summary>
@@ -94,34 +104,77 @@ public class OpeningMentionController : MonoBehaviour
         if (!SceneInteractionController.TryInteract(InteractionIdFence))
             return;
 
-        bool isCall = GetIsCall();
-        pendingFenceSceneTransition = isCall;
-
-        if (!FungusDialogueBridge.ExecuteBlockSafely(flowchart, fenceBlockName))
-            pendingFenceSceneTransition = false;
+        StartCoroutine(PlayFenceSequence());
     }
 
-    void OnBlockEnd(Block block)
+    IEnumerator PlayStartFade()
     {
-        if (block == null || flowchart == null || block.GetFlowchart() != flowchart)
-            return;
-
-        if (block.BlockName == bellBlockName)
-        {
-            EndBellSequence();
-            return;
-        }
-
-        if (block.BlockName == fenceBlockName && pendingFenceSceneTransition)
-        {
-            pendingFenceSceneTransition = false;
-            RequestOpenSceneTransition();
-        }
+        bool done = false;
+        GameplayScreenFade.FadeThen(startFadeTargetAlpha, startFadeDurationSeconds, () => done = true);
+        while (!done)
+            yield return null;
+        isCall = false;
     }
+
+    IEnumerator PlayBellSequence()
+    {
+        for (int i = 0; i < BellLines.Length; i++)
+            yield return SayLine(BellLines[i]);
+
+        isCall = true;
+        EndBellSequence();
+    }
+
+    IEnumerator PlayFenceSequence()
+    {
+        if (!isCall)
+        {
+            yield return SayLine(FenceBeforeBellLine);
+            yield break;
+        }
+
+        yield return SayLine(FenceAfterBellLine);
+        PlaySfx(fenceOpenSfxIndex);
+
+        bool fadeDone = false;
+        GameplayScreenFade.FadeThen(exitFadeTargetAlpha, exitFadeDurationSeconds, () => fadeDone = true);
+        while (!fadeDone)
+            yield return null;
+
+        RequestOpenSceneTransition();
+    }
+
+    IEnumerator SayLine(string line)
+    {
+        bool done = false;
+        SayDialog dialog = SayDialog.GetSayDialog();
+        if (dialog == null)
+        {
+            GameLog.LogWarning("[OpeningMention] SayDialog not found.");
+            yield break;
+        }
+
+        SayDialog.ActiveSayDialog = dialog;
+        dialog.SetCharacterName(string.Empty, Color.white);
+        dialog.Say(
+            line,
+            clearPrevious: true,
+            waitForInput: true,
+            fadeWhenDone: true,
+            stopVoiceover: true,
+            waitForVO: false,
+            voiceOverClip: null,
+            onComplete: () => done = true);
+
+        while (!done)
+            yield return null;
+    }
+
+    internal void RequestOpenSceneTransitionForTests() => RequestOpenSceneTransition();
 
     void RequestOpenSceneTransition()
     {
-        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(null, resetWindowClicked: false);
 
         if (SceneLoadHandlerForTests != null)
         {
@@ -130,7 +183,7 @@ public class OpeningMentionController : MonoBehaviour
         }
 
         if (!SceneTransitionService.LoadSceneSafely(openSceneName))
-            DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+            DeferredClickCleanup.Run(null, resetWindowClicked: false);
     }
 
     void EndBellSequence()
@@ -141,16 +194,14 @@ public class OpeningMentionController : MonoBehaviour
         bellSequenceActive = false;
         InteractionInputGate.Unblock(BellSequenceGateReason);
         InteractionLock.ForceUnlock();
-        ClickInteractionCleanup.ResetAfterUiBoundary(flowchart, resetWindowClicked: false);
-        DeferredClickCleanup.Run(flowchart, resetWindowClicked: false);
+        ClickInteractionCleanup.ResetAfterUiBoundary(null, resetWindowClicked: false);
+        DeferredClickCleanup.Run(null, resetWindowClicked: false);
     }
 
-    bool GetIsCall()
+    static void PlaySfx(int index)
     {
-        if (flowchart == null)
-            return false;
-
-        return flowchart.GetBooleanVariable(IsCallVariableKey);
+        if (SfxController.Instance != null)
+            SfxController.Instance.PlaySFX(index);
     }
 
     void LogIgnored(string message)
@@ -172,7 +223,7 @@ public class OpeningMentionController : MonoBehaviour
 
     internal bool IsBellSequenceActiveForTests => bellSequenceActive;
 
-    internal bool IsPendingFenceSceneTransitionForTests => pendingFenceSceneTransition;
+    internal bool IsCallForTests => isCall;
 
     internal void SimulateBellSequenceStartForTests()
     {
@@ -182,10 +233,15 @@ public class OpeningMentionController : MonoBehaviour
 
     internal void SimulateBellSequenceEndForTests() => EndBellSequence();
 
-    internal void SimulateFenceTransitionPendingForTests(bool pending) =>
-        pendingFenceSceneTransition = pending;
+    internal void SimulateIsCallForTests(bool value) => isCall = value;
 
-    internal void InvokeBlockEndForTests(Block block) => OnBlockEnd(block);
+    internal void CompleteBellMarkingCallForTests()
+    {
+        isCall = true;
+        EndBellSequence();
+    }
+
+    internal IEnumerator PlayFenceSequenceForTests() => PlayFenceSequence();
 
     bool IsFenceColliderUnderPointer(Vector2 screenPosition)
     {

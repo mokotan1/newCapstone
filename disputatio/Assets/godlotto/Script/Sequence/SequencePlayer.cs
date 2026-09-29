@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Godlotto.Sequence
 {
@@ -21,6 +23,26 @@ namespace Godlotto.Sequence
 
         public void Play(SequenceDocument document, string blockId)
         {
+            using (var cts = new CancellationTokenSource())
+            {
+                Task play = PlayAsync(document, blockId, cts.Token);
+                if (!play.IsCompleted)
+                {
+                    cts.Cancel();
+                    throw new SequencePlayException(
+                        "async_required",
+                        "wait/say require awaiting PlayAsync.");
+                }
+
+                play.GetAwaiter().GetResult();
+            }
+        }
+
+        public Task PlayAsync(
+            SequenceDocument document,
+            string blockId,
+            CancellationToken cancellationToken)
+        {
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
             SequenceValidator.Validate(document);
@@ -31,11 +53,20 @@ namespace Godlotto.Sequence
                     "wait/say require a sequence host.");
             }
 
-            PlayBlock(document, blockId, new HashSet<string>(StringComparer.Ordinal));
+            return PlayBlockAsync(
+                document,
+                blockId,
+                new HashSet<string>(StringComparer.Ordinal),
+                cancellationToken);
         }
 
-        void PlayBlock(SequenceDocument document, string blockId, HashSet<string> stack)
+        async Task PlayBlockAsync(
+            SequenceDocument document,
+            string blockId,
+            HashSet<string> stack,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (string.IsNullOrEmpty(blockId))
                 throw new SequencePlayException("unknown_block", "block_id must be non-empty.");
             if (!stack.Add(blockId))
@@ -46,16 +77,22 @@ namespace Godlotto.Sequence
             SequenceOp[] ops = block.commands ?? Array.Empty<SequenceOp>();
             for (int i = 0; i < ops.Length; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 SequenceOp op = ops[i];
                 if (op == null || string.IsNullOrEmpty(op.command))
                     throw new SequencePlayException("invalid_document", "Empty command in block '" + blockId + "'.");
-                Execute(document, blockId, op, stack);
+                await ExecuteAsync(document, blockId, op, stack, cancellationToken).ConfigureAwait(true);
             }
 
             stack.Remove(blockId);
         }
 
-        void Execute(SequenceDocument document, string blockId, SequenceOp op, HashSet<string> stack)
+        async Task ExecuteAsync(
+            SequenceDocument document,
+            string blockId,
+            SequenceOp op,
+            HashSet<string> stack,
+            CancellationToken cancellationToken)
         {
             switch (op.command)
             {
@@ -74,13 +111,15 @@ namespace Godlotto.Sequence
                         throw new SequencePlayException(
                             "invalid_document",
                             "if_bool in '" + blockId + "' missing then_block/else_block.");
-                    PlayBlock(document, next, stack);
+                    await PlayBlockAsync(document, next, stack, cancellationToken).ConfigureAwait(true);
                     return;
                 case "wait":
-                    host.Wait(op.int_value);
+                    await host.WaitAsync(op.int_value, cancellationToken).ConfigureAwait(true);
+                    cancellationToken.ThrowIfCancellationRequested();
                     return;
                 case "say":
-                    host.Say(op.key ?? "", op.string_value);
+                    await host.SayAsync(op.key ?? "", op.string_value, cancellationToken).ConfigureAwait(true);
+                    cancellationToken.ThrowIfCancellationRequested();
                     return;
                 default:
                     throw new SequencePlayException("invalid_document", "Unknown command '" + op.command + "'.");
