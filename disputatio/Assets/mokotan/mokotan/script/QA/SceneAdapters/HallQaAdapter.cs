@@ -16,7 +16,7 @@ namespace Godlotto.QA.SceneAdapters
     /// reached via InteractionRoute id <see cref="KitchenEntryInteractionId"/> ("left" →
     /// fungus Left_Clicked). Capability ids <c>hall.nav.click-kitchen-entry</c> and target
     /// <see cref="KitchenEntryTargetIdValue"/> therefore map to
-    /// <see cref="CorridorEntranceController.OnInteraction(string)"/>("left") — documented
+    /// <see cref="HallPlayableController.OnInteraction(string)"/>("left") — documented
     /// here so callers do not hunt for a non-existent "kitchen" route.
     ///
     /// No ForceSolve; missing controller → explicit failure (click → EnvironmentBlocked).
@@ -32,9 +32,9 @@ namespace Godlotto.QA.SceneAdapters
 
         /// <summary>
         /// Real Hall_playerble.unity InteractionRoute.interactionId for the kitchen wing.
-        /// There is no "kitchen" id in-scene; kitchen entry is via "left" → Left_Clicked.
+        /// There is no "kitchen" id in-scene; kitchen entry is via "left" → Hall_Left.
         /// </summary>
-        public const string KitchenEntryInteractionId = "left";
+        public const string KitchenEntryInteractionId = HallPlayableController.InteractionLeft;
 
         public const string NavClickKitchenEntryCapabilityId = "hall.nav.click-kitchen-entry";
         public const string NavProbeCapabilityId = "hall.nav.probe";
@@ -149,7 +149,7 @@ namespace Godlotto.QA.SceneAdapters
 
         public QaSceneSnapshot CaptureSnapshot()
         {
-            CorridorEntranceController controller = ResolveController();
+            HallPlayableController controller = ResolveController();
             var values = new Dictionary<string, string>
             {
                 ["controllerFound"] = (controller != null).ToString(),
@@ -170,10 +170,10 @@ namespace Godlotto.QA.SceneAdapters
                 return false;
             }
 
-            CorridorEntranceController controller = ResolveController();
+            HallPlayableController controller = ResolveController();
             if (controller == null)
             {
-                error = "CorridorEntranceController not found in the active scene. This adapter " +
+                error = "HallPlayableController not found in the active scene. This adapter " +
                     "only works while Hall_playerble is the active Play Mode scene.";
                 return false;
             }
@@ -271,9 +271,9 @@ namespace Godlotto.QA.SceneAdapters
                 data: data);
         }
 
-        private static CorridorEntranceController ResolveController()
+        private static HallPlayableController ResolveController()
         {
-            return UnityEngine.Object.FindFirstObjectByType<CorridorEntranceController>();
+            return UnityEngine.Object.FindFirstObjectByType<HallPlayableController>(FindObjectsInactive.Include);
         }
     }
 }
