@@ -21,7 +21,7 @@
 | 합침 | 로컬 세이브·폴더 정리와 원격 R1 진행을 merge |
 | independentReview | 세이브·Save Point 제거는 false |
 | stash | `preserve-qa-tool-integration-wip-2026-09-17` 는 pop 하지 말 것 |
-| 다음 | Hallway Start fade·Flowchart 제거 완료·live QA Passed. 다음: 대사 이전 패킷(`Opening_Office` Say/Menu) |
+| 다음 | async Sequence presentation 완료(EditMode). 다음: Opening_Office 대사 이전 (pre-c5fa8b98 Start) |
 
 ## 로컬에서 확인한 EditMode (merge 전)
 

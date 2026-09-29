@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Godlotto.Sequence
 {
@@ -19,6 +21,23 @@ namespace Godlotto.Sequence
 
         public void Play(string interactionId)
         {
+            using (var cts = new CancellationTokenSource())
+            {
+                Task play = PlayAsync(interactionId, cts.Token);
+                if (!play.IsCompleted)
+                {
+                    cts.Cancel();
+                    throw new SequencePlayException(
+                        "async_required",
+                        "wait/say require awaiting PlayAsync.");
+                }
+
+                play.GetAwaiter().GetResult();
+            }
+        }
+
+        public Task PlayAsync(string interactionId, CancellationToken cancellationToken)
+        {
             if (string.IsNullOrWhiteSpace(interactionId))
                 throw new SequencePlayException("empty_key", "Interaction id must be non-empty.");
 
@@ -30,7 +49,7 @@ namespace Godlotto.Sequence
                     "Unknown interaction id '" + interactionId + "'.");
             }
 
-            session.Play(route.Document, route.StartBlock);
+            return session.PlayAsync(route.Document, route.StartBlock, cancellationToken);
         }
     }
 }

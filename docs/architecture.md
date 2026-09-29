@@ -258,7 +258,7 @@ flowchart LR
 | 상태 | 위치 | 비고 |
 |------|------|------|
 | 대화·플래그 | Fungus `Variablemanager` | `FungusVariableKeys.*` 상수로 접근. Sequence 경로는 `Godlotto.Sequence.FlagStore` |
-| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`(ms)·`say`는 호스트가 처리. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason` |
+| 시퀀스 연출 | `SequenceSession` + `ISequenceHost` | `wait`/`say`는 `WaitAsync`/`SayAsync`로 await. Thread.Sleep 없음. 재생 중 입력은 `SequenceLimits.InputLockReason`; 취소·OnDisable 시 잠금 해제 |
 | 인벤토리 슬롯 | `InventoryManager` | `DontDestroyOnLoad` |
 | AI 대화 기록 | `ChatHistoryManager` | `BaseChatbot` 인스턴스별 |
 | 상호작용 차단 | `InteractionInputGate`, `SceneInteractionController` | 대사 중·씬 전환 중 클릭 차단 |

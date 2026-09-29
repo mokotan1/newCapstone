@@ -2,8 +2,8 @@ using Fungus;
 using UnityEngine;
 
 /// <summary>
-/// "Variablemanager" 글로벌 Flowchart를 찾아 반환하는 공유 유틸.
-/// 여러 스크립트에서 <c>GameObject.Find("Variablemanager")</c>를 반복하지 않도록 합니다.
+/// Global gameplay flag lookup. Prefers <see cref="HallGlobalStateHost"/> (sole C# writer)
+/// when present; otherwise falls back to Variablemanager Flowchart / Fungus globals.
 /// </summary>
 public static class FlowchartLocator
 {
@@ -36,15 +36,43 @@ public static class FlowchartLocator
         GameObject go = GameObject.Find(name);
         if (go == null)
         {
-            GameLog.LogWarning($"[FlowchartLocator] '{name}' GameObject를 찾을 수 없습니다.");
+            if (!HallGlobalStateHost.Exists)
+                GameLog.LogWarning($"[FlowchartLocator] '{name}' GameObject를 찾을 수 없습니다.");
             return null;
         }
 
         Flowchart fc = go.GetComponent<Flowchart>();
-        if (fc == null)
+        if (fc == null && !HallGlobalStateHost.Exists)
             GameLog.LogWarning($"[FlowchartLocator] '{name}'에 Flowchart 컴포넌트가 없습니다.");
 
         return fc;
+    }
+
+    /// <summary>Bool flag: HallGlobalStateHost first (sole writer), else Variablemanager Flowchart.</summary>
+    public static bool GetBoolean(string key, bool defaultValue = false)
+    {
+        if (HallGlobalStateHost.Exists)
+            return HallGlobalStateHost.Instance.GetBool(key, defaultValue);
+
+        Flowchart fc = Find();
+        if (fc != null)
+            return fc.GetBooleanVariable(key);
+
+        return GetFungusGlobalBoolean(key) || defaultValue;
+    }
+
+    /// <summary>Bool flag write: HallGlobalStateHost only when present (no Variablemanager dual-write).</summary>
+    public static void SetBoolean(string key, bool value)
+    {
+        if (HallGlobalStateHost.Exists)
+        {
+            HallGlobalStateHost.Instance.SetBool(key, value);
+            return;
+        }
+
+        Flowchart fc = Find();
+        if (fc != null)
+            fc.SetBooleanVariable(key, value);
     }
 
     /// <summary>

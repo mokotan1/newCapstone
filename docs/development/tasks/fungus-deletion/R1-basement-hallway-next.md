@@ -32,8 +32,9 @@ EditMode: `BasementHallwayInteractionControllerTests` 1/1, `RoomInteractionSeque
 ## 재개 순서
 
 1. ~~BasementHallway 격리 QA 경로~~ — live `qa_run` Passed.
-2. ~~Hallway `Start` 페이드 C# 이전~~ — `BasementRoomEnterFade` + Flowchart 제거. `qa_run` 재통과.
-3. Cursor 인증 후 R3 독립 리뷰. live QA만으로 verified가 되지 않는다.
-4. 그 후 대사 이전 패킷으로 진행한다.
+2. ~~Hallway `Start` 페이드 C# 이전~~ — `BasementRoomEnterFade` + Flowchart 제거. `qa_run` 재통과. 커밋 `5e8758e7`.
+3. ~~async Sequence presentation~~ — `ISequenceHost` WaitAsync/SayAsync; say는 입력 대기, wait는 지연; 완료 시 outcome 1회; 취소 시 입력 잠금 해제. EditMode Session 10/10, RoomInteraction 6/6.
+4. Cursor 인증 후 R3 독립 리뷰. live QA만으로 verified가 되지 않는다.
+5. 그 후 `Opening_Office` 대사 이전 패킷 (pre-`c5fa8b98` Start 블록 소스).
 
 `verified`는 컴파일, 씬 참조, 플레이, R3 독립 리뷰가 모두 충족될 때만 기록한다.
