@@ -306,7 +306,9 @@ flowchart LR
 |--------|------|
 | `SceneInteractionController` | `TryInteract(id)` — 연타·대사 중·전환 중 차단 |
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
-| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. `Hall_playerble`의 `IsPlayedAnimation` → `Hall_animate` 로드는 허브에서 스킵한다. 입장 연출은 `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
+| `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. **`Hall_playerble`에서는 제거됨** — 허브는 `HallPlayableController`가 담당. 다른 복도 씬에서 `IsPlayedAnimation` → `Hall_animate` 로드 규칙은 유지. 입장 연출: `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
+| `HallPlayableController` | `Hall_playerble` 허브: right/left/stair/basement/unlock/map. Fungus Flowchart 없이 Say/Menu + fade load. 허브에서 `Hall_animate` 재로드 금지 |
+| `HallGlobalStateHost` | Variablemanager 대체 C# 전역 플래그(`DontDestroyOnLoad`). `FlowchartLocator.Get/SetBoolean`이 호스트 우선·이중 기록 금지 |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |
 | `InteractionInputGate` | 시퀀스 중 입력 전역 차단 |
@@ -353,8 +355,8 @@ flowchart LR
 |--------|------|
 | `InventoryManager` | 아이템 CRUD UI, Tab 토글, Fungus `pressTab` |
 | `Item` / `ItemPickup` | ScriptableObject 아이템, `itemId` 1~30 |
-| `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색 |
-| `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` |
+| `FlowchartLocator` | `"Variablemanager"` Flowchart 탐색; `HallGlobalStateHost`가 있으면 Get/SetBoolean은 호스트만 사용 |
+| `VariablemanagerSingleton` | 전역 Flowchart GO `DontDestroyOnLoad` (레거시; `HallGlobalStateHost` 도입 씬에서는 제거) |
 | `DontDestroyGameplayCleanup` | 메인메뉴 복귀 시 DDOL 게임플레이 루트(Fungus 전역 변수·퀘스트 트래커) 정리 정책의 단일 소유자. `GlobalSettingManager`(BGM/SFX/전체화면/해상도)와 호출자 자신만 보존. `InGameSettingsPanel`·`EndSceneManager`·`IntegratedSettingUI`·`SettingPanelButtonActions`의 모든 "메인메뉴로" 진입점이 공유 |
 | `AudioController` | BGM 등 (`SingletonMonoBehaviour`) |
 | `OpeningMentionController` | 오프닝 씬 Bell/Fence (Interaction 패턴 예시) |

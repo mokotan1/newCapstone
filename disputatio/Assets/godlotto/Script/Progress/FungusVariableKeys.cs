@@ -21,6 +21,7 @@ public static class FungusVariableKeys
     public const string GetBibleCommentary = "GetBibleCommentary";
     public const string HaveMaidKey = "HaveMaidKey";
     public const string HaveBasementKey = "HaveBasementKey";
+    public const string UsedBasementKey = "UsedBasementKey";
     public const string HasBible = "HasBible";
 
     // StudyRoom 다이어리/책갈피 거울 퍼즐 (기존 변수명 유지).
