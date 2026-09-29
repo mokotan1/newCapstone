@@ -31,9 +31,9 @@ EditMode: `BasementHallwayInteractionControllerTests` 1/1, `RoomInteractionSeque
 
 ## 재개 순서
 
-1. ~~BasementHallway 격리 QA 경로~~ — `BasementHallwayQaAdapter` + `basement-hallway.sequence-doors`. EditMode 통과. live `qa_run` **Passed** (2026-09-29).
-2. **다음:** Hallway `Start` 입장 페이드를 C#(`GameplayScreenFade`)으로 이전하고 남은 Flowchart를 제거한다.
-3. Cursor 인증 후 별도 세션에서 R3 명세·품질 리뷰. live QA만으로 verified가 되지 않는다.
+1. ~~BasementHallway 격리 QA 경로~~ — live `qa_run` Passed.
+2. ~~Hallway `Start` 페이드 C# 이전~~ — `BasementRoomEnterFade` + Flowchart 제거. `qa_run` 재통과.
+3. Cursor 인증 후 R3 독립 리뷰. live QA만으로 verified가 되지 않는다.
 4. 그 후 대사 이전 패킷으로 진행한다.
 
 `verified`는 컴파일, 씬 참조, 플레이, R3 독립 리뷰가 모두 충족될 때만 기록한다.
