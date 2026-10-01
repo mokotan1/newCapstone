@@ -310,6 +310,7 @@ flowchart LR
 | `HallPlayableController` | `Hall_playerble` 허브: right/left/stair/basement/unlock/map. Fungus Flowchart 없이 Say/Menu + fade load. 허브에서 `Hall_animate` 재로드 금지 |
 | `RightHallCorridorController` | 1층 오른쪽 5씬(`Hall_Right` → `Hallway_Right2`) 클릭·입장 페이드·ElectricOn 노출. Flowchart 없이 `HallGlobalStateHost`의 `isClicked`/`ElectricOn`만 기록 |
 | `SecondFloorRightController` | 2층 오른쪽 4씬(`2floorMainHall` → `2floorHallway_Right`) 클릭·입장 페이드·ElectricOn 노출·아래층/뒤로 확인. Flowchart 없이 `HallGlobalStateHost`만 기록 |
+| `SecondFloorRoomEntranceController` | `WifeEntrance`·`BedEntrance` 문 클릭·열쇠 해제·뒤로 확인. Flowchart 없이 `HallGlobalStateHost`의 `UsedWifeKey`/`UsedBedKey`/`isClicked`만 기록 |
 | `HallGlobalStateHost` | Variablemanager 대체 C# 전역 플래그(`DontDestroyOnLoad`). `FlowchartLocator.Get/SetBoolean`이 호스트 우선·이중 기록 금지 |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |

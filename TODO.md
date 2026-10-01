@@ -1,21 +1,19 @@
 # TODO — Fungus 삭제
 
 ## 목표
-2층 오른쪽 4씬 Flowchart 제거를 Codex `gpt-6-sol`이 PASS할 때까지 검증한다. 26/55에서 정지.
+제거율 A를 50%까지. 28/55에서 멈춤.
 
 ## 달성
-`SecondFloorRightController`로 4씬 제거. 1차 FAIL(사진 콜라이더, 모달/UI 가드) 수정 후 재검증 PASS. `PROGRESS.md` A = 26/55.
+`WifeEntrance`, `BedEntrance` Flowchart 제거. A 28/55 (50.91%). Codex `gpt-6-sol` 재검증 PASS.
 
 ## 진행 중
 없음.
 
 ## 남음
-push 없음. 폰트 SDF는 이번 작업이 아님. 제거율 A 50%는 다음 작업.
+29번째 씬은 시작하지 않음. 폰트 SDF는 커밋에서 제외.
 
 ## 검증
-- EditMode `SecondFloorRightControllerTests` 20/20
-- PlayMode `SecondFloorRightPlayModeTests` 1/1 (사진 콜라이더 enabled 포함)
-- EditMode `ElectricLightControllerTests` 2/2, `HallPlayableControllerTests` 8/8
-- 4씬 reserialize 후 console error 없음
-- Build Settings, BetaEnd 제외: Flowchart 없는 씬 26/55
-- Codex 1차 FAIL, 2차 PASS. Unity는 Codex가 재실행하지 않음
+EditMode `SecondFloorRoomEntranceControllerTests` 12/12, `SecondFloorRoomEntranceSceneTests` 2/2, `WorldItemDropZoneHostTests` 3/3. PlayMode `SecondFloorRoomEntrancePlayModeTests` 1/1. 콘솔 에러 없음. Build Settings `BetaEnd` 제외 28/55. `git diff --check` 통과.
+
+## 변경 파일
+`SecondFloorRoomEntranceController.cs`, `WorldItemDropZone.cs`, `WifeEntrance.unity`, `BedEntrance.unity`, 테스트 4개, `docs/architecture.md`, `docs/development/tasks/fungus-deletion/PROGRESS.md`.

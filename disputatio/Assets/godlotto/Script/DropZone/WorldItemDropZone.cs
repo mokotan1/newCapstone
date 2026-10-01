@@ -48,6 +48,9 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
     /// <summary>Variablemanager에 변수 항목이 없어도 Fungus 전역 저장소를 조회합니다.</summary>
     private bool IsPersistedFungusBoolTrue(string key)
     {
+        if (HallGlobalStateHost.Instance != null)
+            return HallGlobalStateHost.Instance.GetBool(key);
+
         Flowchart fc = FlowchartLocator.Resolve(flowchart);
         if (fc != null && fc.GetBooleanVariable(key))
             return true;
@@ -201,6 +204,20 @@ public class WorldItemDropZone : MonoBehaviour, IDropHandler
 
     private bool CanUseWhileDialog()
     {
+        if (string.IsNullOrEmpty(dialogBoolName))
+            return true;
+
+        if (HallGlobalStateHost.Instance != null)
+        {
+            if (HallGlobalStateHost.Instance.GetBool(dialogBoolName))
+            {
+                GameLog.Log("대사가 진행 중이라 아이템을 사용할 수 없습니다.");
+                return false;
+            }
+
+            return true;
+        }
+
         Flowchart fc = FlowchartLocator.Resolve(flowchart);
         if (fc == null || string.IsNullOrEmpty(dialogBoolName))
             return true;
