@@ -16,6 +16,12 @@ public static class SceneNames
     public const string HallPlayable = "Hall_playerble";
     public const string HallAnimate = "Hall_animate";
     public const string HallRight = "Hall_Right";
+    public const string HallRight2 = "Hall_Right2";
+    public const string HallRightCross = "Hall_RightCross";
+    public const string HallwayRight = "Hallway_Right";
+    public const string HallwayRight2 = "Hallway_Right2";
+    public const string StudyEntrance = "StudyEntrance";
+    public const string MaidEntrance = "MaidEntrance";
     public const string HallLeft = "Hall_Left";
     public const string HallLeft2 = "Hall_Left2";
     public const string SecondFloorMainHall = "2floorMainHall";

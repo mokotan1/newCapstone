@@ -308,6 +308,7 @@ flowchart LR
 | `RoomInteractionController` | `interactionId` → Fungus block; `BlockOutcome` → 씬/load/back |
 | `CorridorEntranceController` | 복도·입구 씬용 `RoomInteractionController` 파생. **`Hall_playerble`에서는 제거됨** — 허브는 `HallPlayableController`가 담당. 다른 복도 씬에서 `IsPlayedAnimation` → `Hall_animate` 로드 규칙은 유지. 입장 연출: `Opening_Mention _open` → `Hall_animate` → `Hall_playerble` |
 | `HallPlayableController` | `Hall_playerble` 허브: right/left/stair/basement/unlock/map. Fungus Flowchart 없이 Say/Menu + fade load. 허브에서 `Hall_animate` 재로드 금지 |
+| `RightHallCorridorController` | 1층 오른쪽 5씬(`Hall_Right` → `Hallway_Right2`) 클릭·입장 페이드·ElectricOn 노출. Flowchart 없이 `HallGlobalStateHost`의 `isClicked`/`ElectricOn`만 기록 |
 | `HallGlobalStateHost` | Variablemanager 대체 C# 전역 플래그(`DontDestroyOnLoad`). `FlowchartLocator.Get/SetBoolean`이 호스트 우선·이중 기록 금지 |
 | `FungusDialogueBridge` | Flowchart 블록 안전 실행 |
 | `SceneTransitionService` | LoadScene 중복 방지 |

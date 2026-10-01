@@ -60,11 +60,8 @@ public class ElectricLightController : MonoBehaviour
             flashlightInstance.SetActive(isFlashlightOn);
         }
 
-        if (targetFlowchart != null)
-        {
-            previousElectricState = targetFlowchart.GetBooleanVariable(variableName);
-            UpdateEnvironmentState(previousElectricState);
-        }
+        previousElectricState = ReadElectricOn();
+        UpdateEnvironmentState(previousElectricState);
 
         // 시작 시 모든 타겟을 비활성화하고 알파값을 0으로 초기화합니다.
         foreach (var target in interactableTargets)
@@ -137,15 +134,27 @@ public class ElectricLightController : MonoBehaviour
         }
 
         // --- 환경 조명 제어 ---
-        if (targetFlowchart == null) return;
-
-        bool currentElectricState = targetFlowchart.GetBooleanVariable(variableName);
+        bool currentElectricState = ReadElectricOn();
 
         if (currentElectricState != previousElectricState)
         {
             UpdateEnvironmentState(currentElectricState);
             previousElectricState = currentElectricState;
         }
+    }
+
+    /// <summary>
+    /// Flowchart가 있으면 그 변수만 읽는다. 없으면 HallGlobalStateHost 경로만 읽고 Variablemanager에는 쓰지 않는다.
+    /// </summary>
+    private bool ReadElectricOn()
+    {
+        if (targetFlowchart != null)
+            return targetFlowchart.GetBooleanVariable(variableName);
+
+        string key = string.IsNullOrWhiteSpace(variableName)
+            ? FungusVariableKeys.ElectricOn
+            : variableName;
+        return FlowchartLocator.GetBoolean(key);
     }
 
     private void UpdateEnvironmentState(bool isElectricOn)
